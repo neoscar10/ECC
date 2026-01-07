@@ -1,0 +1,731 @@
+{
+    "info": {
+        "_postman_id": "ecc-api-v1-restored-flow",
+        "name": "ECC API v1",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "01 Register",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success && jsonData.data.access_token) {",
+                                    "    pm.environment.set(\"jwt_token\", jsonData.data.access_token);",
+                                    "}",
+                                    "if (jsonData.success && jsonData.data.application && jsonData.data.application.id) {",
+                                    "    pm.environment.set(\"application_id\", jsonData.data.application.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"phone\": \"+1234567890\",\n    \"password\": \"password\",\n    \"password_confirmation\": \"password\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "02 Request Phone OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"phone\": \"+1234567890\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/auth/request-otp",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "auth",
+                                "request-otp"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "03 Verify Phone OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"phone\": \"+1234567890\",\n    \"otp\": \"123456\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/auth/verify-otp",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "auth",
+                                "verify-otp"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "04 Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success && jsonData.data.access_token) {",
+                                    "    pm.environment.set(\"jwt_token\", jsonData.data.access_token);",
+                                    "}",
+                                    "if (jsonData.success && jsonData.data.application && jsonData.data.application.id) {",
+                                    "    pm.environment.set(\"application_id\", jsonData.data.application.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "05 Me",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "auth",
+                                "me"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "06 Refresh Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success && jsonData.data.access_token) {",
+                                    "    pm.environment.set(\"jwt_token\", jsonData.data.access_token);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/auth/refresh",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "auth",
+                                "refresh"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "07 Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/auth/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "auth",
+                                "logout"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Membership Applications",
+            "item": [
+                {
+                    "name": "01 Get Current Application",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success && jsonData.data.id) {",
+                                    "    pm.environment.set(\"application_id\", jsonData.data.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/membership-application/current",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "membership-application",
+                                "current"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "02 Update Personal Details",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"full_name\": \"Test User\",\n    \"date_of_birth\": \"1990-01-01\",\n    \"country\": \"India\",\n    \"city\": \"Mumbai\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/personal-details",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "membership-applications",
+                                "{{application_id}}",
+                                "personal-details"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "03 Update Cricket Profile",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"preferred_formats\": [\"Test\", \"ODI\", \"T20\"],\n    \"eras\": [\"1990s\", \"2000s\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/cricket-profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "membership-applications",
+                                "{{application_id}}",
+                                "cricket-profile"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "04 Submit Collector Intent (Triggers Rec)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"has_acquired_memorabilia_before\": true,\n    \"focus\": \"Global\",\n    \"investment_horizon\": \"Long Term\",\n    \"interests\": [\"Match Worn Gear\", \"Autographs\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/collector-intent",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "membership-applications",
+                                "{{application_id}}",
+                                "collector-intent"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "05 Select Tier",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"tier_id\": 3\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/select-tier",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "membership-applications",
+                                "{{application_id}}",
+                                "select-tier"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "06 Confirm Payment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"method\": \"card\",\n    \"amount\": 50000,\n    \"cardholder_name\": \"Test User\",\n    \"last4\": \"4242\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/payment/confirm",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "membership-applications",
+                                "{{application_id}}",
+                                "payment",
+                                "confirm"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "07 Submit Application",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/submit",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "membership-applications",
+                                "{{application_id}}",
+                                "submit"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Membership Tiers",
+            "item": [
+                {
+                    "name": "List Tiers",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/membership-tiers",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "membership-tiers"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Tier Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/membership-tiers/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "membership-tiers",
+                                "1"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Membership Status",
+            "item": [
+                {
+                    "name": "Get Status",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/membership/status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "membership",
+                                "status"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Admin",
+            "item": [
+                {
+                    "name": "Broadcast Test",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/admin/broadcast/test",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "admin",
+                                "broadcast",
+                                "test"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Approve Membership",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/admin/memberships/1/approve",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "admin",
+                                "memberships",
+                                "1",
+                                "approve"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reject Membership",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"reason\": \"Incomplete application\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/admin/memberships/1/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "admin",
+                                "memberships",
+                                "1",
+                                "reject"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}

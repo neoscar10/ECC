@@ -1,0 +1,53 @@
+﻿
+  GET|HEAD   / ..... 
+  POST       _ignition/execute-solution ignition.executeSolution ΓÇ║ Spatie\LaravelIgnition ΓÇ║ ExecΓÇª
+  GET|HEAD   _ignition/health-check ignition.healthCheck ΓÇ║ Spatie\LaravelIgnition ΓÇ║ HealΓÇª
+  POST       _ignition/update-config ignition.updateConfig ΓÇ║ Spatie\LaravelIgnition ΓÇ║ UpdaΓÇª
+  POST       api/v1/admin/broadcast/test 
+  PATCH      api/v1/admin/memberships/{id}/approve Api\V1\MeΓÇª
+  PATCH      api/v1/admin/memberships/{id}/reject Api\V1\MeΓÇª
+  POST       api/v1/auth/login Api\V1\AuthContΓÇª
+  POST       api/v1/auth/logout Api\V1\AuthContΓÇª
+  GET|HEAD   api/v1/auth/me Api\V1\AuthContΓÇª
+  POST       api/v1/auth/refresh Api\V1\AuthContΓÇª
+  POST       api/v1/auth/register Api\V1\AuthContΓÇª
+  POST       api/v1/auth/request-otp Api\V1\PhoneVerificationConΓÇª
+  POST       api/v1/auth/verify-otp Api\V1\PhoneVerificationConΓÇª
+  GET|HEAD   api/v1/membership-application/current Api\V1\MembersΓÇª
+  PATCH      api/v1/membership-applications/{id}/collector-intent Api\V1\MembΓÇª
+  PATCH      api/v1/membership-applications/{id}/cricket-profile Api\V1\MembΓÇª
+  POST       api/v1/membership-applications/{id}/payment/confirm Api\V1\ΓÇª
+  PATCH      api/v1/membership-applications/{id}/personal-details Api\V1\MembΓÇª
+  POST       api/v1/membership-applications/{id}/select-tier Api\V1\ΓÇª
+  POST       api/v1/membership-applications/{id}/submit Api\V1\MembershipApΓÇª
+  GET|HEAD   api/v1/membership-tiers Api\V1\MembershipTiΓÇª
+  GET|HEAD   api/v1/membership-tiers/{id} Api\V1\MemberΓÇª
+  GET|HEAD   api/v1/membership/status Api\V1\MembershipStatΓÇª
+  GET|HEAD   docs/api scramble.docsΓÇª
+  GET|HEAD   docs/api.json scramble.docs.ΓÇª
+  GET|HEAD   horizon/api/batches horizon.jobs-batches.index ΓÇ║ Laravel\Horizon ΓÇ║ BatchesCoΓÇª
+  POST       horizon/api/batches/retry/{id} horizon.jobs-batches.retry ΓÇ║ Laravel\Horizon ΓÇª
+  GET|HEAD   horizon/api/batches/{id} horizon.jobs-batches.show ΓÇ║ Laravel\Horizon ΓÇ║ BatΓÇª
+  GET|HEAD   horizon/api/jobs/completed horizon.completed-jobs.index ΓÇ║ Laravel\Horizon ΓÇ║ CompleteΓÇª
+  GET|HEAD   horizon/api/jobs/failed horizon.failed-jobs.index ΓÇ║ Laravel\Horizon ΓÇ║ FailedJoΓÇª
+  GET|HEAD   horizon/api/jobs/failed/{id} horizon.failed-jobs.show ΓÇ║ Laravel\Horizon ΓÇ║ FaΓÇª
+  GET|HEAD   horizon/api/jobs/pending horizon.pending-jobs.index ΓÇ║ Laravel\Horizon ΓÇ║ PendingJΓÇª
+  POST       horizon/api/jobs/retry/{id} horizon.retry-jobs.show ΓÇ║ Laravel\Horizon  ΓÇª
+  GET|HEAD   horizon/api/jobs/silenced horizon.silenced-jobs.index ΓÇ║ Laravel\Horizon ΓÇ║ SilencedΓÇª
+  GET|HEAD   horizon/api/jobs/{id} horizon.jobs.show ΓÇ║ Laravel\Horizon ΓÇ║ JobΓÇª
+  GET|HEAD   horizon/api/masters horizon.masters.index ΓÇ║ Laravel\Horizon ΓÇ║ MasterSupervisorCoΓÇª
+  GET|HEAD   horizon/api/metrics/jobs horizon.jobs-metrics.index ΓÇ║ Laravel\Horizon ΓÇ║ JobMetrΓÇª
+  GET|HEAD   horizon/api/metrics/jobs/{id} horizon.jobs-metrics.show ΓÇ║ Laravel\Horizon ΓÇ║ JΓÇª
+  GET|HEAD   horizon/api/metrics/queues horizon.queues-metrics.index ΓÇ║ Laravel\Horizon ΓÇ║ QueueMeΓÇª
+  GET|HEAD   horizon/api/metrics/queues/{id} horizon.queues-metrics.show ΓÇ║ Laravel\Horizon ΓÇ║ QΓÇª
+  GET|HEAD   horizon/api/monitoring horizon.monitoring.index ΓÇ║ Laravel\Horizon ΓÇ║ MonitorinΓÇª
+  POST       horizon/api/monitoring horizon.monitoring.store ΓÇ║ Laravel\Horizon ΓÇ║ MonitorinΓÇª
+  GET|HEAD   horizon/api/monitoring/{tag} horizon.monitoring-tag.paginate ΓÇ║ Laravel\Horizon ΓÇ║ MonitoΓÇª
+  DELETE     horizon/api/monitoring/{tag} horizon.monitoring-tag.destroy ΓÇ║ Laravel\Horizon ΓÇ║ MonitΓÇª
+  GET|HEAD   horizon/api/stats horizon.stats.index ΓÇ║ Laravel\Horizon ΓÇ║ DashboardStatsContΓÇª
+  GET|HEAD   horizon/api/workload horizon.workload.index ΓÇ║ Laravel\Horizon ΓÇ║ WorkloadCΓÇª
+  GET|HEAD   horizon/{view?} horizon.index ΓÇ║ Laravel\Horizon ΓÇ║ HomeControΓÇª
+  GET|HEAD   up .... 
+
+ Showing [49] routes
+

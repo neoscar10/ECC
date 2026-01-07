@@ -1,0 +1,51 @@
+﻿
+  GET|HEAD   / .............................. 
+  POST       _ignition/execute-solution igniΓÇª
+  GET|HEAD   _ignition/health-check ignitionΓÇª
+  POST       _ignition/update-config ignitioΓÇª
+  POST       api/v1/admin/broadcast/test .... 
+  PATCH      api/v1/admin/memberships/{id}/approve Api\V1\MembershipStatusController@ΓÇª
+  PATCH      api/v1/admin/memberships/{id}/reject Api\V1\MembershipStatusController@ΓÇª
+  POST       api/v1/auth/login Api\V1\AuthCoΓÇª
+  POST       api/v1/auth/logout Api\V1\AuthCΓÇª
+  GET|HEAD   api/v1/auth/me Api\V1\AuthContrΓÇª
+  POST       api/v1/auth/refresh Api\V1\AuthΓÇª
+  POST       api/v1/auth/register Api\V1\AutΓÇª
+  GET|HEAD   api/v1/membership-application/current Api\V1\MembershipApplicationController@ΓÇª
+  PATCH      api/v1/membership-applications/{id}/collector-intent Api\V1\MembershipApplicationControllΓÇª
+  PATCH      api/v1/membership-applications/{id}/cricket-profile Api\V1\MembershipApplicationControllΓÇª
+  POST       api/v1/membership-applications/{id}/payment/confirm Api\V1\MembershipApplicationContΓÇª
+  PATCH      api/v1/membership-applications/{id}/personal-details Api\V1\MembershipApplicationControllΓÇª
+  POST       api/v1/membership-applications/{id}/select-tier Api\V1\MembershipApplicationContΓÇª
+  POST       api/v1/membership-applications/{id}/submit Api\V1\MembershipApplicationController@submiΓÇª
+  GET|HEAD   api/v1/membership-tiers Api\V1\ΓÇª
+  GET|HEAD   api/v1/membership-tiers/{id} ApΓÇª
+  GET|HEAD   api/v1/membership/status Api\V1ΓÇª
+  GET|HEAD   docs/api ...... scramble.docs.ui
+  GET|HEAD   docs/api.json scramble.docs.docΓÇª
+  GET|HEAD   horizon/api/batches horizon.jobΓÇª
+  POST       horizon/api/batches/retry/{id} ΓÇª
+  GET|HEAD   horizon/api/batches/{id} horizoΓÇª
+  GET|HEAD   horizon/api/jobs/completed horiΓÇª
+  GET|HEAD   horizon/api/jobs/failed horizonΓÇª
+  GET|HEAD   horizon/api/jobs/failed/{id} hoΓÇª
+  GET|HEAD   horizon/api/jobs/pending horizoΓÇª
+  POST       horizon/api/jobs/retry/{id} horΓÇª
+  GET|HEAD   horizon/api/jobs/silenced horizΓÇª
+  GET|HEAD   horizon/api/jobs/{id} horizon.jΓÇª
+  GET|HEAD   horizon/api/masters horizon.masΓÇª
+  GET|HEAD   horizon/api/metrics/jobs horizoΓÇª
+  GET|HEAD   horizon/api/metrics/jobs/{id} hΓÇª
+  GET|HEAD   horizon/api/metrics/queues horiΓÇª
+  GET|HEAD   horizon/api/metrics/queues/{id} horizon.queues-metrics.show ΓÇ║ Laravel\Horizon ΓÇ║ QueueMetricsController@shoΓÇª
+  GET|HEAD   horizon/api/monitoring horizon.ΓÇª
+  POST       horizon/api/monitoring horizon.ΓÇª
+  GET|HEAD   horizon/api/monitoring/{tag} hoΓÇª
+  DELETE     horizon/api/monitoring/{tag} hoΓÇª
+  GET|HEAD   horizon/api/stats horizon.statsΓÇª
+  GET|HEAD   horizon/api/workload horizon.woΓÇª
+  GET|HEAD   horizon/{view?} horizon.index  ΓÇª
+  GET|HEAD   up ............................. 
+
+                          Showing [47] routes
+
