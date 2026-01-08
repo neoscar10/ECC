@@ -2,11 +2,23 @@
     "info": {
         "_postman_id": "ecc-api-v1-restored-flow",
         "name": "ECC API v1",
+        "description": "# ECC API v1\n\n**Base URL:** `{{base_url}}/{{api_prefix}}`\n\n## Overview\nAuthentication: **Bearer Token (JWT)**\n- Obtain via `/auth/register` or `/auth/login`.\n\n## Flow\n1. **Auth**: Register/Login, then Request/Verify OTP.\n2. **Membership Application**:\n   - Get Current Application\n   - Update Details -> Cricket Profile -> Collector Intent\n   - Select Tier -> Payment -> Submit\n3. **Admin**: Approval flow.\n\n## Response Envelope\nAll responses follow:\n```json\n{\n  \"success\": true,\n  \"message\": \"...\",\n  \"data\": { ... },\n  \"meta\": ...,\n  \"errors\": ...\n}\n```",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{jwt_token}}",
+                "type": "string"
+            }
+        ]
     },
     "item": [
         {
             "name": "Auth",
+            "description": "Handles User Registration, Login, Token Management, and Phone OTP Verification.",
             "item": [
                 {
                     "name": "01 Register",
@@ -28,6 +40,9 @@
                         }
                     ],
                     "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
                         "method": "POST",
                         "header": [
                             {
@@ -53,7 +68,8 @@
                                 "auth",
                                 "register"
                             ]
-                        }
+                        },
+                        "description": "Register a new user and start a membership application.\n\n**Auth:** None\n\n**Body:**\n- `name`, `email`, `phone`, `password`, `password_confirmation`\n\n**Response:**\n- `access_token` (JWT)\n- `application` object (ID used in subsequent requests)"
                     },
                     "response": []
                 },
@@ -89,7 +105,8 @@
                                 "auth",
                                 "request-otp"
                             ]
-                        }
+                        },
+                        "description": "Request an OTP for phone verification.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `phone`: International format preferred."
                     },
                     "response": []
                 },
@@ -125,7 +142,8 @@
                                 "auth",
                                 "verify-otp"
                             ]
-                        }
+                        },
+                        "description": "Verify the OTP sent to the user's phone.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `phone`\n- `otp`: The code received (Dummy: `123456`)"
                     },
                     "response": []
                 },
@@ -149,6 +167,9 @@
                         }
                     ],
                     "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
                         "method": "POST",
                         "header": [
                             {
@@ -174,7 +195,8 @@
                                 "auth",
                                 "login"
                             ]
-                        }
+                        },
+                        "description": "Login existing user.\n\n**Auth:** None\n\n**Body:**\n- `email`\n- `password`\n\n**Response:**\n- `access_token`\n- `user` details"
                     },
                     "response": []
                 },
@@ -202,7 +224,8 @@
                                 "auth",
                                 "me"
                             ]
-                        }
+                        },
+                        "description": "Get current authenticated user details.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)"
                     },
                     "response": []
                 },
@@ -244,7 +267,8 @@
                                 "auth",
                                 "refresh"
                             ]
-                        }
+                        },
+                        "description": "Refresh the current JWT token.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Response:**\n- New `access_token`"
                     },
                     "response": []
                 },
@@ -272,7 +296,8 @@
                                 "auth",
                                 "logout"
                             ]
-                        }
+                        },
+                        "description": "Invalidate the current token.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)"
                     },
                     "response": []
                 }
@@ -280,6 +305,7 @@
         },
         {
             "name": "Membership Applications",
+            "description": "Step-by-step membership application flow.\n\n**Prerequisites:** User must be registered and authenticated (`{{application_id}}` required for most steps).",
             "item": [
                 {
                     "name": "01 Get Current Application",
@@ -319,7 +345,8 @@
                                 "membership-application",
                                 "current"
                             ]
-                        }
+                        },
+                        "description": "Retrieve the active membership application for the user.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Response:** Sets `{{application_id}}` in environment."
                     },
                     "response": []
                 },
@@ -356,7 +383,8 @@
                                 "{{application_id}}",
                                 "personal-details"
                             ]
-                        }
+                        },
+                        "description": "Update personal details for the application.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `full_name`, `date_of_birth`, `country`, `city`"
                     },
                     "response": []
                 },
@@ -393,7 +421,8 @@
                                 "{{application_id}}",
                                 "cricket-profile"
                             ]
-                        }
+                        },
+                        "description": "Update cricket preferences.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `preferred_formats` (Array of Codes via Meta API)\n- `eras` (Array of Codes via Meta API)"
                     },
                     "response": []
                 },
@@ -430,7 +459,8 @@
                                 "{{application_id}}",
                                 "collector-intent"
                             ]
-                        }
+                        },
+                        "description": "Submit collecting habits. **Triggers Tier Recommendation Engine**.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `has_acquired_memorabilia_before` (boolean)\n- `focus` (Code)\n- `investment_horizon` (Code)\n- `interests` (Array)\n\n**Response:**\n- `recommended_tier` object"
                     },
                     "response": []
                 },
@@ -467,7 +497,8 @@
                                 "{{application_id}}",
                                 "select-tier"
                             ]
-                        }
+                        },
+                        "description": "Lock in the selected membership tier.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `tier_id` (Integer)"
                     },
                     "response": []
                 },
@@ -505,7 +536,8 @@
                                 "payment",
                                 "confirm"
                             ]
-                        }
+                        },
+                        "description": "Confirm payment (Mock/Stripe integration).\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `method`\n- `amount`\n- `cardholder_name`\n- `last4`"
                     },
                     "response": []
                 },
@@ -534,7 +566,8 @@
                                 "{{application_id}}",
                                 "submit"
                             ]
-                        }
+                        },
+                        "description": "Final application submission. Marks application as submitted and awaiting approval/activation.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)"
                     },
                     "response": []
                 }
@@ -542,6 +575,7 @@
         },
         {
             "name": "Membership Tiers",
+            "description": "Browse available membership tiers.",
             "item": [
                 {
                     "name": "List Tiers",
@@ -562,7 +596,8 @@
                                 "{{api_prefix}}",
                                 "membership-tiers"
                             ]
-                        }
+                        },
+                        "description": "List all active membership tiers.\n\n**Auth:** Bearer Token (`{{jwt_token}}`) - Inherited"
                     },
                     "response": []
                 },
@@ -586,7 +621,8 @@
                                 "membership-tiers",
                                 "1"
                             ]
-                        }
+                        },
+                        "description": "Get detailed info for a specific tier.\n\n**Auth:** Bearer Token (`{{jwt_token}}`) - Inherited"
                     },
                     "response": []
                 }
@@ -594,6 +630,7 @@
         },
         {
             "name": "Membership Status",
+            "description": "Check current membership status.",
             "item": [
                 {
                     "name": "Get Status",
@@ -619,7 +656,8 @@
                                 "membership",
                                 "status"
                             ]
-                        }
+                        },
+                        "description": "Check the status of the user's membership (Active, Pending, Rejected, None).\n\n**Auth:** Bearer Token (`{{jwt_token}}`)"
                     },
                     "response": []
                 }
@@ -627,6 +665,7 @@
         },
         {
             "name": "Meta",
+            "description": "Helper endpoints for UI options.",
             "item": [
                 {
                     "name": "Get Cricket Profile Options",
@@ -648,7 +687,8 @@
                                 "meta",
                                 "cricket-profile-options"
                             ]
-                        }
+                        },
+                        "description": "Get Code/Label pairs for Cricket Profile (Formats, Eras).\n\n**Auth:** None"
                     },
                     "response": []
                 },
@@ -672,7 +712,8 @@
                                 "meta",
                                 "collector-intent-options"
                             ]
-                        }
+                        },
+                        "description": "Get Code/Label pairs for Collector Intent (Focus, Horizon).\n\n**Auth:** None"
                     },
                     "response": []
                 }
@@ -680,6 +721,7 @@
         },
         {
             "name": "Admin",
+            "description": "Administrative actions.",
             "item": [
                 {
                     "name": "Broadcast Test",
@@ -706,7 +748,8 @@
                                 "broadcast",
                                 "test"
                             ]
-                        }
+                        },
+                        "description": "Trigger a test broadcast event.\n\n**Auth:** Bearer Token (`{{jwt_token}}`) - Admin Role Required"
                     },
                     "response": []
                 },
@@ -736,7 +779,8 @@
                                 "1",
                                 "approve"
                             ]
-                        }
+                        },
+                        "description": "Approve a pending membership.\n\n**Auth:** Bearer Token (`{{jwt_token}}`) - Admin Role Required"
                     },
                     "response": []
                 },
@@ -774,7 +818,8 @@
                                 "1",
                                 "reject"
                             ]
-                        }
+                        },
+                        "description": "Reject a pending membership.\n\n**Auth:** Bearer Token (`{{jwt_token}}`) - Admin Role Required\n\n**Body:**\n- `reason`"
                     },
                     "response": []
                 }
