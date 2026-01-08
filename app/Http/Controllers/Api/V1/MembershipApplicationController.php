@@ -64,6 +64,7 @@ class MembershipApplicationController extends Controller
     {
         $application = $this->getApplicationOr404($id, $request->user());
 
+        // Validate structure first (must be arrays), checking actual values later
         $validator = Validator::make($request->all(), [
             'preferred_formats' => 'required|array',
             'eras' => 'required|array',
@@ -73,8 +74,34 @@ class MembershipApplicationController extends Controller
             return $this->error('Validation Error', 422, $validator->errors());
         }
 
+        // Map and Cleanse Inputs
+        $formats = \App\Support\MetaOptionMapper::mapArray(
+            $request->preferred_formats,
+            config('ecc_meta.cricket_profile.formats')
+        );
+
+        $eras = \App\Support\MetaOptionMapper::mapArray(
+            $request->eras,
+            config('ecc_meta.cricket_profile.eras')
+        );
+
+        // Optional: Ensure at least one valid value remains? 
+        // For now, if client sends junk, it filters out. 
+        // Strict validation: if count differs from input count? 
+        // Keeping it friendly: accept valid ones.
+        
+        if (empty($formats)) {
+             return $this->error('At least one valid format is required.', 422);
+        }
+        if (empty($eras)) {
+             return $this->error('At least one valid era is required.', 422);
+        }
+
         $application->update([
-            'cricket_profile_json' => $request->all(),
+            'cricket_profile_json' => [
+                'preferred_formats' => $formats,
+                'eras' => $eras
+            ],
             'current_step' => 'collector_intent'
         ]);
 
@@ -89,19 +116,42 @@ class MembershipApplicationController extends Controller
             'has_acquired_memorabilia_before' => 'required|boolean',
             'focus' => 'required|string',
             'investment_horizon' => 'required|string',
-            'interests' => 'array' // Add interests validation
+            'interests' => 'array'
         ]);
 
         if ($validator->fails()) {
             return $this->error('Validation Error', 422, $validator->errors());
         }
 
-        $intent = $request->all();
+        // Map inputs
+        $focus = \App\Support\MetaOptionMapper::map(
+            $request->focus,
+            config('ecc_meta.collector_intent.focus')
+        );
+        
+        $horizon = \App\Support\MetaOptionMapper::map(
+            $request->investment_horizon,
+            config('ecc_meta.collector_intent.investment_horizon')
+        );
+
+        if (!$focus) {
+            return $this->error('Invalid focus option.', 422);
+        }
+        if (!$horizon) {
+            return $this->error('Invalid investment horizon option.', 422);
+        }
+
+        $intent = [
+            'has_acquired_memorabilia_before' => $request->has_acquired_memorabilia_before,
+            'focus' => $focus,
+            'investment_horizon' => $horizon,
+            'interests' => $request->interests ?? []
+        ];
         
         // Update application first so service can read it
         $application->update([
             'collector_intent_json' => $intent,
-            'current_step' => 'tier_selection' // Correct next step
+            'current_step' => 'tier_selection'
         ]);
 
         // Generate recommendation

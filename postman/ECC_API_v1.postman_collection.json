@@ -380,7 +380,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"preferred_formats\": [\"Test\", \"ODI\", \"T20\"],\n    \"eras\": [\"1990s\", \"2000s\"]\n}"
+                            "raw": "{\n    \"preferred_formats\": [\"TEST\", \"ODI\", \"T20\"],\n    \"eras\": [\"ODI_90S_ERA\", \"MODERN_ERA\"]\n}"
                         },
                         "url": {
                             "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/cricket-profile",
@@ -417,7 +417,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"has_acquired_memorabilia_before\": true,\n    \"focus\": \"Global\",\n    \"investment_horizon\": \"Long Term\",\n    \"interests\": [\"Match Worn Gear\", \"Autographs\"]\n}"
+                            "raw": "{\n    \"has_acquired_memorabilia_before\": true,\n    \"focus\": \"RARITY\",\n    \"investment_horizon\": \"Y10_PLUS\",\n    \"interests\": [\"Match Worn Gear\", \"Autographs\"]\n}"
                         },
                         "url": {
                             "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/collector-intent",
@@ -618,6 +618,59 @@
                                 "{{api_prefix}}",
                                 "membership",
                                 "status"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Meta",
+            "item": [
+                {
+                    "name": "Get Cricket Profile Options",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/meta/cricket-profile-options",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "meta",
+                                "cricket-profile-options"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Collector Intent Options",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/meta/collector-intent-options",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "meta",
+                                "collector-intent-options"
                             ]
                         }
                     },

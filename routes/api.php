@@ -24,6 +24,12 @@ Route::prefix('v1')->group(function () {
         });
     });
 
+    // Public Meta Routes
+    Route::prefix('meta')->group(function () {
+        Route::get('cricket-profile-options', [\App\Http\Controllers\Api\V1\MetaController::class, 'getCricketProfileOptions']);
+        Route::get('collector-intent-options', [\App\Http\Controllers\Api\V1\MetaController::class, 'getCollectorIntentOptions']);
+    });
+
     // Protected Application Routes
     Route::middleware('auth:api')->group(function () {
         Route::get('/membership-application/current', [App\Http\Controllers\Api\V1\MembershipApplicationController::class, 'current']);

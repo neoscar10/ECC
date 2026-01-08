@@ -22,31 +22,43 @@ class TierRecommendationService
             return new MembershipTier(['name' => 'Basic']);
         }
 
-        // 2. Compute a score from collector intent
+        // 2. Compute a score from collector intent (CODES)
         $intent = $application->collector_intent_json ?? [];
         $score = 0;
 
-        // Example logic:
-        // - Specific interest keywords increase score
-        // - Higher budget increases score (if budget was captured)
-        // - "interacts" or "commits" count
-        
-        if (isset($intent['interests']) && is_array($intent['interests'])) {
-            $score += count($intent['interests']); // +1 per interest
+        // Base Score: History
+        if (!empty($intent['has_acquired_memorabilia_before'])) { // boolean true
+            $score += 2;
         }
 
-        // 3. Map score to a tier
-        // Simple mapping: 0-1 -> Tier 0 (Basic), 2-3 -> Tier 1, 4+ -> Tier 2, etc.
-        // We clamp the index to available tiers.
-        
-        $tierIndex = 0;
-        if ($score >= 4) {
-             $tierIndex = $tiers->count() - 1; // Highest available
-        } elseif ($score >= 2) {
-             $tierIndex = min(1, $tiers->count() - 1); // Second tier if available
-        } else {
-             $tierIndex = 0; // First (lowest) tier
+        // Focus Scoring
+        $focus = $intent['focus'] ?? '';
+        switch ($focus) {
+            case 'RARITY': $score += 2; break;
+            case 'LEGACY': $score += 1; break;
+            case 'VALUE':  $score += 1; break;
         }
+
+        // Horizon Scoring
+        $horizon = $intent['investment_horizon'] ?? '';
+        switch ($horizon) {
+            case 'Y10_PLUS': $score += 3; break;
+            case 'Y5_10':    $score += 2; break;
+            case 'Y1_5':     $score += 1; break;
+        }
+
+        // 3. Map score to a tier index
+        // Max theoretical score: 2 + 2 + 3 = 7.
+        // We divide this range into buckets based on available tiers.
+        
+        $tiersCount = $tiers->count();
+        $maxScore = 7;
+        
+        // Calculate bucket size: e.g. for 3 tiers, maxScore 7 -> size ceil(8/3) = 3
+        // Buckets: 0-2 (Tier 0), 3-5 (Tier 1), 6-7 (Tier 2)
+        $bucketSize = ceil(($maxScore + 1) / $tiersCount);
+        
+        $tierIndex = min(floor($score / $bucketSize), $tiersCount - 1);
 
         return $tiers[$tierIndex];
     }
