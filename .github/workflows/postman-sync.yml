@@ -1,0 +1,44 @@
+name: Sync Postman Collection
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "postman/**"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build collection payload
+        run: |
+          jq -n --argfile c postman/ECC_API_v1.postman_collection.json '{collection: $c}' > /tmp/collection.json
+
+      - name: Update Postman collection
+        run: |
+          curl -sS -X PUT "https://api.getpostman.com/collections/${POSTMAN_COLLECTION_UID}" \
+            -H "X-Api-Key: ${POSTMAN_API_KEY}" \
+            -H "Content-Type: application/json" \
+            --data "@/tmp/collection.json"
+        env:
+          POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+          POSTMAN_COLLECTION_UID: ${{ secrets.POSTMAN_COLLECTION_UID }}
+
+      - name: Build environment payload (optional)
+        if: ${{ secrets.POSTMAN_ENV_UID != '' }}
+        run: |
+          jq -n --argfile e postman/ECC_Local.postman_environment.json '{environment: $e}' > /tmp/environment.json
+
+      - name: Update Postman environment (optional)
+        if: ${{ secrets.POSTMAN_ENV_UID != '' }}
+        run: |
+          curl -sS -X PUT "https://api.getpostman.com/environments/${POSTMAN_ENV_UID}" \
+            -H "X-Api-Key: ${POSTMAN_API_KEY}" \
+            -H "Content-Type: application/json" \
+            --data "@/tmp/environment.json"
+        env:
+          POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+          POSTMAN_ENV_UID: ${{ secrets.POSTMAN_ENV_UID }}
