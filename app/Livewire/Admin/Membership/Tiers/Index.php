@@ -8,6 +8,7 @@ use Livewire\Attributes\Layout;
 use App\Models\MembershipTier;
 use App\Models\Privilege;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class Index extends Component
@@ -33,6 +34,8 @@ class Index extends Component
     public $currency = 'INR';
     public $sort_order = 0;
     public $upgrade_from_id = null;
+    public $description = null;
+    public $features = []; // Dynamic list: [['id'=>?, 'title'=>string, 'sort_order'=>int]]
     
     // Privileges
     public $selectedPrivileges = [];
@@ -54,7 +57,11 @@ class Index extends Component
                     $fail('A tier cannot be an upgrade from itself.');
                 }
             }],
-            'selectedPrivileges' => 'array'
+            'selectedPrivileges' => 'array',
+            'description' => 'nullable|string|max:5000',
+            'features' => 'array|max:50',
+            'features.*.title' => 'required_with:features.*.id|string|max:255', // Require title if row exists and is being saved (filtered later)
+            'features.*.sort_order' => 'integer|min:0',
         ];
     }
 
@@ -71,12 +78,13 @@ class Index extends Component
     public function create()
     {
         $this->checkSuperAdmin();
-        $this->reset(['tierId', 'name', 'code', 'price', 'duration_days', 'is_active', 'requires_approval', 'currency', 'sort_order', 'upgrade_from_id', 'selectedPrivileges']);
+        $this->reset(['tierId', 'name', 'code', 'price', 'duration_days', 'is_active', 'requires_approval', 'currency', 'sort_order', 'upgrade_from_id', 'selectedPrivileges', 'description', 'features']);
         $this->requires_approval = true; // Default to true
         
         // Auto-calculate sort order: max + 1
         $maxSortOrder = MembershipTier::max('sort_order');
         $this->sort_order = ($maxSortOrder !== null) ? $maxSortOrder + 1 : 1;
+        $this->features = [$this->blankFeatureRow(1)];
 
         $this->isEditMode = false;
         $this->dispatch('open-init-modal');
@@ -99,8 +107,27 @@ class Index extends Component
         $this->sort_order = $tier->sort_order;
         $this->upgrade_from_id = $tier->upgrade_from_id;
         
+        $this->description = $tier->description;
+        
         // Load privileges
         $this->selectedPrivileges = $tier->privileges->pluck('id')->map(fn($id) => (string)$id)->toArray();
+
+        // Load features
+        $this->features = DB::table('membership_tier_features')
+            ->where('membership_tier_id', $id)
+            ->orderBy('sort_order')
+            ->get()
+            ->map(function ($f) {
+                return [
+                    'id' => $f->id,
+                    'title' => $f->feature,
+                    'sort_order' => $f->sort_order,
+                ];
+            })->toArray();
+        
+        if (empty($this->features)) {
+            $this->features = [$this->blankFeatureRow(1)];
+        }
 
         $this->dispatch('open-init-modal');
     }
@@ -110,20 +137,36 @@ class Index extends Component
         $this->checkSuperAdmin();
         $validated = $this->validate();
 
-        $tier = MembershipTier::create([
-            'name' => $validated['name'],
-            'code' => $validated['code'],
-            'price' => $validated['price'],
-            'duration_days' => $validated['duration_days'],
-            'is_active' => $validated['is_active'],
-            'currency' => $this->currency,
-            'sort_order' => $validated['sort_order'],
-            'level' => $validated['sort_order'], // Sync level with sort_order
-            'requires_approval' => $validated['requires_approval'],
-            'upgrade_from_id' => $validated['upgrade_from_id'] ?: null,
-        ]);
-        
-        $tier->privileges()->sync($this->selectedPrivileges);
+        DB::transaction(function () use ($validated) {
+            $tier = MembershipTier::create([
+                'name' => $validated['name'],
+                'code' => $validated['code'],
+                'description' => $validated['description'],
+                'price' => $validated['price'],
+                'duration_days' => $validated['duration_days'],
+                'is_active' => $validated['is_active'],
+                'currency' => $this->currency,
+                'sort_order' => $validated['sort_order'],
+                'level' => $validated['sort_order'], // Sync level with sort_order
+                'requires_approval' => $validated['requires_approval'],
+                'upgrade_from_id' => $validated['upgrade_from_id'] ?: null,
+            ]);
+            
+            $tier->privileges()->sync($this->selectedPrivileges);
+
+            // Save features
+            foreach ($this->features as $feature) {
+                if (!empty(trim($feature['title']))) {
+                    DB::table('membership_tier_features')->insert([
+                        'membership_tier_id' => $tier->id,
+                        'feature' => trim($feature['title']),
+                        'sort_order' => $feature['sort_order'] ?? 0,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        });
 
         session()->flash('success', 'Membership Tier created successfully.');
         $this->dispatch('close-modals');
@@ -134,24 +177,79 @@ class Index extends Component
         $this->checkSuperAdmin();
         $validated = $this->validate();
 
-        $tier = MembershipTier::findOrFail($this->tierId);
-        
-        $tier->update([
-            'name' => $validated['name'],
-            'code' => $validated['code'],
-            'price' => $validated['price'],
-            'duration_days' => $validated['duration_days'],
-            'is_active' => $validated['is_active'],
-            'sort_order' => $validated['sort_order'],
-            'level' => $validated['sort_order'], // Sync level with sort_order
-            'requires_approval' => $validated['requires_approval'],
-            'upgrade_from_id' => $validated['upgrade_from_id'] ?: null,
-        ]);
+        DB::transaction(function () use ($validated) {
+            $tier = MembershipTier::findOrFail($this->tierId);
+            
+            $tier->update([
+                'name' => $validated['name'],
+                'code' => $validated['code'],
+                'description' => $validated['description'],
+                'price' => $validated['price'],
+                'duration_days' => $validated['duration_days'],
+                'is_active' => $validated['is_active'],
+                'sort_order' => $validated['sort_order'],
+                'level' => $validated['sort_order'], // Sync level with sort_order
+                'requires_approval' => $validated['requires_approval'],
+                'upgrade_from_id' => $validated['upgrade_from_id'] ?: null,
+            ]);
 
-        $tier->privileges()->sync($this->selectedPrivileges);
+            $tier->privileges()->sync($this->selectedPrivileges);
+
+            // Sync features manually
+            $existingIds = collect($this->features)->pluck('id')->filter()->toArray();
+            
+            // Delete removed
+            DB::table('membership_tier_features')
+                ->where('membership_tier_id', $this->tierId)
+                ->whereNotIn('id', $existingIds)
+                ->delete();
+
+            // Upsert
+            foreach ($this->features as $feature) {
+                if (!empty(trim($feature['title']))) {
+                    if (!empty($feature['id'])) {
+                        DB::table('membership_tier_features')
+                            ->where('id', $feature['id'])
+                            ->update([
+                                'feature' => trim($feature['title']),
+                                'sort_order' => $feature['sort_order'] ?? 0,
+                                'updated_at' => now(),
+                            ]);
+                    } else {
+                        DB::table('membership_tier_features')->insert([
+                            'membership_tier_id' => $this->tierId,
+                            'feature' => trim($feature['title']),
+                            'sort_order' => $feature['sort_order'] ?? 0,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+            }
+        });
 
         session()->flash('success', 'Membership Tier updated successfully.');
         $this->dispatch('close-modals');
+    }
+
+    public function addFeatureRow()
+    {
+        $this->features[] = $this->blankFeatureRow(count($this->features) + 1);
+    }
+
+    public function removeFeatureRow($index)
+    {
+        unset($this->features[$index]);
+        $this->features = array_values($this->features); // Re-index
+    }
+
+    private function blankFeatureRow($sort)
+    {
+        return [
+            'id' => null,
+            'title' => '',
+            'sort_order' => $sort,
+        ];
     }
 
     public function confirmDelete($id)
