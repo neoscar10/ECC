@@ -304,418 +304,424 @@
             ]
         },
         {
-            "name": "Membership Applications",
-            "description": "Step-by-step membership application flow.\n\n**Prerequisites:** User must be registered and authenticated (`{{application_id}}` required for most steps).",
+            "name": "Membership",
+            "description": "Membership related endpoints including applications, tiers, status and meta options.",
             "item": [
                 {
-                    "name": "01 Get Current Application",
-                    "event": [
+                    "name": "Membership Applications",
+                    "description": "Step-by-step membership application flow.\n\n**Prerequisites:** User must be registered and authenticated (`{{application_id}}` required for most steps).",
+                    "item": [
                         {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "var jsonData = pm.response.json();",
-                                    "if (jsonData.success && jsonData.data.id) {",
-                                    "    pm.environment.set(\"application_id\", jsonData.data.id);",
-                                    "}"
+                            "name": "01 Get Current Application",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.success && jsonData.data.id) {",
+                                            "    pm.environment.set(\"application_id\", jsonData.data.id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
                                 ],
-                                "type": "text/javascript"
-                            }
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/membership-application/current",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "membership-application",
+                                        "current"
+                                    ]
+                                },
+                                "description": "Retrieve the active membership application for the user.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Response:** Sets `{{application_id}}` in environment."
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "02 Update Personal Details",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"full_name\": \"Test User\",\n    \"date_of_birth\": \"1990-01-01\",\n    \"country\": \"India\",\n    \"city\": \"Mumbai\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/personal-details",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "membership-applications",
+                                        "{{application_id}}",
+                                        "personal-details"
+                                    ]
+                                },
+                                "description": "Update personal details for the application.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `full_name`, `date_of_birth`, `country`, `city`"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "03 Update Cricket Profile",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"preferred_formats\": [\"TEST\", \"ODI\", \"T20\"],\n    \"eras\": [\"ODI_90S_ERA\", \"MODERN_ERA\"]\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/cricket-profile",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "membership-applications",
+                                        "{{application_id}}",
+                                        "cricket-profile"
+                                    ]
+                                },
+                                "description": "Update cricket preferences.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `preferred_formats` (Array of Codes via Meta API)\n- `eras` (Array of Codes via Meta API)"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "04 Submit Collector Intent (Triggers Rec)",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"has_acquired_memorabilia_before\": true,\n    \"focus\": \"RARITY\",\n    \"investment_horizon\": \"Y10_PLUS\",\n    \"interests\": [\"Match Worn Gear\", \"Autographs\"]\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/collector-intent",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "membership-applications",
+                                        "{{application_id}}",
+                                        "collector-intent"
+                                    ]
+                                },
+                                "description": "Submit collecting habits. **Triggers Tier Recommendation Engine**.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `has_acquired_memorabilia_before` (boolean)\n- `focus` (Code)\n- `investment_horizon` (Code)\n- `interests` (Array)\n\n**Response:**\n- `recommended_tier` object"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "05 Select Tier",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"tier_id\": 3\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/select-tier",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "membership-applications",
+                                        "{{application_id}}",
+                                        "select-tier"
+                                    ]
+                                },
+                                "description": "Lock in the selected membership tier.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `tier_id` (Integer)"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "06 Confirm Payment",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"method\": \"card\",\n    \"amount\": 50000,\n    \"cardholder_name\": \"Test User\",\n    \"last4\": \"4242\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/payment/confirm",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "membership-applications",
+                                        "{{application_id}}",
+                                        "payment",
+                                        "confirm"
+                                    ]
+                                },
+                                "description": "Confirm payment (Mock/Stripe integration).\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `method`\n- `amount`\n- `cardholder_name`\n- `last4`"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "07 Submit Application",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/submit",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "membership-applications",
+                                        "{{application_id}}",
+                                        "submit"
+                                    ]
+                                },
+                                "description": "Final application submission. Marks application as submitted and awaiting approval/activation.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)"
+                            },
+                            "response": []
                         }
-                    ],
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{jwt_token}}"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/{{api_prefix}}/membership-application/current",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "{{api_prefix}}",
-                                "membership-application",
-                                "current"
-                            ]
-                        },
-                        "description": "Retrieve the active membership application for the user.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Response:** Sets `{{application_id}}` in environment."
-                    },
-                    "response": []
+                    ]
                 },
                 {
-                    "name": "02 Update Personal Details",
-                    "request": {
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{jwt_token}}"
+                    "name": "Membership Tiers",
+                    "description": "Browse available membership tiers.",
+                    "item": [
+                        {
+                            "name": "List Tiers",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/membership-tiers",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "membership-tiers"
+                                    ]
+                                },
+                                "description": "List all active membership tiers.\n\n**Auth:** Bearer Token (`{{jwt_token}}`) - Inherited"
                             },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
+                            "response": []
+                        },
+                        {
+                            "name": "Get Tier Details",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/membership-tiers/1",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "membership-tiers",
+                                        "1"
+                                    ]
+                                },
+                                "description": "Get detailed info for a specific tier.\n\n**Auth:** Bearer Token (`{{jwt_token}}`) - Inherited"
                             },
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"full_name\": \"Test User\",\n    \"date_of_birth\": \"1990-01-01\",\n    \"country\": \"India\",\n    \"city\": \"Mumbai\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/personal-details",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "{{api_prefix}}",
-                                "membership-applications",
-                                "{{application_id}}",
-                                "personal-details"
-                            ]
-                        },
-                        "description": "Update personal details for the application.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `full_name`, `date_of_birth`, `country`, `city`"
-                    },
-                    "response": []
+                            "response": []
+                        }
+                    ]
                 },
                 {
-                    "name": "03 Update Cricket Profile",
-                    "request": {
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{jwt_token}}"
+                    "name": "Membership Status",
+                    "description": "Check current membership status.",
+                    "item": [
+                        {
+                            "name": "Get Status",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/membership/status",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "membership",
+                                        "status"
+                                    ]
+                                },
+                                "description": "Check the status of the user's membership (Active, Pending, Rejected, None).\n\n**Auth:** Bearer Token (`{{jwt_token}}`)"
                             },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"preferred_formats\": [\"TEST\", \"ODI\", \"T20\"],\n    \"eras\": [\"ODI_90S_ERA\", \"MODERN_ERA\"]\n}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/cricket-profile",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "{{api_prefix}}",
-                                "membership-applications",
-                                "{{application_id}}",
-                                "cricket-profile"
-                            ]
-                        },
-                        "description": "Update cricket preferences.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `preferred_formats` (Array of Codes via Meta API)\n- `eras` (Array of Codes via Meta API)"
-                    },
-                    "response": []
+                            "response": []
+                        }
+                    ]
                 },
                 {
-                    "name": "04 Submit Collector Intent (Triggers Rec)",
-                    "request": {
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{jwt_token}}"
+                    "name": "Meta",
+                    "description": "Helper endpoints for UI options.",
+                    "item": [
+                        {
+                            "name": "Get Cricket Profile Options",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/meta/cricket-profile-options",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "meta",
+                                        "cricket-profile-options"
+                                    ]
+                                },
+                                "description": "Get Code/Label pairs for Cricket Profile (Formats, Eras).\n\n**Auth:** None"
                             },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
+                            "response": []
+                        },
+                        {
+                            "name": "Get Collector Intent Options",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/meta/collector-intent-options",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "meta",
+                                        "collector-intent-options"
+                                    ]
+                                },
+                                "description": "Get Code/Label pairs for Collector Intent (Focus, Horizon).\n\n**Auth:** None"
                             },
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"has_acquired_memorabilia_before\": true,\n    \"focus\": \"RARITY\",\n    \"investment_horizon\": \"Y10_PLUS\",\n    \"interests\": [\"Match Worn Gear\", \"Autographs\"]\n}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/collector-intent",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "{{api_prefix}}",
-                                "membership-applications",
-                                "{{application_id}}",
-                                "collector-intent"
-                            ]
-                        },
-                        "description": "Submit collecting habits. **Triggers Tier Recommendation Engine**.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `has_acquired_memorabilia_before` (boolean)\n- `focus` (Code)\n- `investment_horizon` (Code)\n- `interests` (Array)\n\n**Response:**\n- `recommended_tier` object"
-                    },
-                    "response": []
-                },
-                {
-                    "name": "05 Select Tier",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{jwt_token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"tier_id\": 3\n}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/select-tier",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "{{api_prefix}}",
-                                "membership-applications",
-                                "{{application_id}}",
-                                "select-tier"
-                            ]
-                        },
-                        "description": "Lock in the selected membership tier.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `tier_id` (Integer)"
-                    },
-                    "response": []
-                },
-                {
-                    "name": "06 Confirm Payment",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{jwt_token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"method\": \"card\",\n    \"amount\": 50000,\n    \"cardholder_name\": \"Test User\",\n    \"last4\": \"4242\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/payment/confirm",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "{{api_prefix}}",
-                                "membership-applications",
-                                "{{application_id}}",
-                                "payment",
-                                "confirm"
-                            ]
-                        },
-                        "description": "Confirm payment (Mock/Stripe integration).\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `method`\n- `amount`\n- `cardholder_name`\n- `last4`"
-                    },
-                    "response": []
-                },
-                {
-                    "name": "07 Submit Application",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{jwt_token}}"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/submit",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "{{api_prefix}}",
-                                "membership-applications",
-                                "{{application_id}}",
-                                "submit"
-                            ]
-                        },
-                        "description": "Final application submission. Marks application as submitted and awaiting approval/activation.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)"
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Membership Tiers",
-            "description": "Browse available membership tiers.",
-            "item": [
-                {
-                    "name": "List Tiers",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/{{api_prefix}}/membership-tiers",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "{{api_prefix}}",
-                                "membership-tiers"
-                            ]
-                        },
-                        "description": "List all active membership tiers.\n\n**Auth:** Bearer Token (`{{jwt_token}}`) - Inherited"
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get Tier Details",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/{{api_prefix}}/membership-tiers/1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "{{api_prefix}}",
-                                "membership-tiers",
-                                "1"
-                            ]
-                        },
-                        "description": "Get detailed info for a specific tier.\n\n**Auth:** Bearer Token (`{{jwt_token}}`) - Inherited"
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Membership Status",
-            "description": "Check current membership status.",
-            "item": [
-                {
-                    "name": "Get Status",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{jwt_token}}"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/{{api_prefix}}/membership/status",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "{{api_prefix}}",
-                                "membership",
-                                "status"
-                            ]
-                        },
-                        "description": "Check the status of the user's membership (Active, Pending, Rejected, None).\n\n**Auth:** Bearer Token (`{{jwt_token}}`)"
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Meta",
-            "description": "Helper endpoints for UI options.",
-            "item": [
-                {
-                    "name": "Get Cricket Profile Options",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/{{api_prefix}}/meta/cricket-profile-options",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "{{api_prefix}}",
-                                "meta",
-                                "cricket-profile-options"
-                            ]
-                        },
-                        "description": "Get Code/Label pairs for Cricket Profile (Formats, Eras).\n\n**Auth:** None"
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get Collector Intent Options",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/{{api_prefix}}/meta/collector-intent-options",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "{{api_prefix}}",
-                                "meta",
-                                "collector-intent-options"
-                            ]
-                        },
-                        "description": "Get Code/Label pairs for Collector Intent (Focus, Horizon).\n\n**Auth:** None"
-                    },
-                    "response": []
+                            "response": []
+                        }
+                    ]
                 }
             ]
         },
