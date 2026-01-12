@@ -6,7 +6,7 @@
 <head>
 
     <meta charset="utf-8" />
-    <title>Dashboard | Velzon - Admin & Dashboard Template</title>
+    <title>Dashboard | Executive Cricket Club</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="Themesbrand" name="author" />
@@ -48,19 +48,26 @@
                 <div class="navbar-brand-box horizontal-logo">
                     <a href="index-2.html" class="logo logo-dark">
                         <span class="logo-sm">
-                            <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22">
+                            <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
+
+                             <h5 class="text-dark pt-3">Executive Cricket Club</h3>
                         </span>
-                        <span class="logo-lg">
-                            <img src="{{ asset('velzon/assets') }}/images/logo-dark.png" alt="" height="17">
+                        <span class="">
+                            <!-- <img src="{{ asset('velzon/assets') }}/images/logo-dark.png" alt="" height="17"> -->
+
+                             <h5 class="text-white pt-3">Executive Cricket Club</h3>
                         </span>
                     </a>
 
                     <a href="index-2.html" class="logo logo-light">
                         <span class="logo-sm">
-                            <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22">
+                            <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
+                              <h5 class="text-white pt-3">Executive Cricket Club</h3>
                         </span>
-                        <span class="logo-lg">
-                            <img src="{{ asset('velzon/assets') }}/images/logo-light.png" alt="" height="17">
+                        <span class="">
+                            <!-- <img src="{{ asset('velzon/assets') }}/images/logo-light.png" alt="" height="17"> -->
+
+                             <h5 class="text-white pt-3">Executive Cricket Club</h3>
                         </span>
                     </a>
                 </div>
@@ -84,7 +91,7 @@
                         <div data-simplebar style="max-height: 320px;">
                             <!-- item-->
                             <div class="dropdown-header">
-                                <h6 class="text-overflow text-muted mb-0 text-uppercase">Recent Searches</h6>
+                                <h5 class="text-overflow text-muted mb-0 text-uppercase">Recent Searches</h5>
                             </div>
 
                             <div class="dropdown-item bg-transparent text-wrap">
@@ -93,7 +100,7 @@
                             </div>
                             <!-- item-->
                             <div class="dropdown-header mt-2">
-                                <h6 class="text-overflow text-muted mb-1 text-uppercase">Pages</h6>
+                                <h5 class="text-overflow text-muted mb-1 text-uppercase">Pages</h5>
                             </div>
 
                             <!-- item-->
@@ -116,7 +123,7 @@
 
                             <!-- item-->
                             <div class="dropdown-header mt-2">
-                                <h6 class="text-overflow text-muted mb-2 text-uppercase">Members</h6>
+                                <h5 class="text-overflow text-muted mb-2 text-uppercase">Members</h5>
                             </div>
 
                             <div class="notification-list">
@@ -125,7 +132,7 @@
                                     <div class="d-flex">
                                         <img src="{{ asset('velzon/assets') }}/images/users/avatar-2.jpg" class="me-3 rounded-circle avatar-xs" alt="user-pic">
                                         <div class="flex-grow-1">
-                                            <h6 class="m-0">Angela Bernier</h6>
+                                            <h5 class="m-0">Angela Bernier</h5>
                                             <span class="fs-11 mb-0 text-muted">Manager</span>
                                         </div>
                                     </div>
@@ -135,7 +142,7 @@
                                     <div class="d-flex">
                                         <img src="{{ asset('velzon/assets') }}/images/users/avatar-3.jpg" class="me-3 rounded-circle avatar-xs" alt="user-pic">
                                         <div class="flex-grow-1">
-                                            <h6 class="m-0">David Grasso</h6>
+                                            <h5 class="m-0">David Grasso</h5>
                                             <span class="fs-11 mb-0 text-muted">Web Designer</span>
                                         </div>
                                     </div>
@@ -145,7 +152,7 @@
                                     <div class="d-flex">
                                         <img src="{{ asset('velzon/assets') }}/images/users/avatar-5.jpg" class="me-3 rounded-circle avatar-xs" alt="user-pic">
                                         <div class="flex-grow-1">
-                                            <h6 class="m-0">Mike Bunch</h6>
+                                            <h5 class="m-0">Mike Bunch</h5>
                                             <span class="fs-11 mb-0 text-muted">React Developer</span>
                                         </div>
                                     </div>
@@ -241,7 +248,7 @@
                         <div class="p-3 border-top-0 border-start-0 border-end-0 border-dashed border">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <h6 class="m-0 fw-semibold fs-15"> Web Apps </h6>
+                                    <h5 class="m-0 fw-semibold fs-15"> Web Apps </h5>
                                 </div>
                                 <div class="col-auto">
                                     <a href="#!" class="btn btn-sm btn-soft-info"> View All Apps
@@ -305,7 +312,7 @@
                         <div class="p-3 border-top-0 border-start-0 border-end-0 border-dashed border">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <h6 class="m-0 fs-16 fw-semibold"> My Cart</h6>
+                                    <h5 class="m-0 fs-16 fw-semibold"> My Cart</h5>
                                 </div>
                                 <div class="col-auto">
                                     <span class="badge bg-warning-subtle text-warning fs-13"><span class="cartitem-badge">7</span>
@@ -328,10 +335,10 @@
                                     <div class="d-flex align-items-center">
                                         <img src="{{ asset('velzon/assets') }}/images/products/img-1.png" class="me-3 rounded-circle avatar-sm p-2 bg-light" alt="user-pic">
                                         <div class="flex-grow-1">
-                                            <h6 class="mt-0 mb-1 fs-14">
+                                            <h5 class="mt-0 mb-1 fs-14">
                                                 <a href="apps-ecommerce-product-details.html" class="text-reset">Branded
                                                     T-Shirts</a>
-                                            </h6>
+                                            </h5>
                                             <p class="mb-0 fs-12 text-muted">
                                                 Quantity: <span>10 x $32</span>
                                             </p>
@@ -349,9 +356,9 @@
                                     <div class="d-flex align-items-center">
                                         <img src="{{ asset('velzon/assets') }}/images/products/img-2.png" class="me-3 rounded-circle avatar-sm p-2 bg-light" alt="user-pic">
                                         <div class="flex-grow-1">
-                                            <h6 class="mt-0 mb-1 fs-14">
+                                            <h5 class="mt-0 mb-1 fs-14">
                                                 <a href="apps-ecommerce-product-details.html" class="text-reset">Bentwood Chair</a>
-                                            </h6>
+                                            </h5>
                                             <p class="mb-0 fs-12 text-muted">
                                                 Quantity: <span>5 x $18</span>
                                             </p>
@@ -369,10 +376,10 @@
                                     <div class="d-flex align-items-center">
                                         <img src="{{ asset('velzon/assets') }}/images/products/img-3.png" class="me-3 rounded-circle avatar-sm p-2 bg-light" alt="user-pic">
                                         <div class="flex-grow-1">
-                                            <h6 class="mt-0 mb-1 fs-14">
+                                            <h5 class="mt-0 mb-1 fs-14">
                                                 <a href="apps-ecommerce-product-details.html" class="text-reset">
                                                     Borosil Paper Cup</a>
-                                            </h6>
+                                            </h5>
                                             <p class="mb-0 fs-12 text-muted">
                                                 Quantity: <span>3 x $250</span>
                                             </p>
@@ -390,10 +397,10 @@
                                     <div class="d-flex align-items-center">
                                         <img src="{{ asset('velzon/assets') }}/images/products/img-6.png" class="me-3 rounded-circle avatar-sm p-2 bg-light" alt="user-pic">
                                         <div class="flex-grow-1">
-                                            <h6 class="mt-0 mb-1 fs-14">
+                                            <h5 class="mt-0 mb-1 fs-14">
                                                 <a href="apps-ecommerce-product-details.html" class="text-reset">Gray
                                                     Styled T-Shirt</a>
-                                            </h6>
+                                            </h5>
                                             <p class="mb-0 fs-12 text-muted">
                                                 Quantity: <span>1 x $1250</span>
                                             </p>
@@ -411,9 +418,9 @@
                                     <div class="d-flex align-items-center">
                                         <img src="{{ asset('velzon/assets') }}/images/products/img-5.png" class="me-3 rounded-circle avatar-sm p-2 bg-light" alt="user-pic">
                                         <div class="flex-grow-1">
-                                            <h6 class="mt-0 mb-1 fs-14">
+                                            <h5 class="mt-0 mb-1 fs-14">
                                                 <a href="apps-ecommerce-product-details.html" class="text-reset">Stillbird Helmet</a>
-                                            </h6>
+                                            </h5>
                                             <p class="mb-0 fs-12 text-muted">
                                                 Quantity: <span>2 x $495</span>
                                             </p>
@@ -466,7 +473,7 @@
                             <div class="p-3">
                                 <div class="row align-items-center">
                                     <div class="col">
-                                        <h6 class="m-0 fs-16 fw-semibold text-white"> Notifications </h6>
+                                        <h5 class="m-0 fs-16 fw-semibold text-white"> Notifications </h5>
                                     </div>
                                     <div class="col-auto dropdown-tabs">
                                         <span class="badge bg-light text-body fs-13"> 4 New</span>
@@ -508,10 +515,10 @@
                                             </div>
                                             <div class="flex-grow-1">
                                                 <a href="#!" class="stretched-link">
-                                                    <h6 class="mt-0 mb-2 lh-base">Your <b>Elite</b> author Graphic
+                                                    <h5 class="mt-0 mb-2 lh-base">Your <b>Elite</b> author Graphic
                                                         Optimization <span class="text-secondary">reward</span> is
                                                         ready!
-                                                    </h6>
+                                                    </h5>
                                                 </a>
                                                 <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
                                                     <span><i class="mdi mdi-clock-outline"></i> Just 30 sec ago</span>
@@ -531,7 +538,7 @@
                                             <img src="{{ asset('velzon/assets') }}/images/users/avatar-2.jpg" class="me-3 rounded-circle avatar-xs flex-shrink-0" alt="user-pic">
                                             <div class="flex-grow-1">
                                                 <a href="#!" class="stretched-link">
-                                                    <h6 class="mt-0 mb-1 fs-13 fw-semibold">Angela Bernier</h6>
+                                                    <h5 class="mt-0 mb-1 fs-13 fw-semibold">Angela Bernier</h5>
                                                 </a>
                                                 <div class="fs-13 text-muted">
                                                     <p class="mb-1">Answered to your comment on the cash flow forecast's
@@ -559,8 +566,8 @@
                                             </div>
                                             <div class="flex-grow-1">
                                                 <a href="#!" class="stretched-link">
-                                                    <h6 class="mt-0 mb-2 fs-13 lh-base">You have received <b class="text-success">20</b> new messages in the conversation
-                                                    </h6>
+                                                    <h5 class="mt-0 mb-2 fs-13 lh-base">You have received <b class="text-success">20</b> new messages in the conversation
+                                                    </h5>
                                                 </a>
                                                 <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
                                                     <span><i class="mdi mdi-clock-outline"></i> 2 hrs ago</span>
@@ -580,7 +587,7 @@
                                             <img src="{{ asset('velzon/assets') }}/images/users/avatar-8.jpg" class="me-3 rounded-circle avatar-xs flex-shrink-0" alt="user-pic">
                                             <div class="flex-grow-1">
                                                 <a href="#!" class="stretched-link">
-                                                    <h6 class="mt-0 mb-1 fs-13 fw-semibold">Maureen Gibson</h6>
+                                                    <h5 class="mt-0 mb-1 fs-13 fw-semibold">Maureen Gibson</h5>
                                                 </a>
                                                 <div class="fs-13 text-muted">
                                                     <p class="mb-1">We talked about a project on linkedin.</p>
@@ -613,7 +620,7 @@
                                             <img src="{{ asset('velzon/assets') }}/images/users/avatar-3.jpg" class="me-3 rounded-circle avatar-xs" alt="user-pic">
                                             <div class="flex-grow-1">
                                                 <a href="#!" class="stretched-link">
-                                                    <h6 class="mt-0 mb-1 fs-13 fw-semibold">James Lemire</h6>
+                                                    <h5 class="mt-0 mb-1 fs-13 fw-semibold">James Lemire</h5>
                                                 </a>
                                                 <div class="fs-13 text-muted">
                                                     <p class="mb-1">We talked about a project on linkedin.</p>
@@ -636,7 +643,7 @@
                                             <img src="{{ asset('velzon/assets') }}/images/users/avatar-2.jpg" class="me-3 rounded-circle avatar-xs" alt="user-pic">
                                             <div class="flex-grow-1">
                                                 <a href="#!" class="stretched-link">
-                                                    <h6 class="mt-0 mb-1 fs-13 fw-semibold">Angela Bernier</h6>
+                                                    <h5 class="mt-0 mb-1 fs-13 fw-semibold">Angela Bernier</h5>
                                                 </a>
                                                 <div class="fs-13 text-muted">
                                                     <p class="mb-1">Answered to your comment on the cash flow forecast's
@@ -660,7 +667,7 @@
                                             <img src="{{ asset('velzon/assets') }}/images/users/avatar-6.jpg" class="me-3 rounded-circle avatar-xs" alt="user-pic">
                                             <div class="flex-grow-1">
                                                 <a href="#!" class="stretched-link">
-                                                    <h6 class="mt-0 mb-1 fs-13 fw-semibold">Kenneth Brown</h6>
+                                                    <h5 class="mt-0 mb-1 fs-13 fw-semibold">Kenneth Brown</h5>
                                                 </a>
                                                 <div class="fs-13 text-muted">
                                                     <p class="mb-1">Mentionned you in his comment on ðŸ“ƒ invoice #12501.
@@ -684,7 +691,7 @@
                                             <img src="{{ asset('velzon/assets') }}/images/users/avatar-8.jpg" class="me-3 rounded-circle avatar-xs" alt="user-pic">
                                             <div class="flex-grow-1">
                                                 <a href="#!" class="stretched-link">
-                                                    <h6 class="mt-0 mb-1 fs-13 fw-semibold">Maureen Gibson</h6>
+                                                    <h5 class="mt-0 mb-1 fs-13 fw-semibold">Maureen Gibson</h5>
                                                 </a>
                                                 <div class="fs-13 text-muted">
                                                     <p class="mb-1">We talked about a project on linkedin.</p>
@@ -724,23 +731,24 @@
                         <span class="d-flex align-items-center">
                             <img class="rounded-circle header-profile-user" src="{{ asset('velzon/assets') }}/images/users/avatar-1.jpg" alt="Header Avatar">
                             <span class="text-start ms-xl-2">
-                                <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">Anna Adame</span>
-                                <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">Founder</span>
+                                <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{ Auth::user()->name }}</span>
+                                <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">{{ Auth::user()->role }}</span>
                             </span>
                         </span>
                     </button>
                     <div class="dropdown-menu dropdown-menu-end">
                         <!-- item-->
-                        <h6 class="dropdown-header">Welcome Anna!</h6>
-                        <a class="dropdown-item" href="pages-profile.html"><i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Profile</span></a>
-                        <a class="dropdown-item" href="apps-chat.html"><i class="mdi mdi-message-text-outline text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Messages</span></a>
-                        <a class="dropdown-item" href="apps-tasks-kanban.html"><i class="mdi mdi-calendar-check-outline text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Taskboard</span></a>
-                        <a class="dropdown-item" href="pages-faqs.html"><i class="mdi mdi-lifebuoy text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Help</span></a>
+                        <h6 class="dropdown-header">Welcome!</h6>
+                        <a class="dropdown-item" href="#"><i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Profile</span></a>
+                        <a class="dropdown-item" href="#"><i class="mdi mdi-cog-outline text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Settings</span></a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="pages-profile.html"><i class="mdi mdi-wallet text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Balance : <b>$5971.67</b></span></a>
-                        <a class="dropdown-item" href="pages-profile-settings.html"><span class="badge bg-success-subtle text-success mt-1 float-end">New</span><i class="mdi mdi-cog-outline text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Settings</span></a>
-                        <a class="dropdown-item" href="auth-lockscreen-basic.html"><i class="mdi mdi-lock text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Lock screen</span></a>
-                        <a class="dropdown-item" href="auth-logout-basic.html"><i class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i> <span class="align-middle" data-key="t-logout">Logout</span></a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="dropdown-item">
+                                <i class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i>
+                                <span class="align-middle" data-key="t-logout">Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -759,7 +767,7 @@
                 <div class="mt-2 text-center">
                     <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop" colors="primary:#f7b84b,secondary:#f06548" style="width:100px;height:100px"></lord-icon>
                     <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
-                        <h4>Are you sure ?</h4>
+                        <h5>Are you sure ?</h5>
                         <p class="text-muted mx-4 mb-0">Are you sure you want to remove this Notification ?</p>
                     </div>
                 </div>
@@ -779,19 +787,23 @@
                 <!-- Dark Logo-->
                 <a href="index-2.html" class="logo logo-dark">
                     <span class="logo-sm">
-                        <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22">
+                        <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
+                          <h3 class="text-dark pt-2">Executive Cricket Club</h3>
                     </span>
-                    <span class="logo-lg">
-                        <img src="{{ asset('velzon/assets') }}/images/logo-dark.png" alt="" height="17">
+                    <span class="">
+                        <!-- <img src="{{ asset('velzon/assets') }}/images/logo-dark.png" alt="" height="17"> -->
+                         <h3 class="text-dark pt-2">Executive Cricket Club</h3>
                     </span>
                 </a>
                 <!-- Light Logo-->
                 <a href="index-2.html" class="logo logo-light">
                     <span class="logo-sm">
-                        <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22">
+                        <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
+                          <h5 class="text-white pt-2">Executive Cricket Club</h3>
                     </span>
-                    <span class="logo-lg">
-                        <img src="{{ asset('velzon/assets') }}/images/logo-light.png" alt="" height="17">
+                    <span class="">
+                        <!-- <img src="{{ asset('velzon/assets') }}/images/logo-light.png" alt="" height="17"> -->
+                          <h5 class="text-white pt-2">Executive Cricket Club</h3>
                     </span>
                 </a>
                 <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
@@ -811,7 +823,7 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
                     <!-- item-->
-                    <h6 class="dropdown-header">Welcome Anna!</h6>
+                    <h5 class="dropdown-header">Welcome Anna!</h5>
                     <a class="dropdown-item" href="pages-profile.html"><i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Profile</span></a>
                     <a class="dropdown-item" href="apps-chat.html"><i class="mdi mdi-message-text-outline text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Messages</span></a>
                     <a class="dropdown-item" href="apps-tasks-kanban.html"><i class="mdi mdi-calendar-check-outline text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Taskboard</span></a>
@@ -935,7 +947,7 @@
         <div class="offcanvas-body p-0">
             <div data-simplebar class="h-100">
                 <div class="p-4">
-                    <h6 class="mb-0 fw-semibold text-uppercase">Layout</h6>
+                    <h5 class="mb-0 fw-semibold text-uppercase">Layout</h5>
                     <p class="text-muted">Choose your layout</p>
 
                     <div class="row gy-3">
@@ -1046,7 +1058,7 @@
                         <label class="form-check-label" for="sidebarUserProfile">Sidebar User Profile Avatar</label>
                     </div>
 
-                    <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Theme</h6>
+                    <h5 class="mt-4 mb-0 fw-semibold text-uppercase">Theme</h5>
                     <p class="text-muted">Choose your suitable Theme.</p>
 
                     <div class="row">
@@ -1154,7 +1166,7 @@
                         </div><!-- end col -->
                     </div>
 
-                    <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Color Scheme</h6>
+                    <h5 class="mt-4 mb-0 fw-semibold text-uppercase">Color Scheme</h5>
                     <p class="text-muted">Choose Light or Dark Scheme.</p>
 
                     <div class="colorscheme-cardradio">
@@ -1212,7 +1224,7 @@
                     </div>
 
                     <div id="sidebar-visibility">
-                        <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Sidebar Visibility</h6>
+                        <h5 class="mt-4 mb-0 fw-semibold text-uppercase">Sidebar Visibility</h5>
                         <p class="text-muted">Choose show or Hidden sidebar.</p>
                 
                         <div class="row">
@@ -1260,7 +1272,7 @@
                     </div>
 
                     <div id="layout-width">
-                        <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Layout Width</h6>
+                        <h5 class="mt-4 mb-0 fw-semibold text-uppercase">Layout Width</h5>
                         <p class="text-muted">Choose Fluid or Boxed layout.</p>
 
                         <div class="row">
@@ -1316,7 +1328,7 @@
                     </div>
 
                     <div id="layout-position">
-                        <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Layout Position</h6>
+                        <h5 class="mt-4 mb-0 fw-semibold text-uppercase">Layout Position</h5>
                         <p class="text-muted">Choose Fixed or Scrollable Layout Position.</p>
 
                         <div class="btn-group radio" role="group">
@@ -1327,7 +1339,7 @@
                             <label class="btn btn-light w-sm ms-0" for="layout-position-scrollable">Scrollable</label>
                         </div>
                     </div>
-                    <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Topbar Color</h6>
+                    <h5 class="mt-4 mb-0 fw-semibold text-uppercase">Topbar Color</h5>
                     <p class="text-muted">Choose Light or Dark Topbar Color.</p>
 
                     <div class="row">
@@ -1382,7 +1394,7 @@
                     </div>
 
                     <div id="sidebar-size">
-                        <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Sidebar Size</h6>
+                        <h5 class="mt-4 mb-0 fw-semibold text-uppercase">Sidebar Size</h5>
                         <p class="text-muted">Choose a size of Sidebar.</p>
 
                         <div class="row">
@@ -1489,7 +1501,7 @@
                     </div>
 
                     <div id="sidebar-view">
-                        <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Sidebar View</h6>
+                        <h5 class="mt-4 mb-0 fw-semibold text-uppercase">Sidebar View</h5>
                         <p class="text-muted">Choose Default or Detached Sidebar view.</p>
 
                         <div class="row">
@@ -1545,7 +1557,7 @@
                         </div>
                     </div>
                     <div id="sidebar-color">
-                        <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Sidebar Color</h6>
+                        <h5 class="mt-4 mb-0 fw-semibold text-uppercase">Sidebar Color</h5>
                         <p class="text-muted">Choose a color of Sidebar.</p>
 
                         <div class="row">
@@ -1653,7 +1665,7 @@
                     </div>
 
                     <div id="sidebar-img">
-                        <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Sidebar Images</h6>
+                        <h5 class="mt-4 mb-0 fw-semibold text-uppercase">Sidebar Images</h5>
                         <p class="text-muted">Choose a image of Sidebar.</p>
 
                         <div class="d-flex gap-2 flex-wrap img-switch">
@@ -1695,7 +1707,7 @@
                     </div>
 
                     <div id="sidebar-color">
-                        <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Primary Color</h6>
+                        <h5 class="mt-4 mb-0 fw-semibold text-uppercase">Primary Color</h5>
                         <p class="text-muted">Choose a color of Primary.</p>
 
                         <div class="d-flex flex-wrap gap-2">
@@ -1719,7 +1731,7 @@
                     </div>
 
                     <div id="preloader-menu">
-                        <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Preloader</h6>
+                        <h5 class="mt-4 mb-0 fw-semibold text-uppercase">Preloader</h5>
                         <p class="text-muted">Choose a preloader.</p>
                     
                         <div class="row">
@@ -1784,7 +1796,7 @@
                     <!-- end preloader-menu -->
 
                     <div id="body-img" style="display: none;">
-                        <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Background Image</h6>
+                        <h5 class="mt-4 mb-0 fw-semibold text-uppercase">Background Image</h5>
                         <p class="text-muted">Choose a body background image.</p>
                 
                         <div class="row">
