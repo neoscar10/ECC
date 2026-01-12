@@ -18,7 +18,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
-    Route::get('/users', \App\Livewire\Admin\Users\Index::class)->name('users.index');
+    Route::get('/users', \App\Livewire\Admin\Users\UsersIndex::class)->name('users.index');
+    Route::get('/admin-users', \App\Livewire\Admin\Users\AdminIndex::class)->name('users.admin');
     
     // Membership
     Route::prefix('membership')->name('membership.')->group(function () {

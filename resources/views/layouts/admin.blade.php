@@ -844,26 +844,48 @@
                     <ul class="navbar-nav" id="navbar-nav">
                         <li class="menu-title"><span data-key="t-menu">Menu</span></li>
                         <li class="nav-item">
-                            <a class="nav-link menu-link" href="{{ route('admin.dashboard') }}">
+                            <a class="nav-link menu-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
                                 <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Dashboard</span>
                             </a>
                         </li>
                         <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-modules">Modules</span></li>
-                        <li class="nav-item"><a class="nav-link menu-link" href="{{ route('admin.users.index') }}"><i class="ri-user-line"></i> <span>Users</span></a></li>
+
+                        @php
+                            $isUsersActive = request()->routeIs('admin.users.*');
+                        @endphp
                         <li class="nav-item">
-                            <a class="nav-link menu-link" href="#sidebarMembership" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarMembership">
-                                <i class="ri-vip-crown-line"></i> <span data-key="t-membership">Membership</span>
+                            <a class="nav-link menu-link {{ $isUsersActive ? 'active' : '' }}" href="#sidebarUsers" data-bs-toggle="collapse" role="button" aria-expanded="{{ $isUsersActive ? 'true' : 'false' }}" aria-controls="sidebarUsers">
+                                <i class="ri-user-line"></i> <span data-key="t-users">Users</span>
                             </a>
-                            <div class="collapse menu-dropdown" id="sidebarMembership">
+                            <div class="collapse menu-dropdown {{ $isUsersActive ? 'show' : '' }}" id="sidebarUsers">
                                 <ul class="nav nav-sm flex-column">
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.membership.applications') }}" class="nav-link" data-key="t-applications">Applications</a>
+                                        <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}" data-key="t-users-list">Users</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.membership.tiers') }}" class="nav-link" data-key="t-tiers">Tiers</a>
+                                        <a href="{{ route('admin.users.admin') }}" class="nav-link {{ request()->routeIs('admin.users.admin') ? 'active' : '' }}" data-key="t-admin-users">Admin Users</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        @php
+                            $isMembershipActive = request()->routeIs('admin.membership.*');
+                        @endphp
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ $isMembershipActive ? 'active' : '' }}" href="#sidebarMembership" data-bs-toggle="collapse" role="button" aria-expanded="{{ $isMembershipActive ? 'true' : 'false' }}" aria-controls="sidebarMembership">
+                                <i class="ri-vip-crown-line"></i> <span data-key="t-membership">Membership</span>
+                            </a>
+                            <div class="collapse menu-dropdown {{ $isMembershipActive ? 'show' : '' }}" id="sidebarMembership">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.membership.applications') }}" class="nav-link {{ request()->routeIs('admin.membership.applications') ? 'active' : '' }}" data-key="t-applications">Applications</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.membership.members') }}" class="nav-link" data-key="t-members">Members</a>
+                                        <a href="{{ route('admin.membership.tiers') }}" class="nav-link {{ request()->routeIs('admin.membership.tiers') ? 'active' : '' }}" data-key="t-tiers">Tiers</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.membership.members') }}" class="nav-link {{ request()->routeIs('admin.membership.members') ? 'active' : '' }}" data-key="t-members">Members</a>
                                     </li>
                                 </ul>
                             </div>

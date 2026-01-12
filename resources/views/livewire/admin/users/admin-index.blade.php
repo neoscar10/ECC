@@ -5,12 +5,13 @@
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                        <h4 class="mb-sm-0">User Management</h4>
+                        <h4 class="mb-sm-0">Admin User Management</h4>
 
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
                                 <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                                <li class="breadcrumb-item active">Users</li>
+                                <li class="breadcrumb-item"><a href="#">Users</a></li>
+                                <li class="breadcrumb-item active">Admin Users</li>
                             </ol>
                         </div>
 
@@ -33,24 +34,22 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             @endif
+            
+            @if (session('warning'))
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>Warning:</strong> {{ session('warning') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            @endif
 
             <!-- Admin Section -->
-            @include('livewire.admin.users.partials._admin_table')
-
-            <!-- Users Section -->
-            @include('livewire.admin.users.partials._users_table')
+            @include('livewire.admin.users.admin.partials._admin_table')
 
     </div>
 
     <!-- Modals -->
-    @include('livewire.admin.users.partials._admin_modal')
+    @include('livewire.admin.users.admin.partials._admin_modal')
     
-    <!-- User View/Edit Modal (reused/refactored if needed, for now using existing userModal structure but simplified in partial if created) -->
-    <!-- For simplicity, keeping the existing User Modal logic here or moving to partial if requested. 
-         The prompt asked for separation. I will create a View/Edit User partial. -->
-     
-     @include('livewire.admin.users.partials._user_modal')
-
     @push('scripts')
     <script>
         document.addEventListener('close-modal', event => {
@@ -82,13 +81,9 @@
                 showCloseButton: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Check if event.detail exists (Livewire v3 standard)
                     const detail = event.detail[0] || event.detail; 
-                    
                     if (detail.type === 'admin') {
                         Livewire.dispatch('deleteAdminConfirmed', { id: detail.id });
-                    } else {
-                        Livewire.dispatch('deleteUserConfirmed', { id: detail.id });
                     }
                 }
             });
@@ -96,7 +91,6 @@
 
         // SweetAlert for Password
         document.addEventListener('show-password-alert', event => {
-             // Safe detail access
              const detail = event.detail[0] || event.detail; 
              
             Swal.fire({
