@@ -11,7 +11,7 @@
     <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="Themesbrand" name="author" />
     <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ asset('velzon/assets') }}/images/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
     <!--Swiper slider css-->
     <link href="{{ asset('velzon/assets') }}/libs/swiper/swiper-bundle.min.css" rel="stylesheet" type="text/css" />

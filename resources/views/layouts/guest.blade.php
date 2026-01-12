@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Executive Cricket Club Admin" name="description" />
     <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ asset('velzon/assets/images/favicon.ico') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
     <!-- Layout config Js -->
     <script src="{{ asset('velzon/assets/js/layout.js') }}"></script>
