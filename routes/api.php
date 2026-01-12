@@ -11,6 +11,12 @@ Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'auth'], function () {
         Route::post('register', [AuthController::class, 'register']);
         Route::post('login', [AuthController::class, 'login']);
+
+        // Password Reset Routes
+        Route::middleware('throttle:5,1')->group(function () {
+            Route::post('password/request-otp', [App\Http\Controllers\Api\V1\Auth\PasswordResetController::class, 'requestOtp']);
+            Route::post('password/reset', [App\Http\Controllers\Api\V1\Auth\PasswordResetController::class, 'reset']);
+        });
         
         // Protected Auth Routes
         Route::middleware('auth:api')->group(function () {

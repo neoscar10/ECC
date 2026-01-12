@@ -56,4 +56,52 @@ class OtpService
 
         return false;
     }
+    /**
+     * Request a Password Reset OTP for the given user and identifier.
+     */
+    public function requestPasswordResetOtp(User $user, string $identifier): array
+    {
+        $otp = '123456'; // Dummy OTP
+        $ttlMinutes = (int) config('ecc.otp.ttl_minutes', 10);
+        $key = 'pwd_reset_otp:' . $user->id . ':' . sha1($identifier);
+
+        Cache::put($key, [
+            'otp' => $otp,
+            'identifier' => $identifier,
+            'created_at' => now(),
+        ], now()->addMinutes($ttlMinutes));
+
+        // Log for debugging (simulating sending)
+        \Illuminate\Support\Facades\Log::info("Password Reset OTP for User {$user->id} ({$identifier}): {$otp}");
+
+        return [
+            'ttl_minutes' => $ttlMinutes,
+            'message' => 'OTP sent (if account exists).',
+        ];
+    }
+
+    /**
+     * Verify the Password Reset OTP.
+     */
+    public function verifyPasswordResetOtp(User $user, string $identifier, string $otp): bool
+    {
+        $key = 'pwd_reset_otp:' . $user->id . ':' . sha1($identifier);
+        $cached = Cache::get($key);
+
+        if (!$cached) {
+            return false;
+        }
+
+        if ($cached['identifier'] !== $identifier) {
+            return false;
+        }
+
+        // Allow dummy OTP or real match
+        if ($otp === '123456' || $otp === $cached['otp']) {
+            Cache::forget($key);
+            return true;
+        }
+
+        return false;
+    }
 }

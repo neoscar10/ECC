@@ -300,6 +300,74 @@
                         "description": "Invalidate the current token.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)"
                     },
                     "response": []
+                },
+                {
+                    "name": "Request Password Reset OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"identifier\": \"test@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/auth/password/request-otp",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "auth",
+                                "password",
+                                "request-otp"
+                            ]
+                        },
+                        "description": "Request OTP for password reset.\n\n**Auth:** Public\n\n**Body:**\n- `identifier` (Email or Phone)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reset Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"identifier\": \"test@example.com\",\n    \"otp\": \"123456\",\n    \"password\": \"NewPass123!\",\n    \"password_confirmation\": \"NewPass123!\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/auth/password/reset",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "auth",
+                                "password",
+                                "reset"
+                            ]
+                        },
+                        "description": "Reset password using OTP.\n\n**Auth:** Public\n\n**Body:**\n- `identifier`, `otp`, `password`, `password_confirmation`"
+                    },
+                    "response": []
                 }
             ]
         },
