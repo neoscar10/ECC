@@ -796,11 +796,11 @@
                                         "select-tier"
                                     ]
                                 },
-                                "description": "Lock in the selected membership tier.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `tier_id` (Integer)"
+                                "description": "Lock in the selected membership tier.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `tier_id` (Integer)\n\n**Flow Note:**\n- If `price` > 0: `current_step` becomes `payment`.\n- If `price` is 0 (Free): `current_step` becomes `submitted` (Payment skipped). Client should proceed to Submit."
                             },
                             "response": [
                                 {
-                                    "name": "Success (200)",
+                                    "name": "Success (Paid Tier)",
                                     "status": "OK",
                                     "code": 200,
                                     "header": [
@@ -809,7 +809,19 @@
                                             "value": "application/json"
                                         }
                                     ],
-                                    "body": "{\n    \"success\": true,\n    \"message\": \"Tier selected.\",\n    \"data\": {\n        \"id\": 1,\n        \"current_step\": \"payment\",\n        \"selected_tier_id\": 3,\n        \"membership_tier\": {\n            \"id\": 3,\n            \"name\": \"Platinum\"\n        }\n    },\n    \"meta\": null,\n    \"errors\": null\n}"
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Tier selected.\",\n    \"data\": {\n        \"id\": 1,\n        \"current_step\": \"payment\",\n        \"selected_tier_id\": 3,\n        \"membership_tier\": {\n            \"id\": 3,\n            \"name\": \"Platinum\",\n            \"price\": \"500.00\"\n        }\n    },\n    \"meta\": null,\n    \"errors\": null\n}"
+                                },
+                                {
+                                    "name": "Success (Free Tier)",
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Tier selected.\",\n    \"data\": {\n        \"id\": 1,\n        \"current_step\": \"submitted\",\n        \"payment_status\": \"not_required\",\n        \"selected_tier_id\": 2,\n        \"membership_tier\": {\n            \"id\": 2,\n            \"name\": \"Free Basic\",\n            \"price\": \"0.00\"\n        }\n    },\n    \"meta\": null,\n    \"errors\": null\n}"
                                 }
                             ]
                         },
@@ -833,7 +845,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"method\": \"card\",\n    \"amount\": 50000,\n    \"cardholder_name\": \"Test User\",\n    \"last4\": \"4242\"\n}"
+                                    "raw": "{\n    \"method\": \"card\",\n    \"cardholder_name\": \"Test User\",\n    \"last4\": \"4242\"\n}"
                                 },
                                 "url": {
                                     "raw": "{{base_url}}/{{api_prefix}}/membership-applications/{{application_id}}/payment/confirm",
@@ -848,7 +860,7 @@
                                         "confirm"
                                     ]
                                 },
-                                "description": "Confirm payment (Mock/Stripe integration).\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `method`\n- `amount`\n- `cardholder_name`\n- `last4`"
+                                "description": "Confirm payment (Mock/Stripe integration).\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `method`\n- `cardholder_name`\n- `last4`\n\n**Note:** Amount is computed server-side from selected tier price. If amount is 0, payment is skipped and returns success."
                             },
                             "response": [
                                 {

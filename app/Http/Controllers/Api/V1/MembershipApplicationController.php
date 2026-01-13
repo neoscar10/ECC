@@ -183,12 +183,22 @@ class MembershipApplicationController extends Controller
         }
 
         $tier = \App\Models\MembershipTier::find($request->tier_id);
+        $isFree = (float) $tier->price <= 0.0;
 
-        $application->update([
+        $updateData = [
             'selected_tier_id' => $request->tier_id,
             'membership_tier_id' => $request->tier_id,
-            'current_step' => 'payment'
-        ]);
+        ];
+
+        if ($isFree) {
+            $updateData['current_step'] = 'submitted'; // Ready for submission (skip payment)
+            $updateData['payment_status'] = 'not_required';
+        } else {
+            $updateData['current_step'] = 'payment';
+            $updateData['payment_status'] = 'unpaid';
+        }
+
+        $application->update($updateData);
 
         return $this->success($application->load('membershipTier.privileges'), 'Tier selected.');
     }
@@ -199,7 +209,7 @@ class MembershipApplicationController extends Controller
 
         $validator = Validator::make($request->all(), [
             'method' => 'required|in:card,wallet',
-            'amount' => 'required|numeric',
+            // 'amount' => 'required|numeric', // Removed: Server computed
             'cardholder_name' => 'required_if:method,card',
             'last4' => 'required_if:method,card',
         ]);
@@ -212,8 +222,27 @@ class MembershipApplicationController extends Controller
             return $this->error('Security Violation: Raw card data not accepted.', 400);
         }
 
+        $tier = $application->membershipTier;
+        if (!$tier) {
+            return $this->error('No tier selected.', 400);
+        }
+
+        $amount = (float) $tier->price;
+
+        if ($amount <= 0) {
+            // Logic for free tier if they hit this endpoint weirdly
+            $application->update([
+                'payment_status' => 'not_required',
+                'current_step' => 'submitted'
+            ]);
+            return $this->success($application, 'Payment not required for this tier.');
+        }
+
         try {
-            $paymentService->processTestPayment($application, $request->all());
+            // Force server-side amount
+            $paymentData = array_merge($request->all(), ['amount' => $amount]);
+
+            $paymentService->processTestPayment($application, $paymentData);
             
             $application->update([
                 'payment_status' => 'test_paid',
@@ -230,7 +259,10 @@ class MembershipApplicationController extends Controller
     {
         $application = $this->getApplicationOr404($id, $request->user());
 
-        if ($application->payment_status !== 'test_paid' && $application->payment_status !== 'paid') {
+        // Allow 'not_required' for free tiers
+        if ($application->payment_status !== 'test_paid' && 
+            $application->payment_status !== 'paid' && 
+            $application->payment_status !== 'not_required') {
             return $this->error('Payment required before submission.', 400);
         }
 
