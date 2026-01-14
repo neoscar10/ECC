@@ -27,4 +27,10 @@ Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admi
         Route::get('/tiers', \App\Livewire\Admin\Membership\Tiers\Index::class)->name('tiers');
         Route::get('/members', \App\Livewire\Admin\Members\Index::class)->name('members');
     });
+
+    // The Archive
+    Route::prefix('archive')->name('archive.')->group(function () {
+        Route::get('/categories', \App\Livewire\Admin\Archive\Categories\Index::class)->name('categories');
+        Route::get('/products', \App\Livewire\Admin\Archive\Products\Index::class)->name('products');
+    });
 });

@@ -551,7 +551,7 @@
             "item": [
                 {
                     "name": "Membership Applications",
-                    "description": "Step-by-step membership application flow.\n\n**Prerequisites:** User must be registered and authenticated (`{{application_id}}` required for most steps).",
+                    "description": "Step-by-step membership application flow.\n\n**Prerequisites:** User must be registered and authenticated (`{{application_id}}` required for most steps).\n\n### Reference: Application State Fields\n\n**current_step**\n- `personal_details` — Initial state, waiting for user info.\n- `cricket_profile` — Personal details saved, waiting for preferences.\n- `collector_intent` — Profile saved, waiting for investment focus.\n- `tier_selection` — Intent saved & tier recommended, waiting for selection.\n- `payment` — Tier selected (paid), waiting for payment confirmation.\n- `submitted` — Payment done (or free tier), ready for final submission.\n- `waiting_approval` — Submitted, waiting for admin approval (restricted tiers).\n- `access_granted` — Submitted & approved, membership active.\n\n**status**\n- `draft` — Application in progress, not yet submitted.\n- `submitted` — User finished flow, waiting for review or auto-grant.\n- `under_review` — Admin is currently reviewing.\n- `approved` — Application accepted, membership granted.\n- `rejected` — Application denied.",
                     "item": [
                         {
                             "name": "01 Get Current Application",

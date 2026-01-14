@@ -890,6 +890,25 @@
                                 </ul>
                             </div>
                         </li>
+
+                        @php
+                            $isArchiveActive = request()->routeIs('admin.archive.*');
+                        @endphp
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ $isArchiveActive ? 'active' : '' }}" href="#sidebarArchive" data-bs-toggle="collapse" role="button" aria-expanded="{{ $isArchiveActive ? 'true' : 'false' }}" aria-controls="sidebarArchive">
+                                <i class="ri-archive-line"></i> <span data-key="t-archive">The Archive</span>
+                            </a>
+                            <div class="collapse menu-dropdown {{ $isArchiveActive ? 'show' : '' }}" id="sidebarArchive">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.archive.categories') }}" class="nav-link {{ request()->routeIs('admin.archive.categories') ? 'active' : '' }}" data-key="t-categories">Categories</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.archive.products') }}" class="nav-link {{ request()->routeIs('admin.archive.products') ? 'active' : '' }}" data-key="t-products">Products</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-store-2-line"></i> <span>Shop</span></a></li>
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-auction-line"></i> <span>Auctions</span></a></li>
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-chat-voice-line"></i> <span>Inquiries</span></a></li>
