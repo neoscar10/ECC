@@ -1279,6 +1279,87 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "Archive",
+            "description": "Public and Restricted Archive Categories.",
+            "item": [
+                {
+                    "name": "Categories",
+                    "item": [
+                        {
+                            "name": "01 List Categories",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/archive/categories?per_page=15&include_locked=false",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "archive",
+                                        "categories"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "per_page",
+                                            "value": "15"
+                                        },
+                                        {
+                                            "key": "include_locked",
+                                            "value": "false",
+                                            "description": "Set to true to see inaccessible categories marked as is_accessible:false"
+                                        }
+                                    ]
+                                },
+                                "description": "List all categories accessible to the current user."
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "02 Show Category",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/archive/categories/{{category_slug}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "archive",
+                                        "categories",
+                                        "{{category_slug}}"
+                                    ]
+                                },
+                                "description": "Get details for a specific category."
+                            },
+                            "response": []
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

@@ -57,6 +57,12 @@ Route::prefix('v1')->group(function () {
     // Membership Status (Flutter Check)
     Route::middleware('auth:api')->get('/membership/status', [MembershipStatusController::class, 'status']);
 
+    // Archive Routes
+    Route::middleware('auth:api')->prefix('archive')->group(function () {
+        Route::get('categories', [\App\Http\Controllers\Api\V1\Archive\ArchiveCategoryController::class, 'index']);
+        Route::get('categories/{slugOrId}', [\App\Http\Controllers\Api\V1\Archive\ArchiveCategoryController::class, 'show']);
+    });
+
     // Admin Routes
     Route::middleware(['auth:api', 'role:ecc_admin|super_admin'])->prefix('admin')->group(function () {
         Route::patch('memberships/{id}/approve', [MembershipStatusController::class, 'approve']);
