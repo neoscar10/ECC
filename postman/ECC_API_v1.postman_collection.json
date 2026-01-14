@@ -1342,7 +1342,7 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{base_url}}/{{api_prefix}}/archive/categories/{{category_slug}}",
+                                    "raw": "{{base_url}}/{{api_prefix}}/archive/categories/{{category_id}}",
                                     "host": [
                                         "{{base_url}}"
                                     ],
@@ -1350,7 +1350,7 @@
                                         "{{api_prefix}}",
                                         "archive",
                                         "categories",
-                                        "{{category_slug}}"
+                                        "{{category_id}}"
                                     ]
                                 },
                                 "description": "Get details for a specific category."

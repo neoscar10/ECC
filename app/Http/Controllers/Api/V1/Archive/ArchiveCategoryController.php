@@ -67,12 +67,10 @@ class ArchiveCategoryController extends Controller
     /**
      * Show single category.
      */
-    public function show(Request $request, $slugOrId)
+    public function show(Request $request, $id)
     {
-        // Try slug first, then ID
-        $category = ArchiveCategory::where('slug', $slugOrId)
-            ->orWhere('id', $slugOrId)
-            ->first();
+        // Strict ID lookup
+        $category = ArchiveCategory::whereKey($id)->first();
 
         if (!$category || !$category->is_active) {
             return $this->error('Category not found.', 404);
