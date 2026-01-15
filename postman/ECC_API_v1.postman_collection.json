@@ -1377,7 +1377,7 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{base_url}}/{{api_prefix}}/archive/products?category_id=",
+                                    "raw": "{{base_url}}/{{api_prefix}}/archive/products?category_id={{category_id}}",
                                     "host": [
                                         "{{base_url}}"
                                     ],
@@ -1389,14 +1389,27 @@
                                     "query": [
                                         {
                                             "key": "category_id",
-                                            "value": "",
+                                            "value": "{{category_id}}",
                                             "description": "Optional Category ID"
                                         }
                                     ]
                                 },
                                 "description": "List all products. Locked products are included with is_open: false."
                             },
-                            "response": []
+                            "response": [
+                                {
+                                    "name": "Filtered by Category (200)",
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Success\",\n    \"data\": [\n        {\n            \"id\": 7,\n            \"title\": \"Signed Jersey\",\n            \"archive_category_id\": 4,\n            \"is_accessible\": true,\n             \"price_min_amount\": 100,\n             \"price_max_amount\": 200\n        }\n    ],\n    \"meta\": {\n        \"current_page\": 1,\n        \"total\": 1\n    },\n    \"errors\": null\n}"
+                                }
+                            ]
                         },
                         {
                             "name": "02 Show Product",
