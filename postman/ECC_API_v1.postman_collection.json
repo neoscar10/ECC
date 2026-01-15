@@ -1282,10 +1282,11 @@
         },
         {
             "name": "Archive",
-            "description": "Public and Restricted Archive Categories.",
+            "description": "The **Archive** is a curated collection of memorabilia, experiences, and exclusive content. Access to items is restricted based on the user's **Membership Tier**.\n\n### Access Rules & Logic\n\n1.  **Category Restriction**: High-level grouping. If a user cannot access a Category, they generally cannot see its products.\n2.  **Product Restriction**: Individual items can be:\n    *   **Public**: Open to everyone.\n    *   **Restricted**: Requires user's tier ID to be in the allowed list.\n    *   **Early Access**: Product has `go_live_at` in the future. Specific tiers get earlier access (`access_at`).\n3.  **Upgrade Recommendation**: The API calculates the best tier to access locked content or get earlier access.\n4.  **Attachments**: Can be restricted to a subset of product tiers. Locked attachments return `is_accessible: false` and a `lock_message`.\n\n### Common Testing Steps (Flutter Dev)\n1.  **Auth**: Ensure `{{jwt_token}}` is set for a user with a valid membership.\n2.  **Categories**: Check both `public` and `restricted` visibility.\n3.  **Products**: Filter by `category_id` (e.g. `{{category_id}}`).\n4.  **Locked Content**: Find a product restricted to a higher tier to verify `is_open: false` UI behavior.",
             "item": [
                 {
                     "name": "Categories",
+                    "description": "Browse Categories. Categories can be Public or Restricted.",
                     "item": [
                         {
                             "name": "01 List Categories",
@@ -1323,9 +1324,34 @@
                                         }
                                     ]
                                 },
-                                "description": "List all categories accessible to the current user."
+                                "description": "List all categories accessible to the current user.\n\n### Query Params\n| Param | Type | Default | Description |\n| :--- | :--- | :--- | :--- |\n| `include_locked` | bool | `false` | If true, returns inaccessible categories (marked `is_accessible: false`). |\n| `search` | string | null | Filter by title. |\n| `per_page` | int | 15 | Pagination limit. |"
                             },
-                            "response": []
+                            "response": [
+                                {
+                                    "name": "Success - Mixed Access (200)",
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Categories fetched successfully.\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"title\": \"General Memorabilia\",\n            \"slug\": \"general-memorabilia\",\n            \"image_url\": \"https://example.com/storage/cat1.jpg\",\n            \"visibility\": \"public\",\n            \"is_accessible\": true,\n            \"created_at\": \"2024-01-01T00:00:00.000000Z\"\n        },\n        {\n            \"id\": 5,\n            \"title\": \"VIP Experiences\",\n            \"slug\": \"vip-experiences\",\n            \"image_url\": \"https://example.com/storage/cat5.jpg\",\n            \"visibility\": \"restricted\",\n            \"is_accessible\": false,\n            \"created_at\": \"2024-01-01T00:00:00.000000Z\"\n        }\n    ],\n    \"meta\": {\n        \"current_page\": 1,\n        \"last_page\": 1,\n        \"total\": 2\n    },\n    \"errors\": null\n}"
+                                },
+                                {
+                                    "name": "Unauthorized (401)",
+                                    "status": "Unauthorized",
+                                    "code": 401,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"message\": \"Unauthenticated.\"\n}"
+                                }
+                            ]
                         },
                         {
                             "name": "02 Show Category",
@@ -1353,14 +1379,52 @@
                                         "{{category_id}}"
                                     ]
                                 },
-                                "description": "Get details for a specific category."
+                                "description": "Get details for a specific category.\n\n### Access Rules\n*   **403 Forbidden**: If the user's tier does not allow access to this category."
                             },
-                            "response": []
+                            "response": [
+                                {
+                                    "name": "Success (200)",
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Category retrieved.\",\n    \"data\": {\n        \"id\": 1,\n        \"title\": \"Rare Items\",\n        \"slug\": \"rare-items\",\n        \"description\": \"Exclusive rare collectibles.\",\n        \"image_url\": \"https://example.com/storage/rare.jpg\",\n        \"visibility\": \"restricted\",\n        \"is_accessible\": true,\n        \"created_at\": \"2024-01-01T00:00:00.000000Z\"\n    },\n    \"meta\": null,\n    \"errors\": null\n}"
+                                },
+                                {
+                                    "name": "Forbidden (403)",
+                                    "status": "Forbidden",
+                                    "code": 403,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"success\": false,\n    \"message\": \"You do not have permission to view this category.\",\n    \"data\": null,\n    \"meta\": null,\n    \"errors\": null\n}"
+                                },
+                                {
+                                    "name": "Not Found (404)",
+                                    "status": "Not Found",
+                                    "code": 404,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"success\": false,\n    \"message\": \"Category not found.\",\n    \"data\": null,\n    \"meta\": null,\n    \"errors\": null\n}"
+                                }
+                            ]
                         }
                     ]
                 },
                 {
                     "name": "Products",
+                    "description": "Browse Archive Products. Products can be Public, Restricted, or bound by Early Access windows.",
                     "item": [
                         {
                             "name": "01 List Products",
@@ -1394,7 +1458,7 @@
                                         }
                                     ]
                                 },
-                                "description": "List all products. Locked products are included with is_open: false."
+                                "description": "List all products. Locked products are included with `is_open: false`.\n\n### Query Params\n| Param | Type | Default | Description |\n| :--- | :--- | :--- | :--- |\n| `category_id` | int | null | **Required/Recommended** to filter by category. Checks `archive_category_id`. |\n| `page` | int | 1 | Page number. |\n\n### Validation\nReturns **422** if `category_id` is present but non-numeric."
                             },
                             "response": [
                                 {
@@ -1407,7 +1471,19 @@
                                             "value": "application/json"
                                         }
                                     ],
-                                    "body": "{\n    \"success\": true,\n    \"message\": \"Success\",\n    \"data\": [\n        {\n            \"id\": 7,\n            \"title\": \"Signed Jersey\",\n            \"archive_category_id\": 4,\n            \"is_accessible\": true,\n             \"price_min_amount\": 100,\n             \"price_max_amount\": 200\n        }\n    ],\n    \"meta\": {\n        \"current_page\": 1,\n        \"total\": 1\n    },\n    \"errors\": null\n}"
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Success\",\n    \"data\": [\n        {\n            \"id\": 7,\n            \"title\": \"Signed Jersey\",\n            \"slug\": \"signed-jersey\",\n            \"category_id\": 4,\n            \"category_title\": \"Jerseys\",\n            \"description_unlocked\": \"Authentic signed jersey.\",\n            \"description_locked\": \"Complete provenance details...\",\n            \"price\": {\n                \"min\": 10000,\n                \"max\": 20000,\n                \"currency\": \"INR\"\n            },\n            \"is_live\": true,\n            \"go_live_at\": \"2024-01-01T00:00:00.000000Z\",\n            \"go_live_formatted\": \"01 Jan 2024, 12:00 AM\",\n            \"is_open\": true,\n            \"recommended_upgrade\": null,\n            \"images\": [],\n            \"attachments\": []\n        },\n        {\n            \"id\": 8,\n            \"title\": \"Private Dinner\",\n            \"slug\": \"private-dinner\",\n            \"category_id\": 4,\n            \"category_title\": \"Jerseys\",\n            \"description_unlocked\": \"Exclusive dinner event.\",\n            \"description_locked\": null,\n            \"price\": {\n                 \"min\": 50000,\n                 \"max\": 50000,\n                 \"currency\": \"INR\"\n            },\n            \"is_live\": true,\n            \"go_live_at\": null,\n            \"go_live_formatted\": null,\n            \"is_open\": false,\n            \"recommended_upgrade\": {\n                \"type\": \"tier_restriction\",\n                \"tier_id\": 3,\n                \"tier_name\": \"Platinum\",\n                \"message\": \"Exclusive to Platinum members.\"\n            },\n            \"images\": [],\n            \"attachments\": []\n        }\n    ],\n    \"meta\": {\n        \"current_page\": 1,\n        \"total\": 2\n    },\n    \"errors\": null\n}"
+                                },
+                                {
+                                    "name": "Validation Error (422)",
+                                    "status": "Unprocessable Content",
+                                    "code": 422,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"success\": false,\n    \"message\": \"Invalid category_id. Must be numeric.\",\n    \"data\": null,\n    \"meta\": null,\n    \"errors\": null\n}"
                                 }
                             ]
                         },
@@ -1437,9 +1513,46 @@
                                         "{{product_id}}"
                                     ]
                                 },
-                                "description": "Get product details including access status and attachments."
+                                "description": "Get product details including access status and attachments.\n\n### Attachments\nBy default, locked attachments are HIDDEN. Pass `include_locked_attachments=true` to see them as placeholders with a `lock_message`.\n\n| Param | Type | Default | Description |\n| :--- | :--- | :--- | :--- |\n| `include_locked_attachments` | bool | `false` | If true, returns locked attachments (`is_accessible: false`). |"
                             },
-                            "response": []
+                            "response": [
+                                {
+                                    "name": "Success - Open Product (200)",
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Success\",\n    \"data\": {\n        \"id\": 101,\n        \"title\": \"Signed Bat 2011\",\n        \"is_open\": true,\n        \"description_locked\": \"This bat was used in the finals...\",\n        \"attachments\": [\n            {\n                \"id\": 10,\n                \"type\": \"rich\",\n                \"heading\": \"Certificate of Authenticity\",\n                \"is_accessible\": true,\n                \"body\": \"Markdown content here...\"\n            }\n        ]\n    },\n    \"meta\": null,\n    \"errors\": null\n}"
+                                },
+                                {
+                                    "name": "Success - Locked Product (200)",
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Success\",\n    \"data\": {\n        \"id\": 102,\n        \"title\": \"Premium Masterclass\",\n        \"is_open\": false,\n        \"description_locked\": null,\n        \"recommended_upgrade\": {\n            \"tier_id\": 2,\n            \"tier_name\": \"Gold\",\n            \"message\": \"Upgrade to Gold to unlock.\",\n            \"type\": \"tier_restriction\"\n        },\n        \"attachments\": []\n    },\n    \"meta\": null,\n    \"errors\": null\n}"
+                                },
+                                {
+                                    "name": "Success - Mixed Attachments (200)",
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Success\",\n    \"data\": {\n        \"id\": 101,\n        \"title\": \"Signed Bat 2011\",\n        \"is_open\": true,\n        \"description_locked\": \"This bat was used in the finals...\",\n        \"attachments\": [\n            {\n                \"id\": 10,\n                \"type\": \"rich\",\n                \"heading\": \"Certificate of Authenticity\",\n                \"is_accessible\": true,\n                \"body\": \"Markdown content here...\"\n            },\n            {\n                \"id\": 11,\n                \"type\": \"kv\",\n                \"heading\": \"Owner History\",\n                \"is_accessible\": false,\n                \"lock_message\": \"Available to Gold Tier and above.\",\n                \"body\": null\n            }\n        ]\n    },\n    \"meta\": null,\n    \"errors\": null\n}"
+                                }
+                            ]
                         }
                     ]
                 }
