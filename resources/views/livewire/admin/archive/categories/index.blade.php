@@ -1,6 +1,6 @@
 @section('title', 'Archive Categories')
 
-<div class="page-content">
+<div>
     <div class="container-fluid">
 
         <!-- Page Header -->

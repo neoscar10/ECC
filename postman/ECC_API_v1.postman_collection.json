@@ -1358,6 +1358,77 @@
                             "response": []
                         }
                     ]
+                },
+                {
+                    "name": "Products",
+                    "item": [
+                        {
+                            "name": "01 List Products",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/archive/products?category_id=",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "archive",
+                                        "products"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "category_id",
+                                            "value": "",
+                                            "description": "Optional Category ID"
+                                        }
+                                    ]
+                                },
+                                "description": "List all products. Locked products are included with is_open: false."
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "02 Show Product",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/archive/products/{{product_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "archive",
+                                        "products",
+                                        "{{product_id}}"
+                                    ]
+                                },
+                                "description": "Get product details including access status and attachments."
+                            },
+                            "response": []
+                        }
+                    ]
                 }
             ]
         }

@@ -61,6 +61,8 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:api')->prefix('archive')->group(function () {
         Route::get('categories', [\App\Http\Controllers\Api\V1\Archive\ArchiveCategoryController::class, 'index']);
         Route::get('categories/{id}', [\App\Http\Controllers\Api\V1\Archive\ArchiveCategoryController::class, 'show']);
+        Route::get('products', [\App\Http\Controllers\Api\V1\Archive\ArchiveProductController::class, 'index']);
+        Route::get('products/{id}', [\App\Http\Controllers\Api\V1\Archive\ArchiveProductController::class, 'show']);
     });
 
     // Admin Routes

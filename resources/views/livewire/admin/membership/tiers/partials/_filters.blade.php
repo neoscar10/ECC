@@ -9,7 +9,7 @@
         <div class="col-sm-auto ms-auto">
             @role('super_admin')
             <div class="hstack gap-2">
-                <button type="button" class="btn btn-success add-btn" wire:click="create"><i class="ri-add-line align-bottom me-1"></i> Add Tier</button>
+                <button type="button" class="btn btn-primary add-btn" wire:click="create"><i class="ri-add-line align-bottom me-1"></i> Add Tier</button>
             </div>
             @endrole
         </div>

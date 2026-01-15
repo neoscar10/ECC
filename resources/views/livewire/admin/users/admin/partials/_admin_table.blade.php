@@ -3,7 +3,7 @@
         <h4 class="card-title mb-0 flex-grow-1">Admin Users</h4>
         @if(auth()->user()->hasRole('super_admin'))
         <div class="flex-shrink-0">
-            <button type="button" class="btn btn-primary btn-sm" wire:click="createAdmin">
+            <button type="button" class="btn btn-primary add-btn" wire:click="createAdmin">
                 <i class="ri-add-line align-middle"></i> Add Admin
             </button>
         </div>
