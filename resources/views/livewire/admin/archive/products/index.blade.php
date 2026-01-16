@@ -52,6 +52,7 @@
     @include('livewire.admin.archive.products.partials._create-modal')
     @include('livewire.admin.archive.products.partials._early-access-modal')
     @include('livewire.admin.archive.products.partials._attachments-modal')
+    @include('livewire.admin.archive.products.partials._delete-confirm')
 
     <!-- Scripts -->
     <script>
@@ -61,6 +62,9 @@
             var createModal = new bootstrap.Modal(document.getElementById('createProductModal'));
             Livewire.on('show-create-modal', () => { createModal.show(); });
             Livewire.on('hide-create-modal', () => { createModal.hide(); });
+            // Custom listeners for wizard success
+            Livewire.on('archive-product-created', () => { createModal.hide(); });
+            Livewire.on('archive-product-updated', () => { createModal.hide(); });
 
             // Early Access Modal
             var eaModal = new bootstrap.Modal(document.getElementById('earlyAccessModal'));
@@ -71,6 +75,11 @@
             var attModal = new bootstrap.Modal(document.getElementById('attachmentsModal'));
             Livewire.on('show-att-modal', () => { attModal.show(); });
             Livewire.on('hide-att-modal', () => { attModal.hide(); });
+            
+            // Delete Confirm Modal
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteProductModal'));
+            Livewire.on('show-product-delete-modal', () => { deleteModal.show(); });
+            Livewire.on('hide-product-delete-modal', () => { deleteModal.hide(); });
         });
     </script>
 </div>

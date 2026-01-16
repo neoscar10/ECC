@@ -35,6 +35,11 @@ class ArchiveProduct extends Model
         return $this->hasMany(ArchiveProductImage::class)->orderBy('sort_order');
     }
 
+    public function images360(): HasMany
+    {
+        return $this->hasMany(ArchiveProduct360Image::class)->orderBy('sort_order');
+    }
+
     // Tiers for "Random" restriction type
     public function tiers(): BelongsToMany
     {

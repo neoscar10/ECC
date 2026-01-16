@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 #[Layout('layouts.admin')]
 class Index extends Component
@@ -36,11 +37,13 @@ class Index extends Component
     public $membershipTiers = [];
 
     // Modal States
-    public $showCreateModal = false;
-    public $showEarlyAccessModal = false;
     public $showAttachmentsModal = false;
     public $isEditMode = false;
     public $productId;
+    
+    // Delete Modal State
+    public $confirmingDelete = false;
+    public $deleteId = null;
 
     // --- Product Form Fields ---
     public $title;
@@ -62,6 +65,13 @@ class Index extends Component
     // Images
     public $newImages = []; // Uploaded files
     public $existingImages = []; // Existing image records
+    
+    // 360 Images
+    public $new360Images = [];
+    public $existing360Images = [];
+
+    // Wizard State
+    public $createStep = 1;
 
     // --- Early Access Form ---
     // Structure: [['tier_id' => X, 'access_at' => Y]]
@@ -124,12 +134,102 @@ class Index extends Component
         ]);
     }
 
+    // --- Wizard Navigation ---
+
+    public function updatedRestrictionMode($value)
+    {
+        if ($value === 'public') {
+            $this->restrictionType = null;
+            $this->restrictedMinTierId = null;
+            $this->restrictedPrivateTierId = null;
+            $this->selectedRandomTiers = [];
+        }
+    }
+
+    public function updatedRestrictionType($value)
+    {
+        if ($value !== 'hierarchical') {
+            $this->restrictedMinTierId = null;
+        }
+        if ($value !== 'private') {
+            $this->restrictedPrivateTierId = null;
+        }
+        if ($value !== 'random') {
+            $this->selectedRandomTiers = [];
+        }
+    }
+
+    public function validateStep($step)
+    {
+        if ($step === 1) {
+            $this->validate([
+                'title' => 'required|string|max:255',
+                'categoryId' => 'required|exists:archive_categories,id',
+                'priceMin' => 'nullable|integer|min:0',
+                'priceMax' => 'nullable|integer|min:0',
+                'descriptionUnlocked' => 'nullable|string',
+                'goLiveAt' => 'nullable|required_if:goLiveNow,false|date',
+            ]);
+        } elseif ($step === 2) {
+             $rules = [
+                'newImages.*' => 'image|max:10240', // 10MB
+                'new360Images.*' => 'image|max:10240',
+             ];
+             // If creating, require at least one image if no existing images? 
+             // Current rules likely require images.
+             if (!$this->isEditMode && empty($this->existingImages) && empty($this->newImages)) {
+                 $rules['newImages'] = 'required';
+             }
+             $this->validate($rules);
+        } elseif ($step === 3) {
+            $this->validate([
+                'restrictionMode' => 'required|in:public,restricted',
+                'restrictionType' => ['exclude_unless:restrictionMode,restricted', 'required', 'in:hierarchical,random,private'],
+                'restrictedMinTierId' => ['exclude_unless:restrictionType,hierarchical', 'required', 'exists:membership_tiers,id'],
+                'restrictedPrivateTierId' => ['exclude_unless:restrictionType,private', 'required', 'exists:membership_tiers,id'],
+                'selectedRandomTiers' => ['exclude_unless:restrictionType,random', 'array', 'min:1'],
+                'selectedRandomTiers.*' => ['exclude_unless:restrictionType,random', 'exists:membership_tiers,id'],
+            ]);
+        }
+    }
+
+    public function nextStep()
+    {
+        $this->validateStep($this->createStep);
+        if ($this->createStep < 3) {
+            $this->createStep++;
+        }
+    }
+
+    public function prevStep()
+    {
+        if ($this->createStep > 1) {
+            $this->createStep--;
+        }
+    }
+    
+    public function goToStep($step)
+    {
+         // Allow going back freely, but going forward requires validation of previous steps
+         if ($step < $this->createStep) {
+             $this->createStep = $step;
+             return;
+         }
+         
+         // To go forward, validate all steps before target
+         for ($i = 1; $i < $step; $i++) {
+             $this->validateStep($i);
+         }
+         $this->createStep = $step;
+    }
+
     // --- Create / Edit Product ---
 
     public function create()
     {
         $this->resetForm();
         $this->isEditMode = false;
+        $this->createStep = 1;
         $this->showCreateModal = true;
         $this->dispatch('show-create-modal');
     }
@@ -139,6 +239,7 @@ class Index extends Component
         $this->showCreateModal = false;
         $this->dispatch('hide-create-modal');
         $this->resetForm();
+        $this->createStep = 1;
     }
 
     public function edit($id)
@@ -147,34 +248,61 @@ class Index extends Component
         $this->isEditMode = true;
         $this->productId = $id;
 
-        $product = ArchiveProduct::with(['images', 'tiers'])->findOrFail($id);
-
+        $product = ArchiveProduct::with(['images', 'images360', 'tiers'])->findOrFail($id);
+        
         $this->title = $product->title;
         $this->categoryId = $product->archive_category_id;
-        $this->priceMin = $product->price_min_amount; // Assuming needed in paise or units? Let's check logic. Usually input is units.
+        $this->priceMin = $product->price_min_amount;
         $this->priceMax = $product->price_max_amount;
-        $this->descriptionUnlocked = $product->description_unlocked;
-        $this->descriptionLocked = $product->description_locked;
-        $this->goLiveNow = (bool) $product->go_live_now;
+        $this->descriptionUnlocked = $product->description_unlocked; 
+        // Note: We ignore description_locked in UI as consolidated
+        
+        $this->goLiveNow = $product->go_live_now;
         $this->goLiveAt = $product->go_live_at ? $product->go_live_at->format('Y-m-d\TH:i') : null;
-        $this->allowsEarlyAccess = (bool) $product->early_access_enabled;
+        $this->allowsEarlyAccess = $product->early_access_enabled;
         
         $this->restrictionMode = $product->restriction_mode;
         $this->restrictionType = $product->restriction_type;
         $this->restrictedMinTierId = $product->restricted_min_tier_id;
         $this->restrictedPrivateTierId = $product->restricted_private_tier_id;
         
-        $this->selectedRandomTiers = $product->tiers->pluck('id')->map(fn($id) => (string)$id)->toArray();
+        $this->existingImages = $product->images;
+        $this->existing360Images = $product->images360;
+        
+        if ($product->restriction_type === 'random') {
+             $this->selectedRandomTiers = $product->tiers->pluck('id')->toArray();
+        }
+        
+        $this->createStep = 1;
 
-        $this->existingImages = $product->images; // Collection
-
-        $this->showCreateModal = true;
         $this->dispatch('show-create-modal');
     }
 
     public function storeProduct()
     {
-        $this->validateProduct();
+        logger()->info('storeProduct called', ['step' => $this->createStep, 'data' => $this->all()]);
+        
+        $this->validateStep(1);
+        $this->validateStep(2);
+        
+        // Normalize restriction data before final validation to prevent stale errors
+        if ($this->restrictionMode === 'public') {
+            $this->restrictionType = null;
+            $this->restrictedMinTierId = null;
+            $this->restrictedPrivateTierId = null;
+            $this->selectedRandomTiers = [];
+        } else {
+             if ($this->restrictionType !== 'hierarchical') $this->restrictedMinTierId = null;
+             if ($this->restrictionType !== 'private') $this->restrictedPrivateTierId = null;
+             if ($this->restrictionType !== 'random') $this->selectedRandomTiers = [];
+        }
+
+        // Additional image validation for final submit
+        $this->validate([
+             'newImages.*' => 'image|max:10240', // 10MB
+             'new360Images.*' => 'image|max:10240',
+        ]);
+        $this->validateStep(3);
 
         // Safe Defaults for restriction vars if public
         if ($this->restrictionMode === 'public') {
@@ -190,46 +318,69 @@ class Index extends Component
             $slug = Str::slug($this->title) . '-' . $count++;
         }
 
-        $product = ArchiveProduct::create([
-            'title' => $this->title,
-            'slug' => $slug,
-            'archive_category_id' => $this->categoryId,
-            'description_unlocked' => $this->descriptionUnlocked,
-            'description_locked' => $this->descriptionLocked, // Can be null on create
-            'price_min_amount' => $this->priceMin,
-            'price_max_amount' => $this->priceMax,
-            'currency' => $this->currency,
-            'go_live_now' => $this->goLiveNow,
-            'go_live_at' => $this->goLiveNow ? null : $this->goLiveAt,
-            'early_access_enabled' => (!$this->goLiveNow && $this->allowsEarlyAccess),
-            'restriction_mode' => $this->restrictionMode,
-            'restriction_type' => $this->restrictionType,
-            'restricted_min_tier_id' => $this->restrictedMinTierId,
-            'restricted_private_tier_id' => $this->restrictedPrivateTierId,
-        ]);
-
-        // Save Tiers (Random)
-        if ($this->restrictionMode === 'restricted' && $this->restrictionType === 'random') {
-            $product->tiers()->sync($this->selectedRandomTiers);
-        }
-
-        // Save Images
-        foreach ($this->newImages as $index => $img) {
-            $path = $img->store('archive/products', 'public');
-            $product->images()->create([
-                'image_path' => str_replace('\\', '/', $path),
-                'sort_order' => $index
+        DB::beginTransaction();
+        try {
+            $product = ArchiveProduct::create([
+                'title' => $this->title,
+                'slug' => $slug,
+                'archive_category_id' => $this->categoryId,
+                'description_unlocked' => $this->descriptionUnlocked,
+                // 'description_locked' => $this->descriptionLocked, // Removed/Consolidated
+                'price_min_amount' => $this->priceMin,
+                'price_max_amount' => $this->priceMax,
+                'currency' => $this->currency,
+                'go_live_now' => $this->goLiveNow,
+                'go_live_at' => $this->goLiveNow ? null : $this->goLiveAt,
+                'early_access_enabled' => (!$this->goLiveNow && $this->allowsEarlyAccess),
+                'restriction_mode' => $this->restrictionMode,
+                'restriction_type' => $this->restrictionType,
+                'restricted_min_tier_id' => $this->restrictedMinTierId,
+                'restricted_private_tier_id' => $this->restrictedPrivateTierId,
             ]);
-        }
 
-        $this->showCreateModal = false;
-        $this->dispatch('hide-create-modal');
-        session()->flash('success', 'Product created successfully.');
+            // Save Tiers (Random)
+            if ($this->restrictionMode === 'restricted' && $this->restrictionType === 'random') {
+                $product->tiers()->sync($this->selectedRandomTiers);
+            }
+            // Save Images
+            if ($this->newImages) {
+                foreach ($this->newImages as $index => $image) {
+                    $path = $image->store('archive/products', 'public');
+                    $product->images()->create([
+                        'image_path' => $path,
+                        'sort_order' => $index
+                    ]);
+                }
+            }
+            
+            // Save 360 Images
+            if ($this->new360Images) {
+                foreach ($this->new360Images as $index => $image) {
+                    $path = $image->store('archive/products/360', 'public');
+                    $product->images360()->create([
+                        'image_path' => $path,
+                        'sort_order' => $index
+                    ]);
+                }
+            }
+            
+            DB::commit();
+
+            $this->closeModal();
+            $this->dispatch('refresh-products'); 
+            $this->dispatch('archive-product-created'); // Trigger JS close
+            session()->flash('success', 'Product created successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->addError('general', 'Error saving product: ' . $e->getMessage());
+        }
     }
 
     public function updateProduct()
     {
-        $this->validateProduct();
+        $this->validateStep(1);
+        $this->validateStep(2);
+        $this->validateStep(3);
 
         $product = ArchiveProduct::findOrFail($this->productId);
 
@@ -276,51 +427,33 @@ class Index extends Component
 
         $this->showCreateModal = false;
         $this->dispatch('hide-create-modal');
+        $this->dispatch('archive-product-updated'); // Trigger JS close
         session()->flash('success', 'Product updated successfully.');
     }
     
-    public function deleteImage($imageId)
+    public function deleteImage($imageId, $type = 'main')
     {
-        $img = ArchiveProductImage::findOrFail($imageId);
-        // Verify ownership
-        if ($this->productId && $img->archive_product_id == $this->productId) {
-            Storage::disk('public')->delete($img->image_path);
-            $img->delete();
-            // Refresh
-            $this->edit($this->productId); 
-        }
-    }
-
-    protected function validateProduct()
-    {
-        $rules = [
-            'title' => 'required|string|max:255',
-            'categoryId' => 'required|exists:archive_categories,id',
-            'newImages.*' => 'image|max:10240', // 10MB
-            'restrictionMode' => 'required|in:public,restricted',
-            'goLiveAt' => 'required_if:goLiveNow,false|nullable|date',
-        ];
-
-        if ($this->restrictionMode === 'restricted') {
-            $rules['restrictionType'] = 'required|in:hierarchical,random,private';
-            if ($this->restrictionType === 'hierarchical') {
-                $rules['restrictedMinTierId'] = 'required|exists:membership_tiers,id';
-            } elseif ($this->restrictionType === 'random') {
-                $rules['selectedRandomTiers'] = 'required|array|min:1';
-            } elseif ($this->restrictionType === 'private') {
-                $rules['restrictedPrivateTierId'] = 'required|exists:membership_tiers,id';
+        if ($type === 'main') {
+            $img = ArchiveProductImage::findOrFail($imageId);
+            // Verify ownership
+            if ($this->productId && $img->archive_product_id == $this->productId) {
+                Storage::disk('public')->delete($img->image_path);
+                $img->delete();
+                // Refresh
+                $this->edit($this->productId); 
             }
-        }
-
-        $this->validate($rules);
-        
-        // Ensure at least one image exists (either old or new)
-        if (!$this->productId && count($this->newImages) === 0) {
-             $this->addError('newImages', 'At least one image is required.');
-             // throw validation exception logic is handled by livewire, but we need to stop
-             // We can check error bag after this.
+        } elseif ($type === '360') {
+             // Assuming ArchiveProduct360Image model exists
+             $img = \App\Models\Archive\ArchiveProduct360Image::findOrFail($imageId);
+             if ($this->productId && $img->archive_product_id == $this->productId) {
+                Storage::disk('public')->delete($img->image_path);
+                $img->delete();
+                $this->edit($this->productId); 
+             }
         }
     }
+
+
 
     // --- Early Access Config ---
 
@@ -607,22 +740,39 @@ class Index extends Component
     }
 
     // --- Deletion ---
-    public function delete($id)
+    // --- Deletion ---
+    public function confirmDelete($id)
     {
-        $p = ArchiveProduct::findOrFail($id);
+        $this->deleteId = $id;
+        $this->confirmingDelete = true;
+        $this->dispatch('show-product-delete-modal');
+    }
+
+    public function deleteConfirmed()
+    {
+        if (!$this->deleteId) return;
+
+        $p = ArchiveProduct::findOrFail($this->deleteId);
         // Clean images
         foreach($p->images as $img) {
             Storage::disk('public')->delete($img->image_path);
         }
+        // Clean 360 images logic if needed later
+        
         $p->delete();
+        
+        $this->confirmingDelete = false;
+        $this->deleteId = null;
+        $this->dispatch('hide-product-delete-modal');
         session()->flash('success', 'Product deleted.');
     }
 
     public function resetForm()
     {
-        $this->reset(['title', 'categoryId', 'priceMin', 'priceMax', 'descriptionUnlocked', 'descriptionLocked']);
-        $this->reset(['goLiveNow', 'goLiveAt', 'allowsEarlyAccess', 'restrictionMode', 'restrictionType', 'restrictedMinTierId', 'restrictedPrivateTierId', 'selectedRandomTiers']);
-        $this->reset(['newImages', 'existingImages', 'earlyAccessRows', 'attachmentRows']);
+        $this->reset(['title', 'categoryId', 'priceMin', 'priceMax', 'descriptionUnlocked']);
+        $this->reset(['goLiveNow', 'goLiveAt', 'allowsEarlyAccess', 'restrictionMode', 'restrictionType', 'restrictedMinTierId', 'restrictedPrivateTierId']);
+        $this->selectedRandomTiers = [];
+        $this->reset(['newImages', 'existingImages', 'new360Images', 'existing360Images', 'earlyAccessRows', 'attachmentRows']);
         
         $this->goLiveNow = true;
         // Defaults

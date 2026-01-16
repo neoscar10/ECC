@@ -101,7 +101,7 @@
                                 </li>
                                 <div class="dropdown-divider"></div>
                                 <li>
-                                    <button class="dropdown-item remove-item-btn" wire:click="delete({{ $product->id }})" wire:confirm="Delete this product?">
+                                    <button class="dropdown-item remove-item-btn" wire:click="confirmDelete({{ $product->id }})">
                                         <i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i> Delete
                                     </button>
                                 </li>
