@@ -16,16 +16,21 @@
         @error('categoryId') <span class="text-danger text-sm">{{ $message }}</span> @enderror
     </div>
 
-    <!-- Price Range -->
-    <div class="col-md-6">
+    <!-- Price Range & Quantity -->
+    <div class="col-md-4">
         <label class="form-label">Min Price (Price from)</label>
         <input type="number" class="form-control" wire:model="priceMin" placeholder="e.g. 1000">
         @error('priceMin') <span class="text-danger text-sm">{{ $message }}</span> @enderror
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <label class="form-label">Max Price (Price to)</label>
         <input type="number" class="form-control" wire:model="priceMax" placeholder="e.g. 5000">
         @error('priceMax') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Quantity <span class="text-danger">*</span></label>
+        <input type="number" min="1" class="form-control" wire:model="quantity" placeholder="1">
+        @error('quantity') <span class="text-danger text-sm">{{ $message }}</span> @enderror
     </div>
     
     <!-- Descriptions -->

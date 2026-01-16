@@ -5,6 +5,7 @@
                 <th>Product</th>
                 <th>Category</th>
                 <th>Price Range</th>
+                <th class="text-center">Stock</th>
                 <th>Visibility</th>
                 <th>Status</th>
                 <th>Early Access</th>
@@ -46,6 +47,9 @@
                     </td>
                     <td>
                         {{ $product->currency }} {{ number_format($product->price_min_amount) }} - {{ number_format($product->price_max_amount) }}
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-info-subtle text-info">{{ $product->quantity ?? 1 }}</span>
                     </td>
                     <td>
                         @if($product->restriction_mode == 'public')
@@ -111,7 +115,7 @@
                 </tr>
             @empty
                 <tr>
-                        <td colspan="6" class="text-center">
+                        <td colspan="7" class="text-center">
                             <div class="noresult">
                                 <div class="text-center">
                                     <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" colors="primary:#121331,secondary:#08a88a" style="width:75px;height:75px"></lord-icon>

@@ -63,6 +63,9 @@ Route::prefix('v1')->group(function () {
         Route::get('categories/{id}', [\App\Http\Controllers\Api\V1\Archive\ArchiveCategoryController::class, 'show']);
         Route::get('products', [\App\Http\Controllers\Api\V1\Archive\ArchiveProductController::class, 'index']);
         Route::get('products/{id}', [\App\Http\Controllers\Api\V1\Archive\ArchiveProductController::class, 'show']);
+        
+        // Enquiry
+        Route::post('enquiries', [\App\Http\Controllers\Api\V1\Archive\ArchiveEnquiryController::class, 'store']);
     });
 
     // Admin Routes

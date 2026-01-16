@@ -23,6 +23,7 @@ class ArchiveProduct extends Model
         'early_access_enabled' => 'boolean',
         'price_min_amount' => 'integer',
         'price_max_amount' => 'integer',
+        'quantity' => 'integer',
     ];
 
     public function category(): BelongsTo
