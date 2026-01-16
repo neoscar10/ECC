@@ -3,12 +3,12 @@
         <div class="row g-2">
             <div class="col-md-3">
                 <label class="form-label fs-11 text-muted text-uppercase mb-0">Label / Key</label>
-                <input type="text" class="form-control form-control-sm mt-1" placeholder="e.g. 'Resolution'" wire:model="attachmentRows.{{ $index }}.kv_key">
+                <input type="text" class="form-control form-control-sm mt-1" placeholder="e.g. 'Dimensions'" wire:model="attachmentRows.{{ $index }}.kv_key">
                 @error("attachmentRows.{$index}.kv_key") <span class="text-danger fs-11">{{ $message }}</span> @enderror
             </div>
             <div class="col-md-4">
                 <label class="form-label fs-11 text-muted text-uppercase mb-0">Value</label>
-                <input type="text" class="form-control form-control-sm mt-1" placeholder="e.g. '4K Ultra HD'" wire:model="attachmentRows.{{ $index }}.kv_value">
+                <input type="text" class="form-control form-control-sm mt-1" placeholder="e.g. '1920 x 1080'" wire:model="attachmentRows.{{ $index }}.kv_value">
                 @error("attachmentRows.{$index}.kv_value") <span class="text-danger fs-11">{{ $message }}</span> @enderror
             </div>
             

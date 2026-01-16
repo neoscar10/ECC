@@ -17,27 +17,19 @@
                 
                 <div class="mb-0" wire:ignore>
                     <label class="form-label fs-11 text-muted text-uppercase mb-1">Content (Markdown)</label>
-                    <div
-                        x-data="{
-                            initEditor() {
-                                if (this.editor) return;
-                                this.editor = new EasyMDE({
-                                    element: this.$refs.editor,
-                                    spellChecker: false,
-                                    status: false,
-                                    minHeight: '150px',
-                                    toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'preview', 'guide'],
-                                    initialValue: @entangle('attachmentRows.' . $index . '.body').live
-                                });
-
-                                this.editor.codemirror.on('change', () => {
-                                    @this.set('attachmentRows.{{ $index }}.body', this.editor.value());
-                                });
-                            }
-                        }"
-                        x-init="initEditor()" 
-                    >
-                        <textarea x-ref="editor"></textarea>
+                    <div x-data x-init="
+                        new EasyMDE({
+                            element: $refs.editor,
+                            spellChecker: false,
+                            status: false,
+                            minHeight: '150px',
+                            toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'preview', 'guide'],
+                            forceSync: true
+                        }).codemirror.on('change', (cm) => {
+                            @this.set('attachmentRows.{{ $index }}.body', cm.getValue());
+                        });
+                    ">
+                        <textarea x-ref="editor">{{ $attachmentRows[$index]['body'] ?? '' }}</textarea>
                     </div>
                 </div>
                 @error("attachmentRows.{$index}.body") <span class="text-danger fs-11">{{ $message }}</span> @enderror
