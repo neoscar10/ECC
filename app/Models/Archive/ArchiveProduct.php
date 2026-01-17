@@ -24,6 +24,7 @@ class ArchiveProduct extends Model
         'price_min_amount' => 'integer',
         'price_max_amount' => 'integer',
         'quantity' => 'integer',
+        'blur_enabled' => 'boolean',
     ];
 
     public function category(): BelongsTo
@@ -45,6 +46,13 @@ class ArchiveProduct extends Model
     public function tiers(): BelongsToMany
     {
         return $this->belongsToMany(MembershipTier::class, 'archive_product_tier', 'archive_product_id', 'membership_tier_id')
+            ->withTimestamps();
+    }
+    
+    // Tiers that get CLEAR view when blur is enabled
+    public function clearViewTiers(): BelongsToMany
+    {
+        return $this->belongsToMany(MembershipTier::class, 'archive_product_clear_tier', 'archive_product_id', 'membership_tier_id')
             ->withTimestamps();
     }
 

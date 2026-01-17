@@ -130,14 +130,35 @@ class ArchiveAccessResolver
         }
 
         if ($this->checkStandardRestriction($product, $userTier)) {
+            // Access Granted via Visibility... allow? or check blur?
+             if ($product->blur_enabled) {
+                 if (!$this->hasClearViewAccess($product, $userTier)) {
+                      // Visible but Blurred
+                      $upgrade = $this->findClearViewUpgrade($product);
+                      return $this->buildAccessResponse(
+                          'blur',
+                          'blurred',
+                          $upgrade['message'] ?? 'Blur Enabled',
+                          [
+                            'type' => 'upgrade_membership',
+                            'label' => 'Upgrade for Clear View',
+                            'target_tier' => $upgrade ? $this->formatTier($upgrade['tier']) : null,
+                            'deeplink' => '/membership/tiers'
+                          ],
+                          $userTier,
+                          'eye-off'
+                      );
+                 }
+             }
+             
             return $this->buildOpenAccess('Access Granted.', $userTier);
         }
 
-        // Recommend Upgrade
+        // Recommend Upgrade (Totally Blocked)
         $upgrade = $this->findBaseRestrictionUpgrade($product);
         return $this->buildLockedAccess(
             'product_restricted',
-            $upgrade['message'] ?? 'Upgrade Memebership',
+            $upgrade['message'] ?? 'Upgrade Membership',
             [
                 'type' => 'upgrade_membership',
                 'label' => 'Upgrade',
@@ -281,6 +302,29 @@ class ArchiveAccessResolver
         return null;
     }
 
+    protected function hasClearViewAccess($product, $userTier): bool
+    {
+        if (!$userTier) return false;
+        
+        if ($product->relationLoaded('clearViewTiers')) {
+             return $product->clearViewTiers->contains('id', $userTier->id);
+        }
+        // Fallback query
+        return $product->clearViewTiers()->where('membership_tier_id', $userTier->id)->exists();
+    }
+
+    protected function findClearViewUpgrade($product): ?array
+    {
+        $tier = $product->clearViewTiers()->orderBy('level', 'asc')->first();
+        if ($tier) {
+             return [
+                'tier' => $tier,
+                'message' => "Upgrade to {$tier->name} to view clearly."
+            ];
+        }
+        return null;
+    }
+
     protected function findEarlyAccessRecommendation(ArchiveProduct $product): array
     {
         // 1. Find currently active windows (access_at <= now), sort by lowest tier level
@@ -321,6 +365,7 @@ class ArchiveAccessResolver
     {
         return [
             'open' => true,
+            'view_mode' => 'clear', // New field
             'reason' => null,
             'source' => 'product', // caller can override
             'viewer' => $this->formatViewer($userTier),
@@ -333,22 +378,29 @@ class ArchiveAccessResolver
             'timing' => array_merge(['go_live_at' => null, 'next_access_at' => null], $timing)
         ];
     }
-
-    protected function buildLockedAccess(string $reason, string $msgBody, array $action, ?MembershipTier $userTier, string $icon = 'lock', array $timing = []): array
+    
+    // Helper to build Blur or Blocked responses
+    protected function buildAccessResponse(string $viewMode, string $reason, string $msgBody, array $action, ?MembershipTier $userTier, string $icon = 'lock', array $timing = []): array
     {
-        return [
-            'open' => false,
+         return [
+            'open' => ($viewMode === 'clear'), // False for blur/blocked
+            'view_mode' => $viewMode,
             'reason' => $reason,
             'source' => 'product', // caller override
             'viewer' => $this->formatViewer($userTier),
             'message' => [
-                'title' => 'Restricted',
+                'title' => ucfirst($viewMode), // e.g. "Restricted" or "Blur"
                 'body' => $msgBody,
                 'icon' => $icon
             ],
             'action' => array_merge(['type' => 'wait', 'label' => null, 'target_tier' => null, 'deeplink' => null], $action),
             'timing' => array_merge(['go_live_at' => null, 'next_access_at' => null], $timing)
         ];
+    }
+
+    protected function buildLockedAccess(string $reason, string $msgBody, array $action, ?MembershipTier $userTier, string $icon = 'lock', array $timing = []): array
+    {
+        return $this->buildAccessResponse('blocked', $reason, $msgBody, $action, $userTier, $icon, $timing);
     }
 
     protected function formatViewer(?MembershipTier $tier): array

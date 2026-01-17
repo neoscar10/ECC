@@ -1,21 +1,23 @@
 <div class="row g-4">
-    <!-- Restriction Settings -->
-    <div class="col-lg-7">
-        <h6 class="fw-semibold mb-3">Restriction Settings</h6>
-        <div class="row g-3 p-3 bg-light rounded border">
-            <div class="col-md-12">
-                <label class="form-label">Restriction Mode</label>
-                <div class="btn-group w-100" role="group">
-                    <input type="radio" class="btn-check" name="restrictionMode" id="modePublic" value="public" wire:model.live="restrictionMode">
-                    <label class="btn btn-outline-success" for="modePublic">Public</label>
-
-                    <input type="radio" class="btn-check" name="restrictionMode" id="modeRestricted" value="restricted" wire:model.live="restrictionMode">
-                    <label class="btn btn-outline-warning" for="modeRestricted">Restricted</label>
-                </div>
+    <!-- Visibility Settings -->
+    <div class="col-lg-6">
+        <h6 class="fw-semibold mb-3">Visibility</h6>
+        <div class="card bg-light border p-3 h-100">
+            <div class="mb-3">
+                <p class="text-muted small">Visibility controls who can access this product at all. Users who do not meet these criteria will not see the item.</p>
+            </div>
+            
+            <div class="col-md-12 mb-3">
+                <label class="form-label">Visibility Mode</label>
+                <select class="form-select" wire:model.live="restrictionMode">
+                     <option value="public">Public (Everyone)</option>
+                     <option value="restricted">Restricted (Members Only)</option>
+                </select>
+                @error('restrictionMode') <span class="text-danger text-sm">{{ $message }}</span> @enderror
             </div>
 
             @if($restrictionMode === 'restricted')
-                <div class="col-md-12">
+                <div class="col-md-12 mb-3">
                     <label class="form-label">Restriction Type</label>
                     <select class="form-select" wire:model.live="restrictionType">
                         <option value="">Select Type...</option>
@@ -29,7 +31,7 @@
                 @if($restrictionType === 'hierarchical')
                     <div class="col-md-12">
                         <label class="form-label">Minimum Required Tier</label>
-                        <select class="form-select" wire:model="restrictedMinTierId">
+                        <select class="form-select" wire:model.live="restrictedMinTierId">
                             <option value="">Select Minimum Tier</option>
                             @foreach($membershipTiers as $tier)
                                 <option value="{{ $tier->id }}">{{ $tier->name }}</option>
@@ -45,7 +47,7 @@
                             @foreach($membershipTiers as $tier)
                                 <div class="col-6">
                                     <div class="form-check card-radio">
-                                        <input class="form-check-input" type="checkbox" value="{{ $tier->id }}" wire:model="selectedRandomTiers" id="randTier_{{ $tier->id }}">
+                                        <input class="form-check-input" type="checkbox" value="{{ $tier->id }}" wire:model.live="selectedRandomTiers" id="randTier_{{ $tier->id }}">
                                         <label class="form-check-label" for="randTier_{{ $tier->id }}">
                                             <span class="fs-14 mb-1 d-block">{{ $tier->name }}</span>
                                             <span class="text-muted text-xs">Level {{ $tier->level }}</span>
@@ -59,7 +61,7 @@
                 @elseif($restrictionType === 'private')
                     <div class="col-md-12">
                         <label class="form-label">Private Tier Access</label>
-                        <select class="form-select" wire:model="restrictedPrivateTierId">
+                        <select class="form-select" wire:model.live="restrictedPrivateTierId">
                             <option value="">Select Tier</option>
                             @foreach($membershipTiers as $tier)
                                 <option value="{{ $tier->id }}">{{ $tier->name }}</option>
@@ -73,54 +75,52 @@
         </div>
     </div>
 
-    <!-- Summary Panel -->
-    <div class="col-lg-5">
-        <h6 class="fw-semibold mb-3">Review Details</h6>
-        <div class="card border mb-0">
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="text-muted text-uppercase fw-medium fs-11">Product</label>
-                    <p class="fs-14 mb-0 fw-bold">{{ $title ?: 'Untitled Product' }}</p>
-                    @php $catMatch = $categories->where('id', $categoryId)->first(); @endphp
-                    <p class="text-muted mb-0">{{ $catMatch ? $catMatch->title : 'No Category' }}</p>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="text-muted text-uppercase fw-medium fs-11">Availability</label>
-                    @if($goLiveNow)
-                        <div class="badge bg-success-subtle text-success">Live Now</div>
-                    @else
-                        <div class="badge bg-warning-subtle text-warning">Scheduled: {{ $goLiveAt ? \Carbon\Carbon::parse($goLiveAt)->format('d M Y, h:i A') : 'TBD' }}</div>
-                        @if($allowsEarlyAccess)
-                            <div class="badge bg-info-subtle text-info mt-1">Early Access Enabled</div>
-                        @endif
-                    @endif
-                </div>
-
-                <div class="mb-3">
-                    <label class="text-muted text-uppercase fw-medium fs-11">Images</label>
-                    <div class="d-flex justify-content-between">
-                        <span>Main Images:</span>
-                        <span class="fw-bold">{{ count($existingImages) + count($newImages) }}</span>
-                    </div>
-                     <div class="d-flex justify-content-between">
-                        <span>360° Images:</span>
-                        <span class="fw-bold">{{ count($existing360Images) + count($new360Images) }}</span>
-                    </div>
-                </div>
-
-                 <div class="mb-0">
-                    <label class="text-muted text-uppercase fw-medium fs-11">Access</label>
-                    <div class="d-flex align-items-center">
-                        @if($restrictionMode === 'public')
-                             <span class="badge badge-outline-success">Public</span>
-                        @else
-                             <span class="badge badge-outline-warning">Restricted</span>
-                             <span class="ms-1 text-xs text-muted">({{ ucfirst($restrictionType) }})</span>
-                        @endif
-                    </div>
-                 </div>
+    <!-- Blur Settings -->
+    <div class="col-lg-6">
+        <h6 class="fw-semibold mb-3">Blur / Clear View</h6>
+        <div class="card bg-light border p-3 h-100">
+             <div class="mb-3">
+                <p class="text-muted small">Among users who can access the product, select which tiers see it clearly. Others will see a blurred preview.</p>
             </div>
+            
+            <div class="col-md-12 mb-3">
+                <label class="form-label">Enable Blur</label>
+                <div class="form-check form-switch form-switch-lg">
+                    <input class="form-check-input" type="checkbox" role="switch" id="blurEnabledSwitch" wire:model.live="blurEnabled">
+                    <label class="form-check-label" for="blurEnabledSwitch">Blur content for lower allowed tiers?</label>
+                </div>
+            </div>
+            
+            @if($blurEnabled)
+                 <div class="col-md-12">
+                    <label class="form-label">Select Clear View Tiers <span class="text-danger">*</span></label>
+                     <div class="alert alert-info py-2 px-3 small">
+                        Showing only tiers that have Visibility access.
+                    </div>
+                    <div class="row g-2" style="max-height: 300px; overflow-y: auto;">
+                        @forelse($membershipTiers as $tier)
+                           @if(in_array($tier->id, $computedVisibilityTierIds))
+                                <div class="col-6">
+                                    <div class="form-check card-radio">
+                                        <input class="form-check-input" type="checkbox" value="{{ $tier->id }}" wire:model="clearViewTierIds" id="clearTier_{{ $tier->id }}">
+                                        <label class="form-check-label" for="clearTier_{{ $tier->id }}">
+                                            <span class="fs-14 mb-1 d-block">{{ $tier->name }}</span>
+                                            <span class="text-muted text-xs">Level {{ $tier->level }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            @endif
+                        @empty
+                             <div class="col-12 text-muted">No tiers available.</div>
+                        @endforelse
+                    </div>
+                     <div class="mt-2 text-muted small">
+                        Selected tiers will see the product clearly. All other allowed tiers will see a blurred version.
+                    </div>
+                    @error('clearViewTierIds') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+                     @error('clearViewTierIds.*') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+                </div>
+            @endif
         </div>
     </div>
 </div>

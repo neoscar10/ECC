@@ -85,7 +85,7 @@
                                                     </div>
                                                 </div>
                                             @else
-                                                <span class="text-muted text-italic">Product Deleted</span>
+                                                <span class="text-muted text-italic">Product Not available</span>
                                             @endif
                                         </td>
                                         <td>
@@ -93,13 +93,13 @@
                                         </td>
                                         <td class="status">
                                             @if($enquiry->status === 'new')
-                                                <span class="badge badge-soft-info text-uppercase">New</span>
+                                                <span class="text-uppercase">New</span>
                                             @elseif($enquiry->status === 'contacted')
-                                                <span class="badge badge-soft-warning text-uppercase">Contacted</span>
+                                                <span class="text-uppercase">Contacted</span>
                                             @elseif($enquiry->status === 'closed')
-                                                <span class="badge badge-soft-success text-uppercase">Closed</span>
+                                                <span class="text-uppercase">Closed</span>
                                             @else
-                                                <span class="badge badge-soft-secondary text-uppercase">{{ $enquiry->status }}</span>
+                                                <span class="text-uppercase">{{ $enquiry->status }}</span>
                                             @endif
                                         </td>
                                         <td>

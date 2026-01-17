@@ -26,9 +26,24 @@
                             @error('price') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Duration (Days)</label>
-                            <input type="number" class="form-control" wire:model="duration_days">
-                            @error('duration_days') <span class="text-danger small">{{ $message }}</span> @enderror
+                            <label class="form-label">Duration</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" wire:model="durationValue" placeholder="Val" required>
+                                    </div>
+                                    @error('durationValue') <span class="text-danger small">{{ $message }}</span> @enderror
+                                </div>
+                                <div class="col-6">
+                                    <select class="form-select" wire:model="durationUnit">
+                                        <option value="days">Days</option>
+                                        <option value="weeks">Weeks</option>
+                                        <option value="months">Months</option>
+                                        <option value="years">Years</option>
+                                    </select>
+                                    @error('durationUnit') <span class="text-danger small">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Sort Order</label>

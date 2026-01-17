@@ -29,6 +29,8 @@ class Index extends Component
     public $code;
     public $price;
     public $duration_days = 365;
+    public $durationValue = 1;
+    public $durationUnit = 'years';
     public $is_active = true;
     public $requires_approval = true;
     public $currency = 'INR';
@@ -48,7 +50,8 @@ class Index extends Component
             'name' => 'required|string|max:255',
             'code' => ['required', 'string', 'max:255', Rule::unique('membership_tiers')->ignore($this->tierId)],
             'price' => 'required|numeric|min:0',
-            'duration_days' => 'required|integer|min:1',
+            'durationValue' => 'required|integer|min:1|max:36500',
+            'durationUnit' => 'required|in:days,weeks,months,years',
             'sort_order' => 'required|integer|min:0',
             'is_active' => 'boolean',
             'requires_approval' => 'boolean',
@@ -78,7 +81,9 @@ class Index extends Component
     public function create()
     {
         $this->checkSuperAdmin();
-        $this->reset(['tierId', 'name', 'code', 'price', 'duration_days', 'is_active', 'requires_approval', 'currency', 'sort_order', 'upgrade_from_id', 'selectedPrivileges', 'description', 'features']);
+        $this->reset(['tierId', 'name', 'code', 'price', 'duration_days', 'durationValue', 'durationUnit', 'is_active', 'requires_approval', 'currency', 'sort_order', 'upgrade_from_id', 'selectedPrivileges', 'description', 'features']);
+        $this->durationValue = 1;
+        $this->durationUnit = 'years';
         $this->requires_approval = true; // Default to true
         
         // Auto-calculate sort order: max + 1
@@ -101,6 +106,21 @@ class Index extends Component
         $this->code = $tier->code;
         $this->price = $tier->price;
         $this->duration_days = $tier->duration_days;
+        
+        // Convert to Unit/Value for Edit Mode
+        if ($this->duration_days % 365 === 0) {
+            $this->durationValue = $this->duration_days / 365;
+            $this->durationUnit = 'years';
+        } elseif ($this->duration_days % 30 === 0) {
+            $this->durationValue = $this->duration_days / 30;
+            $this->durationUnit = 'months';
+        } elseif ($this->duration_days % 7 === 0) {
+            $this->durationValue = $this->duration_days / 7;
+            $this->durationUnit = 'weeks';
+        } else {
+            $this->durationValue = $this->duration_days;
+            $this->durationUnit = 'days';
+        }
         $this->is_active = $tier->is_active;
         $this->requires_approval = $tier->requires_approval;
         $this->currency = $tier->currency;
@@ -143,7 +163,7 @@ class Index extends Component
                 'code' => $validated['code'],
                 'description' => $validated['description'],
                 'price' => $validated['price'],
-                'duration_days' => $validated['duration_days'],
+                'duration_days' => $this->durationToDays(),
                 'is_active' => $validated['is_active'],
                 'currency' => $this->currency,
                 'sort_order' => $validated['sort_order'],
@@ -185,7 +205,7 @@ class Index extends Component
                 'code' => $validated['code'],
                 'description' => $validated['description'],
                 'price' => $validated['price'],
-                'duration_days' => $validated['duration_days'],
+                'duration_days' => $this->durationToDays(),
                 'is_active' => $validated['is_active'],
                 'sort_order' => $validated['sort_order'],
                 'level' => $validated['sort_order'], // Sync level with sort_order
@@ -280,6 +300,17 @@ class Index extends Component
         $this->confirmingDeletion = false;
         $this->tierToDeleteId = null;
         $this->dispatch('close-modals');
+    }
+
+    protected function durationToDays(): int
+    {
+        $value = (int) $this->durationValue;
+        return match ($this->durationUnit) {
+            'weeks' => $value * 7,
+            'months' => $value * 30, // 30-day month as per requirements
+            'years' => $value * 365, // 365-day year as per requirements
+            default => $value, // 'days' or fallback
+        };
     }
     
     private function checkSuperAdmin()

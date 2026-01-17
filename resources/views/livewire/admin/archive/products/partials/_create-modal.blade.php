@@ -9,34 +9,51 @@
                 <!-- Wizard Navigation -->
                 <div class="archive-product-stepper mb-5">
                     <div class="ap-stepper d-flex justify-content-between position-relative">
-                        <!-- Step 1 -->
+                        <!-- Step 1: Basic Details -->
                         <div class="ap-step">
                             <button class="ap-pill btn {{ $createStep === 1 ? 'active' : '' }} {{ $createStep > 1 ? 'done' : '' }}" 
-                                wire:click="goToStep(1)" type="button">
+                                wire:click="goToStep(1)" type="button"
+                                @if(!$isEditMode && $createStep < 1) disabled @endif>
                                 <span class="step-icon">
                                     @if($createStep > 1) <i class="ri-check-line"></i> @else 1 @endif
                                 </span>
-                                <span class="d-none d-sm-block">Basic Details</span>
+                                <span class="step-label d-none d-sm-block">Basic Details</span>
                             </button>
                         </div>
 
-                        <!-- Step 2 -->
+                        <!-- Step 2: Media Files -->
                         <div class="ap-step">
                             <button class="ap-pill btn {{ $createStep === 2 ? 'active' : '' }} {{ $createStep > 2 ? 'done' : '' }}" 
-                                wire:click="goToStep(2)" type="button">
+                                wire:click="goToStep(2)" type="button"
+                                @if(!$isEditMode && $createStep < 2) disabled @endif>
                                 <span class="step-icon">
                                     @if($createStep > 2) <i class="ri-check-line"></i> @else 2 @endif
                                 </span>
-                                <span class="d-none d-sm-block">Media Files</span>
+                                <span class="step-label d-none d-sm-block">Media Files</span>
                             </button>
                         </div>
 
-                        <!-- Step 3 -->
+                        <!-- Step 3: Access Settings -->
                         <div class="ap-step">
-                            <button class="ap-pill btn {{ $createStep === 3 ? 'active' : '' }}" 
-                                wire:click="goToStep(3)" type="button">
-                                <span class="step-icon">3</span>
-                                <span class="d-none d-sm-block">Restriction Settings</span>
+                            <button class="ap-pill btn {{ $createStep === 3 ? 'active' : '' }} {{ $createStep > 3 ? 'done' : '' }}" 
+                                wire:click="goToStep(3)" type="button"
+                                @if(!$isEditMode && $createStep < 3) disabled @endif>
+                                <span class="step-icon">
+                                    @if($createStep > 3) <i class="ri-check-line"></i> @else 3 @endif
+                                </span>
+                                <span class="step-label d-none d-sm-block">Access Settings</span>
+                            </button>
+                        </div>
+
+                        <!-- Step 4: Review Details -->
+                        <div class="ap-step">
+                            <button class="ap-pill btn {{ $createStep === 4 ? 'active' : '' }} {{ $createStep > 4 ? 'done' : '' }}" 
+                                wire:click="goToStep(4)" type="button"
+                                @if(!$isEditMode && $createStep < 4) disabled @endif>
+                                <span class="step-icon">
+                                    @if($createStep > 4) <i class="ri-check-line"></i> @else 4 @endif
+                                </span>
+                                <span class="step-label d-none d-sm-block">Review Details</span>
                             </button>
                         </div>
                     </div>
@@ -69,21 +86,26 @@
                             <div class="tab-pane active" id="step3" role="tabpanel">
                                 @include('livewire.admin.archive.products.partials.steps._step3-restriction')
                             </div>
+                        @elseif($createStep === 4)
+                            <div class="tab-pane active" id="step4" role="tabpanel">
+                                @include('livewire.admin.archive.products.partials.steps._step4-review')
+                            </div>
                         @endif
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" wire:click="closeModal" data-bs-dismiss="modal">Cancel</button>
-                
                 <div class="d-flex gap-2">
                     @if($createStep > 1)
-                        <button type="button" class="btn btn-secondary" wire:click="prevStep">Back</button>
+                        <button type="button" class="btn btn-light" wire:click="prevStep">Back</button>
+                    @else
+                        <button type="button" class="btn btn-light" wire:click="closeModal">Cancel</button>
                     @endif
-
-                    @if($createStep < 3)
+                    
+                    @if($createStep < 4)
                         <button type="button" class="btn btn-primary" wire:click="nextStep" wire:loading.attr="disabled">
-                            Next <i class="ri-arrow-right-line align-middle ms-1"></i>
+                            Next Step <i class="ri-arrow-right-line align-middle ms-1"></i>
                         </button>
                     @else
                         <button type="submit" form="productForm" class="btn btn-success" wire:loading.attr="disabled">

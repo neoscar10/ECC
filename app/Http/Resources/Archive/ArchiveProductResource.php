@@ -78,7 +78,6 @@ class ArchiveProductResource extends JsonResource
             ],
             
             'description_unlocked' => $this->description_unlocked,
-            'description_locked' => $access['open'] ? $this->description_locked : null,
             
             'price' => [
                 'min' => $this->price_min_amount,

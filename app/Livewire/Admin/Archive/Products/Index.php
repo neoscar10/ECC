@@ -63,6 +63,11 @@ class Index extends Component
     public $restrictedPrivateTierId;
     public $selectedRandomTiers = []; // For product restriction
     
+    // Blur / Clear View
+    public $blurEnabled = false;
+    public $clearViewTierIds = [];
+    public $computedVisibilityTierIds = []; // For UI display/validation
+    
     // Images
     public $newImages = []; // Uploaded files
     public $existingImages = []; // Existing image records
@@ -158,6 +163,7 @@ class Index extends Component
         if ($value !== 'random') {
             $this->selectedRandomTiers = [];
         }
+        $this->computeVisibilityTiers();
     }
 
     public function validateStep($step)
@@ -192,13 +198,32 @@ class Index extends Component
                 'selectedRandomTiers' => ['exclude_unless:restrictionType,random', 'array', 'min:1'],
                 'selectedRandomTiers.*' => ['exclude_unless:restrictionType,random', 'exists:membership_tiers,id'],
             ]);
+        } elseif ($step === 3) {
+            $this->validate([
+                'restrictionMode' => 'required|in:public,restricted',
+                'restrictionType' => ['exclude_unless:restrictionMode,restricted', 'required', 'in:hierarchical,random,private'],
+                'restrictedMinTierId' => ['exclude_unless:restrictionType,hierarchical', 'required', 'exists:membership_tiers,id'],
+                'restrictedPrivateTierId' => ['exclude_unless:restrictionType,private', 'required', 'exists:membership_tiers,id'],
+                'selectedRandomTiers' => ['exclude_unless:restrictionType,random', 'array', 'min:1'],
+                'selectedRandomTiers.*' => ['exclude_unless:restrictionType,random', 'exists:membership_tiers,id'],
+                
+                // Blur Validation
+                'blurEnabled' => 'boolean',
+                'clearViewTierIds' => ['exclude_if:blurEnabled,false', 'required', 'array', 'min:1'],
+                'clearViewTierIds.*' => ['exists:membership_tiers,id', function($attribute, $value, $fail) {
+                     // Ensure selected clear tier is within allowed visibility tiers
+                     if (!in_array($value, $this->computedVisibilityTierIds)) {
+                         $fail('Selected clear view tier is not within the visible access list.');
+                     }
+                }],
+            ]);
         }
     }
 
     public function nextStep()
     {
         $this->validateStep($this->createStep);
-        if ($this->createStep < 3) {
+        if ($this->createStep < 4) {
             $this->createStep++;
         }
     }
@@ -232,6 +257,7 @@ class Index extends Component
         $this->resetForm();
         $this->isEditMode = false;
         $this->createStep = 1;
+        $this->computeVisibilityTiers();
         $this->showCreateModal = true;
         $this->dispatch('show-create-modal');
     }
@@ -276,6 +302,11 @@ class Index extends Component
              $this->selectedRandomTiers = $product->tiers->pluck('id')->toArray();
         }
         
+        $this->blurEnabled = $product->blur_enabled;
+        $this->clearViewTierIds = $product->clearViewTiers->pluck('id')->map(fn($id) => (string)$id)->toArray();
+        
+        $this->computeVisibilityTiers();
+        
         $this->createStep = 1;
 
         $this->dispatch('show-create-modal');
@@ -305,7 +336,8 @@ class Index extends Component
              'newImages.*' => 'image|max:10240', // 10MB
              'new360Images.*' => 'image|max:10240',
         ]);
-        $this->validateStep(3);
+        $this->validateStep(3); // Access
+        // Step 4 is Review, no validation needed needed beyond previous steps
 
         // Safe Defaults for restriction vars if public
         if ($this->restrictionMode === 'public') {
@@ -339,8 +371,16 @@ class Index extends Component
                 'restriction_mode' => $this->restrictionMode,
                 'restriction_type' => $this->restrictionType,
                 'restricted_min_tier_id' => $this->restrictedMinTierId,
+                'restriction_type' => $this->restrictionType,
+                'restricted_min_tier_id' => $this->restrictedMinTierId,
                 'restricted_private_tier_id' => $this->restrictedPrivateTierId,
+                'blur_enabled' => $this->blurEnabled,
             ]);
+
+            // Save Clear View Tiers
+            if ($this->blurEnabled) {
+                $product->clearViewTiers()->sync($this->clearViewTierIds);
+            }
 
             // Save Tiers (Random)
             if ($this->restrictionMode === 'restricted' && $this->restrictionType === 'random') {
@@ -410,7 +450,15 @@ class Index extends Component
             'restriction_type' => $this->restrictionType,
             'restricted_min_tier_id' => $this->restrictedMinTierId,
             'restricted_private_tier_id' => $this->restrictedPrivateTierId,
+            'blur_enabled' => $this->blurEnabled,
         ]);
+
+        // Sync Clear View Tiers
+        if ($this->blurEnabled) {
+             $product->clearViewTiers()->sync($this->clearViewTierIds);
+        } else {
+             $product->clearViewTiers()->detach();
+        }
 
          if ($this->restrictionMode === 'restricted' && $this->restrictionType === 'random') {
             $product->tiers()->sync($this->selectedRandomTiers);
@@ -524,6 +572,39 @@ class Index extends Component
 
         return collect([]);
     }
+    
+    // Compute IDs for the Access Form (creation/edit state)
+    public function computeVisibilityTiers()
+    {
+        $tiers = collect([]);
+        
+        if ($this->restrictionMode === 'public') {
+             $tiers = $this->membershipTiers;
+        } elseif ($this->restrictionMode === 'restricted') {
+            if ($this->restrictionType === 'hierarchical' && $this->restrictedMinTierId) {
+                $minTier = $this->membershipTiers->where('id', $this->restrictedMinTierId)->first();
+                if ($minTier) {
+                    $tiers = $this->membershipTiers->where('level', '>=', $minTier->level);
+                }
+            } elseif ($this->restrictionType === 'random') {
+                 $tiers = $this->membershipTiers->whereIn('id', $this->selectedRandomTiers);
+            } elseif ($this->restrictionType === 'private' && $this->restrictedPrivateTierId) {
+                 $tiers = $this->membershipTiers->where('id', $this->restrictedPrivateTierId);
+            }
+        }
+        
+        $this->computedVisibilityTierIds = $tiers->pluck('id')->map(fn($id) => (string)$id)->toArray();
+        
+        // Prune clear view tiers if they are no longer visible
+        if ($this->blurEnabled) {
+             $this->clearViewTierIds = array_intersect($this->clearViewTierIds, $this->computedVisibilityTierIds);
+        }
+    }
+    
+    public function updatedRestrictedMinTierId() { $this->computeVisibilityTiers(); }
+    public function updatedRestrictedPrivateTierId() { $this->computeVisibilityTiers(); }
+    public function updatedSelectedRandomTiers() { $this->computeVisibilityTiers(); }
+    public function updatedBlurEnabled() { $this->computeVisibilityTiers(); }
 
     public function addEarlyAccessRow()
     {
@@ -776,6 +857,7 @@ class Index extends Component
     {
         $this->reset(['title', 'categoryId', 'priceMin', 'priceMax', 'quantity', 'descriptionUnlocked']);
         $this->reset(['goLiveNow', 'goLiveAt', 'allowsEarlyAccess', 'restrictionMode', 'restrictionType', 'restrictedMinTierId', 'restrictedPrivateTierId']);
+        $this->reset(['blurEnabled', 'clearViewTierIds', 'computedVisibilityTierIds']);
         $this->selectedRandomTiers = [];
         $this->reset(['newImages', 'existingImages', 'new360Images', 'existing360Images', 'earlyAccessRows', 'attachmentRows']);
         
