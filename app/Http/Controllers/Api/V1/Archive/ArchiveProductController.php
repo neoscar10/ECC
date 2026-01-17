@@ -14,9 +14,13 @@ class ArchiveProductController extends Controller
 
     public function index(Request $request)
     {
+        $user = $request->user();
+        $userTier = $user ? $user->currentMembership?->membershipTier : null;
+
         $query = ArchiveProduct::query()
-            ->with(['category', 'images', 'restrictedMinTier']) // Eager load common relations
-            ->where('is_active', true);
+            ->with(['category', 'images', 'restrictedMinTier', 'clearViewTiers']) // Eager load clearViewTiers
+            ->where('is_active', true)
+            ->visibleTo($user, $userTier); // Apply Visibility Scope
 
         if ($request->has('category_id') && !is_numeric($request->category_id)) {
             return $this->error('Invalid category_id. Must be numeric.', 422);
@@ -36,13 +40,17 @@ class ArchiveProductController extends Controller
 
     public function show($id)
     {
+        $user = request()->user();
+        $userTier = $user ? $user->currentMembership?->membershipTier : null;
+
         $product = ArchiveProduct::with([
             'category', 
             'images', 
             'restrictedMinTier', 
             'restrictedPrivateTier',
             'attachments',
-            'earlyAccessWindows'
+            'earlyAccessWindows',
+            'clearViewTiers' // Fix: Load pivots so Resolver works
         ])
         ->where('is_active', true)
         ->findOrFail($id);

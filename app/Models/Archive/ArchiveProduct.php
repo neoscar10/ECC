@@ -76,4 +76,45 @@ class ArchiveProduct extends Model
     {
         return $this->belongsTo(MembershipTier::class, 'restricted_private_tier_id');
     }
+
+    /**
+     * Scope to filter products visible to the user.
+     */
+    public function scopeVisibleTo($query, ?User $user, ?MembershipTier $userTier = null)
+    {
+        return $query->where(function ($q) use ($user, $userTier) {
+            // 1. Public is always visible
+            $q->where('restriction_mode', 'public');
+
+            // 2. If user exists, check restrictions
+            if ($user && $userTier) {
+                $q->orWhere(function ($restricted) use ($userTier) {
+                    $restricted->where('restriction_mode', 'restricted')
+                        ->where(function ($types) use ($userTier) {
+                            // Type: Hierarchical
+                            $types->where(function ($h) use ($userTier) {
+                                $h->where('restriction_type', 'hierarchical')
+                                  ->whereHas('restrictedMinTier', function ($t) use ($userTier) {
+                                      $t->where('level', '<=', $userTier->level);
+                                  });
+                            });
+
+                            // Type: Random (Pivot check)
+                            $types->orWhere(function ($r) use ($userTier) {
+                                $r->where('restriction_type', 'random')
+                                  ->whereHas('tiers', function ($t) use ($userTier) {
+                                      $t->where('membership_tiers.id', $userTier->id);
+                                  });
+                            });
+
+                            // Type: Private
+                            $types->orWhere(function ($p) use ($userTier) {
+                                $p->where('restriction_type', 'private')
+                                  ->where('restricted_private_tier_id', $userTier->id);
+                            });
+                        });
+                });
+            }
+        });
+    }
 }

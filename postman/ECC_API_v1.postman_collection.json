@@ -1458,7 +1458,7 @@
                                         }
                                     ]
                                 },
-                                "description": "List all products. Locked products are included with `is_open: false`.\n\n### Query Params\n| Param | Type | Default | Description |\n| :--- | :--- | :--- | :--- |\n| `category_id` | int | null | **Required/Recommended** to filter by category. Checks `archive_category_id`. |\n| `page` | int | 1 | Page number. |\n\n### Validation\nReturns **422** if `category_id` is present but non-numeric."
+                                "description": "List all products. Locked products are included with `is_open: false`.\n\n### Query Params\n| Param | Type | Default | Description |\n| :--- | :--- | :--- | :--- |\n| `category_id` | int | null | **Required/Recommended** to filter by category. Checks `archive_category_id`. |\n| `page` | int | 1 | Page number. |\n\n### "
                             },
                             "response": [
                                 {
