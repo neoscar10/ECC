@@ -934,4 +934,74 @@ class Index extends Component
         $this->restrictionMode = 'public';
         $this->currency = 'INR';
     }
+
+    // --- Computed Properties for Preview (Step 4) ---
+
+    // 1. VISIBLE TIERS
+    public function getPreviewVisibleTiersProperty()
+    {
+        // If public, everything is visible
+        if ($this->restrictionMode === 'public') {
+            return $this->membershipTiers; // Assuming this is loaded in mount() with active tiers
+        }
+        
+        // If restricted, only selected IDs
+        // Filter active tiers to ensure we don't show stale/deleted ones, and strict match selection
+        return $this->membershipTiers->whereIn('id', $this->selectedVisibilityTiers);
+    }
+
+    // 2. CLEAR TIERS (Subset of Visible)
+    public function getPreviewClearTiersProperty()
+    {
+        $visible = $this->previewVisibleTiers;
+
+        // If blur NOT enabled, then CLEAR = VISIBLE (everything is clear)
+        if (!$this->blurEnabled) {
+            return $visible;
+        }
+
+        // If blur IS enabled, we calculate who gets CLEAR view based on restriction type
+        // The result MUST be a subset of $visible
+        
+        if ($this->restrictionType === 'hierarchical' && $this->restrictedMinTierId) {
+            $minTier = $this->membershipTiers->firstWhere('id', $this->restrictedMinTierId);
+            if (!$minTier) return collect([]); // Misconfiguration or not found
+            
+            // All visible tiers with level >= minTier level
+            return $visible->filter(function($tier) use ($minTier) {
+                return $tier->level >= $minTier->level;
+            });
+        }
+
+        if ($this->restrictionType === 'random' && !empty($this->selectedRandomTiers)) {
+            // All visible tiers that are ALSO in the random selection
+            return $visible->whereIn('id', $this->selectedRandomTiers);
+        }
+
+        if ($this->restrictionType === 'private' && $this->restrictedPrivateTierId) {
+            // Only the specific private tier, if it is visible
+            return $visible->where('id', $this->restrictedPrivateTierId);
+        }
+
+        return collect([]); // Fallback: no clear tiers selected
+    }
+
+    // 3. BLUR TIERS (Visible - Clear)
+    public function getPreviewBlurTiersProperty()
+    {
+        $visible = $this->previewVisibleTiers;
+        $clear = $this->previewClearTiers;
+        
+        // Blur = Visible diff Clear
+        return $visible->diff($clear);
+    }
+
+    public function getPreviewCountsProperty()
+    {
+        return [
+            'visible' => $this->previewVisibleTiers->count(),
+            'clear' => $this->previewClearTiers->count(),
+            'blur' => $this->previewBlurTiers->count(),
+        ];
+    }
 }
