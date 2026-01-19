@@ -62,6 +62,7 @@ class Index extends Component
     public $restrictedMinTierId;
     public $restrictedPrivateTierId;
     public $selectedRandomTiers = []; // For product restriction
+    public $selectedVisibilityTiers = []; // [NEW] Who can access the product at all
     
     // Blur / Clear View
     public $blurEnabled = false;
@@ -145,11 +146,9 @@ class Index extends Component
     public function updatedRestrictionMode($value)
     {
         if ($value === 'public') {
-            $this->restrictionType = null;
-            $this->restrictedMinTierId = null;
-            $this->restrictedPrivateTierId = null;
-            $this->selectedRandomTiers = [];
+            $this->selectedVisibilityTiers = [];
         }
+        $this->computeEligibleBlurTiers();
     }
 
     public function updatedRestrictionType($value)
@@ -163,7 +162,8 @@ class Index extends Component
         if ($value !== 'random') {
             $this->selectedRandomTiers = [];
         }
-        $this->computeVisibilityTiers();
+        // No need to recompute eligibility here as restriction type affects BLUR logic, not visibility list
+        // EXCEPT if we want to reset some blur selection?
     }
 
     public function validateStep($step)
@@ -201,22 +201,41 @@ class Index extends Component
         } elseif ($step === 3) {
             $this->validate([
                 'restrictionMode' => 'required|in:public,restricted',
-                'restrictionType' => ['exclude_unless:restrictionMode,restricted', 'required', 'in:hierarchical,random,private'],
-                'restrictedMinTierId' => ['exclude_unless:restrictionType,hierarchical', 'required', 'exists:membership_tiers,id'],
-                'restrictedPrivateTierId' => ['exclude_unless:restrictionType,private', 'required', 'exists:membership_tiers,id'],
-                'selectedRandomTiers' => ['exclude_unless:restrictionType,random', 'array', 'min:1'],
-                'selectedRandomTiers.*' => ['exclude_unless:restrictionType,random', 'exists:membership_tiers,id'],
-                
-                // Blur Validation
+                // Visibility Tiers
+                'selectedVisibilityTiers' => ['exclude_unless:restrictionMode,restricted', 'required', 'array', 'min:1'],
+                'selectedVisibilityTiers.*' => ['exists:membership_tiers,id'],
+
+                // Blur Settings (Restriction Type moved here)
                 'blurEnabled' => 'boolean',
-                'clearViewTierIds' => ['exclude_if:blurEnabled,false', 'required', 'array', 'min:1'],
-                'clearViewTierIds.*' => ['exists:membership_tiers,id', function($attribute, $value, $fail) {
-                     // Ensure selected clear tier is within allowed visibility tiers
+                'restrictionType' => ['exclude_if:blurEnabled,false', 'required', 'in:hierarchical,random,private'],
+                'restrictedMinTierId' => ['exclude_unless:restrictionType,hierarchical', 'required', 'exists:membership_tiers,id', function($attribute, $value, $fail) {
+                     // Ensure min tier is in visibility set (or public)
                      if (!in_array($value, $this->computedVisibilityTierIds)) {
-                         $fail('Selected clear view tier is not within the visible access list.');
+                         $fail('Selected minimum tier is not in the visible access list.');
                      }
                 }],
-            ]);
+                'restrictedPrivateTierId' => ['exclude_unless:restrictionType,private', 'required', 'exists:membership_tiers,id', function($attribute, $value, $fail) {
+                     if (!in_array($value, $this->computedVisibilityTierIds)) {
+                         $fail('Selected private tier is not in the visible access list.');
+                     }
+                }],
+                'selectedRandomTiers' => ['exclude_unless:restrictionType,random', 'array', 'min:1'],
+                'selectedRandomTiers.*' => ['exclude_unless:restrictionType,random', 'exists:membership_tiers,id', function($attribute, $value, $fail) {
+                     if (!in_array($value, $this->computedVisibilityTierIds)) {
+                         $fail('Selected random tier is not in the visible access list.');
+                     }
+                }],
+
+                'clearViewTierIds' => ['exclude_if:blurEnabled,false', 'array'], // Can be empty if driven by MinTier? No, let's keep logic simple
+                // Actually, if Hierarchy/Random/Private is used to determine Clear View, do we explicitly populate clearViewTierIds?
+                // The current requirement says: 
+                // "Hierarchical: choose min tier -> clear-view tiers = allowed tiers >= chosen min tier"
+                // "Random: choose clear-view tiers -> clear-view tiers = chosen ones"
+                // "Private: choose one -> clear-view tiers = chosen one"
+                // So validation depends on type.
+                
+                // Let's rely on the specific fields above (Min/Private/Random) to drive logic
+             ]);
         }
     }
 
@@ -257,7 +276,7 @@ class Index extends Component
         $this->resetForm();
         $this->isEditMode = false;
         $this->createStep = 1;
-        $this->computeVisibilityTiers();
+        $this->computeEligibleBlurTiers();
         $this->showCreateModal = true;
         $this->dispatch('show-create-modal');
     }
@@ -305,7 +324,7 @@ class Index extends Component
         $this->blurEnabled = $product->blur_enabled;
         $this->clearViewTierIds = $product->clearViewTiers->pluck('id')->map(fn($id) => (string)$id)->toArray();
         
-        $this->computeVisibilityTiers();
+        $this->computeEligibleBlurTiers();
         
         $this->createStep = 1;
 
@@ -321,10 +340,16 @@ class Index extends Component
         
         // Normalize restriction data before final validation to prevent stale errors
         if ($this->restrictionMode === 'public') {
+             $this->selectedVisibilityTiers = [];
+        }
+        
+        // Clean up Blur vars if Blur disabled
+        if (!$this->blurEnabled) {
             $this->restrictionType = null;
             $this->restrictedMinTierId = null;
             $this->restrictedPrivateTierId = null;
             $this->selectedRandomTiers = [];
+            $this->clearViewTierIds = [];
         } else {
              if ($this->restrictionType !== 'hierarchical') $this->restrictedMinTierId = null;
              if ($this->restrictionType !== 'private') $this->restrictedPrivateTierId = null;
@@ -377,15 +402,39 @@ class Index extends Component
                 'blur_enabled' => $this->blurEnabled,
             ]);
 
-            // Save Clear View Tiers
-            if ($this->blurEnabled) {
-                $product->clearViewTiers()->sync($this->clearViewTierIds);
+
+            // Save Visibility Tiers
+            if ($this->restrictionMode === 'restricted') {
+                $product->visibilityTiers()->sync($this->selectedVisibilityTiers);
+            } else {
+                // Public = No explicit map (empty pivot)
+                $product->visibilityTiers()->detach();
             }
 
-            // Save Tiers (Random)
-            if ($this->restrictionMode === 'restricted' && $this->restrictionType === 'random') {
-                $product->tiers()->sync($this->selectedRandomTiers);
+            // Save Clear View Tiers
+            $finalClearTiers = [];
+            if ($this->blurEnabled) {
+                // Calculate clear tiers based on Type
+                if ($this->restrictionType === 'hierarchical' && $this->restrictedMinTierId) {
+                     $min = MembershipTier::find($this->restrictedMinTierId);
+                     if ($min) {
+                         // Must be in Visibility Set (intersect)
+                         $potential = MembershipTier::where('level', '>=', $min->level)->pluck('id')->toArray();
+                         $finalClearTiers = array_intersect($potential, $this->computedVisibilityTierIds); // computed is now vis set
+                     }
+                } elseif ($this->restrictionType === 'random') {
+                     $finalClearTiers = $this->selectedRandomTiers;
+                } elseif ($this->restrictionType === 'private' && $this->restrictedPrivateTierId) {
+                     $finalClearTiers = [$this->restrictedPrivateTierId];
+                }
+                $product->clearViewTiers()->sync($finalClearTiers);
+            } else {
+                $product->clearViewTiers()->detach();
             }
+            
+            // We no longer use product->tiers() (old random pivot)
+            $product->tiers()->detach();
+
             // Save Images
             if ($this->newImages) {
                 foreach ($this->newImages as $index => $image) {
@@ -454,17 +503,33 @@ class Index extends Component
         ]);
 
         // Sync Clear View Tiers
+        // Save Visibility
+        if ($this->restrictionMode === 'restricted') {
+            $product->visibilityTiers()->sync($this->selectedVisibilityTiers);
+        } else {
+            $product->visibilityTiers()->detach();
+        }
+
+        // Save Clear View Tiers
+        $finalClearTiers = [];
         if ($this->blurEnabled) {
-             $product->clearViewTiers()->sync($this->clearViewTierIds);
+            if ($this->restrictionType === 'hierarchical' && $this->restrictedMinTierId) {
+                    $min = MembershipTier::find($this->restrictedMinTierId);
+                    if ($min) {
+                        $potential = MembershipTier::where('level', '>=', $min->level)->pluck('id')->toArray();
+                        $finalClearTiers = array_intersect($potential, $this->computedVisibilityTierIds);
+                    }
+            } elseif ($this->restrictionType === 'random') {
+                    $finalClearTiers = $this->selectedRandomTiers;
+            } elseif ($this->restrictionType === 'private' && $this->restrictedPrivateTierId) {
+                    $finalClearTiers = [$this->restrictedPrivateTierId];
+            }
+            $product->clearViewTiers()->sync($finalClearTiers);
         } else {
              $product->clearViewTiers()->detach();
         }
-
-         if ($this->restrictionMode === 'restricted' && $this->restrictionType === 'random') {
-            $product->tiers()->sync($this->selectedRandomTiers);
-        } else {
-            $product->tiers()->detach();
-        }
+        
+        $product->tiers()->detach(); // Obsolescent
 
         // Add New Images
         if (count($this->newImages) > 0) {
@@ -574,37 +639,39 @@ class Index extends Component
     }
     
     // Compute IDs for the Access Form (creation/edit state)
-    public function computeVisibilityTiers()
+    // Compute IDs for BLUR consideration (The 'Available' set)
+    public function computeEligibleBlurTiers()
     {
         $tiers = collect([]);
         
         if ($this->restrictionMode === 'public') {
              $tiers = $this->membershipTiers;
         } elseif ($this->restrictionMode === 'restricted') {
-            if ($this->restrictionType === 'hierarchical' && $this->restrictedMinTierId) {
-                $minTier = $this->membershipTiers->where('id', $this->restrictedMinTierId)->first();
-                if ($minTier) {
-                    $tiers = $this->membershipTiers->where('level', '>=', $minTier->level);
-                }
-            } elseif ($this->restrictionType === 'random') {
-                 $tiers = $this->membershipTiers->whereIn('id', $this->selectedRandomTiers);
-            } elseif ($this->restrictionType === 'private' && $this->restrictedPrivateTierId) {
-                 $tiers = $this->membershipTiers->where('id', $this->restrictedPrivateTierId);
-            }
+             // Only those explicitly selected
+             $tiers = $this->membershipTiers->whereIn('id', $this->selectedVisibilityTiers);
         }
         
         $this->computedVisibilityTierIds = $tiers->pluck('id')->map(fn($id) => (string)$id)->toArray();
         
-        // Prune clear view tiers if they are no longer visible
+        // Auto-sanitize Blur Selections
         if ($this->blurEnabled) {
-             $this->clearViewTierIds = array_intersect($this->clearViewTierIds, $this->computedVisibilityTierIds);
+             if ($this->restrictedMinTierId && !in_array($this->restrictedMinTierId, $this->computedVisibilityTierIds)) {
+                 $this->restrictedMinTierId = null;
+             }
+             if ($this->restrictedPrivateTierId && !in_array($this->restrictedPrivateTierId, $this->computedVisibilityTierIds)) {
+                 $this->restrictedPrivateTierId = null;
+             }
+             if (!empty($this->selectedRandomTiers)) {
+                 $this->selectedRandomTiers = array_intersect($this->selectedRandomTiers, $this->computedVisibilityTierIds);
+             }
         }
     }
     
-    public function updatedRestrictedMinTierId() { $this->computeVisibilityTiers(); }
-    public function updatedRestrictedPrivateTierId() { $this->computeVisibilityTiers(); }
-    public function updatedSelectedRandomTiers() { $this->computeVisibilityTiers(); }
-    public function updatedBlurEnabled() { $this->computeVisibilityTiers(); }
+    public function updatedSelectedVisibilityTiers() { $this->computeEligibleBlurTiers(); }
+    public function updatedRestrictedMinTierId() { /* No-op unless we want to recalc something */ } 
+    public function updatedRestrictedPrivateTierId() {  }
+    public function updatedSelectedRandomTiers() {  } 
+    public function updatedBlurEnabled() { $this->computeEligibleBlurTiers(); }
 
     public function addEarlyAccessRow()
     {

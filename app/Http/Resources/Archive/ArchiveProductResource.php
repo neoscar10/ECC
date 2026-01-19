@@ -7,6 +7,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use App\Services\Archive\ArchiveAccessService;
 use Illuminate\Support\Facades\Storage;
 
+use App\Support\Archive\AccessIconNormalizer;
+
 class ArchiveProductResource extends JsonResource
 {
     /**
@@ -22,14 +24,23 @@ class ArchiveProductResource extends JsonResource
         
         $access = $resolver->resolveProductAccess($this->resource, $user, $userTier);
         
-        // Check View Mode
+        // Strict Icon Normalization (Last Mile)
+        $access['message']['icon'] = AccessIconNormalizer::normalize(
+            $access['reason'] ?? null, 
+            $access['view_mode'] ?? 'blocked'
+        );
+        
+        // View Mode Checks
         $isClear = ($access['view_mode'] === 'clear');
+        $isBlur = ($access['view_mode'] === 'blur');
+        // If blocked, controller handles 403, or listing excludes it. 
+        // But if we are here (e.g. show endpoint before controller update), be safe.
 
-        // Images (Standard) - Hide if blurred? User requirements say "sensitive fields". Images usually restricted.
-        // Assuming images should be hidden or blurred. Frontend handles blur overlap usually, but API should be safe.
-        // Let's hide images if not clear, unless we have a specific 'blurred' image variant (not implemented).
-        // Safest: Return empty if blurred.
-        $images = $isClear ? $this->images->map(function ($img) {
+        // Images: Always return images for Clear OR Blur. (Frontend applies blur style)
+        // Only hide if strictly blocked (which shouldn't happen here usually)
+        $showImages = ($isClear || $isBlur);
+
+        $images = $showImages ? $this->images->map(function ($img) {
              return [
                  'id' => $img->id,
                  'url' => url(Storage::url($img->image_path)),
@@ -37,8 +48,7 @@ class ArchiveProductResource extends JsonResource
              ];
         }) : [];
 
-        // 360 Images
-        $images360 = $isClear ? $this->images360->map(function ($img) {
+        $images360 = $showImages ? $this->images360->map(function ($img) {
              return [
                  'id' => $img->id,
                  'url' => url(Storage::url($img->image_path)),
@@ -47,24 +57,19 @@ class ArchiveProductResource extends JsonResource
         }) : [];
 
         // Attachments
-        // Logic: Return all attachments but with their own access objects. 
-        // If Product is blurred, attachments are definitely not explicitly open unless public override?
-        // But Resolver handles product dependency.
-        // Here we just ensure CONTENT is striped if not open OR if product is blurred.
-        
-        $resource = $this->resource; // Capture for closure
+        $resource = $this->resource; 
         
         $attachments = $this->attachments->map(function ($att) use ($resolver, $resource, $user, $userTier, $isClear) {
              $attAccess = $resolver->resolveAttachmentAccess($att, $resource, $user, $userTier);
              
-             // Strict Content Control: Open AND Product is Clear (unless attachment overrides standard logic?)
-             // Actually, resolveAttachmentAccess checks resolveProductAccess['open'].
-             // If product is BLUR, resolveProductAccess['open'] is FALSE.
-             // So attAccess['open'] will be FALSE.
-             // So content is already hidden by $isOpen check below.
-             // BUT: We want to ensure we don't leak anything if logic drifts.
+             // Strict Icon Normalization (Last Mile for Attachments)
+             $attAccess['message']['icon'] = AccessIconNormalizer::normalize(
+                 $attAccess['reason'] ?? null,
+                 $attAccess['view_mode'] ?? 'blocked'
+             );
              
-             $isOpen = $attAccess['open']; 
+             // Content requires strict Clear access on attachment
+             $attIsClear = ($attAccess['view_mode'] === 'clear');
 
              return [
                  'id' => $att->id,
@@ -74,15 +79,14 @@ class ArchiveProductResource extends JsonResource
                  'access' => $attAccess,
                  
                  // Content (Conditionally Hidden)
-                 'line_text' => $isOpen ? $att->line_text : null,
-                 'kv_key' => $isOpen ? $att->kv_key : null,
-                 'kv_value' => $isOpen ? $att->kv_value : null,
-                 'body' => $isOpen ? $att->body : null,
+                 'line_text' => $attIsClear ? $att->line_text : null,
+                 'kv_key' => $attIsClear ? $att->kv_key : null,
+                 'kv_value' => $attIsClear ? $att->kv_value : null,
+                 'body' => $attIsClear ? $att->body : null,
                  
                  'sort_order' => $att->sort_order
              ];
         });
-        // Filtering attachments list itself? No, list is usually visible, content is locked.
         
         return [
             'id' => $this->id,
@@ -90,15 +94,12 @@ class ArchiveProductResource extends JsonResource
             'slug' => $this->slug,
             'category_id' => $this->archive_category_id,
             'category_title' => $this->category->title ?? null,
-            'category_summary' => [ 
-                 'id' => $this->archive_category_id,
-                 'title' => $this->category->title ?? null,
-                 'slug' => $this->category->slug ?? null,
-            ],
+            // 'category_summary' removed
             
-            // Description: Hide unlocked description if blurred? 
-            // Usually valid to show teaser. "description_unlocked" implies public/teaser.
-            'description_unlocked' => $this->description_unlocked,
+            // Description: Hide unlocked description if blurred?
+            // User requested: "description_unlocked should become: If blur: return null OR a short preview"
+            // We return null for blur to be safe/minimal as requested.
+            'description_unlocked' => $isClear ? $this->description_unlocked : null,
             
             'price' => [
                 'min' => $this->price_min_amount,
@@ -117,8 +118,7 @@ class ArchiveProductResource extends JsonResource
             // Unified Access Object
             'access' => $access,
             
-            // Legacy Backwards Compat (Optional but safe)
-            'is_open' => $access['open'],
+            // 'is_open' removed
             
             'images' => $images,
             'images360' => $images360,

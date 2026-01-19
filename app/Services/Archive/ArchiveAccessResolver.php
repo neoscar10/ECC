@@ -22,7 +22,7 @@ class ArchiveAccessResolver
         if (!$user) {
              return $this->buildLockedAccess(
                  'category_restricted',
-                 'Sign in to view.',
+                 ['required_tier_name' => 'Member'], // Default to generic member context
                  ['type' => 'subscribe', 'label' => 'Login / Register', 'deeplink' => '/login'],
                  $userTier
              );
@@ -36,13 +36,17 @@ class ArchiveAccessResolver
 
         // Recommend Upgrade
         $upgrade = $this->findBaseRestrictionUpgrade($category);
+        $context = [];
+        // Categories typically don't specify private vs public in the same way, but let's assume standard tier required.
+        $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
+        
         return $this->buildLockedAccess(
             'category_restricted',
-            $upgrade['message'] ?? 'Restricted Category',
+            $context,
             [
                 'type' => 'upgrade_membership',
                 'label' => 'Upgrade',
-                'target_tier' => $upgrade ? $this->formatTier($upgrade['tier']) : null,
+                'target_tier' => $upgrade['tier'] ? $this->formatTier($upgrade['tier']) : null,
                 'deeplink' => '/membership/tiers'
             ],
             $userTier,
@@ -65,10 +69,10 @@ class ArchiveAccessResolver
                 if (!$user) {
                      return $this->buildLockedAccess(
                          'early_access_locked',
-                         'Early access available for members.',
+                         ['days_remaining' => 0, 'early_access_tier_name' => 'Member'], // Default context
                          ['type' => 'subscribe', 'label' => 'Login', 'deeplink' => '/login'],
                          $userTier,
-                         'clock',
+                         'time-lock',
                          ['go_live_at' => $product->go_live_at?->toIso8601String()]
                      );
                 }
@@ -85,9 +89,23 @@ class ArchiveAccessResolver
                 // User has no active window, find best recommendation
                 $recommendation = $this->findEarlyAccessRecommendation($product);
                 
+                // Calculate Days Remaining (Rule 3)
+                // Use next access if available, else go_live
+                $targetDate = isset($recommendation['access_at']) ? \Carbon\Carbon::parse($recommendation['access_at']) : $product->go_live_at;
+                $days = 0;
+                if ($targetDate && $targetDate->isFuture()) {
+                     // "Compute as whole days... max(0, ceil(diffInSeconds / 86400))"
+                     $days = max(0, ceil(now()->diffInSeconds($targetDate) / 86400));
+                }
+
+                $context = [
+                    'days_remaining' => $days,
+                    'early_access_tier_name' => $recommendation['tier']?->name ?? 'VIP'
+                ];
+
                 return $this->buildLockedAccess(
                     'early_access_locked',
-                    $recommendation['message'] ?? 'Early Access Required',
+                    $context,
                     [
                         'type' => 'upgrade_membership',
                         'label' => 'Get Early Access',
@@ -95,7 +113,7 @@ class ArchiveAccessResolver
                         'deeplink' => '/membership/tiers'
                     ],
                     $userTier,
-                    'clock',
+                    'time-lock',
                     [
                         'go_live_at' => $product->go_live_at?->toIso8601String(),
                         'next_access_at' => $recommendation['access_at'] ?? null
@@ -106,10 +124,10 @@ class ArchiveAccessResolver
             // Not Live & No Early Access
             return $this->buildLockedAccess(
                 'not_live_yet',
-                'Coming Soon',
+                ['title' => 'Coming Soon', 'body' => 'Stay tuned.'],
                 ['type' => 'wait', 'label' => 'Coming Soon'],
                 $userTier,
-                'clock',
+                'time-lock', // or lock? normalizedIcon will handle it as lock unless specifically early_access_locked
                 ['go_live_at' => $product->go_live_at?->toIso8601String()]
             );
         }
@@ -122,7 +140,7 @@ class ArchiveAccessResolver
         if (!$user) {
              return $this->buildLockedAccess(
                  'product_restricted',
-                 'Members Only Content',
+                 ['required_tier_name' => 'Member'],
                  ['type' => 'subscribe', 'label' => 'Join Now', 'deeplink' => '/register'],
                  $userTier,
                  'lock'
@@ -138,15 +156,15 @@ class ArchiveAccessResolver
                       return $this->buildAccessResponse(
                           'blur',
                           'blurred',
-                          $upgrade['message'] ?? 'Blur Enabled',
+                          ['clear_view_tier_name' => $upgrade['tier']?->name ?? 'Higher Tier'],
                           [
                             'type' => 'upgrade_membership',
                             'label' => 'Upgrade for Clear View',
-                            'target_tier' => $upgrade ? $this->formatTier($upgrade['tier']) : null,
+                            'target_tier' => $upgrade['tier'] ? $this->formatTier($upgrade['tier']) : null,
                             'deeplink' => '/membership/tiers'
                           ],
                           $userTier,
-                          'eye-off'
+                          'lock'
                       );
                  }
              }
@@ -156,13 +174,23 @@ class ArchiveAccessResolver
 
         // Recommend Upgrade (Totally Blocked)
         $upgrade = $this->findBaseRestrictionUpgrade($product);
+        
+        $context = [];
+        if ($product->restriction_type === 'private') {
+             // Rule 2: Private
+             $context['private_tier_name'] = $upgrade['tier']?->name ?? 'Private';
+        } else {
+             // Rule 1: Restricted
+             $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
+        }
+
         return $this->buildLockedAccess(
             'product_restricted',
-            $upgrade['message'] ?? 'Upgrade Membership',
+            $context,
             [
                 'type' => 'upgrade_membership',
                 'label' => 'Upgrade',
-                'target_tier' => $upgrade ? $this->formatTier($upgrade['tier']) : null,
+                'target_tier' => $upgrade['tier'] ? $this->formatTier($upgrade['tier']) : null,
                 'deeplink' => '/membership/tiers'
             ],
             $userTier,
@@ -175,14 +203,13 @@ class ArchiveAccessResolver
      */
     public function resolveAttachmentAccess(ArchiveProductAttachment $attachment, ArchiveProduct $product, ?User $user, ?MembershipTier $userTier): array
     {
-        // 1. Inherited Product Access (must have product access first)
-        // Optimization: Caller should usually pass the product access result if known, but here we strictly check.
-        // If product is locked, attachment is definitely locked.
+        // 1. Inherited Product Access
         $productAccess = $this->resolveProductAccess($product, $user, $userTier);
-        if (!$productAccess['open']) {
+        
+        if (($productAccess['view_mode'] ?? 'blocked') !== 'clear') {
             // Return product lock reason but sourced as attachment
             $productAccess['source'] = 'attachment'; 
-            $productAccess['reason'] = 'product_restricted'; // Parent locked
+            // Reason and Message are already set correctly by product logic (Rule 1/2/3)
             return $productAccess;
         }
 
@@ -192,14 +219,12 @@ class ArchiveAccessResolver
         }
         
         if ($attachment->restriction_mode === 'public') {
-            // Public means "Public to anyone who can see the product".
-            // Since we passed product check above, it's open.
             return $this->buildOpenAccess('Public Attachment.', $userTier);
         }
 
         // Restricted Subset
         if (!$user) {
-             return $this->buildLockedAccess('attachment_restricted', 'Login required.', ['type' => 'subscribe'], $userTier);
+             return $this->buildLockedAccess('attachment_restricted', ['required_tier_name' => 'Member'], ['type' => 'subscribe'], $userTier);
         }
 
         if ($this->checkStandardRestriction($attachment, $userTier)) {
@@ -207,13 +232,21 @@ class ArchiveAccessResolver
         }
 
         $upgrade = $this->findBaseRestrictionUpgrade($attachment);
+        
+        $context = [];
+        if ($attachment->restriction_type === 'private') {
+             $context['private_tier_name'] = $upgrade['tier']?->name ?? 'Private';
+        } else {
+             $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
+        }
+
         return $this->buildLockedAccess(
             'attachment_restricted',
-            $upgrade['message'] ?? 'Premium Attachment',
+            $context,
             [
                 'type' => 'upgrade_membership',
                 'label' => 'Upgrade',
-                'target_tier' => $upgrade ? $this->formatTier($upgrade['tier']) : null,
+                'target_tier' => $upgrade['tier'] ? $this->formatTier($upgrade['tier']) : null,
                 'deeplink' => '/membership/tiers'
             ],
             $userTier
@@ -222,6 +255,101 @@ class ArchiveAccessResolver
 
     // --- Helpers ---
 
+    // --- Helpers ---
+
+    private function buildMessage(string $reason, array $context = []): array
+    {
+        // Rule 1: Visibility Restricted (Product/Category)
+        if (in_array($reason, ['product_restricted', 'category_restricted', 'visibility_restricted', 'attachment_restricted'])) {
+            // Check for Private Tier (Rule 2)
+            if (!empty($context['private_tier_name'])) {
+                return [
+                    'title' => strtoupper($context['private_tier_name']),
+                    'body' => 'Members Only',
+                    'icon' => 'diamond'
+                ];
+            }
+
+            // Standard Restricted (Rule 1)
+            $tierName = $context['required_tier_name'] ?? 'Membership';
+            return [
+                'title' => 'Restricted View',
+                'body' => "{$tierName} Tier Required",
+                'icon' => 'lock'
+            ];
+        }
+
+        // Rule 3: Early Access Locked
+        if (in_array($reason, ['early_access_locked', 'early_access_tier_required'])) {
+            $days = $context['days_remaining'] ?? 0;
+            $tierName = $context['early_access_tier_name'] ?? 'Member';
+            
+            return [
+                'title' => "Unlocks in {$days} days",
+                'body' => "Early Access: {$tierName}",
+                'icon' => 'clock'
+            ];
+        }
+        
+        // Blur (Visible but Blurred) - Not explicitly in 3 rules but needs handling
+        if ($reason === 'blurred') {
+             $tierName = $context['clear_view_tier_name'] ?? 'Higher Tier';
+             return [
+                'title' => 'Restricted View', // Or custom? Consolidating to Rule 1 style or specific?
+                // Text from previous code: "X Tier Required"
+                // Let's keep a sensible default if not covered by strict rules, 
+                // OR map to Restricted View if it fits. 
+                // Using previous custom logic for safety unless instructed otherwise.
+                // Actually, Rule 1 is "Visibility blocked". Blur is visible. 
+                // Let's keep blur specific for now or use context['body'] if passed.
+                'title' => $context['title'] ?? 'Restricted View',
+                'body' => $context['body'] ?? "{$tierName} Tier Required",
+                'icon' => 'lock'
+             ];
+        }
+
+        // Default / Fallback (e.g. Not Live Yet, Open)
+        return [
+            'title' => $context['title'] ?? 'Info',
+            'body' => $context['body'] ?? 'Access Info',
+            'icon' => $context['icon'] ?? 'lock'
+        ];
+    }
+
+    private function normalizedIcon(?string $reason, string $viewMode): ?string
+    {
+        $reason = $reason ? strtolower(trim($reason)) : null;
+        $viewMode = strtolower(trim($viewMode));
+
+        // Unrestricted clear access => null
+        if ($viewMode === 'clear' && empty($reason)) {
+            return null;
+        }
+
+        // Early access lock
+        if ($reason === 'early_access_locked') {
+            return 'time-lock';
+        }
+
+        // Private collection lock
+        $privateReasons = [
+            'private_collection',
+            'private',
+            'private_only',
+            'product_private',
+            'category_private',
+            'attachment_private',
+            'private_tier_only',
+        ];
+
+        if ($reason && in_array($reason, $privateReasons, true)) {
+            return 'diamond';
+        }
+
+        // Everything else (including blur/blocked/restricted)
+        return 'lock';
+    }
+
     protected function checkStandardRestriction($entity, ?MembershipTier $userTier): bool
     {
         if ($entity->restriction_mode === 'public') return true;
@@ -229,30 +357,30 @@ class ArchiveAccessResolver
 
         if (!$userTier) return false;
 
-        // Unified logic for Products, Categories, Attachments
-        // Note: Category uses 'visibility'='restricted', Products use 'restriction_mode'='restricted'
-        // We assume $entity has restriction_type, etc. (Model standardization helps)
-        
         $type = $entity->restriction_type; 
-        // Categories don't share identical col names in standard ECC code usually? 
-        // Let's handle Category specific (pivot check only usually) if different.
-        // Checking Service logic: Category has 'tiers' relation.
         
         if ($entity instanceof ArchiveCategory) {
-             // Category usually just random pivot logic in ECC templates unless heavily customized.
-             // Service check: `$category->tiers->contains($tierId)`
              if ($entity->relationLoaded('tiers')) {
                 return $entity->tiers->contains('id', $userTier->id);
              }
              return $entity->tiers()->where('membership_tier_id', $userTier->id)->exists();
         }
 
-        // Product/Attachment Logic
+        if ($entity instanceof ArchiveProduct) {
+             if ($entity->restriction_mode === 'public') return true;
+             // Check Visibility Tiers Pivot
+             if ($entity->relationLoaded('visibilityTiers')) {
+                 return $entity->visibilityTiers->contains('id', $userTier->id);
+             }
+             return $entity->visibilityTiers()->where('membership_tier_id', $userTier->id)->exists();
+        }
+
+        // Attachment Logic
         if ($type === 'hierarchical') {
             $minTierId = $entity->restricted_min_tier_id;
-            if (!$minTierId) return true; // Config error? allow or block? default block safe.
+            if (!$minTierId) return true; 
             
-            $minTier = $entity->restrictedMinTier; // Assumed loaded or fetched
+            $minTier = $entity->restrictedMinTier; 
             if (!$minTier) $minTier = MembershipTier::find($minTierId);
             
             if ($minTier) {
@@ -278,25 +406,24 @@ class ArchiveAccessResolver
     protected function findBaseRestrictionUpgrade($entity): ?array
     {
         if ($entity instanceof ArchiveCategory) {
-             // Suggest lowest level allowed tier
              $tier = $entity->tiers()->orderBy('level', 'asc')->first();
-             if ($tier) return ['tier' => $tier, 'message' => "Available to {$tier->name} members."];
+             if ($tier) return ['tier' => $tier, 'message' => null];
              return null;
         }
 
         if ($entity->restriction_type === 'hierarchical') {
              $minTier = $entity->restrictedMinTier ?? MembershipTier::find($entity->restricted_min_tier_id);
-             if ($minTier) return ['tier' => $minTier, 'message' => "Upgrade to {$minTier->name}."];
+             if ($minTier) return ['tier' => $minTier, 'message' => null];
         }
 
         if ($entity->restriction_type === 'random') {
              $tier = $entity->tiers()->orderBy('level', 'asc')->first();
-             if ($tier) return ['tier' => $tier, 'message' => "Available to {$tier->name}."];
+             if ($tier) return ['tier' => $tier, 'message' => null];
         }
 
         if ($entity->restriction_type === 'private') {
               $p = $entity->restrictedPrivateTier ?? MembershipTier::find($entity->restricted_private_tier_id);
-              if ($p) return ['tier' => $p, 'message' => "Exclusive to {$p->name}."];
+              if ($p) return ['tier' => $p, 'message' => null];
         }
         
         return null;
@@ -309,7 +436,6 @@ class ArchiveAccessResolver
         if ($product->relationLoaded('clearViewTiers')) {
              return $product->clearViewTiers->contains('id', $userTier->id);
         }
-        // Fallback query
         return $product->clearViewTiers()->where('membership_tier_id', $userTier->id)->exists();
     }
 
@@ -327,7 +453,7 @@ class ArchiveAccessResolver
 
     protected function findEarlyAccessRecommendation(ArchiveProduct $product): array
     {
-        // 1. Find currently active windows (access_at <= now), sort by lowest tier level
+        // 1. Find currently active windows
         $bestActive = $product->earlyAccessWindows()
              ->where('access_at', '<=', now())
              ->with('tier')
@@ -339,11 +465,11 @@ class ArchiveAccessResolver
             return [
                 'tier' => $bestActive->tier,
                 'access_at' => $bestActive->access_at->toIso8601String(),
-                'message' => "Upgrade to {$bestActive->tier->name} for immediate access."
+                'message' => null // Handled by buildMessage
             ];
         }
 
-        // 2. Find ANY upcoming windows, sort by soonest date
+        // 2. Find ANY upcoming windows
         $soonest = $product->earlyAccessWindows()
              ->where('access_at', '>', now())
              ->with('tier')
@@ -354,20 +480,19 @@ class ArchiveAccessResolver
              return [
                 'tier' => $soonest->tier,
                 'access_at' => $soonest->access_at->toIso8601String(),
-                'message' => "Upgrade to {$soonest->tier->name} to access on " . $soonest->access_at->format('d M')
+                'message' => null
             ];
         }
         
-        return ['tier' => null, 'message' => 'Early access not available for your tier.'];
+        return ['tier' => null, 'message' => null];
     }
 
     protected function buildOpenAccess(string $title, ?MembershipTier $userTier = null, array $timing = []): array
     {
         return [
-            'open' => true,
-            'view_mode' => 'clear', // New field
+            'view_mode' => 'clear', 
             'reason' => null,
-            'source' => 'product', // caller can override
+            'source' => 'product', 
             'viewer' => $this->formatViewer($userTier),
             'message' => [
                 'title' => 'Open',
@@ -380,27 +505,30 @@ class ArchiveAccessResolver
     }
     
     // Helper to build Blur or Blocked responses
-    protected function buildAccessResponse(string $viewMode, string $reason, string $msgBody, array $action, ?MembershipTier $userTier, string $icon = 'lock', array $timing = []): array
+    protected function buildAccessResponse(string $viewMode, string $reason, array $context, array $action, ?MembershipTier $userTier, string $icon = 'lock', array $timing = []): array
     {
+         // Use the central message builder
+         $message = $this->buildMessage($reason, $context);
+         
+         // Allow override if necessary, or just use builder result
+         // If icon passed in arg is specific (e.g. from caller), use it? 
+         // But logic says "consistent icon type". Builder has authoritative icons for rules.
+         // We'll trust builder, but maybe allow overrides if context['icon'] exists.
+         
          return [
-            'open' => ($viewMode === 'clear'), // False for blur/blocked
             'view_mode' => $viewMode,
             'reason' => $reason,
-            'source' => 'product', // caller override
+            'source' => 'product', 
             'viewer' => $this->formatViewer($userTier),
-            'message' => [
-                'title' => ucfirst($viewMode), // e.g. "Restricted" or "Blur"
-                'body' => $msgBody,
-                'icon' => $icon
-            ],
+            'message' => $message,
             'action' => array_merge(['type' => 'wait', 'label' => null, 'target_tier' => null, 'deeplink' => null], $action),
             'timing' => array_merge(['go_live_at' => null, 'next_access_at' => null], $timing)
         ];
     }
 
-    protected function buildLockedAccess(string $reason, string $msgBody, array $action, ?MembershipTier $userTier, string $icon = 'lock', array $timing = []): array
+    protected function buildLockedAccess(string $reason, array $context, array $action, ?MembershipTier $userTier, string $icon = 'lock', array $timing = []): array
     {
-        return $this->buildAccessResponse('blocked', $reason, $msgBody, $action, $userTier, $icon, $timing);
+        return $this->buildAccessResponse('blocked', $reason, $context, $action, $userTier, $icon, $timing);
     }
 
     protected function formatViewer(?MembershipTier $tier): array
@@ -418,7 +546,7 @@ class ArchiveAccessResolver
             'id' => $tier->id,
             'name' => $tier->name,
             'level' => $tier->level,
-            'price_amount' => $tier->price_amount ?? 0, // Assuming column exists
+            'price_amount' => $tier->price_amount ?? 0, 
             'currency' => $tier->currency ?? 'INR'
         ];
     }
