@@ -63,16 +63,22 @@
                             @error('upgrade_from_id') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-check form-switch form-switch-lg" dir="ltr">
                                 <input type="checkbox" class="form-check-input" id="isActive" wire:model="is_active">
                                 <label class="form-check-label" for="isActive">Active Status</label>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-check form-switch form-switch-lg" dir="ltr">
                                 <input type="checkbox" class="form-check-input" id="requiresApproval" wire:model="requires_approval">
                                 <label class="form-check-label" for="requiresApproval">Require Approval</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch form-switch-lg" dir="ltr">
+                                <input type="checkbox" class="form-check-input" id="hasEarlyAccess" wire:model="has_early_access">
+                                <label class="form-check-label" for="hasEarlyAccess">Early Access Eligible</label>
                             </div>
                         </div>
 

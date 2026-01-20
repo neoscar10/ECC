@@ -40,9 +40,14 @@
 
         @if ($newImages)
             <div class="d-flex gap-2 mt-2 overflow-auto custom-scrollbar">
-                @foreach ($newImages as $tempImg)
-                     <div class="avatar-sm bg-white border rounded p-1 flex-shrink-0">
+                @foreach ($newImages as $i => $tempImg)
+                     <div class="avatar-sm bg-white border rounded p-1 flex-shrink-0 position-relative" wire:key="new-main-{{ $i }}">
                          <img src="{{ $tempImg->temporaryUrl() }}" class="img-fluid rounded h-100 object-cover">
+                         <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 rounded-circle" 
+                                style="width: 16px; height: 16px; min-width: 16px; transform: translate(30%, -30%); padding: 0;"
+                                wire:click="removeNewImage({{ $i }})">
+                            <i class="ri-close-line" style="font-size: 10px;"></i>
+                        </button>
                      </div>
                 @endforeach
             </div>
@@ -90,9 +95,14 @@
 
          @if ($new360Images)
             <div class="d-flex gap-2 mt-2 overflow-auto custom-scrollbar">
-                @foreach ($new360Images as $tempImg)
-                     <div class="avatar-sm bg-white border rounded p-1 flex-shrink-0">
+                @foreach ($new360Images as $i => $tempImg)
+                     <div class="avatar-sm bg-white border rounded p-1 flex-shrink-0 position-relative" wire:key="new-360-{{ $i }}">
                          <img src="{{ $tempImg->temporaryUrl() }}" class="img-fluid rounded h-100 object-cover">
+                         <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 rounded-circle" 
+                                style="width: 16px; height: 16px; min-width: 16px; transform: translate(30%, -30%); padding: 0;"
+                                wire:click="removeNew360Image({{ $i }})">
+                            <i class="ri-close-line" style="font-size: 10px;"></i>
+                        </button>
                      </div>
                 @endforeach
             </div>

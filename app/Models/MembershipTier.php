@@ -10,6 +10,7 @@ class MembershipTier extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'has_early_access' => 'boolean', // [NEW] Capability flag
         'benefits_json' => 'array',
     ];
 

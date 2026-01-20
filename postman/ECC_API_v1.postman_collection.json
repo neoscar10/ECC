@@ -959,7 +959,7 @@
                                             "value": "application/json"
                                         }
                                     ],
-                                    "body": "{\n    \"success\": true,\n    \"message\": \"Success\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"Gold\",\n            \"annual_fee\": 250.00\n        },\n        {\n            \"id\": 3,\n            \"name\": \"Platinum\",\n            \"annual_fee\": 500.00\n        }\n    ],\n    \"meta\": null,\n    \"errors\": null\n}"
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Success\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"Gold\",\n            \"annual_fee\": 250.00,\n            \"has_early_access\": false\n        },\n        {\n            \"id\": 3,\n            \"name\": \"Platinum\",\n            \"annual_fee\": 500.00,\n            \"has_early_access\": true\n        }\n    ],\n    \"meta\": null,\n    \"errors\": null\n}"
                                 }
                             ]
                         },
@@ -1458,7 +1458,7 @@
                                         }
                                     ]
                                 },
-                                "description": "List all products. Locked products are included with `is_open: false`.\n\n### Query Params\n| Param | Type | Default | Description |\n| :--- | :--- | :--- | :--- |\n| `category_id` | int | null | **Required/Recommended** to filter by category. Checks `archive_category_id`. |\n| `page` | int | 1 | Page number. |\n\n### "
+                                "description": "Products from categories not visible to the user’s membership tier are excluded from results.\n\nList all products. Locked products are included with `is_open: false`.\n\n### Query Params\n| Param | Type | Default | Description |\n| :--- | :--- | :--- | :--- |\n| `category_id` | int | null | **Required/Recommended** to filter by category. Checks `archive_category_id`. |\n| `page` | int | 1 | Page number. |\n\n### "
                             },
                             "response": [
                                 {

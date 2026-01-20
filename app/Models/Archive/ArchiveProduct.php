@@ -96,18 +96,38 @@ class ArchiveProduct extends Model
     public function scopeVisibleTo($query, ?\App\Models\User $user, ?MembershipTier $userTier = null)
     {
         return $query->where(function ($q) use ($user, $userTier) {
-            // 1. Public is always visible
-            $q->where('restriction_mode', 'public');
+            // CATEGORY GATE: Product must belong to a category visible to the user
+            $q->whereHas('category', function ($catQuery) use ($userTier) {
+                 $catQuery->where(function($c) use ($userTier) {
+                      // Cat Public
+                      $c->where('visibility', 'public');
+                      // OR Cat Restricted but user has tier
+                      if ($userTier) {
+                          $c->orWhere(function($cr) use ($userTier) {
+                              $cr->where('visibility', 'restricted')
+                                 ->whereHas('tiers', function($t) use ($userTier) {
+                                      $t->where('membership_tiers.id', $userTier->id);
+                                 });
+                          });
+                      }
+                 });
+            });
 
-            // 2. If user exists, check visibility restrictions
-            if ($user && $userTier) {
-                $q->orWhere(function ($restricted) use ($userTier) {
-                    $restricted->where('restriction_mode', 'restricted')
-                        ->whereHas('visibilityTiers', function ($t) use ($userTier) {
-                            $t->where('membership_tiers.id', $userTier->id);
-                        });
-                });
-            }
+            // PRODUCT GATE: Only if category gate passed, apply product rules
+            $q->where(function($p) use ($userTier) {
+                // 1. Public is always visible (within allowed category)
+                $p->where('restriction_mode', 'public');
+
+                // 2. If user exists, check visibility restrictions
+                if ($userTier) {
+                    $p->orWhere(function ($restricted) use ($userTier) {
+                        $restricted->where('restriction_mode', 'restricted')
+                            ->whereHas('visibilityTiers', function ($t) use ($userTier) {
+                                $t->where('membership_tiers.id', $userTier->id);
+                            });
+                    });
+                }
+            });
         });
     }
 }

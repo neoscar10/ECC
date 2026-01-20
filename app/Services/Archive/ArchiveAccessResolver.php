@@ -77,10 +77,13 @@ class ArchiveAccessResolver
                      );
                 }
 
-                $activeWindow = $product->earlyAccessWindows()
-                    ->where('membership_tier_id', $userTier?->id)
-                    ->where('access_at', '<=', now())
-                    ->first();
+                $activeWindow = null;
+                if ($userTier?->has_early_access) {
+                    $activeWindow = $product->earlyAccessWindows()
+                        ->where('membership_tier_id', $userTier->id)
+                        ->where('access_at', '<=', now())
+                        ->first();
+                }
 
                 if ($activeWindow) {
                     return $this->buildOpenAccess('Early Access Granted.', $userTier, ['go_live_at' => $product->go_live_at?->toIso8601String()]);
@@ -456,6 +459,7 @@ class ArchiveAccessResolver
         // 1. Find currently active windows
         $bestActive = $product->earlyAccessWindows()
              ->where('access_at', '<=', now())
+             ->whereHas('tier', fn($q) => $q->where('has_early_access', true))
              ->with('tier')
              ->get()
              ->sortBy(fn($w) => $w->tier->level ?? 999)
@@ -472,6 +476,7 @@ class ArchiveAccessResolver
         // 2. Find ANY upcoming windows
         $soonest = $product->earlyAccessWindows()
              ->where('access_at', '>', now())
+             ->whereHas('tier', fn($q) => $q->where('has_early_access', true))
              ->with('tier')
              ->orderBy('access_at', 'asc')
              ->first();

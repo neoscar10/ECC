@@ -16,7 +16,7 @@
                 </select>
                 @error("attachmentRows.{$index}.restriction_mode") <span class="text-danger fs-11">{{ $message }}</span> @enderror
 
-                <div wire:key="att-restrict-{{ $index }}-{{ data_get($attachmentRows, $index.'.restriction_mode') }}">
+                <div wire:key="att-restrict-{{ $index }}-{{ data_get($attachmentRows, $index.'.restriction_mode', 'inherit') }}">
                     @include('livewire.admin.archive.products.partials._attachment-restriction-config', ['index' => $index])
                 </div>
             </div>

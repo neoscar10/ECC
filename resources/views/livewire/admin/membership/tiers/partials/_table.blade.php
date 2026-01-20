@@ -8,6 +8,7 @@
                     <th>Code</th>
                     <th>Price</th>
                     <th>Duration</th>
+                    <th>Early Access</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -16,10 +17,21 @@
                 @forelse ($tiers as $tier)
                     <tr>
                         <td>{{ $tier->sort_order }}</td>
-                        <td><h5 class="fs-14 mb-1">{{ $tier->name }}</h5></td>
+                        <td>
+                            <h5 class="fs-14 mb-1">
+                                {{ $tier->name }}
+                            </h5>
+                        </td>
                         <td class="text-muted">{{ $tier->code }}</td>
                         <td>{{ $tier->currency }} {{ number_format($tier->price, 2) }}</td>
                         <td>{{ $tier->duration_days }} days</td>
+                        <td>
+                            @if($tier->has_early_access)
+                                <span class="badge bg-success-subtle text-success">Yes</span>
+                            @else
+                                <span class="text-muted">No</span>
+                            @endif
+                        </td>
                         <td>
                             @if($tier->is_active)
                                 <span class="badge bg-success-subtle text-success text-uppercase">Active</span>
@@ -43,7 +55,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center">
+                        <td colspan="8" class="text-center">
                             <div class="noresult">
                                 <div class="text-center">
                                     <h5 class="mt-2">No tiers found</h5>

@@ -20,23 +20,71 @@
                  <div class="col-md-12">
                     <label class="form-label">Select Tiers with Access <span class="text-danger">*</span></label>
                     <div class="row g-2" style="max-height: 300px; overflow-y: auto;">
+                        @php
+                            $selectedCat = $categories->firstWhere('id', $categoryId);
+                            $catTitle = $selectedCat ? $selectedCat->title : 'Category';
+                        @endphp
                         @foreach($membershipTiers as $tier)
+                            @php
+                                $isAllowed = in_array($tier->id, $categoryAllowedTierIds);
+                            @endphp
                             <div class="col-6">
-                                <div class="form-check card-radio">
-                                    <input class="form-check-input" type="checkbox" value="{{ $tier->id }}" wire:model.live="selectedVisibilityTiers" id="visTier_{{ $tier->id }}">
-                                    <label class="form-check-label" for="visTier_{{ $tier->id }}">
+                                <div class="form-check card-radio position-relative {{ !$isAllowed ? 'opacity-50' : '' }}" 
+                                     @if(!$isAllowed) 
+                                         data-bs-toggle="tooltip" 
+                                         title="Not allowed by category: {{ $catTitle }}" 
+                                         style="cursor: not-allowed;"
+                                     @endif>
+                                    <input class="form-check-input" type="checkbox" value="{{ $tier->id }}" 
+                                           wire:model.live="selectedVisibilityTiers" 
+                                           id="visTier_{{ $tier->id }}"
+                                           @disabled(!$isAllowed)>
+                                    <label class="form-check-label" for="visTier_{{ $tier->id }}" style="{{ !$isAllowed ? 'pointer-events: none;' : '' }}">
                                         <span class="fs-14 mb-1 d-block">{{ $tier->name }}</span>
                                         <span class="text-muted text-xs">Level {{ $tier->level }}</span>
                                     </label>
+                                    @if(!$isAllowed)
+                                        <div class="position-absolute top-50 start-50 translate-middle">
+                                            <i class="ri-lock-2-fill fs-24 text-dark"></i>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
                     </div>
                     @error('selectedVisibilityTiers') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+                    
+                    <script>
+                        // Re-init tooltips on Livewire update
+                        document.addEventListener('livewire:initialized', () => {
+                             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                               return new bootstrap.Tooltip(tooltipTriggerEl)
+                             })
+                        });
+                        document.addEventListener('livewire:updated', () => {
+                             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                               return new bootstrap.Tooltip(tooltipTriggerEl)
+                             })
+                        });
+                    </script>
                  </div>
             @else
-                 <div class="alert alert-info border-0 mb-0">
-                    <i class="ri-information-line me-1"></i> Public: All current and future tiers can access this product.
+            
+                 <div class="alert alert-info border-0 mb-3">
+                    <i class="ri-information-line me-1"></i> Public: Product follows category visibility.
+                 </div>
+                 
+                 <div class="mb-3">
+                     <label class="form-label text-muted fs-12 text-uppercase fw-bold">Allowed by Category</label>
+                     <div class="d-flex flex-wrap gap-2">
+                         @forelse($membershipTiers->whereIn('id', $categoryAllowedTierIds) as $tier)
+                             <span class="badge bg-light text-body border">{{ $tier->name }}</span>
+                         @empty
+                             <span class="badge bg-danger-subtle text-danger border border-danger-subtle">No Tiers Allowed (Category Hidden)</span>
+                         @endforelse
+                     </div>
                  </div>
             @endif
         </div>
@@ -75,10 +123,8 @@
                         <label class="form-label">Minimum Clear View Tier</label>
                         <select class="form-select" wire:model.live="restrictedMinTierId">
                             <option value="">Select Minimum Tier</option>
-                            @foreach($membershipTiers as $tier)
-                                @if(in_array($tier->id, $computedVisibilityTierIds))
-                                    <option value="{{ $tier->id }}">{{ $tier->name }}</option>
-                                @endif
+                            @foreach($this->visibilityAllowedTiers as $tier)
+                                <option value="{{ $tier->id }}">{{ $tier->name }}</option>
                             @endforeach
                         </select>
                         <div class="form-text">Visible users with this tier OR HIGHER will see clear content.</div>
@@ -87,19 +133,17 @@
                 @elseif($restrictionType === 'random')
                     <div class="col-md-12">
                         <label class="form-label">Select Clear View Tiers</label>
-                        <div class="row g-2">
-                            @foreach($membershipTiers as $tier)
-                                @if(in_array($tier->id, $computedVisibilityTierIds))
-                                    <div class="col-6">
-                                        <div class="form-check card-radio">
-                                            <input class="form-check-input" type="checkbox" value="{{ $tier->id }}" wire:model.live="selectedRandomTiers" id="randTier_{{ $tier->id }}">
-                                            <label class="form-check-label" for="randTier_{{ $tier->id }}">
-                                                <span class="fs-14 mb-1 d-block">{{ $tier->name }}</span>
-                                                <span class="text-muted text-xs">Level {{ $tier->level }}</span>
-                                            </label>
-                                        </div>
+                        <div class="row g-2" wire:key="clear-tiers-{{ $categoryId }}-{{ $restrictionMode }}-{{ md5(json_encode($computedVisibilityTierIds)) }}">
+                            @foreach($this->visibilityAllowedTiers as $tier)
+                                <div class="col-6">
+                                    <div class="form-check card-radio">
+                                        <input class="form-check-input" type="checkbox" value="{{ $tier->id }}" wire:model.live="selectedRandomTiers" id="randTier_{{ $tier->id }}">
+                                        <label class="form-check-label" for="randTier_{{ $tier->id }}">
+                                            <span class="fs-14 mb-1 d-block">{{ $tier->name }}</span>
+                                            <span class="text-muted text-xs">Level {{ $tier->level }}</span>
+                                        </label>
                                     </div>
-                                @endif
+                                </div>
                             @endforeach
                         </div>
                          @if(empty($computedVisibilityTierIds))
@@ -112,10 +156,8 @@
                         <label class="form-label">Private Clear View Tier</label>
                         <select class="form-select" wire:model.live="restrictedPrivateTierId">
                             <option value="">Select Tier</option>
-                            @foreach($membershipTiers as $tier)
-                                @if(in_array($tier->id, $computedVisibilityTierIds))
-                                    <option value="{{ $tier->id }}">{{ $tier->name }}</option>
-                                @endif
+                            @foreach($this->visibilityAllowedTiers as $tier)
+                                <option value="{{ $tier->id }}">{{ $tier->name }}</option>
                             @endforeach
                         </select>
                         <div class="form-text">ONLY users with exactly this tier will see clear content.</div>

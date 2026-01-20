@@ -37,14 +37,16 @@
             
             <div class="col-md-4 border-start ps-3">
                 <label class="form-label fs-11 text-muted text-uppercase mb-0">Restriction</label>
-                <select class="form-select form-select-sm mt-1" wire:model="attachmentRows.{{ $index }}.restriction_mode">
+                <select class="form-select form-select-sm mt-1" wire:model.live="attachmentRows.{{ $index }}.restriction_mode">
                     <option value="inherit">Inherit (Default)</option>
                     <option value="public">Force Public</option>
                     <option value="restricted">Restricted Subset</option>
                 </select>
                 @error("attachmentRows.{$index}.restriction_mode") <span class="text-danger fs-11">{{ $message }}</span> @enderror
 
-                @include('livewire.admin.archive.products.partials._attachment-restriction-config', ['index' => $index, 'row' => $row])
+                <div wire:key="att-restrict-{{ $index }}-{{ data_get($attachmentRows, $index.'.restriction_mode', 'inherit') }}">
+                    @include('livewire.admin.archive.products.partials._attachment-restriction-config', ['index' => $index, 'row' => $row])
+                </div>
             </div>
         </div>
     </div>

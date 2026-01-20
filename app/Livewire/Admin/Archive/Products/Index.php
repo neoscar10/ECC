@@ -37,7 +37,9 @@ class Index extends Component
     public $membershipTiers = [];
 
     // Modal States
+    public $showCreateModal = false;
     public $showAttachmentsModal = false;
+    public $showEarlyAccessModal = false;
     public $isEditMode = false;
     public $productId;
     
@@ -64,6 +66,9 @@ class Index extends Component
     public $selectedRandomTiers = []; // For product restriction
     public $selectedVisibilityTiers = []; // [NEW] Who can access the product at all
     
+    // Gating Logic
+    public $categoryAllowedTierIds = []; // [NEW] Tiers allowed by currently selected category
+
     // Blur / Clear View
     public $blurEnabled = false;
     public $clearViewTierIds = [];
@@ -299,6 +304,9 @@ class Index extends Component
         
         $this->title = $product->title;
         $this->categoryId = $product->archive_category_id;
+        
+        $this->computeCategoryAllowedTiers(); // [NEW] Populate allowed tiers for validation/UI
+        
         $this->priceMin = $product->price_min_amount;
         $this->priceMax = $product->price_max_amount;
         $this->quantity = $product->quantity ?? 1;
@@ -571,6 +579,22 @@ class Index extends Component
         }
     }
 
+    public function removeNewImage($index)
+    {
+        if (isset($this->newImages[$index])) {
+            unset($this->newImages[$index]);
+            $this->newImages = array_values($this->newImages);
+        }
+    }
+
+    public function removeNew360Image($index)
+    {
+        if (isset($this->new360Images[$index])) {
+            unset($this->new360Images[$index]);
+            $this->new360Images = array_values($this->new360Images);
+        }
+    }
+
 
 
     // --- Early Access Config ---
@@ -640,18 +664,30 @@ class Index extends Component
     
     // Compute IDs for the Access Form (creation/edit state)
     // Compute IDs for BLUR consideration (The 'Available' set)
-    public function computeEligibleBlurTiers()
+    // Computed Property: The single source of truth for "Visibility Allowed Tiers"
+    public function getVisibilityAllowedTierIdsProperty()
     {
-        $tiers = collect([]);
-        
         if ($this->restrictionMode === 'public') {
-             $tiers = $this->membershipTiers;
-        } elseif ($this->restrictionMode === 'restricted') {
-             // Only those explicitly selected
-             $tiers = $this->membershipTiers->whereIn('id', $this->selectedVisibilityTiers);
+            return $this->categoryAllowedTierIds;
         }
         
-        $this->computedVisibilityTierIds = $tiers->pluck('id')->map(fn($id) => (string)$id)->toArray();
+        // Restricted: Intersection of Category Allowed AND User Selected
+        return array_intersect($this->categoryAllowedTierIds, $this->selectedVisibilityTiers);
+    }
+    
+    // Computed Property: Collection of models
+    public function getVisibilityAllowedTiersProperty()
+    {
+        $ids = $this->visibilityAllowedTierIds;
+        // Filter from all loaded tiers to preserve order/attributes
+        return $this->membershipTiers->whereIn('id', $ids); 
+    }
+
+    // Compute IDs for BLUR consideration
+    // This methods updates the simple array property used by UI/Validation
+    public function computeEligibleBlurTiers()
+    {
+        $this->computedVisibilityTierIds = array_map(fn($id) => (string)$id, $this->visibilityAllowedTierIds);
         
         // Auto-sanitize Blur Selections
         if ($this->blurEnabled) {
@@ -667,11 +703,41 @@ class Index extends Component
         }
     }
     
-    public function updatedSelectedVisibilityTiers() { $this->computeEligibleBlurTiers(); }
-    public function updatedRestrictedMinTierId() { /* No-op unless we want to recalc something */ } 
-    public function updatedRestrictedPrivateTierId() {  }
-    public function updatedSelectedRandomTiers() {  } 
-    public function updatedBlurEnabled() { $this->computeEligibleBlurTiers(); }
+    public function updatedSelectedVisibilityTiers()
+    {
+        $this->computeEligibleBlurTiers();
+    }
+    
+    public function computeCategoryAllowedTiers()
+    {
+        if ($this->categoryId) {
+            $cat = ArchiveCategory::with('tiers')->find($this->categoryId);
+            if ($cat) {
+                 $this->categoryAllowedTierIds = $cat->getAllowedTierIds();
+                 // Auto-clean selected if not allowed
+                 if (!empty($this->selectedVisibilityTiers)) {
+                     $valid = array_intersect($this->selectedVisibilityTiers, $this->categoryAllowedTierIds);
+                     if (count($valid) !== count($this->selectedVisibilityTiers)) {
+                         $this->selectedVisibilityTiers = array_values($valid);
+                     }
+                 }
+            } else {
+                $this->categoryAllowedTierIds = [];
+            }
+        } else {
+            $this->categoryAllowedTierIds = [];
+        }
+        
+        // [NEW] Always recompute blur eligibility when category changes
+        $this->computeEligibleBlurTiers();
+    }
+
+    public function updatedCategoryId($value)
+    {
+        $this->computeCategoryAllowedTiers();
+    }
+    
+    // ... (computeEligibleBlurTiers) has been replaced/moved above
 
     public function addEarlyAccessRow()
     {
@@ -682,10 +748,27 @@ class Index extends Component
     {
         unset($this->earlyAccessRows[$index]);
         $this->earlyAccessRows = array_values($this->earlyAccessRows);
+        $this->resetErrorBag();
+    }
+
+    public function updatedEarlyAccessRows($value, $name)
+    {
+        // Clear validation for the exact nested key that changed
+        $this->resetValidation($name);
+
+        // Also clear the row’s derived errors so corrected values can pass on next save
+        if (preg_match('/^earlyAccessRows\.(\d+)\.(tier_id|access_at)$/', $name, $m)) {
+            $i = (int) $m[1];
+            $this->resetValidation("earlyAccessRows.$i.tier_id");
+            $this->resetValidation("earlyAccessRows.$i.access_at");
+        }
     }
 
     public function saveEarlyAccess()
     {
+        $this->resetErrorBag();
+        $this->resetValidation();
+
         $product = ArchiveProduct::findOrFail($this->productId);
         
         // Validation Logic
@@ -699,43 +782,58 @@ class Index extends Component
         $allowedTierIds = $allowedTiers->pluck('id')->toArray();
 
         // Check rows
-        foreach ($this->earlyAccessRows as $row) {
+        foreach ($this->earlyAccessRows as $index => $row) {
             if (!empty($row['tier_id'])) {
                 if (!in_array($row['tier_id'], $allowedTierIds)) {
-                    $this->addError("earlyAccessRows", "One or more selected tiers are not allowed for this product restriction.");
-                    return;
+                    $this->addError("earlyAccessRows.{$index}.tier_id", "Tier not allowed.");
+                    continue; // Skip further checks for this row if invalid tier
+                }
+
+                // [NEW] Check Eligibility
+                $tierObj = \App\Models\MembershipTier::find($row['tier_id']);
+                if ($tierObj && !$tierObj->has_early_access) {
+                     $this->addError("earlyAccessRows.{$index}.tier_id", "Tier not eligible.");
+                     continue;
                 }
                 
                 if (!empty($row['access_at'])) {
                     $accessDate = Carbon::parse($row['access_at']);
                     if ($accessDate->gt($product->go_live_at)) {
-                        $this->addError("earlyAccessRows", "Early access date must be before Go Live date ({$product->go_live_at->format('Y-m-d H:i')}).");
-                        return;
+                        $this->addError("earlyAccessRows.{$index}.access_at", "Date must be before Go Live.");
                     }
                 } else {
-                     $this->addError("earlyAccessRows", "Access date is required.");
-                     return;
+                     $this->addError("earlyAccessRows.{$index}.access_at", "Date required.");
                 }
             }
         }
-
-        // Save
-        $product->earlyAccessWindows()->delete();
         
-        foreach ($this->earlyAccessRows as $row) {
-            if (!empty($row['tier_id']) && !empty($row['access_at'])) {
-                $product->earlyAccessWindows()->create([
-                    'membership_tier_id' => $row['tier_id'],
-                    'access_at' => $row['access_at']
-                ]);
-            }
+        if ($this->getErrorBag()->isNotEmpty()) {
+            $this->dispatch('toast', type: 'error', message: 'Please fix the highlighted fields.');
+            return;
         }
-        
-        $this->showEarlyAccessModal = false;
-        $this->dispatch('hide-ea-modal');
-        session()->flash('success', 'Early access config saved.');
-    }
 
+        try {
+            // Save
+            $product->earlyAccessWindows()->delete();
+            
+            foreach ($this->earlyAccessRows as $row) {
+                if (!empty($row['tier_id']) && !empty($row['access_at'])) {
+                    $product->earlyAccessWindows()->create([
+                        'membership_tier_id' => $row['tier_id'],
+                        'access_at' => $row['access_at']
+                    ]);
+                }
+            }
+            
+            $this->showEarlyAccessModal = false;
+            $this->dispatch('hide-ea-modal');
+            $this->dispatch('toast', type: 'success', message: 'Early access config saved.');
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('toast', type: 'error', message: 'Unable to save. Please try again.');
+        }
+    }
+        
     // --- Attachments Config ---
     
     public $attachmentAllowedTiers = [];

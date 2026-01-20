@@ -27,10 +27,15 @@
                                 @endphp
                                 <tr class="{{ $isRowInvalid ? 'table-danger' : '' }}">
                                     <td>
-                                        <select class="form-select {{ $isRowInvalid ? 'is-invalid' : '' }}" wire:model="earlyAccessRows.{{ $index }}.tier_id">
+                                        <select class="form-select {{ $isRowInvalid || $errors->has("earlyAccessRows.{$index}.tier_id") ? 'is-invalid' : '' }}" wire:model="earlyAccessRows.{{ $index }}.tier_id">
                                             <option value="">Select Tier</option>
                                             @foreach($earlyAccessAllowedTiers as $tier)
-                                                <option value="{{ $tier['id'] }}">{{ $tier['name'] }}</option>
+                                                @php
+                                                    $isEligible = $tier['has_early_access'] ?? false;
+                                                @endphp
+                                                <option value="{{ $tier['id'] }}" @disabled(!$isEligible)>
+                                                    {{ $tier['name'] }} {{ !$isEligible ? '(Not Eligible)' : '' }}
+                                                </option>
                                             @endforeach
                                         </select>
                                         @if($isRowInvalid)
@@ -38,10 +43,11 @@
                                                 Tier not allowed. Please remove.
                                             </div>
                                         @endif
-                                        @error("earlyAccessRows") <span class="text-danger text-sm">{{ $message }}</span> @enderror
+                                        @error("earlyAccessRows.{$index}.tier_id") <span class="text-danger small">{{ $message }}</span> @enderror
                                     </td>
                                     <td>
-                                        <input type="datetime-local" class="form-control" wire:model="earlyAccessRows.{{ $index }}.access_at">
+                                        <input type="datetime-local" class="form-control {{ $errors->has("earlyAccessRows.{$index}.access_at") ? 'is-invalid' : '' }}" wire:model="earlyAccessRows.{{ $index }}.access_at">
+                                        @error("earlyAccessRows.{$index}.access_at") <span class="text-danger small">{{ $message }}</span> @enderror
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-soft-danger btn-sm" wire:click="removeEarlyAccessRow({{ $index }})">
