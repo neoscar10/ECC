@@ -153,8 +153,10 @@
                             <div class="col-md-6 border-end">
                                 <h6 class="text-muted text-uppercase fw-semibold mb-3">Customer Information</h6>
                                 <p class="mb-2"><span class="fw-medium">Name:</span> {{ $selectedEnquiry->contact_name }}</p>
+                                <p class="mb-2"><span class="fw-medium">Membership Tier:</span> {{ $selectedEnquiry->user?->currentMembership?->membershipTier?->name ?? 'N/A' }}</p>
                                 <p class="mb-2"><span class="fw-medium">Email:</span> <a href="mailto:{{ $selectedEnquiry->contact_email }}">{{ $selectedEnquiry->contact_email }}</a></p>
                                 <p class="mb-2"><span class="fw-medium">Phone:</span> {{ $selectedEnquiry->contact_phone ?? 'N/A' }}</p>
+
                                 <p class="mb-2"><span class="fw-medium">User Account:</span> 
                                     @if($selectedEnquiry->user)
                                         <a href="{{ route('admin.users.index', ['search' => $selectedEnquiry->user->email]) }}" target="_blank">View Profile</a>
