@@ -559,14 +559,17 @@ class Index extends Component
     
     public function deleteImage($imageId, $type = 'main')
     {
+        // Preserve current step to avoid jumping back to Step 1
+        $currentStep = $this->createStep;
+
         if ($type === 'main') {
             $img = ArchiveProductImage::findOrFail($imageId);
             // Verify ownership
             if ($this->productId && $img->archive_product_id == $this->productId) {
                 Storage::disk('public')->delete($img->image_path);
                 $img->delete();
-                // Refresh
-                $this->edit($this->productId); 
+                // Refresh ONLY media, not full edit form
+                $this->refreshMedia(); 
             }
         } elseif ($type === '360') {
              // Assuming ArchiveProduct360Image model exists
@@ -574,8 +577,22 @@ class Index extends Component
              if ($this->productId && $img->archive_product_id == $this->productId) {
                 Storage::disk('public')->delete($img->image_path);
                 $img->delete();
-                $this->edit($this->productId); 
+                $this->refreshMedia(); 
              }
+        }
+        
+        // Restore step (though refreshMedia shouldn't touch it, SAFETY first)
+        $this->createStep = $currentStep;
+    }
+
+    public function refreshMedia()
+    {
+        if ($this->productId) {
+            $product = ArchiveProduct::with(['images', 'images360'])->find($this->productId);
+            if ($product) {
+                $this->existingImages = $product->images;
+                $this->existing360Images = $product->images360;
+            }
         }
     }
 

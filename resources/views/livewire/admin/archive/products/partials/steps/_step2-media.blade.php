@@ -11,7 +11,7 @@
                         <img src="{{ Storage::url(str_replace('\\', '/', $img->image_path)) }}" class="img-fluid rounded w-100 h-100 object-cover border">
                         <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 rounded-circle" 
                                 style="width: 16px; height: 16px; min-width: 16px; transform: translate(30%, -30%); padding: 0;"
-                                wire:click="deleteImage({{ $img->id }}, 'main')">
+                                wire:click.prevent.stop="deleteImage({{ $img->id }}, 'main')">
                             <i class="ri-close-line" style="font-size: 10px;"></i>
                         </button>
                     </div>
@@ -45,7 +45,7 @@
                          <img src="{{ $tempImg->temporaryUrl() }}" class="img-fluid rounded h-100 object-cover">
                          <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 rounded-circle" 
                                 style="width: 16px; height: 16px; min-width: 16px; transform: translate(30%, -30%); padding: 0;"
-                                wire:click="removeNewImage({{ $i }})">
+                                wire:click.prevent.stop="removeNewImage({{ $i }})">
                             <i class="ri-close-line" style="font-size: 10px;"></i>
                         </button>
                      </div>
@@ -66,7 +66,7 @@
                         <img src="{{ Storage::url(str_replace('\\', '/', $img->image_path)) }}" class="img-fluid rounded w-100 h-100 object-cover border">
                         <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 rounded-circle" 
                                 style="width: 16px; height: 16px; min-width: 16px; transform: translate(30%, -30%); padding: 0;"
-                                wire:click="deleteImage({{ $img->id }}, '360')">
+                                wire:click.prevent.stop="deleteImage({{ $img->id }}, '360')">
                             <i class="ri-close-line" style="font-size: 10px;"></i>
                         </button>
                     </div>
@@ -100,7 +100,7 @@
                          <img src="{{ $tempImg->temporaryUrl() }}" class="img-fluid rounded h-100 object-cover">
                          <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 rounded-circle" 
                                 style="width: 16px; height: 16px; min-width: 16px; transform: translate(30%, -30%); padding: 0;"
-                                wire:click="removeNew360Image({{ $i }})">
+                                wire:click.prevent.stop="removeNew360Image({{ $i }})">
                             <i class="ri-close-line" style="font-size: 10px;"></i>
                         </button>
                      </div>
