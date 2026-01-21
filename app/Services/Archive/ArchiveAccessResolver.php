@@ -38,7 +38,8 @@ class ArchiveAccessResolver
         $upgrade = $this->findBaseRestrictionUpgrade($category);
         $context = [];
         // Categories typically don't specify private vs public in the same way, but let's assume standard tier required.
-        $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
+        // [FIX] Safety check
+        $context['required_tier_name'] = ($upgrade && isset($upgrade['tier'])) ? $upgrade['tier']->name : 'Higher';
         
         return $this->buildLockedAccess(
             'category_restricted',
@@ -46,7 +47,7 @@ class ArchiveAccessResolver
             [
                 'type' => 'upgrade_membership',
                 'label' => 'Upgrade',
-                'target_tier' => $upgrade['tier'] ? $this->formatTier($upgrade['tier']) : null,
+                'target_tier' => ($upgrade && isset($upgrade['tier'])) ? $this->formatTier($upgrade['tier']) : null,
                 'deeplink' => '/membership/tiers'
             ],
             $userTier,
@@ -179,12 +180,17 @@ class ArchiveAccessResolver
         $upgrade = $this->findBaseRestrictionUpgrade($product);
         
         $context = [];
-        if ($product->restriction_type === 'private') {
-             // Rule 2: Private
-             $context['private_tier_name'] = $upgrade['tier']?->name ?? 'Private';
+        // [FIX] Safety check for null upgrade result
+        if ($upgrade) {
+            if ($product->restriction_type === 'private') {
+                 // Rule 2: Private
+                 $context['private_tier_name'] = $upgrade['tier']?->name ?? 'Private';
+            } else {
+                 // Rule 1: Restricted
+                 $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
+            }
         } else {
-             // Rule 1: Restricted
-             $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
+             $context['required_tier_name'] = 'Membership';
         }
 
         return $this->buildLockedAccess(
@@ -193,7 +199,7 @@ class ArchiveAccessResolver
             [
                 'type' => 'upgrade_membership',
                 'label' => 'Upgrade',
-                'target_tier' => $upgrade['tier'] ? $this->formatTier($upgrade['tier']) : null,
+                'target_tier' => isset($upgrade['tier']) ? $this->formatTier($upgrade['tier']) : null,
                 'deeplink' => '/membership/tiers'
             ],
             $userTier,
@@ -237,10 +243,16 @@ class ArchiveAccessResolver
         $upgrade = $this->findBaseRestrictionUpgrade($attachment);
         
         $context = [];
-        if ($attachment->restriction_type === 'private') {
-             $context['private_tier_name'] = $upgrade['tier']?->name ?? 'Private';
+        // [FIX] Handle null upgrade (broken config) gracefully
+        if ($upgrade) {
+            if ($attachment->restriction_type === 'private') {
+                 $context['private_tier_name'] = $upgrade['tier']?->name ?? 'Private';
+            } else {
+                 $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
+            }
         } else {
-             $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
+            // Fallback for broken config (prevent crash)
+            $context['required_tier_name'] = 'Membership';
         }
 
         return $this->buildLockedAccess(
@@ -249,7 +261,7 @@ class ArchiveAccessResolver
             [
                 'type' => 'upgrade_membership',
                 'label' => 'Upgrade',
-                'target_tier' => $upgrade['tier'] ? $this->formatTier($upgrade['tier']) : null,
+                'target_tier' => isset($upgrade['tier']) ? $this->formatTier($upgrade['tier']) : null,
                 'deeplink' => '/membership/tiers'
             ],
             $userTier
