@@ -909,6 +909,9 @@
                                     <li class="nav-item">
                                         <a href="{{ route('admin.archive.enquiries') }}" class="nav-link {{ request()->routeIs('admin.archive.enquiries') ? 'active' : '' }}" data-key="t-enquiries">Enquiries</a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.archive.orders.index') }}" class="nav-link {{ request()->routeIs('admin.archive.orders.*') ? 'active' : '' }}" data-key="t-orders">Orders</a>
+                                    </li>
                                 </ul>
                             </div>
                         </li>

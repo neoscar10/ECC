@@ -22,4 +22,9 @@ class ArchiveProductEnquiry extends Model
     {
         return $this->belongsTo(ArchiveProduct::class, 'archive_product_id');
     }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(ArchiveOrder::class, 'archive_order_id');
+    }
 }

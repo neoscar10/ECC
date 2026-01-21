@@ -110,6 +110,11 @@
                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                     <li><a href="#" wire:click.prevent="viewEnquiry({{ $enquiry->id }})" class="dropdown-item"><i class="ri-eye-fill align-bottom me-2 text-muted"></i> View</a></li>
                                                     <li><a class="dropdown-item edit-item-btn" href="#" wire:click.prevent="updateStatus({{ $enquiry->id }}, 'contacted')"><i class="ri-mail-send-fill align-bottom me-2 text-muted"></i> Mark Contacted</a></li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" wire:click.prevent="$dispatch('log-sale-from-enquiry', { enquiryId: {{ $enquiry->id }} })">
+                                                            <i class="ri-shopping-cart-2-line align-bottom me-2 text-primary"></i> Log Sale
+                                                        </a>
+                                                    </li>
                                                     <li><a class="dropdown-item remove-item-btn" href="#" wire:click.prevent="updateStatus({{ $enquiry->id }}, 'closed')"><i class="ri-check-double-fill align-bottom me-2 text-muted"></i> Mark Closed</a></li>
                                                 </ul>
                                             </div>
@@ -138,6 +143,9 @@
             </div>
         </div>
     </div>
+    
+    {{-- Orders Create Modal (Hidden until triggered) --}}
+    @livewire('admin.archive.orders.create')
     
     {{-- View Modal --}}
     <div wire:ignore.self class="modal fade" id="viewEnquiryModal" tabindex="-1" aria-labelledby="viewEnquiryModalLabel" aria-hidden="true">

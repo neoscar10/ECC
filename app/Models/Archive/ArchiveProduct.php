@@ -85,14 +85,6 @@ class ArchiveProduct extends Model
         return $this->belongsTo(MembershipTier::class, 'restricted_private_tier_id');
     }
 
-    /**
-     * Scope to filter products visible to the user.
-     * 
-     * Visibility Rule:
-     * 1. Public => Visible to everyone.
-     * 2. Restricted => Visible ONLY if user's tier is in visibilityTiers().
-     * (Old 'restriction_type' logic now applies to BLUR, not visibility)
-     */
     public function scopeVisibleTo($query, ?\App\Models\User $user, ?MembershipTier $userTier = null)
     {
         return $query->where(function ($q) use ($user, $userTier) {
@@ -129,5 +121,10 @@ class ArchiveProduct extends Model
                 }
             });
         });
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(ArchiveOrder::class);
     }
 }

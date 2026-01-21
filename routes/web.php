@@ -33,5 +33,6 @@ Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admi
         Route::get('/categories', \App\Livewire\Admin\Archive\Categories\Index::class)->name('categories');
         Route::get('/products', \App\Livewire\Admin\Archive\Products\Index::class)->name('products');
         Route::get('/enquiries', \App\Livewire\Admin\Archive\Enquiries\Index::class)->name('enquiries');
+        Route::get('/orders', \App\Livewire\Admin\Archive\Orders\Index::class)->name('orders.index');
     });
 });
