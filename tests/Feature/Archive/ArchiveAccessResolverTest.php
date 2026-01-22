@@ -129,6 +129,33 @@ class ArchiveAccessResolverTest extends TestCase
         
         // Ensure VIP string string is gone
         $this->assertStringNotContainsString('VIP', json_encode($access));
+        
+        // Verify Message Body contains formatted date
+        $expectedDate = $product->go_live_at->format('d M Y, h:i A');
+        $this->assertEquals("Goes live on {$expectedDate}", $access['message']['body']);
+    }
+
+    public function test_it_shows_formatted_date_for_standard_scheduled_product()
+    {
+        // 1. Setup Standard Product (No EA)
+        $category = ArchiveCategory::create(['title' => 'Cat', 'slug' => 'cat-'.uniqid(), 'visibility' => 'public']);
+        $product = ArchiveProduct::create([
+            'title' => 'Scheduled Product', 'slug' => 'sched-'.uniqid(),
+            'archive_category_id' => $category->id,
+            'is_active' => true,
+            'early_access_enabled' => false,
+            'go_live_now' => false,
+            'go_live_at' => now()->addDays(3),
+        ]);
+
+        $resolver = new \App\Services\Archive\ArchiveAccessResolver();
+        $access = $resolver->resolveProductAccess($product, null, null);
+
+        // 2. Assert
+        $this->assertEquals('not_live_yet', $access['reason']);
+        
+        $expectedDate = $product->go_live_at->format('d M Y, h:i A');
+        $this->assertEquals("Goes live on {$expectedDate}", $access['message']['body']);
     }
 
     public function test_it_returns_empty_actions_if_user_already_has_early_access_tier()

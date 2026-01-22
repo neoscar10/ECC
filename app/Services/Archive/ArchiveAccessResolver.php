@@ -125,9 +125,10 @@ class ArchiveAccessResolver
                     ];
                 } else {
                     // Scenario: EA Enabled but NO windows (Misconfiguration fallback)
+                    $goLiveText = $product->go_live_at ? "Goes live on " . $product->go_live_at->format('d M Y, h:i A') : 'Stay tuned.';
                     return $this->buildLockedAccess(
                         'not_live_yet',
-                        ['title' => 'Coming Soon', 'body' => 'Stay tuned.'],
+                        ['title' => 'Coming Soon', 'body' => $goLiveText],
                         ['type' => 'wait', 'label' => 'Coming Soon'],
                         $userTier,
                         'time-lock',
@@ -264,9 +265,10 @@ class ArchiveAccessResolver
             }
             
             // Not Live & No Early Access
+            $goLiveText = $product->go_live_at ? "Goes live on " . $product->go_live_at->format('d M Y, h:i A') : 'Stay tuned.';
             return $this->buildLockedAccess(
                 'not_live_yet',
-                ['title' => 'Coming Soon', 'body' => 'Stay tuned.'],
+                ['title' => 'Coming Soon', 'body' => $goLiveText],
                 ['type' => 'wait', 'label' => 'Coming Soon'],
                 $userTier,
                 'time-lock', // or lock? normalizedIcon will handle it as lock unless specifically early_access_locked
