@@ -34,11 +34,11 @@
                                             </div>
                                         </div>
                                         
-                                        <div class="d-flex justify-content-between align-items-center py-2 border-top border-dashed">
+                                        <div class="d-flex justify-content-between align-items-center py-2 border-top b">
                                             <span class="text-muted">Available Stock:</span>
                                             <span class="fw-bold fs-16 {{ $selectedProduct->quantity < 1 ? 'text-danger' : 'text-success' }}">{{ $selectedProduct->quantity }}</span>
                                         </div>
-                                        <div class="d-flex justify-content-between align-items-center py-2 border-top border-dashed">
+                                        <div class="d-flex justify-content-between align-items-center py-2 border-top ">
                                             <span class="text-muted">Min Price:</span>
                                             <span class="fw-medium">INR {{ number_format($selectedProduct->price_min_amount) }}</span>
                                         </div>
@@ -124,8 +124,12 @@
                                                     <h6 class="fs-14 mb-1">{{ $userSearch }}</h6>
                                                     <p class="text-muted mb-0 fs-11">Registered Member</p>
                                                 </div>
-                                                <button type="button" wire:click="$set('user_id', null)" class="btn btn-sm btn-ghost-danger">Change</button>
+                                                
+                                                    
+                                                
+                                                
                                             </div>
+                                            <button type="button" wire:click="$set('user_id', null)" class="btn btn-sm btn-danger">Change</button>
                                         </div>
                                     </div>
                                 @else
