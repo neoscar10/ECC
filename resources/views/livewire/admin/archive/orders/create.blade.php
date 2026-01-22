@@ -129,7 +129,7 @@
                                                 
                                                 
                                             </div>
-                                            <button type="button" wire:click="$set('user_id', null)" class="btn btn-sm btn-danger">Change</button>
+                                            <button type="button" wire:click="$set('user_id', null)" class="btn btn-sm btn-danger mt-2">Change</button>
                                         </div>
                                     </div>
                                 @else
