@@ -68,6 +68,14 @@ Route::prefix('v1')->group(function () {
         Route::post('enquiries', [\App\Http\Controllers\Api\V1\Archive\ArchiveEnquiryController::class, 'store']);
     });
 
+    // Auction Routes
+    Route::middleware('auth:api')->prefix('auctions')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\AuctionController::class, 'index']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\V1\AuctionController::class, 'show']);
+        Route::post('/{id}/bid', [\App\Http\Controllers\Api\V1\AuctionController::class, 'bid']);
+        Route::post('/{id}/auto-bid', [\App\Http\Controllers\Api\V1\AuctionController::class, 'autoBid']);
+    });
+
     // Admin Routes
     Route::middleware(['auth:api', 'role:ecc_admin|super_admin'])->prefix('admin')->group(function () {
         Route::patch('memberships/{id}/approve', [MembershipStatusController::class, 'approve']);

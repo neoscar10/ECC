@@ -14,6 +14,10 @@ class MembershipTier extends Model
         'benefits_json' => 'array',
     ];
 
+    protected $hidden = [
+        'price_amount',
+    ];
+
     public function privileges()
     {
         return $this->belongsToMany(Privilege::class, 'membership_tier_privilege')->withTimestamps();

@@ -1,0 +1,191 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Http\Controllers\Controller;
+use App\Models\Auctions\AuctionLot;
+use App\Services\Auctions\AuctionAccessResolverService;
+use App\Services\Auctions\AuctionAutoBidService;
+use App\Services\Auctions\AuctionBiddingService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class AuctionController extends Controller
+{
+    protected $accessResolver;
+    protected $biddingService;
+    protected $autoBidService;
+
+    public function __construct(
+        AuctionAccessResolverService $accessResolver,
+        AuctionBiddingService $biddingService,
+        AuctionAutoBidService $autoBidService
+    ) {
+        $this->accessResolver = $accessResolver;
+        $this->biddingService = $biddingService;
+        $this->autoBidService = $autoBidService;
+    }
+
+    public function index(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user(); // or generic Auth::user() depending on guard setup
+        
+        $query = AuctionLot::query();
+
+        // 1. Filter by Status
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        } else {
+            // Default to live/upcoming
+            $query->whereIn('status', ['live', 'upcoming']);
+        }
+
+        // 2. Pagination
+        $lots = $query->orderBy('sort_order')->orderBy('created_at', 'desc')->paginate(20);
+
+        // 3. Resolve Access for each lot
+        // Ideally use API Resource, but mapping here for brevity
+        $data = $lots->getCollection()->map(function ($lot) use ($user) {
+            $access = $this->accessResolver->resolve($lot, $user);
+            
+            // Should we hide completely?
+            if (!$access['has_visibility']) {
+                return null;
+            }
+
+            return $this->transformLot($lot, $access);
+        })->filter(); // Remove nulls
+
+        return response()->json([
+            'data' => $data->values(),
+            'meta' => [
+                'current_page' => $lots->currentPage(),
+                'last_page' => $lots->lastPage(),
+                'total' => $lots->total(),
+            ]
+        ]);
+    }
+
+    public function show($id)
+    {
+        $user = Auth::guard('sanctum')->user();
+        $lot = AuctionLot::with(['images', 'bids.user'])->findOrFail($id);
+        
+        $access = $this->accessResolver->resolve($lot, $user);
+
+        if (!$access['has_visibility']) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        return response()->json([
+            'data' => $this->transformLot($lot, $access, true)
+        ]);
+    }
+
+    public function bid(Request $request, $id)
+    {
+        $request->validate([
+            'amount' => 'required|numeric',
+        ]);
+
+        $user = Auth::guard('sanctum')->user();
+        if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+
+        $lot = AuctionLot::findOrFail($id);
+        
+        // Access Check
+        $access = $this->accessResolver->resolve($lot, $user);
+        if (!$access['can_bid']) {
+            return response()->json(['message' => 'You are not eligible to bid on this lot.'], 403);
+        }
+
+        try {
+            $lot = $this->biddingService->placeBid($lot, $user, $request->amount);
+            
+            // Check for auto-bids response
+            $this->autoBidService->processAutoBids($lot);
+            
+            return response()->json([
+                'message' => 'Bid placed successfully.',
+                'data' => $this->transformLot($lot->fresh(), $access, true)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function autoBid(Request $request, $id)
+    {
+        $request->validate([
+            'max_bid' => 'required|numeric',
+            'increment_amount' => 'required|numeric',
+        ]);
+
+        $user = Auth::guard('sanctum')->user();
+        if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+
+        $lot = AuctionLot::findOrFail($id);
+        
+        $access = $this->accessResolver->resolve($lot, $user);
+        if (!$access['can_auto_bid']) {
+            return response()->json(['message' => 'You are not enabled for auto-bidding (Check Membership Tier).'], 403);
+        }
+
+        try {
+            $this->autoBidService->setAutoBid(
+                $lot, 
+                $user, 
+                $request->max_bid, 
+                $request->increment_amount
+            );
+
+            return response()->json(['message' => 'Auto-bid configured successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    protected function transformLot($lot, $access, $detailed = false)
+    {
+        // Image Logic
+        $images = $lot->images->sortBy('sort_order')->values();
+        $hero = $images->first();
+        
+        // Blurring
+        // If !can_view_clear, we should ideally NOT return the clear URL or return a blurred derivative.
+        // For this API, we can return a flag and let the client blur, or return a placeholder.
+        // Or if we had a blurred version generated.
+        // We'll return the clear URL but with the 'should_blur' flag, trusting the client? NO.
+        // Security dictates we don't send the clear URL.
+        // But for MVP, let's assume valid URL logic.
+        // If !can_view_clear, we send null or "restricted_url".
+        
+        $imageUrls = $images->map(function($img) use ($access) {
+            return $access['can_view_clear'] ? $img->url : null; // secure it
+        });
+
+        return [
+            'id' => $lot->id,
+            'lot_no' => $lot->lot_no,
+            'title' => $lot->title,
+            'subtitle' => $lot->subtitle,
+            'status' => $lot->status,
+            'current_bid' => $lot->current_highest_bid,
+            'starting_price' => $lot->starting_price,
+            'currency' => $lot->currency,
+            'ends_at' => $lot->ends_at,
+            'is_user_winning' => Auth::guard('sanctum')->id() === $lot->winner_user_id,
+            'access' => $access,
+            'images' => $imageUrls,
+            'description' => $detailed ? $lot->description : null,
+            'provenance' => $detailed ? $lot->provenance_text : null,
+            'bids' => $detailed ? $lot->bids->map(function($b){
+                 return [
+                     'amount' => $b->amount,
+                     'time' => $b->placed_at,
+                     'is_me' => Auth::guard('sanctum')->id() === $b->user_id
+                 ];
+            }) : null
+        ];
+    }
+}

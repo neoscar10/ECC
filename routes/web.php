@@ -35,4 +35,10 @@ Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admi
         Route::get('/enquiries', \App\Livewire\Admin\Archive\Enquiries\Index::class)->name('enquiries');
         Route::get('/orders', \App\Livewire\Admin\Archive\Orders\Index::class)->name('orders.index');
     });
+
+    // Auctions
+    Route::prefix('auctions')->name('auctions.')->group(function () {
+        Route::get('/', \App\Livewire\Admin\Auctions\Index::class)->name('index');
+        Route::get('/{id}', \App\Livewire\Admin\Auctions\Detail::class)->name('detail');
+    });
 });

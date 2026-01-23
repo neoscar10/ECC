@@ -1,4 +1,4 @@
-<div class="table-card mb-1">
+<div class="table-responsive table-card mb-1">
     <table class="table align-middle" id="productTable">
         <thead class="table-light text-muted">
             <tr>

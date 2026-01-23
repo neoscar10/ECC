@@ -758,7 +758,7 @@
                                             "value": "application/json"
                                         }
                                     ],
-                                    "body": "{\n    \"success\": true,\n    \"message\": \"Collector intent saved. Tier recommended.\",\n    \"data\": {\n        \"application\": {\n            \"id\": 1,\n            \"current_step\": \"tier_selection\",\n            \"recommended_tier_id\": 3\n        },\n        \"recommended_tier\": {\n            \"id\": 3,\n            \"name\": \"Platinum\",\n            \"code\": \"platinum\",\n            \"annual_fee\": 500.00\n        },\n        \"all_tiers\": [\n            {\"id\": 1, \"name\": \"Gold\", \"annual_fee\": 250.00},\n            {\"id\": 3, \"name\": \"Platinum\", \"annual_fee\": 500.00}\n        ]\n    },\n    \"meta\": null,\n    \"errors\": null\n}"
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Collector intent saved. Tier recommended.\",\n    \"data\": {\n        \"application\": {\n            \"id\": 1,\n            \"current_step\": \"tier_selection\",\n            \"recommended_tier_id\": 3\n        },\n        \"recommended_tier\": {\n            \"id\": 3,\n            \"name\": \"Platinum\",\n            \"code\": \"platinum\",\n            \"price\": \"500.00\"\n        },\n        \"all_tiers\": [\n            {\"id\": 1, \"name\": \"Gold\", \"price\": \"250.00\"},\n            {\"id\": 3, \"name\": \"Platinum\", \"price\": \"500.00\"}\n        ]\n    },\n    \"meta\": null,\n    \"errors\": null\n}"
                                 }
                             ]
                         },
@@ -959,7 +959,7 @@
                                             "value": "application/json"
                                         }
                                     ],
-                                    "body": "{\n    \"success\": true,\n    \"message\": \"Success\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"Gold\",\n            \"annual_fee\": 250.00,\n            \"has_early_access\": false\n        },\n        {\n            \"id\": 3,\n            \"name\": \"Platinum\",\n            \"annual_fee\": 500.00,\n            \"has_early_access\": true\n        }\n    ],\n    \"meta\": null,\n    \"errors\": null\n}"
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Success\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"Gold\",\n            \"price\": \"250.00\",\n            \"has_early_access\": false\n        },\n        {\n            \"id\": 3,\n            \"name\": \"Platinum\",\n            \"price\": \"500.00\",\n            \"has_early_access\": true\n        }\n    ],\n    \"meta\": null,\n    \"errors\": null\n}"
                                 }
                             ]
                         },

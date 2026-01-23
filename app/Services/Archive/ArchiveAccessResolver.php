@@ -708,7 +708,7 @@ class ArchiveAccessResolver
             'id' => $tier->id,
             'name' => $tier->name,
             'level' => $tier->level,
-            'price_amount' => $tier->price_amount ?? 0, 
+            'price' => (string) ($tier->price ?? '0.00'),
             'currency' => $tier->currency ?? 'INR'
         ];
     }

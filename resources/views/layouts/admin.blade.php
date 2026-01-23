@@ -916,7 +916,21 @@
                             </div>
                         </li>
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-store-2-line"></i> <span>Shop</span></a></li>
-                        <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-auction-line"></i> <span>Auctions</span></a></li>
+                        @php
+                            $isAuctionsActive = request()->routeIs('admin.auctions.*');
+                        @endphp
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ $isAuctionsActive ? 'active' : '' }}" href="#sidebarAuctions" data-bs-toggle="collapse" role="button" aria-expanded="{{ $isAuctionsActive ? 'true' : 'false' }}" aria-controls="sidebarAuctions">
+                                <i class="ri-auction-line"></i> <span data-key="t-auctions">Auctions</span>
+                            </a>
+                            <div class="collapse menu-dropdown {{ $isAuctionsActive ? 'show' : '' }}" id="sidebarAuctions">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.auctions.index') }}" class="nav-link {{ request()->routeIs('admin.auctions.index') ? 'active' : '' }}" data-key="t-auction-lots">Auction Lots</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-chat-voice-line"></i> <span>Inquiries</span></a></li>
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-slideshow-line"></i> <span>CMS</span></a></li>
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-pie-chart-line"></i> <span>Reports</span></a></li>
