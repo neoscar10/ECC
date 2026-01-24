@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Models\Archive;
+namespace App\Models;
 
-use App\Models\User;
+use App\Models\Archive\ArchiveProduct;
+use App\Models\Archive\ArchiveProductEnquiry;
+use App\Models\Auctions\AuctionLot;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ArchiveOrder extends Model
+class Order extends Model
 {
     use HasFactory;
 
@@ -15,6 +17,7 @@ class ArchiveOrder extends Model
 
     protected $casts = [
         'sold_at' => 'datetime',
+        'paid_at' => 'datetime',
         'qty' => 'integer',
         'unit_price_inr' => 'decimal:2',
         'subtotal_inr' => 'decimal:2',
@@ -23,6 +26,11 @@ class ArchiveOrder extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(ArchiveProduct::class, 'archive_product_id');
+    }
+
+    public function auctionLot(): BelongsTo
+    {
+        return $this->belongsTo(AuctionLot::class, 'auction_lot_id');
     }
 
     public function enquiry(): BelongsTo

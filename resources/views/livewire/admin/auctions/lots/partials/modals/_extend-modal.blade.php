@@ -8,7 +8,7 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Extend By (Minutes)</label>
-                    <input type="number" class="form-control" wire:model="extendMinutes" min="1">
+                    <input type="number" class="form-control" wire:model.number="extendMinutes" min="1">
                     @error('extendMinutes') <div class="text-danger fs-12 mt-1">{{ $message }}</div> @enderror
                 </div>
                 <div class="mb-0">

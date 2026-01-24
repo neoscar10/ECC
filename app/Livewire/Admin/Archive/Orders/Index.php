@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Admin\Archive\Orders;
 
-use App\Models\Archive\ArchiveOrder;
+use App\Models\Order;
 use App\Models\Archive\ArchiveProduct;
-use App\Services\Archive\ArchiveOrderService;
+use App\Services\OrderService;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
@@ -32,7 +32,9 @@ class Index extends Component
 
     public function render()
     {
-        $query = ArchiveOrder::with(['product', 'buyer', 'enquiry', 'logger'])
+        // Only show Archive orders
+        $query = Order::with(['product', 'buyer', 'enquiry', 'logger'])
+            ->where('source', 'archive')
             ->latest('sold_at');
 
         if ($this->search) {
@@ -65,10 +67,10 @@ class Index extends Component
         ]);
     }
 
-    public function cancelOrder($orderId, ArchiveOrderService $service)
+    public function cancelOrder($orderId, OrderService $service)
     {
         try {
-            $order = ArchiveOrder::findOrFail($orderId);
+            $order = Order::findOrFail($orderId);
             $service->cancelOrder($order, auth()->user());
             session()->flash('success', 'Order cancelled and stock restored.');
         } catch (\Exception $e) {

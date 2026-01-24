@@ -8,8 +8,8 @@ use App\Models\Auctions\AuctionLot;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use App\Events\AuctionBidPlaced; // Will create this later
-use App\Events\AuctionExtended;  // Will create this later
+use App\Events\AuctionBidPlaced;
+use App\Events\AuctionExtended;
 
 class AuctionBiddingService
 {
@@ -90,7 +90,7 @@ class AuctionBiddingService
             $lot->save();
 
             // 7. Audit Event
-            AuctionEvent::create([
+            $timelineEvent = AuctionEvent::create([
                 'auction_lot_id' => $lot->id,
                 'actor_type' => $isAuto ? 'system' : 'user',
                 'actor_id' => $isAuto ? null : $user->id,
@@ -104,8 +104,13 @@ class AuctionBiddingService
             ]);
 
             // 8. Fire Events (Realtime)
-            // event(new AuctionBidPlaced($lot, $bid));
-            // if ($extended) event(new AuctionExtended($lot));
+            event(new AuctionBidPlaced($lot, $amount, $user->id));
+            if ($extended) event(new AuctionExtended($lot, 'anti_sniping'));
+            
+             // Fire Timeline Event
+            if (isset($timelineEvent)) {
+                 event(new \App\Events\AuctionTimelineEventCreated($timelineEvent));
+            }
 
             return $lot;
         });

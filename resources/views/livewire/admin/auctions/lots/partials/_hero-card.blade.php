@@ -3,15 +3,6 @@
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 <h5 class="card-title mb-1">{{ $lot->title }}</h5>
-                 <p class="text-muted mb-0">
-                    @if($lot->status == 'upcoming')
-                        Starts: {{ $lot->starts_at?->format('d M Y, h:i A') }}
-                    @elseif($lot->status == 'live')
-                        Ends: {{ $lot->ends_at?->format('d M Y, h:i A') }}
-                    @else
-                        Ended: {{ $lot->ends_at?->format('d M Y, h:i A') }}
-                    @endif
-                 </p>
             </div>
             <div>
                  @if($lot->status == 'live')
@@ -20,6 +11,8 @@
                      <span class="badge bg-info fs-12">UPCOMING</span>
                 @elseif($lot->status == 'ended')
                      <span class="badge bg-secondary fs-12">ENDED</span>
+                @elseif($lot->status == 'unsold')
+                     <span class="badge bg-warning fs-12">UNSOLD</span>
                 @elseif($lot->status == 'cancelled')
                      <span class="badge bg-danger fs-12">CANCELLED</span>
                 @endif

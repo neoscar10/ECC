@@ -25,6 +25,6 @@ class ArchiveProductEnquiry extends Model
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(ArchiveOrder::class, 'archive_order_id');
+        return $this->belongsTo(\App\Models\Order::class, 'archive_order_id');
     }
 }

@@ -81,6 +81,9 @@ Route::prefix('v1')->group(function () {
         Route::patch('memberships/{id}/approve', [MembershipStatusController::class, 'approve']);
         Route::patch('memberships/{id}/reject', [MembershipStatusController::class, 'reject']);
         
+        // Realtime Auth
+        Route::post('broadcasting/auth', [\App\Http\Controllers\Api\V1\BroadcastController::class, 'authenticate']);
+
         Route::post('broadcast/test', function () {
             // TODO: Dispatch real event
             return response()->json(['message' => 'Broadcast triggered']);

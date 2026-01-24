@@ -104,6 +104,11 @@ class AuctionLot extends Model
         return $this->belongsTo(AuctionLot::class, 'reauctioned_from_lot_id');
     }
 
+    public function order(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\Order::class);
+    }
+
     // Scopes
     public function scopeLive($query)
     {

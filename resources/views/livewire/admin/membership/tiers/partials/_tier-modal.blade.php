@@ -81,6 +81,13 @@
                                 <label class="form-check-label" for="hasEarlyAccess">Early Access Eligible</label>
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch form-switch-lg" dir="ltr">
+                                <input type="checkbox" class="form-check-input" id="isAutoBiddingEnabled" wire:model="is_auto_bidding_enabled">
+                                <label class="form-check-label" for="isAutoBiddingEnabled">Auto-Bidding Eligible</label>
+                                <div class="text-muted fs-11">Allow members to configure Auto-Bid</div>
+                            </div>
+                        </div>
 
                         <div class="col-md-12">
                             <label class="form-label">Description</label>

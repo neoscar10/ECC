@@ -32,6 +32,8 @@
              <span class="badge bg-info-subtle text-info">Upcoming</span>
         @elseif($lot->status == 'ended')
              <span class="badge bg-secondary-subtle text-secondary">Ended</span>
+        @elseif($lot->status == 'unsold')
+             <span class="badge bg-warning-subtle text-warning">Unsold</span>
         @else
              <span class="badge bg-light text-muted">{{ ucfirst($lot->status) }}</span>
         @endif

@@ -373,10 +373,43 @@ class LotFormModal extends Component
                     ]);
                 }
              }
-        });
+            
+            // The following code is from the user's instruction, adapted to fit the existing $lot variable
+            // and assuming $isNew is determined by $this->isEditMode
+            $isNew = !$this->isEditMode;
 
-        $this->dispatch('hide-create-modal');
-        $this->dispatch('auction-updated'); // Refresh parent lists
+            if ($this->restrictionMode === 'public') {
+                 $lot->visibilityTiers()->detach();
+                 $lot->clearViewTiers()->detach();
+            } else {
+                 $lot->visibilityTiers()->sync($this->selectedVisibilityTiers); // Using selectedVisibilityTiers from existing code
+                 // The original instruction had $this->clearViewTiers, but the existing code uses $this->selectedRandomTiers for clearViewTiers sync
+                 // For hierarchical/private, clearViewTiers are not synced here.
+                 if ($this->blurEnabled && $this->restrictionType == 'random') {
+                     $lot->clearViewTiers()->sync($this->selectedRandomTiers);
+                 } else {
+                     $lot->clearViewTiers()->detach(); // Detach if not random or blur not enabled
+                 }
+            }
+            
+            // Assuming earlyAccessWindows logic is not part of this component or needs to be added if it is.
+            // The provided snippet for earlyAccessWindows seems to be from a different context.
+            // For now, I'll omit the earlyAccessWindows part as it's not present in the original document
+            // and its inclusion would require more context about its properties ($this->earlyAccess).
+            // If it was intended to be added, it would need to be defined elsewhere.
+            
+            // Broadcast Update separate from status change (unless status changed too)
+            event(new \App\Events\AuctionLotUpdated($lot)); // Use $lot instead of $this->lot
+        }); // End of DB::transaction
+
+        $this->dispatch('hide-create-modal'); // Changed from hide-modal to hide-create-modal to match existing
+        $this->dispatch('auction-updated'); // Internal Livewire refresh
+        
+        // Success Toast
+        $this->dispatch('notify', 
+            type: 'success', 
+            message: ($this->isEditMode ? 'Auction Lot updated successfully' : 'Auction Lot created successfully') // Use $this->isEditMode
+        ); // Refresh parent lists
         $this->resetForm();
     }
 

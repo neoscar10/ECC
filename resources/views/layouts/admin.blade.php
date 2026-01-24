@@ -928,6 +928,9 @@
                                     <li class="nav-item">
                                         <a href="{{ route('admin.auctions.lots.index') }}" class="nav-link {{ request()->routeIs('admin.auctions.lots.index') ? 'active' : '' }}" data-key="t-auction-lots">Auction Lots</a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.auctions.orders.index') }}" class="nav-link {{ request()->routeIs('admin.auctions.orders.index') ? 'active' : '' }}" data-key="t-auction-orders">Orders</a>
+                                    </li>
                                 </ul>
                             </div>
                         </li>
@@ -1959,6 +1962,9 @@
     <!-- App js -->
     <script src="{{ asset('velzon/assets') }}/js/app.js"></script>
     <script src="{{ asset('velzon/assets') }}/libs/sweetalert2/sweetalert2.min.js"></script>
+    
+    @vite(['resources/js/app.js'])
+    
     @stack('scripts')
 @livewireScripts
 </body>

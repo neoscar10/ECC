@@ -1,16 +1,21 @@
 <div>
     @include('livewire.admin.auctions.lots.partials._page-header', ['lot' => $lot])
 
+    <div id="page-alerts" wire:ignore></div>
+
     <div class="row">
         <div class="col-lg-8">
-            @include('livewire.admin.auctions.lots.partials._hero-card', ['lot' => $lot])
+            @include('livewire.admin.auctions.lots.partials._hero-gallery', ['lot' => $lot])
             @include('livewire.admin.auctions.lots.partials._details-card', ['lot' => $lot, 'accessSummary' => $this->accessSummary, 'timelineEvents' => $timelineEvents])
             @include('livewire.admin.auctions.lots.partials._timeline-card', ['timelineEvents' => $timelineEvents])
         </div>
 
         <div class="col-lg-4">
+            {{-- Winner / Unsold Card --}}
+            @include('livewire.admin.auctions.lots.partials._winner-card', ['lot' => $lot])
+            
             {{-- Poll only if LIVE --}}
-            <div @if($lot->status === 'live') wire:poll.5s="refreshPanels" @endif>
+            <div @if($lot->status === 'live') wire:poll.30s="refreshPanels" @endif>
                 @include('livewire.admin.auctions.lots.partials._summary-card', [
                     'lot' => $lot,
                     'bidCount' => $bidCount,
@@ -28,9 +33,11 @@
 
     @include('livewire.admin.auctions.lots.partials.modals._extend-modal')
     @include('livewire.admin.auctions.lots.partials.modals._bids-modal', ['lot' => $lot, 'allBids' => $allBids])
+    @include('livewire.admin.auctions.lots.partials.modals._winner-modal', ['lot' => $lot])
 
     {{-- reusable edit modal --}}
     <livewire:admin.auctions.lots.lot-form-modal :key="'auction-lot-edit-modal'" />
+    <livewire:admin.auctions.orders.record-sale-modal :key="'record-sale-modal'" />
 
     @include('livewire.admin.auctions.lots.partials._scripts', ['lot' => $lot])
 

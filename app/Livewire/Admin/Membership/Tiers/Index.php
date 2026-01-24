@@ -35,6 +35,7 @@ class Index extends Component
     public $requires_approval = true;
     public $currency = 'INR';
     public $has_early_access = false;
+    public $is_auto_bidding_enabled = false;
     public $sort_order = 0;
     public $upgrade_from_id = null;
     public $description = null;
@@ -56,6 +57,7 @@ class Index extends Component
             'sort_order' => 'required|integer|min:0',
             'is_active' => 'boolean',
             'has_early_access' => 'boolean',
+            'is_auto_bidding_enabled' => 'boolean',
             'requires_approval' => 'boolean',
             'upgrade_from_id' => ['nullable', 'exists:membership_tiers,id', function($attribute, $value, $fail) {
                 if ($this->tierId && $value == $this->tierId) {
@@ -83,7 +85,7 @@ class Index extends Component
     public function create()
     {
         $this->checkSuperAdmin();
-        $this->reset(['tierId', 'name', 'code', 'price', 'duration_days', 'durationValue', 'durationUnit', 'is_active', 'has_early_access', 'requires_approval', 'currency', 'sort_order', 'upgrade_from_id', 'selectedPrivileges', 'description', 'features']);
+        $this->reset(['tierId', 'name', 'code', 'price', 'duration_days', 'durationValue', 'durationUnit', 'is_active', 'has_early_access', 'is_auto_bidding_enabled', 'requires_approval', 'currency', 'sort_order', 'upgrade_from_id', 'selectedPrivileges', 'description', 'features']);
         $this->durationValue = 1;
         $this->durationUnit = 'years';
         $this->requires_approval = true; // Default to true
@@ -125,6 +127,7 @@ class Index extends Component
         }
         $this->is_active = $tier->is_active;
         $this->has_early_access = $tier->has_early_access;
+        $this->is_auto_bidding_enabled = $tier->is_auto_bidding_enabled;
         $this->requires_approval = $tier->requires_approval;
         $this->currency = $tier->currency;
         $this->sort_order = $tier->sort_order;
@@ -169,6 +172,7 @@ class Index extends Component
                 'duration_days' => $this->durationToDays(),
                 'is_active' => $validated['is_active'],
                 'has_early_access' => $validated['has_early_access'],
+                'is_auto_bidding_enabled' => $validated['is_auto_bidding_enabled'],
                 'currency' => $this->currency,
                 'sort_order' => $validated['sort_order'],
                 'level' => $validated['sort_order'], // Sync level with sort_order
@@ -212,6 +216,7 @@ class Index extends Component
                 'duration_days' => $this->durationToDays(),
                 'is_active' => $validated['is_active'],
                 'has_early_access' => $validated['has_early_access'],
+                'is_auto_bidding_enabled' => $validated['is_auto_bidding_enabled'],
                 'sort_order' => $validated['sort_order'],
                 'level' => $validated['sort_order'], // Sync level with sort_order
                 'requires_approval' => $validated['requires_approval'],

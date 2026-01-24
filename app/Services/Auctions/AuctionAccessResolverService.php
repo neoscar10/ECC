@@ -14,7 +14,7 @@ class AuctionAccessResolverService
      */
     public function resolve(AuctionLot $lot, ?User $user): array
     {
-        $tier = $user?->currentMembership?->tier;
+        $tier = $user?->currentMembership?->membershipTier;
         $now = now();
 
         // 1. Base Visibility (Does the user even see the card?)
@@ -61,8 +61,9 @@ class AuctionAccessResolverService
         $canBid = $user && $lot->status === 'live';
         
         // 5. Auto Bid Eligibility
-        // Only if User's Tier has can_auto_bid = true
-        $canAutoBid = $canBid && ($tier?->can_auto_bid ?? false);
+        // Only if User's Tier has can_auto_bid (is_auto_bidding_enabled) = true
+        // AND user has bid permission (live status)
+        $canAutoBid = $canBid && ($tier?->is_auto_bidding_enabled ?? false);
 
         return [
             'has_visibility' => $hasVisibility,

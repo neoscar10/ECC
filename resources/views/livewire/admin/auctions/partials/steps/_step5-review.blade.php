@@ -10,7 +10,7 @@
                         <label class="text-muted text-uppercase fw-medium fs-11">Auction Lot Details</label>
                         <h5 class="fs-15 fw-bold mb-1">{{ $title ?: 'Untitled Lot' }}</h5>
                         <p class="text-muted mb-0">{{ $lot_no ?: 'Lot # (Auto)' }}</p>
-                        <p class="mb-0 mt-1"><span class="fw-medium">{{ count($existingImages) + count($newImages) }}</span> Images, <span class="fw-medium">{{ count($attachmentRows) }}</span> Attachments</p>
+                        <p class="mb-0 mt-1"><span class="fw-medium">{{ count($existingImages) + count($newImages) }}</span> Images, <span class="fw-medium">{{ count($attachmentRows ?? []) }}</span> Attachments</p>
                     </div>
                     <div class="col-md-6 text-md-end">
                         <label class="text-muted text-uppercase fw-medium fs-11">Availability</label>

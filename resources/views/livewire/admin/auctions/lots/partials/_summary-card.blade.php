@@ -17,12 +17,23 @@
 
             @if($lot->status === 'live')
                 <div class="mt-3">
-                    <h5 class="text-danger mb-0" id="countdown_timer" data-ends-at="{{ $lot->ends_at?->toIso8601String() }}">--:--:--</h5>
-                    <small class="text-muted">Time Remaining</small>
+                    <small class="text-muted text-uppercase fw-bold mb-2 d-block">Time Remaining</small>
+                    <div class="d-inline-block">
+                        <div class="badge bg-danger-subtle text-danger fs-15 py-2 px-4 shadow-sm" wire:ignore>
+                            <div id="auctionCountdown" class="d-flex align-items-center justify-content-center" data-end-at="{{ $lot->ends_at?->toIso8601String() }}">
+                                <i class="ri-time-line align-middle me-2"></i>
+                                <span class="fw-bold">Calculating...</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @else
                 <div class="mt-3">
-                    <span class="badge bg-light text-dark text-uppercase">{{ ucfirst($lot->status) }}</span>
+                    @if($lot->status == 'unsold')
+                        <span class="badge bg-warning-subtle text-warning text-uppercase fs-12">Unsold (Reserve Not Met)</span>
+                    @else
+                        <span class="badge bg-light text-dark text-uppercase">{{ ucfirst($lot->status) }}</span>
+                    @endif
                 </div>
             @endif
         </div>

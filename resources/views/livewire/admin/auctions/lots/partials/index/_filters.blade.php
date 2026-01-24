@@ -14,6 +14,7 @@
                 <option value="upcoming">Upcoming</option>
                 <option value="live">Live</option>
                 <option value="ended">Ended</option>
+                <option value="unsold">Unsold</option>
             </select>
         </div>
     </div>

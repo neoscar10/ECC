@@ -125,6 +125,6 @@ class ArchiveProduct extends Model
 
     public function orders(): HasMany
     {
-        return $this->hasMany(ArchiveOrder::class);
+        return $this->hasMany(\App\Models\Order::class);
     }
 }

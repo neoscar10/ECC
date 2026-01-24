@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Admin\Archive\Orders;
 
-use App\Models\Archive\ArchiveOrder;
+use App\Models\Order;
 use App\Models\Archive\ArchiveProduct;
 use App\Models\Archive\ArchiveProductEnquiry;
 use App\Models\User;
-use App\Services\Archive\ArchiveOrderService;
+use App\Services\OrderService;
 use Livewire\Component;
 
 class Create extends Component
@@ -123,7 +123,7 @@ class Create extends Component
         }
     }
 
-    public function store(ArchiveOrderService $service)
+    public function store(OrderService $service)
     {
         $this->validate([
             'product_id' => 'required|exists:archive_products,id',
@@ -140,7 +140,7 @@ class Create extends Component
         }
 
         try {
-            $service->createOrder([
+            $service->createArchiveOrder([
                 'archive_product_id' => $this->product_id,
                 'archive_product_enquiry_id' => $this->enquiry_id,
                 'user_id' => $this->user_id,
