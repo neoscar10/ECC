@@ -60,15 +60,6 @@
                         @error('new_tier_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="form-check form-switch form-switch-lg mb-3" dir="ltr">
-                        <input type="checkbox" class="form-check-input" id="apply_immediately" wire:model="apply_immediately">
-                        <label class="form-check-label" for="apply_immediately">Apply Changes Immediately</label>
-                    </div>
-
-                    @if(!$apply_immediately)
-                        <p class="text-muted small">future scheduling is disabled for manual overrides.</p>
-                    @endif
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" wire:click="closeUpdateTierModal">Cancel</button>

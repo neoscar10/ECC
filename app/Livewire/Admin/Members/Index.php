@@ -40,7 +40,6 @@ class Index extends Component
     public $membershipIdToUpdate = null;
     public $membershipToUpdate = null; // Stored for display
     public $new_tier_id = '';
-    public $apply_immediately = true;
     public $currentTierToCheck = null;
 
     protected $paginationTheme = 'bootstrap';
@@ -130,7 +129,7 @@ class Index extends Component
     
     public function openUpdateTierModal($id)
     {
-        $this->reset(['new_tier_id', 'apply_immediately', 'membershipIdToUpdate', 'membershipToUpdate', 'currentTierToCheck']);
+        $this->reset(['new_tier_id', 'membershipIdToUpdate', 'membershipToUpdate', 'currentTierToCheck']);
         $this->resetValidation();
 
         $this->membershipIdToUpdate = $id;
@@ -143,7 +142,6 @@ class Index extends Component
 
         $this->currentTierToCheck = $this->membershipToUpdate->membershipTier;
         $this->new_tier_id = ''; 
-        $this->apply_immediately = true;
         
         $this->dispatch('show-update-tier-modal-script'); // We will update script to listen to this
     }
@@ -151,7 +149,7 @@ class Index extends Component
     public function closeUpdateTierModal()
     {
         $this->dispatch('hide-update-tier-modal-script');
-        $this->reset(['membershipIdToUpdate', 'membershipToUpdate', 'new_tier_id', 'currentTierToCheck', 'apply_immediately']);
+        $this->reset(['membershipIdToUpdate', 'membershipToUpdate', 'new_tier_id', 'currentTierToCheck']);
     }
 
     public function updateTier()
