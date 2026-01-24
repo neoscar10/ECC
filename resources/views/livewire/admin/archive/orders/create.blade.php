@@ -186,8 +186,9 @@
                     @enderror
                     
                     <button type="button" class="btn btn-light" wire:click="close">Cancel</button>
-                    <button type="button" class="btn btn-success" wire:click="store" @if(!$selectedProduct) disabled @endif>
-                        <i class="ri-save-line align-bottom me-1"></i> Confirm Sale
+                    <button type="button" class="btn btn-success" wire:click="store" wire:loading.attr="disabled" wire:target="store" @if(!$selectedProduct) disabled @endif>
+                        <span wire:loading.remove wire:target="store"><i class="ri-save-line align-bottom me-1"></i> Confirm Sale</span>
+                        <span wire:loading wire:target="store"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...</span>
                     </button>
                 </div>
             </div>

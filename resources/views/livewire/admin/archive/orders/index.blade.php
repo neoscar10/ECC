@@ -45,6 +45,13 @@
                 </div>
                 
                 <div class="card-body">
+                    @if ($successMessage)
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ $successMessage }}
+                            <button type="button" class="btn-close" wire:click="$set('successMessage', null)" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    
                     @if(session()->has('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ session('success') }}

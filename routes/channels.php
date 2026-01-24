@@ -23,3 +23,7 @@ Broadcast::channel('auctions.lot.{lotId}', function ($user, $lotId) {
     // We allow subscription even if not "live" so they can see "upcoming" or "ended" updates.
     return $access['has_visibility'];
 });
+
+Broadcast::channel('admin.members', function ($user) {
+    return $user->hasRole(['super_admin', 'ecc_admin']);
+});

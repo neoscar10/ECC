@@ -12,8 +12,20 @@ use Illuminate\Support\Facades\Auth;
 class Index extends Component
 {
     use WithPagination;
+    
+    #[On('member-tier-updated')]
+    public function refresh() { $this->render(); } // Placeholder if needed
 
     public $search = '';
+    
+    // Alerts
+    public $successMessage = '';
+    
+    #[On('operation-success')]
+    public function showSuccessAlert($message)
+    {
+        $this->successMessage = $message;
+    }
     public $tierFilter = '';
     public $statusFilter = 'active'; // Default to active members
 
@@ -22,6 +34,14 @@ class Index extends Component
     public $confirmingDeactivation = false;
     public $confirmingActivation = false;
     public $membershipIdToToggle = null;
+    
+    // Update Tier Modal State
+    public $showUpdateTierModal = false;
+    public $membershipIdToUpdate = null;
+    public $membershipToUpdate = null; // Stored for display
+    public $new_tier_id = '';
+    public $apply_immediately = true;
+    public $currentTierToCheck = null;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -71,7 +91,8 @@ class Index extends Component
             }
 
             $membership->update(['status' => 'cancelled']);
-            session()->flash('success', 'Member deactivated successfully.');
+            $this->successMessage = 'Member deactivated successfully.';
+            \App\Events\MembershipUpdated::dispatch();
         }
         
         $this->resetToggleState();
@@ -90,7 +111,8 @@ class Index extends Component
         if ($this->membershipIdToToggle) {
             $membership = Membership::findOrFail($this->membershipIdToToggle);
             $membership->update(['status' => 'active']);
-            session()->flash('success', 'Member activated successfully.');
+            $this->successMessage = 'Member activated successfully.';
+            \App\Events\MembershipUpdated::dispatch();
         }
 
         $this->resetToggleState();
@@ -102,6 +124,89 @@ class Index extends Component
         $this->membershipIdToToggle = null;
         $this->confirmingDeactivation = false;
         $this->confirmingActivation = false;
+    }
+    
+    // --- Update Tier Logic (Ported from Modal) ---
+    
+    public function openUpdateTierModal($id)
+    {
+        $this->reset(['new_tier_id', 'apply_immediately', 'membershipIdToUpdate', 'membershipToUpdate', 'currentTierToCheck']);
+        $this->resetValidation();
+
+        $this->membershipIdToUpdate = $id;
+        $this->membershipToUpdate = Membership::with(['user', 'membershipTier'])->find($id);
+        
+        if (!$this->membershipToUpdate) {
+            session()->flash('error', 'Membership not found.');
+            return;
+        }
+
+        $this->currentTierToCheck = $this->membershipToUpdate->membershipTier;
+        $this->new_tier_id = ''; 
+        $this->apply_immediately = true;
+        
+        $this->dispatch('show-update-tier-modal-script'); // We will update script to listen to this
+    }
+    
+    public function closeUpdateTierModal()
+    {
+        $this->dispatch('hide-update-tier-modal-script');
+        $this->reset(['membershipIdToUpdate', 'membershipToUpdate', 'new_tier_id', 'currentTierToCheck', 'apply_immediately']);
+    }
+
+    public function updateTier()
+    {
+        $this->validate([
+            'new_tier_id' => 'required|exists:membership_tiers,id', // Removed 'different' rule to simplify, or keep if strict
+        ]);
+
+        if ($this->currentTierToCheck && $this->new_tier_id == $this->currentTierToCheck->id) {
+             $this->addError('new_tier_id', 'Please select a different tier.');
+             return;
+        }
+
+        $newTier = MembershipTier::find($this->new_tier_id);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($newTier) {
+            $data = ['membership_tier_id' => $newTier->id];
+            // Apply Immediately logic is implied for now as we don't handle scheduling in this simplified version
+            $this->membershipToUpdate->update($data);
+        });
+
+        // Success
+        $message = "Membership updated to {$newTier->name} successfully.";
+        
+        // 1. Local Property (For immediate feedback safety)
+        $this->successMessage = $message;
+
+        // 2. Broadcast
+        broadcast(new \App\Events\MembershipUpdated())->toOthers();
+        
+        $this->closeUpdateTierModal();
+    }
+    
+    public function getDowngradeWarningProperty()
+    {
+        // We need access to all tiers to compare sort_order. 
+        // Since we don't store all Tiers in public property (they are in render), we might need to query or use what we have.
+        // For efficiency, we can query just the new tier or if we had them loaded. 
+        // Let's query the new tier's sort order.
+        if (!$this->new_tier_id || !$this->currentTierToCheck) return false;
+        
+        $newTier = MembershipTier::find($this->new_tier_id);
+        if (!$newTier) return false;
+        
+        return $newTier->sort_order < $this->currentTierToCheck->sort_order;
+    }
+    
+    public function getUpgradeInfoProperty()
+    {
+        if (!$this->new_tier_id || !$this->currentTierToCheck) return false;
+        
+        $newTier = MembershipTier::find($this->new_tier_id);
+        if (!$newTier) return false;
+        
+        return $newTier->sort_order > $this->currentTierToCheck->sort_order;
     }
 
     #[Layout('layouts.admin')]
@@ -140,5 +245,12 @@ class Index extends Component
             'members' => $members,
             'tiers' => $tiers
         ]);
+    }
+
+    public function getListeners()
+    {
+        return [
+             "echo-private:admin.members,.updated" => 'refresh',
+        ];
     }
 }

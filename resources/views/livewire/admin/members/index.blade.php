@@ -21,6 +21,13 @@
         <div class="col-lg-12">
             
             @include('livewire.admin.members.partials._alerts')
+            
+            @if ($successMessage)
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ $successMessage }}
+                    <button type="button" class="btn-close" wire:click="$set('successMessage', null)" aria-label="Close"></button>
+                </div>
+            @endif
 
             <div class="card" id="membersList">
                 @include('livewire.admin.members.partials._filters')
@@ -33,6 +40,8 @@
     @include('livewire.admin.members.partials._view-modal')
 
     @include('livewire.admin.members.partials._action-modals')
+    
+    @include('livewire.admin.members.partials._update-tier-modal')
 
     @include('livewire.admin.members.partials._scripts')
 </div>

@@ -157,6 +157,7 @@ class Create extends Component
             $this->showModal = false;
             $this->dispatch('order-created'); // Refresh parent list
             $this->dispatch('refresh-products'); // Refresh anything else if needed
+            $this->dispatch('operation-success', message: 'Order created successfully.');
             session()->flash('success', 'Order created successfully.');
             
             // If redirected from enquiry page, maybe we should redirect back? 
