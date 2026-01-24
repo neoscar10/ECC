@@ -1661,6 +1661,179 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "Auctions",
+            "item": [
+                {
+                    "name": "Lots",
+                    "item": [
+                        {
+                            "name": "List Lots",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.data && jsonData.data.length > 0) {",
+                                            "    pm.environment.set(\"lot_id\", jsonData.data[0].id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/auctions?status=live&page=1&per_page={{pagination_per_page}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "auctions"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "status",
+                                            "value": "live"
+                                        },
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "per_page",
+                                            "value": "{{pagination_per_page}}"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Lot Detail",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/auctions/{{lot_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "auctions",
+                                        "{{lot_id}}"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Bids",
+                    "item": [
+                        {
+                            "name": "Place Bid",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"amount\": 1000\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/auctions/{{lot_id}}/bid",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "auctions",
+                                        "{{lot_id}}",
+                                        "bid"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Auto-Bid",
+                    "item": [
+                        {
+                            "name": "Set/Update Auto-Bid",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"max_bid\": 5000,\n    \"increment_amount\": 100,\n    \"is_enabled\": true\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/auctions/{{lot_id}}/auto-bid",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "auctions",
+                                        "{{lot_id}}",
+                                        "auto-bid"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }
