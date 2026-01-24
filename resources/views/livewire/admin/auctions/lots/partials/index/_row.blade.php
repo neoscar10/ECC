@@ -20,6 +20,9 @@
             <div>
                 <h5 class="fs-14 mb-1">
                     <a href="{{ route('admin.auctions.lots.show', $lot->id) }}" class="text-reset">{{ $lot->title }}</a>
+                    @if($lot->restriction_mode === 'restricted')
+                         <span class="badge bg-warning-subtle text-warning ms-1">Restricted</span>
+                    @endif
                 </h5>
                 <p class="text-muted mb-0">{{ Str::limit(strip_tags($lot->description), 30) }}</p>
             </div>

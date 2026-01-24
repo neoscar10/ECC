@@ -77,7 +77,7 @@
                         <label class="form-label">Minimum Clear View Tier</label>
                         <select class="form-select" wire:model.live="restrictedMinTierId">
                             <option value="">Select Minimum Tier</option>
-                            @foreach($this->visibilityAllowedTiers as $tier)
+                            @foreach($this->previewVisibleTiers as $tier)
                                 <option value="{{ $tier->id }}">{{ $tier->name }}</option>
                             @endforeach
                         </select>
@@ -88,7 +88,7 @@
                     <div class="col-md-12">
                         <label class="form-label">Select Clear View Tiers</label>
                         <div class="row g-2" wire:key="clear-tiers-random">
-                            @foreach($this->visibilityAllowedTiers as $tier)
+                            @foreach($this->previewVisibleTiers as $tier)
                                 <div class="col-6">
                                     <div class="form-check card-radio">
                                         <input class="form-check-input" type="checkbox" value="{{ $tier->id }}" wire:model.live="selectedRandomTiers" id="randTier_{{ $tier->id }}">
@@ -107,7 +107,7 @@
                         <label class="form-label">Private Clear View Tier</label>
                         <select class="form-select" wire:model.live="restrictedPrivateTierId">
                             <option value="">Select Tier</option>
-                            @foreach($this->visibilityAllowedTiers as $tier)
+                            @foreach($this->previewVisibleTiers as $tier)
                                 <option value="{{ $tier->id }}">{{ $tier->name }}</option>
                             @endforeach
                         </select>
