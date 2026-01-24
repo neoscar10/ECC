@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Archive;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Archive\ArchiveProductResource;
+use App\Http\Resources\Archive\ArchiveProductListResource;
 use App\Models\Archive\ArchiveProduct;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ class ArchiveProductController extends Controller
         $query = ArchiveProduct::query()
             ->with(['category', 'images', 'restrictedMinTier', 'clearViewTiers', 'visibilityTiers']) // Eager load clearViewTiers, visibilityTiers
             ->where('is_active', true)
+            ->where('quantity', '>', 0) // Filter out-of-stock items
             ->visibleTo($user, $userTier); // Apply Visibility Scope
 
         if ($request->has('category_id') && !is_numeric($request->category_id)) {
@@ -35,7 +37,7 @@ class ArchiveProductController extends Controller
 
         $products = $query->paginate(20);
 
-        return $this->success(ArchiveProductResource::collection($products));
+        return $this->success(ArchiveProductListResource::collection($products));
     }
 
     public function show($id)

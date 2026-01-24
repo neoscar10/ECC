@@ -1,0 +1,90 @@
+<?php
+
+namespace App\Http\Resources\Archive;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+use App\Services\Archive\ArchiveAccessService;
+use Illuminate\Support\Facades\Storage;
+
+use App\Support\Archive\AccessIconNormalizer;
+
+class ArchiveProductListResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        $resolver = app(\App\Services\Archive\ArchiveAccessResolver::class);
+        $user = $request->user();
+        $userTier = $user ? $user->currentMembership?->membershipTier : null;
+        
+        $access = $resolver->resolveProductAccess($this->resource, $user, $userTier);
+        
+        // Strict Icon Normalization (Last Mile)
+        $access['message']['icon'] = AccessIconNormalizer::normalize(
+            $access['reason'] ?? null, 
+            $access['view_mode'] ?? 'blocked'
+        );
+        
+        // View Mode Checks
+        $isClear = ($access['view_mode'] === 'clear');
+        $isBlur = ($access['view_mode'] === 'blur');
+
+        // Images: Always return images for Clear OR Blur. (Frontend applies blur style)
+        $showImages = ($isClear || $isBlur);
+
+        $images = $showImages ? $this->images->map(function ($img) {
+             return [
+                 'id' => $img->id,
+                 'url' => url(Storage::url($img->image_path)),
+                 'sort_order' => $img->sort_order,
+             ];
+        }) : [];
+
+        $images360 = $showImages ? $this->images360->map(function ($img) {
+             return [
+                 'id' => $img->id,
+                 'url' => url(Storage::url($img->image_path)),
+                 'sort_order' => $img->sort_order,
+             ];
+        }) : [];
+
+        // Attachments REMOVED for List View
+        
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'slug' => $this->slug,
+            'category_id' => $this->archive_category_id,
+            'category_title' => $this->category->title ?? null,
+            
+            // Description: Return null for blur to be safe/minimal
+            'description_unlocked' => $isClear ? $this->description_unlocked : null,
+            
+            'price' => [
+                'min' => $this->price_min_amount,
+                'max' => $this->price_max_amount,
+                'currency' => $this->currency,
+            ],
+            
+            'quantity' => $this->quantity ?? 1, 
+            
+            // Timing / Early Access Info
+            'early_access_enabled' => (bool) $this->early_access_enabled,
+            'is_live' => (bool) ($this->go_live_now || ($this->go_live_at && now()->gte($this->go_live_at))),
+            'go_live_at' => $this->go_live_at,
+            'go_live_formatted' => $this->go_live_at ? $this->go_live_at->format('d M Y, h:i A') : null,
+            
+            // Unified Access Object
+            'access' => $access,
+            
+            'images' => $images,
+            'images360' => $images360,
+            // 'attachments' key intentionally removed
+        ];
+    }
+}
