@@ -38,7 +38,27 @@ Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admi
 
     // Auctions
     Route::prefix('auctions')->name('auctions.')->group(function () {
-        Route::get('/', \App\Livewire\Admin\Auctions\Index::class)->name('index');
-        Route::get('/{id}', \App\Livewire\Admin\Auctions\Detail::class)->name('detail');
+        // Redirect root 'auctions' to lots index if needed, or just use lots index as main
+        Route::get('/', \App\Livewire\Admin\Auctions\Lots\Index::class)->name('index'); // Keeping 'index' as name for backward compat if needed? 
+        // Request said: "Fix it to lots index route." and used 'admin.auctions.lots.index' in breadcrumb.
+        // So I should name it 'lots.index' ?
+        // But if I change 'admin.auctions.index' to 'admin.auctions.lots.index', I break existing links unless I update them.
+        // The Prompt Breadcrumb: <li class="breadcrumb-item"><a href="{{ route('admin.auctions.lots.index') }}">Auction Lots</a></li>
+        // So I should define 'lots.index'.
+        
+        Route::prefix('lots')->name('lots.')->group(function() {
+             Route::get('/', \App\Livewire\Admin\Auctions\Lots\Index::class)->name('index');
+             Route::get('/{id}', \App\Livewire\Admin\Auctions\Lots\Show::class)->name('show');
+        });
+        
+        // Retain 'admin.auctions.index' as a redirect or alias?
+        // Or just point internal 'auctions' to the same component?
+        // Let's just point global auctions directly to Lots Index for now, but with the NEW name?
+        // Actually, if I nest it under 'lots', the URL becomes /admin/auctions/lots.
+        // That seems cleaner.
+        // So: 
+        // URL: /admin/auctions -> Redirects to /admin/auctions/lots OR renders Index.
+        // Let's make /admin/auctions render Index, AND /admin/auctions/lots render Index.
+        // BUT the user specifically asked for `admin.auctions.lots.index`.
     });
 });

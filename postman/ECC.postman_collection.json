@@ -1,0 +1,265 @@
+{
+    "info": {
+        "_postman_id": "ecc-auctions-collection-id",
+        "name": "ECC API",
+        "description": "Postman collection for ECC Auctions module.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auctions",
+            "item": [
+                {
+                    "name": "Lots",
+                    "item": [
+                        {
+                            "name": "List Lots",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "var jsonData = pm.response.json();",
+                                            "pm.test(\"Response has data array\", function () {",
+                                            "    pm.expect(jsonData).to.have.property('data');",
+                                            "    pm.expect(jsonData.data).to.be.an('array');",
+                                            "});",
+                                            "if (jsonData.data && jsonData.data.length > 0) {",
+                                            "    pm.environment.set(\"lot_id\", jsonData.data[0].id);",
+                                            "    console.log(\"Set lot_id to: \" + jsonData.data[0].id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}{{api_prefix}}/auctions?status=live&page=1&per_page={{pagination_per_page}}",
+                                    "host": [
+                                        "{{base_url}}{{api_prefix}}"
+                                    ],
+                                    "path": [
+                                        "auctions"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "status",
+                                            "value": "live",
+                                            "description": "Filter by status: live, upcoming, past"
+                                        },
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "per_page",
+                                            "value": "{{pagination_per_page}}"
+                                        }
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Get Lot Detail",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "var jsonData = pm.response.json();",
+                                            "pm.test(\"Response has data object\", function () {",
+                                            "    pm.expect(jsonData).to.have.property('data');",
+                                            "    pm.expect(jsonData.data).to.have.property('id');",
+                                            "});",
+                                            "var envLotId = pm.environment.get(\"lot_id\");",
+                                            "if (envLotId) {",
+                                            "    pm.test(\"Lot ID matches environment\", function () {",
+                                            "        pm.expect(jsonData.data.id).to.eql(Number(envLotId));",
+                                            "    });",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}{{api_prefix}}/auctions/{{lot_id}}",
+                                    "host": [
+                                        "{{base_url}}{{api_prefix}}"
+                                    ],
+                                    "path": [
+                                        "auctions",
+                                        "{{lot_id}}"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Bids",
+                    "item": [
+                        {
+                            "name": "Place Bid",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "var jsonData = pm.response.json();",
+                                            "pm.test(\"Response success message\", function () {",
+                                            "    pm.expect(jsonData).to.have.property('message');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"amount\": 1000\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}{{api_prefix}}/auctions/{{lot_id}}/bid",
+                                    "host": [
+                                        "{{base_url}}{{api_prefix}}"
+                                    ],
+                                    "path": [
+                                        "auctions",
+                                        "{{lot_id}}",
+                                        "bid"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Auto-Bid",
+                    "item": [
+                        {
+                            "name": "Set/Update Auto-Bid",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "var jsonData = pm.response.json();",
+                                            "pm.test(\"Response success message\", function () {",
+                                            "    pm.expect(jsonData).to.have.property('message');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"max_bid\": 5000,\n    \"increment_amount\": 100,\n    \"is_enabled\": true\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}{{api_prefix}}/auctions/{{lot_id}}/auto-bid",
+                                    "host": [
+                                        "{{base_url}}{{api_prefix}}"
+                                    ],
+                                    "path": [
+                                        "auctions",
+                                        "{{lot_id}}",
+                                        "auto-bid"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Device Tokens",
+                    "item": [],
+                    "description": "Placeholder for future Device Token registration endpoints."
+                },
+                {
+                    "name": "Debug / Health",
+                    "item": []
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{jwt_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000"
+        },
+        {
+            "key": "api_prefix",
+            "value": "/api/v1"
+        }
+    ]
+}

@@ -926,7 +926,7 @@
                             <div class="collapse menu-dropdown {{ $isAuctionsActive ? 'show' : '' }}" id="sidebarAuctions">
                                 <ul class="nav nav-sm flex-column">
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.auctions.index') }}" class="nav-link {{ request()->routeIs('admin.auctions.index') ? 'active' : '' }}" data-key="t-auction-lots">Auction Lots</a>
+                                        <a href="{{ route('admin.auctions.lots.index') }}" class="nav-link {{ request()->routeIs('admin.auctions.lots.index') ? 'active' : '' }}" data-key="t-auction-lots">Auction Lots</a>
                                     </li>
                                 </ul>
                             </div>
