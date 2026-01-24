@@ -17,6 +17,13 @@
 
         @include('livewire.admin.partials._alerts')
 
+        @if ($successMessage)
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ $successMessage }}
+                <button type="button" class="btn-close" wire:click="$set('successMessage', null)" aria-label="Close"></button>
+            </div>
+        @endif
+
         <div class="row">
             <div class="col-lg-12">
                 <div class="card" id="auctionList">

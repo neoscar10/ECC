@@ -1,6 +1,15 @@
 <div>
     @include('livewire.admin.auctions.lots.partials._page-header', ['lot' => $lot])
 
+    @include('livewire.admin.partials._alerts')
+    
+    @if ($successMessage)
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ $successMessage }}
+            <button type="button" class="btn-close" wire:click="$set('successMessage', null)" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div id="page-alerts" wire:ignore></div>
 
     <div class="row">

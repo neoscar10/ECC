@@ -12,6 +12,9 @@ class Show extends Component
     public $lotId;
     public $lot;
     
+    // Alerts
+    public $successMessage = '';
+    
     // Realtime UI state
     public $lastBids = [];
     public $timelineEvents = [];
@@ -68,6 +71,13 @@ class Show extends Component
     public function requestEdit()
     {
         $this->dispatch('auction-lot:edit', lotId: $this->lot->id);
+    }
+    
+    // Message Handler
+    #[On('operation-success')]
+    public function showSuccessAlert($message)
+    {
+        $this->successMessage = $message;
     }
     
     // --- Bids Modal ---

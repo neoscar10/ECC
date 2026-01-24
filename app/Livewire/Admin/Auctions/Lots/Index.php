@@ -17,6 +17,9 @@ class Index extends Component
     // Filters
     public $search = '';
     public $filterStatus = '';
+    
+    // Alerts
+    public $successMessage = '';
 
     // Data handling
     public $lotId;
@@ -85,10 +88,20 @@ class Index extends Component
         $this->dispatch('auction-lot:edit', lotId: $id);
     }
     
+    // Message Handler
+    #[On('operation-success')]
+    public function showSuccessAlert($message)
+    {
+        $this->successMessage = $message;
+    }
+
     // Kept solely for Delete/Sub-modals reloading
     #[On('auction-updated')] 
     #[On('auction-created')]
-    public function refreshList() {} 
+    public function refreshList() 
+    {
+        // Re-render
+    } 
 
     // --- Attachment Actions (Kept Local) ---
 

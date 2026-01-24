@@ -405,11 +405,11 @@ class LotFormModal extends Component
         $this->dispatch('hide-create-modal'); // Changed from hide-modal to hide-create-modal to match existing
         $this->dispatch('auction-updated'); // Internal Livewire refresh
         
-        // Success Toast
-        $this->dispatch('notify', 
-            type: 'success', 
-            message: ($this->isEditMode ? 'Auction Lot updated successfully' : 'Auction Lot created successfully') // Use $this->isEditMode
-        ); // Refresh parent lists
+        session()->flash('success', $this->isEditMode ? 'Auction Lot updated successfully.' : 'Auction Lot created successfully.');
+        
+        // Dispatch event for parent component to show alert instantly without refresh
+        $this->dispatch('operation-success', message: $this->isEditMode ? 'Auction Lot updated successfully.' : 'Auction Lot created successfully.');
+
         $this->resetForm();
     }
 
