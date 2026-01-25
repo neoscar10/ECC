@@ -145,7 +145,34 @@ class AuctionController extends Controller
         
         $access = $this->accessResolver->resolve($lot, $user);
         if (!$access['can_auto_bid']) {
-            return response()->json(['message' => 'Access Denied: Auto-bidding is not enabled for your Membership Tier.'], 403);
+            $userTier = $user->currentMembership?->membershipTier;
+            $actions = [];
+            
+            // Re-use logic from presenter (dry)
+            if ($userTier) {
+                $upgrade = $this->presenter->findAutoBidUpgrade($userTier);
+                if ($upgrade) {
+                    $actions[] = [
+                       'type' => 'upgrade_membership',
+                       'label' => 'Upgrade to Enable Auto-Bid',
+                       'target_tier' => [
+                           'id' => $upgrade->id,
+                           'name' => $upgrade->name,
+                           'level' => $upgrade->level,
+                           'price' => (string)($upgrade->price ?? '0.00'),
+                           'currency' => $upgrade->currency ?? 'INR'
+                       ],
+                       'deeplink' => '/membership/tiers',
+                       'priority' => 'primary'
+                    ];
+                }
+            }
+
+            return response()->json([
+                'message' => 'Access Denied: Auto-bidding is not enabled for your Membership Tier.',
+                'actions' => $actions,
+                'access' => $this->presenter->present($lot, $user, $access) // Include full access object context
+            ], 403);
         }
 
         try {
@@ -159,6 +186,27 @@ class AuctionController extends Controller
             return response()->json(['message' => 'Auto-bid configured successfully.']);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function cancelAutoBid(Request $request, $id)
+    {
+        $user = Auth::guard('api')->user();
+        if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+
+        $lot = AuctionLot::findOrFail($id);
+        
+        try {
+            $this->autoBidService->cancelAutoBid($lot, $user);
+            
+            // Re-fetch and return updated state
+            $access = $this->accessResolver->resolve($lot, $user);
+            return response()->json([
+                'message' => 'Auto-bid cancelled successfully.',
+                'data' => $this->transformLot($lot->fresh(), $access, true)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Cancellation Failed: ' . $e->getMessage()], 400);
         }
     }
 

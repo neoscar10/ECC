@@ -74,6 +74,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/{id}', [\App\Http\Controllers\Api\V1\AuctionController::class, 'show']);
         Route::post('/{id}/bid', [\App\Http\Controllers\Api\V1\AuctionController::class, 'bid']);
         Route::post('/{id}/auto-bid', [\App\Http\Controllers\Api\V1\AuctionController::class, 'autoBid']);
+        Route::delete('/{id}/auto-bid', [\App\Http\Controllers\Api\V1\AuctionController::class, 'cancelAutoBid']);
     });
 
     // Mobile Broadcasting Auth (JWT)

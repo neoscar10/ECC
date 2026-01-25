@@ -87,6 +87,20 @@ class AuctionAccessPresenter
             }
         }
 
+        // Auto-Bid Eligibility Action
+        if ($resolverResult['can_bid'] && !$resolverResult['can_auto_bid'] && $userTier) {
+             $upgrade = $this->findAutoBidUpgrade($userTier);
+             if ($upgrade) {
+                 $actions[] = [
+                    'type' => 'upgrade_membership',
+                    'label' => 'Upgrade to Enable Auto-Bid',
+                    'target_tier' => $this->formatTier($upgrade),
+                    'deeplink' => '/membership/tiers',
+                    'priority' => 'secondary'
+                 ];
+             }
+        }
+
         // 3. Delegate to Common Presenter
         $timing = [
             'go_live_at' => $lot->starts_at?->toIso8601String(),
@@ -222,6 +236,16 @@ class AuctionAccessPresenter
         // Fallback or explicit visibility tiers usage if not set?
         // If restriction_mode is restricted but type is null, maybe fallback?
         return $lot->visibilityTiers()->orderBy('level', 'asc')->first();
+    }
+    
+    public function findAutoBidUpgrade(MembershipTier $currentTier)
+    {
+        // Find next tier with is_auto_bidding_enabled = true
+        return MembershipTier::where('is_active', true)
+            ->where('is_auto_bidding_enabled', true)
+            ->where('level', '>', $currentTier->level)
+            ->orderBy('level', 'asc')
+            ->first();
     }
     
     protected function formatTier($tier): array
