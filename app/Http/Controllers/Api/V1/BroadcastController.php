@@ -21,6 +21,11 @@ class BroadcastController extends Controller
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
+        $request->validate([
+            'socket_id' => 'required|string',
+            'channel_name' => 'required|string',
+        ]);
+
         // Standard Laravel Broadcast Auth
         // This will call the callbacks defined in routes/channels.php
         return Broadcast::auth($request);

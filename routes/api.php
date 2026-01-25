@@ -76,6 +76,11 @@ Route::prefix('v1')->group(function () {
         Route::post('/{id}/auto-bid', [\App\Http\Controllers\Api\V1\AuctionController::class, 'autoBid']);
     });
 
+    // Mobile Broadcasting Auth (JWT)
+    Route::middleware('auth:api')->prefix('broadcasting')->group(function () {
+        Route::post('auth', [\App\Http\Controllers\Api\V1\BroadcastController::class, 'authenticate']);
+    });
+
     // Admin Routes
     Route::middleware(['auth:api', 'role:ecc_admin|super_admin'])->prefix('admin')->group(function () {
         Route::patch('memberships/{id}/approve', [MembershipStatusController::class, 'approve']);

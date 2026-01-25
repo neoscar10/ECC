@@ -69,7 +69,7 @@ class AuctionController extends Controller
     public function show($id)
     {
         $user = Auth::guard('api')->user();
-        $lot = AuctionLot::with(['images', 'bids.user'])->findOrFail($id);
+        $lot = AuctionLot::with(['images', 'bids.user', 'attachments'])->findOrFail($id);
         
         $access = $this->accessResolver->resolve($lot, $user);
 
@@ -172,7 +172,7 @@ class AuctionController extends Controller
             'id' => $lot->id,
             'lot_no' => $lot->lot_no,
             'title' => $lot->title,
-            'subtitle' => $lot->subtitle,
+            'description' => $detailed ? $lot->description : null,
             'status' => $lot->status,
             'bids_count_total' => $lot->bids->count(),
             'current_bid' => $lot->current_highest_bid,
@@ -182,10 +182,28 @@ class AuctionController extends Controller
             'is_user_winning' => Auth::guard('api')->id() === $lot->winner_user_id,
             'access' => $access,
             'images' => $imageUrls,
-            'description' => $detailed ? $lot->description : null,
             'provenance' => $detailed ? $lot->provenance_text : null,
-            'bids' => $detailed ? $this->transformBids($lot) : null
+            'bids' => $detailed ? $this->transformBids($lot) : null,
+            'attachments' => $detailed ? $this->transformAttachments($lot) : null,
         ];
+    }
+
+    protected function transformAttachments($lot)
+    {
+        // Return active attachments sorted by order
+        // Filters should ideally happen in query or here. Assuming `is_active` check is desirable.
+        return $lot->attachments->where('is_active', true)->sortBy('sort_order')->values()->map(function($att) {
+            return [
+                'id' => $att->id,
+                'type' => $att->type,
+                'heading' => $att->heading,
+                'body' => $att->body,
+                'line_text' => $att->line_text,
+                'kv_key' => $att->kv_key,
+                'kv_value' => $att->kv_value, // Frontend can decide how to display based on 'type'
+                'sort_order' => $att->sort_order,
+            ];
+        });
     }
 
     protected function transformBids($lot)
