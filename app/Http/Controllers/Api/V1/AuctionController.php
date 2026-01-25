@@ -52,7 +52,7 @@ class AuctionController extends Controller
         $data = $lots->getCollection()->map(function ($lot) use ($user) {
             $access = $this->accessResolver->resolve($lot, $user);
             
-            // Should we hide completely?
+            // Logic Update: Strictly hide if !has_visibility
             if (!$access['has_visibility']) {
                 return null;
             }
@@ -78,7 +78,18 @@ class AuctionController extends Controller
         $access = $this->accessResolver->resolve($lot, $user);
 
         if (!$access['has_visibility']) {
-            return response()->json(['message' => 'Access Denied: You do not have permission to view this auction lot.'], 403);
+            // Return 403 JSON with access object to explain why (like Archive)
+             // Format Access Object (Archive Style)
+            $formattedAccess = $this->presenter->present($lot, $user, $access);
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Access Denied',
+                'code' => 403,
+                'data' => [
+                    'access' => $formattedAccess
+                ]
+            ], 403);
         }
 
         return response()->json([

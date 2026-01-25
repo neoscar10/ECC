@@ -17,37 +17,73 @@ class AuctionAccessResolverService
         $tier = $user?->currentMembership?->membershipTier;
         $now = now();
 
-        // 1. Base Visibility (Does the user even see the card?)
-        // If visibility tiers defined, checking intersection.
-        $hasVisibility = true;
-        if ($lot->visibilityTiers()->exists()) {
-            $hasVisibility = $tier && $lot->visibilityTiers->contains($tier->id);
+        // 1. Base Visibility
+        // Logic Update: Use restriction_mode and restriction_type
+        // Fail Closed if private
+        
+        $hasVisibility = true; 
+        
+        if ($lot->restriction_mode !== 'public') {
+             $hasVisibility = false; // Default closed if not public
+             
+             if ($userTier) {
+                 if ($lot->restriction_type === 'hierarchical') {
+                     $min = $lot->restrictedMinTier ?? MembershipTier::find($lot->restricted_min_tier_id);
+                     if ($min && $userTier->level >= $min->level) {
+                         $hasVisibility = true;
+                     }
+                 } elseif ($lot->restriction_type === 'private') {
+                      if ($lot->restricted_private_tier_id === $userTier->id) {
+                          $hasVisibility = true;
+                      }
+                 } elseif ($lot->restriction_type === 'random') {
+                      // Check visibility pivot
+                      if ($lot->visibilityTiers()->exists()) {
+                          if ($lot->visibilityTiers->contains($userTier->id)) {
+                              $hasVisibility = true;
+                          }
+                      }
+                 }
+             }
         }
 
         // 2. Clear View (Unblurred)
-        // If clear view tiers defined, checks intersection. 
-        // Note: Archive used "blur_enabled" + "clear_tiers". We follow same pattern.
-        // But for auctions, usually hero image is key. 
-        // We assume logic: If restricted, needs specific tier.
-        
-        // Let's assume strict logic based on DB:
-        // If no rows in clearViewTiers, it's public clear? Or check a boolean?
-        // Archive has 'blur_enabled' boolean on product.
-        // AuctionLot uses 'visibilityTiers' and 'clearViewTiers'.
-        // If clearViewTiers is empty, everyone sees clear? Or no one?
-        // Let's follow Archive: if blur_enabled (not in lot schema? Wait, I didn't add blur_enabled to lot schema!)
-        
-        // [Correction] ArchiveProduct has 'blur_enabled'. AuctionLot schema I created didn't explicitly include it? 
-        // Checking schema... `create_auction_system_tables`.
-        // I missed `blur_enabled` in the migration! I only added pivots. 
-        // I should treat empty clearViewTiers as "Open" or handle via Access Settings logic.
-        // However, I can infer: if clearViewTiers exists, it's restricted.
-        
         $canViewClear = false;
-        if ($lot->clearViewTiers()->count() === 0) {
-            $canViewClear = true; // No restriction defined implies open
+
+        // If public, check if blur is enabled
+        if ($lot->restriction_mode === 'public') {
+             if ($lot->blur_enabled) {
+                 // Check clear tiers
+                 if ($userTier) {
+                     if ($lot->clearViewTiers()->count() > 0) {
+                          if ($lot->clearViewTiers->contains($userTier->id)) {
+                              $canViewClear = true;
+                          }
+                     } else {
+                         // If blur enabled but no clear tiers? Assume blocked? Or Open?
+                         // Archive logic: public + blur + no clear tiers = strictly blurred?
+                         // Let's assume strict: false.
+                     }
+                 }
+             } else {
+                 $canViewClear = true;
+             }
         } else {
-            $canViewClear = $tier && $lot->clearViewTiers->contains($tier->id);
+            // Restricted Mode
+            // If visible, is it clear?
+            // Usually if you have access to a private/restricted item, you see it clear?
+            // Unless layered (Restricted Visibility + Blurred). 
+            // Assuming: If you pass visibility check on restricted item, you view it clear, UNLESS blur_enabled is explicitly on?
+            // Let's assume logical inheritance: Visibility Access = Clear View for restricted items unless specified.
+            if ($hasVisibility) {
+                $canViewClear = true; 
+                if ($lot->blur_enabled) {
+                    $canViewClear = false;
+                     if ($userTier && $lot->clearViewTiers->contains($userTier->id)) {
+                         $canViewClear = true;
+                     }
+                }
+            }
         }
 
         // 3. Early Access
