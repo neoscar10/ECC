@@ -1664,26 +1664,13 @@
         },
         {
             "name": "Auctions",
+            "description": "## Auctions Module\n\nThe Auctions module handles the full lifecycle of bidding on exclusive items. \n\n### Authentication\n*   **Required**: Yes (Bearer Token via `Authorization` header).\n*   **Headers**: `Accept: application/json`.\n\n### Access Control\n*   **Visibility**: Some lots are restricted to specific tiers. Restricted lots may return `access.view_mode: blur` or `blocked`.\n*   **Bidding**: Users must have `can_bid: true`. If not, they may need to upgrade their tier.\n\n---\n\n### Realtime (Pusher) for Auctions\n\nMobile apps should subscribe to Pusher channels to receive live updates.\n\n*   **Auth Endpoint**: `POST /broadcasting/auth` (Requires Bearer Token)\n*   **Channel**: `private-auctions.lot.{lotId}`\n\n#### Events\n1.  **`bid.placed`**\n    *   **Trigger**: New bid accepted.\n    *   **Payload**: `{ lot_id, amount, formatted_amount, bidder_id, current_highest_bid, ends_at, placed_at }`\n2.  **`lot.updated`**\n    *   **Trigger**: Generic update (details changed).\n    *   **Payload**: `{ lot_id, status, starts_at, ends_at, current_highest_bid }`\n3.  **`status.changed`**\n    *   **Trigger**: Lot goes live, ends, or is sold.\n    *   **Payload**: `{ lot_id, status, ended_at, winner_user_id }`",
             "item": [
                 {
                     "name": "Lots",
                     "item": [
                         {
                             "name": "List Lots",
-                            "event": [
-                                {
-                                    "listen": "test",
-                                    "script": {
-                                        "exec": [
-                                            "var jsonData = pm.response.json();",
-                                            "if (jsonData.data && jsonData.data.length > 0) {",
-                                            "    pm.environment.set(\"lot_id\", jsonData.data[0].id);",
-                                            "}"
-                                        ],
-                                        "type": "text/javascript"
-                                    }
-                                }
-                            ],
                             "request": {
                                 "method": "GET",
                                 "header": [
@@ -1708,7 +1695,8 @@
                                     "query": [
                                         {
                                             "key": "status",
-                                            "value": "live"
+                                            "value": "live",
+                                            "description": "Filter by status: live, upcoming, ended. Default: live,upcoming"
                                         },
                                         {
                                             "key": "page",
@@ -1719,8 +1707,23 @@
                                             "value": "{{pagination_per_page}}"
                                         }
                                     ]
+                                },
+                                "description": "List available auction lots.\n\n### Success Response\nReturns a paginated list of lots with simplified 'access' and 'images' data.\n\n*   **access.view_mode**: `clear` (visible), `blur` (restricted/blurred), `blocked` (hidden).\n*   **can_bid**: boolean indicating if user can bid."
+                            },
+                            "response": [
+                                {
+                                    "name": "Success (200)",
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"data\": [\n        {\n            \"id\": 1,\n            \"lot_no\": \"L-101\",\n            \"title\": \"Signed Bat 2011\",\n            \"status\": \"live\",\n            \"current_bid\": \"50000.00\",\n            \"bids_count_total\": 5,\n            \"ends_at\": \"2026-02-01T12:00:00Z\",\n            \"access\": {\n                \"view_mode\": \"clear\",\n                \"can_bid\": true,\n                \"message\": null\n            },\n            \"images\": [\"https://example.com/img1.jpg\"]\n        }\n    ],\n    \"meta\": {\n        \"current_page\": 1,\n        \"total\": 10\n    }\n}"
                                 }
-                            }
+                            ]
                         },
                         {
                             "name": "Get Lot Detail",
@@ -1746,8 +1749,35 @@
                                         "auctions",
                                         "{{lot_id}}"
                                     ]
+                                },
+                                "description": "Get full details for a specific lot, including Bids and Attachments.\n\n### Notes\n*   **Bids**: Includes list of recent bids.\n*   **Attachments**: Includes active attachments (provenance, COA) respecting access control.\n*   **Access**: Check `access.actions` for upgrade prompts if `view_mode` is `blur`."
+                            },
+                            "response": [
+                                {
+                                    "name": "Success (200)",
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"data\": {\n        \"id\": 1,\n        \"title\": \"Signed Bat\",\n        \"description\": \"Full description...\",\n        \"images\": [\"https://url...\"],\n        \"bids\": [\n            {\n                \"amount\": \"50000.00\",\n                \"time_human\": \"2 mins ago\",\n                \"bidder_label\": \"User ****123\"\n            }\n        ],\n        \"access\": {\n            \"view_mode\": \"clear\",\n            \"can_bid\": true,\n            \"can_auto_bid\": true,\n            \"actions\": []\n        }\n    }\n}"
+                                },
+                                {
+                                    "name": "Forbidden - Restricted (403)",
+                                    "status": "Forbidden",
+                                    "code": 403,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"status\": \"error\",\n    \"message\": \"Access Denied\",\n    \"code\": 403,\n    \"data\": {\n        \"access\": {\n            \"view_mode\": \"blur\",\n            \"reason\": \"tier_too_low\",\n            \"actions\": [{\n                \"type\": \"upgrade_membership\",\n                \"label\": \"Upgrade to View\",\n                \"target_tier\": { \"name\": \"Platinum\" }\n            }]\n        }\n    }\n}"
                                 }
-                            }
+                            ]
                         }
                     ]
                 },
@@ -1774,7 +1804,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"amount\": 1000\n}"
+                                    "raw": "{\n    \"amount\": 55000\n}"
                                 },
                                 "url": {
                                     "raw": "{{base_url}}/{{api_prefix}}/auctions/{{lot_id}}/bid",
@@ -1787,8 +1817,47 @@
                                         "{{lot_id}}",
                                         "bid"
                                     ]
+                                },
+                                "description": "Place a manual bid on an auction lot.\n\n### Rules\n*   **Amount**: Must be >= `current_highest_bid` + `min_increment`.\n*   **Status**: Lot must be `live`."
+                            },
+                            "response": [
+                                {
+                                    "name": "Success (200)",
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"message\": \"Bid placed successfully.\",\n    \"data\": { \"id\": 1, \"current_bid\": \"55000.00\" }\n}"
+                                },
+                                {
+                                    "name": "Forbidden - Not Eligible (403)",
+                                    "status": "Forbidden",
+                                    "code": 403,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"message\": \"Access Denied: You are not eligible to bid on this lot.\"\n}"
+                                },
+                                {
+                                    "name": "Validation Error (422)",
+                                    "status": "Unprocessable Content",
+                                    "code": 422,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"message\": \"The amount must be at least 55000.\",\n    \"errors\": { \"amount\": [\"The amount must be at least 55000.\"] }\n}"
                                 }
-                            }
+                            ]
                         }
                     ]
                 },
@@ -1815,7 +1884,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"max_bid\": 5000,\n    \"increment_amount\": 100,\n    \"is_enabled\": true\n}"
+                                    "raw": "{\n    \"max_bid\": 100000,\n    \"increment_amount\": 1000\n}"
                                 },
                                 "url": {
                                     "raw": "{{base_url}}/{{api_prefix}}/auctions/{{lot_id}}/auto-bid",
@@ -1828,8 +1897,35 @@
                                         "{{lot_id}}",
                                         "auto-bid"
                                     ]
+                                },
+                                "description": "Configure an auto-bid (proxy bid) for this lot.\n\n### Body\n*   `max_bid`: The maximum amount you are willing to bid.\n*   `increment_amount`: Optional. The step to use (if higher than lot's min increment).\n\n### Errors\n*   **403**: Users with lower tiers may not have auto-bid privileges."
+                            },
+                            "response": [
+                                {
+                                    "name": "Success (200)",
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"message\": \"Auto-bid configured successfully.\"\n}"
+                                },
+                                {
+                                    "name": "Forbidden - Upgrade Required (403)",
+                                    "status": "Forbidden",
+                                    "code": 403,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"message\": \"Access Denied: Auto-bidding is not enabled for your Membership Tier.\",\n    \"actions\": [{ \"type\": \"upgrade_membership\", \"label\": \"Upgrade to Enable Auto-Bid\" }]\n}"
                                 }
-                            }
+                            ]
                         },
                         {
                             "name": "Cancel Auto-Bid",
@@ -1857,9 +1953,34 @@
                                         "auto-bid"
                                     ]
                                 },
-                                "description": "Cancel an active auto-bid for the current user/lot.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)"
+                                "description": "Cancel an active auto-bid for the current user/lot.\n\n### Notes\n*   Cancels any pending auto-bid actions.\n*   Returns a concise confirmation."
                             },
-                            "response": []
+                            "response": [
+                                {
+                                    "name": "Success (200)",
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"message\": \"Auto-bid cancelled successfully.\",\n    \"data\": {\n        \"lot_id\": 1,\n        \"auto_bid\": {\n            \"id\": 105,\n            \"is_enabled\": false,\n            \"status\": \"cancelled\",\n            \"cancelled_at\": \"2026-01-25T23:55:00+01:00\",\n            \"reason\": \"user_cancelled\"\n        }\n    }\n}"
+                                },
+                                {
+                                    "name": "No Active Bid (200)",
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n    \"message\": \"No active auto-bid to cancel.\",\n    \"data\": {\n        \"lot_id\": 1,\n        \"auto_bid\": {\n            \"id\": null,\n            \"status\": \"not_active\"\n        }\n    }\n}"
+                                }
+                            ]
                         }
                     ]
                 }

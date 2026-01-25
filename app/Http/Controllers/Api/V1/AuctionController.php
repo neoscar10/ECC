@@ -194,16 +194,22 @@ class AuctionController extends Controller
         $user = Auth::guard('api')->user();
         if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
 
+        // Concise Response: No eager loading required
         $lot = AuctionLot::findOrFail($id);
         
         try {
-            $this->autoBidService->cancelAutoBid($lot, $user);
+            $result = $this->autoBidService->cancelAutoBid($lot, $user);
             
-            // Re-fetch and return updated state
-            $access = $this->accessResolver->resolve($lot, $user);
+            $message = $result['status'] === 'cancelled' 
+                ? 'Auto-bid cancelled successfully.' 
+                : 'No active auto-bid to cancel.';
+
             return response()->json([
-                'message' => 'Auto-bid cancelled successfully.',
-                'data' => $this->transformLot($lot->fresh(), $access, true)
+                'message' => $message,
+                'data' => [
+                    'lot_id' => $lot->id,
+                    'auto_bid' => $result
+                ]
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Cancellation Failed: ' . $e->getMessage()], 400);

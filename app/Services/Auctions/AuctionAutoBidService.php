@@ -186,14 +186,15 @@ class AuctionAutoBidService
     /**
      * Cancel an active auto-bid for a user on a lot.
      */
-    public function cancelAutoBid(AuctionLot $lot, User $user): void
+    public function cancelAutoBid(AuctionLot $lot, User $user): array
     {
-        DB::transaction(function () use ($lot, $user) {
+        return DB::transaction(function () use ($lot, $user) {
             $autoBid = AuctionAutoBid::where('auction_lot_id', $lot->id)
                 ->where('user_id', $user->id)
                 ->first();
 
             if ($autoBid) {
+                $id = $autoBid->id;
                 $autoBid->delete();
                 
                 // Log Event
@@ -204,7 +205,23 @@ class AuctionAutoBidService
                     'event_type' => 'auto_bid_cancelled',
                     'payload' => null
                 ]);
+
+                return [
+                    'id' => $id,
+                    'is_enabled' => false,
+                    'status' => 'cancelled',
+                    'cancelled_at' => now()->toIso8601String(),
+                    'reason' => 'user_cancelled'
+                ];
             }
+
+            return [
+                'id' => null,
+                'is_enabled' => false,
+                'status' => 'not_active',
+                'cancelled_at' => null,
+                'reason' => 'not_active'
+            ];
         });
     }
 }

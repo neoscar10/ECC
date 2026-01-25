@@ -718,7 +718,16 @@ Cancel active auto-bid.
 ```json
 {
     "message": "Auto-bid cancelled successfully.",
-    "data": { ...updated lot... }
+    "data": {
+        "lot_id": 123,
+        "auto_bid": {
+            "id": 45,
+            "is_enabled": false,
+            "status": "cancelled",
+            "cancelled_at": "2026-01-25T12:00:00Z",
+            "reason": "user_cancelled"
+        }
+    }
 }
 ```
 
