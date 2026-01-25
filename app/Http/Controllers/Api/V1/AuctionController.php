@@ -7,6 +7,7 @@ use App\Models\Auctions\AuctionLot;
 use App\Services\Auctions\AuctionAccessResolverService;
 use App\Services\Auctions\AuctionAutoBidService;
 use App\Services\Auctions\AuctionBiddingService;
+use App\Services\Auctions\AuctionAccessPresenter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,15 +16,18 @@ class AuctionController extends Controller
     protected $accessResolver;
     protected $biddingService;
     protected $autoBidService;
+    protected $presenter;
 
     public function __construct(
         AuctionAccessResolverService $accessResolver,
         AuctionBiddingService $biddingService,
-        AuctionAutoBidService $autoBidService
+        AuctionAutoBidService $autoBidService,
+        AuctionAccessPresenter $presenter
     ) {
         $this->accessResolver = $accessResolver;
         $this->biddingService = $biddingService;
         $this->autoBidService = $autoBidService;
+        $this->presenter = $presenter;
     }
 
     public function index(Request $request)
@@ -168,6 +172,9 @@ class AuctionController extends Controller
             return $access['can_view_clear'] ? $img->url : null; // secure it
         });
 
+        // Format Access Object (Archive Style)
+        $formattedAccess = $this->presenter->present($lot, Auth::guard('api')->user(), $access);
+
         return [
             'id' => $lot->id,
             'lot_no' => $lot->lot_no,
@@ -180,27 +187,37 @@ class AuctionController extends Controller
             'currency' => $lot->currency,
             'ends_at' => $lot->ends_at,
             'is_user_winning' => Auth::guard('api')->id() === $lot->winner_user_id,
-            'access' => $access,
+            'access' => $formattedAccess, // Replaced raw access (breaking change, or keep both if really needed, but prompt said Replace (Option A))
             'images' => $imageUrls,
             'provenance' => $detailed ? $lot->provenance_text : null,
             'bids' => $detailed ? $this->transformBids($lot) : null,
-            'attachments' => $detailed ? $this->transformAttachments($lot) : null,
+            'attachments' => $detailed ? $this->transformAttachments($lot, $formattedAccess) : null,
         ];
     }
 
-    protected function transformAttachments($lot)
+    protected function transformAttachments($lot, $lotAccess)
     {
+        $user = Auth::guard('api')->user();
+
         // Return active attachments sorted by order
         // Filters should ideally happen in query or here. Assuming `is_active` check is desirable.
-        return $lot->attachments->where('is_active', true)->sortBy('sort_order')->values()->map(function($att) {
+        return $lot->attachments->where('is_active', true)->sortBy('sort_order')->values()->map(function($att) use ($lot, $user, $lotAccess) {
+            
+            // Resolve Access
+            $attAccess = $this->presenter->presentAttachment($att, $lot, $user, $lotAccess);
+            $isClear = ($attAccess['view_mode'] === 'clear');
+
             return [
                 'id' => $att->id,
                 'type' => $att->type,
                 'heading' => $att->heading,
-                'body' => $att->body,
-                'line_text' => $att->line_text,
-                'kv_key' => $att->kv_key,
-                'kv_value' => $att->kv_value, // Frontend can decide how to display based on 'type'
+                // Access
+                'access' => $attAccess,
+                // Content (Hidden if not clear)
+                'body' => $isClear ? $att->body : null,
+                'line_text' => $isClear ? $att->line_text : null,
+                'kv_key' => $isClear ? $att->kv_key : null,
+                'kv_value' => $isClear ? $att->kv_value : null,
                 'sort_order' => $att->sort_order,
             ];
         });
