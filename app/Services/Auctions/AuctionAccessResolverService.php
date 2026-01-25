@@ -26,20 +26,20 @@ class AuctionAccessResolverService
         if ($lot->restriction_mode !== 'public') {
              $hasVisibility = false; // Default closed if not public
              
-             if ($userTier) {
+             if ($tier) {
                  if ($lot->restriction_type === 'hierarchical') {
                      $min = $lot->restrictedMinTier ?? MembershipTier::find($lot->restricted_min_tier_id);
-                     if ($min && $userTier->level >= $min->level) {
+                     if ($min && $tier->level >= $min->level) {
                          $hasVisibility = true;
                      }
                  } elseif ($lot->restriction_type === 'private') {
-                      if ($lot->restricted_private_tier_id === $userTier->id) {
+                      if ($lot->restricted_private_tier_id === $tier->id) {
                           $hasVisibility = true;
                       }
                  } elseif ($lot->restriction_type === 'random') {
                       // Check visibility pivot
                       if ($lot->visibilityTiers()->exists()) {
-                          if ($lot->visibilityTiers->contains($userTier->id)) {
+                          if ($lot->visibilityTiers->contains($tier->id)) {
                               $hasVisibility = true;
                           }
                       }
@@ -54,9 +54,9 @@ class AuctionAccessResolverService
         if ($lot->restriction_mode === 'public') {
              if ($lot->blur_enabled) {
                  // Check clear tiers
-                 if ($userTier) {
+                 if ($tier) {
                      if ($lot->clearViewTiers()->count() > 0) {
-                          if ($lot->clearViewTiers->contains($userTier->id)) {
+                          if ($lot->clearViewTiers->contains($tier->id)) {
                               $canViewClear = true;
                           }
                      } else {
@@ -79,7 +79,7 @@ class AuctionAccessResolverService
                 $canViewClear = true; 
                 if ($lot->blur_enabled) {
                     $canViewClear = false;
-                     if ($userTier && $lot->clearViewTiers->contains($userTier->id)) {
+                     if ($tier && $lot->clearViewTiers->contains($tier->id)) {
                          $canViewClear = true;
                      }
                 }
@@ -99,6 +99,8 @@ class AuctionAccessResolverService
         // 5. Auto Bid Eligibility
         // Only if User's Tier has can_auto_bid (is_auto_bidding_enabled) = true
         // AND user has bid permission (live status)
+        // AND user has VISIBILITY (cannot bid on what you cannot see)
+        $canBid = $user && $lot->status === 'live' && $hasVisibility;
         $canAutoBid = $canBid && ($tier?->is_auto_bidding_enabled ?? false);
 
         return [

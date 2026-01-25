@@ -6,10 +6,17 @@ use App\Models\Auctions\AuctionLot;
 use App\Models\Auctions\AuctionLotAttachment;
 use App\Models\MembershipTier;
 use App\Models\User;
-use App\Support\Archive\AccessIconNormalizer; // Verify this exists, used in ArchiveProductResource
+use Unicodeveloper\Identify\Identify; // Unused but check imports
+use App\Services\Common\AccessPresentationService;
 
 class AuctionAccessPresenter
 {
+    protected $commonPresenter;
+
+    public function __construct(AccessPresentationService $commonPresenter)
+    {
+        $this->commonPresenter = $commonPresenter;
+    }
     /**
      * Format the main lot access object to match Archive schema.
      */
@@ -54,8 +61,19 @@ class AuctionAccessPresenter
                 }
             } elseif ($viewMode === 'blocked') {
                 // Upgrade for Visibility
-                $upgrade = $this->findTierUpgrade($lot, 'visibilityTiers');
+                // Use robust findBaseRestrictionUpgrade instead of just checking visibilityTiers
+                $upgrade = $this->findBaseRestrictionUpgrade($lot);
+                
                 if ($upgrade) {
+                    $context = [];
+                     if ($lot->restriction_type === 'private') {
+                          $context['private_tier_name'] = $upgrade['name'] ?? 'Private';
+                     } else {
+                          $context['required_tier_name'] = $upgrade['name'] ?? 'Higher';
+                     }
+                     // Merge context
+                     $messageContext = array_merge($messageContext, $context);
+
                     $actions[] = [
                         'type' => 'upgrade_membership',
                         'label' => 'Upgrade to View',
@@ -63,31 +81,27 @@ class AuctionAccessPresenter
                         'deeplink' => '/membership/tiers',
                         'priority' => 'primary'
                     ];
-                    $messageContext['required_tier_name'] = $upgrade->name;
                 } else {
                      $messageContext['required_tier_name'] = 'Membership';
                 }
             }
         }
 
-        // 3. Build Message
-        $message = $this->buildMessage($reason, $viewMode, $messageContext);
-
-        // 4. Timing
+        // 3. Delegate to Common Presenter
         $timing = [
             'go_live_at' => $lot->starts_at?->toIso8601String(),
-            'next_access_at' => null // Logic for early access could go here if mapped
+            'next_access_at' => null
         ];
 
-        return [
-            'view_mode' => $viewMode,
-            'reason' => $reason,
-            'source' => 'lot', // 'product' in archive, 'lot' here
-            'viewer' => $this->formatViewer($userTier),
-            'message' => $message,
-            'actions' => $actions,
-            'timing' => $timing
-        ];
+        return $this->commonPresenter->present(
+            $viewMode,
+            $reason,
+            'lot',
+            $user,
+            $messageContext,
+            $actions,
+            $timing
+        );
     }
     
     /**
@@ -139,19 +153,20 @@ class AuctionAccessPresenter
 
         $viewMode = $isClear ? 'clear' : 'blocked';
         
-        return [
-            'view_mode' => $viewMode,
-            'reason' => $reason,
-            'source' => 'attachment',
-            'viewer' => $this->formatViewer($userTier),
-            'message' => $this->buildMessage($reason, $viewMode, $context),
-            'actions' => $actions,
-            'timing' => $lotAccess['timing'] // Inherit timing
-        ];
+        return $this->commonPresenter->present(
+            $viewMode,
+            $reason,
+            'attachment',
+            $user,
+            $context,
+            $actions,
+            $lotAccess['timing'] ?? []
+        );
     }
 
     // --- Helpers ---
-
+    
+    // Kept for internal logic (finding upgrades)
     protected function checkAttachmentAccess($attachment, $userTier) {
         if (!$userTier) return false;
         
@@ -188,44 +203,27 @@ class AuctionAccessPresenter
         // $relation = 'visibilityTiers' or 'clearViewTiers'
         return $lot->$relation()->orderBy('level', 'asc')->first();
     }
-
-    protected function buildMessage($reason, $viewMode, $context)
+    
+    // Derived from ArchiveAccessResolver::findBaseRestrictionUpgrade
+    protected function findBaseRestrictionUpgrade(AuctionLot $lot)
     {
-        // Replicating Archive logic simply
-        if ($viewMode === 'clear') {
-            return ['title' => 'Open', 'body' => 'Access Granted', 'icon' => 'info'];
+        if ($lot->restriction_type === 'hierarchical') {
+             return $lot->restrictedMinTier ?? MembershipTier::find($lot->restricted_min_tier_id);
         }
 
-        if ($reason === 'blurred') {
-            $name = $context['clear_view_tier_name'] ?? 'Higher Tier';
-            return [
-                'title' => 'Restricted View',
-                'body' => "$name Tier Required",
-                'icon' => 'lock'
-            ];
+        if ($lot->restriction_type === 'random') {
+             return $lot->visibilityTiers()->orderBy('level', 'asc')->first();
         }
 
-        if ($reason === 'product_restricted' || $reason === 'attachment_restricted') {
-            $name = $context['required_tier_name'] ?? 'Membership';
-             return [
-                'title' => 'Restricted Access',
-                'body' => "$name Tier Required",
-                'icon' => 'lock'
-            ];
+        if ($lot->restriction_type === 'private') {
+             return $lot->restrictedPrivateTier ?? MembershipTier::find($lot->restricted_private_tier_id);
         }
         
-        return ['title' => 'Restricted', 'body' => 'Access Denied', 'icon' => 'lock'];
+        // Fallback or explicit visibility tiers usage if not set?
+        // If restriction_mode is restricted but type is null, maybe fallback?
+        return $lot->visibilityTiers()->orderBy('level', 'asc')->first();
     }
-
-    protected function formatViewer($tier): array
-    {
-        return [
-            'membership_tier_id' => $tier?->id,
-            'membership_tier_name' => $tier?->name,
-            'membership_level' => $tier?->level
-        ];
-    }
-
+    
     protected function formatTier($tier): array
     {
         return [

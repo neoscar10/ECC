@@ -52,13 +52,11 @@ class AuctionController extends Controller
         $data = $lots->getCollection()->map(function ($lot) use ($user) {
             $access = $this->accessResolver->resolve($lot, $user);
             
-            // Logic Update: Strictly hide if !has_visibility
-            if (!$access['has_visibility']) {
-                return null;
-            }
-
+            // Logic Update: We now INCLUDE restricted lots in the list, but marked as blocked in access object.
+            // No filtering here based on visibility.
+            
             return $this->transformLot($lot, $access);
-        })->filter(); // Remove nulls
+        }); 
 
         return response()->json([
             'data' => $data->values(),
@@ -198,12 +196,22 @@ class AuctionController extends Controller
             'currency' => $lot->currency,
             'ends_at' => $lot->ends_at,
             'is_user_winning' => Auth::guard('api')->id() === $lot->winner_user_id,
+            'can_bid' => $access['can_bid'], // Exposed for frontend UI
             'access' => $formattedAccess, // Replaced raw access (breaking change, or keep both if really needed, but prompt said Replace (Option A))
             'images' => $imageUrls,
-            'provenance' => $detailed ? $lot->provenance_text : null,
-            'bids' => $detailed ? $this->transformBids($lot) : null,
-            'attachments' => $detailed ? $this->transformAttachments($lot, $formattedAccess) : null,
+            // 'provenance' => $detailed ? $lot->provenance_text : null, // REMOVED provenance entirely as per prompt requirement
+            // Detail Only Fields
+            'bids' => $detailed ? $this->transformBids($lot) : null, // Kept null if list, as per previous logic, but now strictly enforced via array_filter or just unset? 
+            // Prompt says: "List endpoint MUST NOT return provenance, bids, attachments at all".
+            // So we should conditionally add them to the array.
         ];
+
+        if ($detailed) {
+            $response['bids'] = $this->transformBids($lot);
+            $response['attachments'] = $this->transformAttachments($lot, $formattedAccess);
+        }
+
+        return $response;
     }
 
     protected function transformAttachments($lot, $lotAccess)
