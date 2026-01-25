@@ -539,3 +539,196 @@ In this example, the product is open, but one attachment is premium.
     *   Verify you see attachments with `is_accessible: false`.
     *   Verify the `lock_message` matches the restriction (e.g., "Requires Gold").
 
+
+---
+
+## Auctions
+
+The **Auctions** module allows users to bid on exclusive items. It features real-time bidding, auto-bidding (proxy), and tiered access control similar to the Archive.
+
+### A. Overview
+
+- **Real-time**: Bids and status updates are broadcast via Pusher.
+- **Access Control**: Tiers determine who can **view** (existence), **view clear** (unblurred), **bid**, and **auto-bid**.
+- **Auto-Bid**: System automatically places bids on behalf of the user up to a max amount. Restricted by tier.
+
+### B. Enumerations
+
+#### 1. Lot Status (`status`)
+| Value | Description |
+| :--- | :--- |
+| `draft` | Not visible to users. |
+| `upcoming` | Visible, countdown to start. |
+| `live` | Bidding is active. |
+| `ended` | Time expired, processing winner. |
+| `sold` | Winner confirmed. |
+| `unsold` | No valid bids. |
+| `cancelled` | Withdrawn by admin. |
+
+#### 2. Access View Mode (`access.view_mode`)
+| Value | Description |
+| :--- | :--- |
+| `clear` | Full access to details and images. |
+| `blur` | Blurred images, partial details. |
+| `blocked` | Access denied (hidden or placeholder). |
+
+#### 3. Attachment Types (`type`)
+Same as Archive: `line` (text), `kv` (key-value), `rich` (markdown), `file`.
+
+### C. Endpoints
+
+#### 1. List Auctions
+`GET /auctions`
+
+List active auctions.
+
+| Param | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `status` | string | `live` | Filter by status (`live`, `upcoming`, `ended`). |
+| `page` | int | 1 | Pagination. |
+
+**Success (200):**
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "lot_no": "2026-001",
+            "title": "Signed Bat",
+            "status": "live",
+            "current_bid": "50000.00",
+            "bids_count_total": 5,
+            "ends_at": "2026-02-01T12:00:00Z",
+            "access": {
+                "view_mode": "clear",
+                "can_bid": true
+            },
+            "images": ["https://..."]
+        }
+    ],
+    "meta": { ... }
+}
+```
+
+#### 2. Get Auction Details
+`GET /auctions/{id}`
+
+Get full details including bids and attachments.
+
+**Success (200):**
+```json
+{
+    "data": {
+        "id": 1,
+        "title": "Signed Bat",
+        "description": "...",
+        "current_bid": "50000.00",
+        "bids": [
+            {
+                "amount": "50000.00",
+                "time_human": "2 mins ago",
+                "is_me": true,
+                "bidder_label": "You"
+            }
+        ],
+        "access": {
+            "view_mode": "clear",
+            "can_bid": true,
+            "can_auto_bid": true,
+            "actions": []
+        }
+    }
+}
+```
+
+**Forbidden (403) - Restricted Access:**
+Returns 403 but includes `data.access` to explain why.
+```json
+{
+    "message": "Access Denied",
+    "data": {
+        "access": {
+            "view_mode": "blur",
+            "reason": "blurred",
+            "actions": [
+                {
+                    "type": "upgrade_membership",
+                    "label": "Upgrade for Clear View",
+                    "target_tier": { ... }
+                }
+            ]
+        }
+    }
+}
+```
+
+#### 3. Place Bid
+`POST /auctions/{id}/bid`
+
+**Body:**
+```json
+{
+    "amount": 55000
+}
+```
+
+**Success (200):** Returns updated lot data.
+
+#### 4. Setup Auto-Bid
+`POST /auctions/{id}/auto-bid`
+
+Configure proxy bidding.
+
+**Body:**
+```json
+{
+    "max_bid": 100000,
+    "increment_amount": 1000
+}
+```
+
+**Success (200):**
+```json
+{
+    "message": "Auto-bid configured successfully."
+}
+```
+
+**Forbidden (403) - Auto-Bid Restricted:**
+If user tier allows manual bidding but NO auto-bidding.
+```json
+{
+    "message": "Access Denied: Auto-bidding is not enabled for your Membership Tier.",
+    "actions": [
+        {
+            "type": "upgrade_membership",
+            "label": "Upgrade to Enable Auto-Bid",
+            "target_tier": { ... }
+        }
+    ]
+}
+```
+
+#### 5. Cancel Auto-Bid
+`DELETE /auctions/{id}/auto-bid`
+
+Cancel active auto-bid.
+
+**Success (200):**
+```json
+{
+    "message": "Auto-bid cancelled successfully.",
+    "data": { ...updated lot... }
+}
+```
+
+### D. Real-time (Pusher)
+
+**Channel:** `private-auctions.lot.{id}`
+**Events:**
+- `bid.placed`: New bid update.
+- `lot.update`: Status/Time/Price update.
+
+**Auth Endpoint:** `POST /broadcasting/auth`
+Standard Pusher auth. Requires Bearer Token. Send `socket_id` and `channel_name`.
+

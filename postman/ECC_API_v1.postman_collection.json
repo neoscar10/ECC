@@ -1830,6 +1830,36 @@
                                     ]
                                 }
                             }
+                        },
+                        {
+                            "name": "Cancel Auto-Bid",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/auctions/{{lot_id}}/auto-bid",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "auctions",
+                                        "{{lot_id}}",
+                                        "auto-bid"
+                                    ]
+                                },
+                                "description": "Cancel an active auto-bid for the current user/lot.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)"
+                            },
+                            "response": []
                         }
                     ]
                 }
