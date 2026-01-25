@@ -33,18 +33,33 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="mb-3 position-relative">
+                                <div class="mb-3 position-relative" x-data="{ open: false }">
                                     <label class="form-label">Search Lot</label>
                                     <div class="input-group">
-                                        <span class="input-group-text"><i class="ri-search-line"></i></span>
-                                        <input type="text" wire:model.live.debounce.300ms="lotSearch" class="form-control" placeholder="Lot No or Title...">
+                                        <input type="text" 
+                                            wire:model.live.debounce.300ms="lotSearch" 
+                                            class="form-control" 
+                                            placeholder="Lot No or Title..."
+                                            @focus="open = true; $wire.searchLots()"
+                                            @input="open = true"
+                                            @click.outside="open = false"
+                                            @keydown.escape="open = false"
+                                        >
                                     </div>
                                     
                                     @if(count($lotSearchResults) > 0)
-                                        <div class="list-group position-absolute w-100 shadow mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                        <div class="list-group position-absolute w-100 shadow mt-1" 
+                                            style="z-index: 1000; max-height: 200px; overflow-y: auto;"
+                                            x-show="open"
+                                            x-transition
+                                            wire:key="lot-search-results"
+                                        >
                                             @foreach($lotSearchResults as $lot)
-                                                <button type="button" wire:click="selectLot({{ $lot->id }})" class="list-group-item list-group-item-action">
-                                                    <div class="fw-medium">{{ $lot->title }}</div>
+                                                <button type="button" wire:click="selectLot({{ $lot->id }}); open = false" class="list-group-item list-group-item-action">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="fw-medium text-truncate" style="max-width: 200px;">{{ $lot->title }}</div>
+                                                        <span class="badge bg-light text-dark">{{ ucfirst($lot->status) }}</span>
+                                                    </div>
                                                     <small class="text-muted">Lot #{{ $lot->lot_no }}</small>
                                                 </button>
                                             @endforeach
@@ -110,12 +125,25 @@
                                             </div>
                                         </div>
                                     @else
-                                        <div class="position-relative">
-                                            <input type="text" wire:model.live.debounce.300ms="userSearch" class="form-control" placeholder="Search Winner...">
+                                        <div class="position-relative" x-data="{ open: false }">
+                                            <input type="text" 
+                                                wire:model.live.debounce.300ms="userSearch" 
+                                                class="form-control" 
+                                                placeholder="Search Winner..."
+                                                @focus="open = true; $wire.searchUsers()"
+                                                @input="open = true"
+                                                @click.outside="open = false"
+                                                @keydown.escape="open = false"
+                                            >
                                             @if(count($userSearchResults) > 0)
-                                                <div class="list-group position-absolute w-100 shadow mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                                <div class="list-group position-absolute w-100 shadow mt-1" 
+                                                    style="z-index: 1000; max-height: 200px; overflow-y: auto;"
+                                                    x-show="open"
+                                                    x-transition
+                                                    wire:key="user-search-results"
+                                                >
                                                     @foreach($userSearchResults as $u)
-                                                        <button type="button" wire:click="selectUser({{ $u->id }})" class="list-group-item list-group-item-action">
+                                                        <button type="button" wire:click="selectUser({{ $u->id }}); open = false" class="list-group-item list-group-item-action">
                                                             <div class="fw-medium">{{ $u->name }}</div>
                                                             <small class="text-muted">{{ $u->email }}</small>
                                                         </button>

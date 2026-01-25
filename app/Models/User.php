@@ -85,4 +85,9 @@ class User extends Authenticatable implements JWTSubject
 
         return $membership->membershipTier->privileges->contains('key', $privilegeKey);
     }
+
+    public function bids()
+    {
+        return $this->hasMany(\App\Models\Auctions\AuctionBid::class);
+    }
 }

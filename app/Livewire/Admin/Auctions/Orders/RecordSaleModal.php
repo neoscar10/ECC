@@ -53,25 +53,43 @@ class RecordSaleModal extends Component
 
     public function updatedLotSearch()
     {
-        if (strlen($this->lotSearch) > 1) {
-            $this->lotSearchResults = AuctionLot::where('title', 'like', '%' . $this->lotSearch . '%')
-                ->orWhere('lot_no', 'like', '%' . $this->lotSearch . '%')
-                ->take(5)
+        $this->searchLots();
+    }
+
+    public function searchLots()
+    {
+        if (strlen($this->lotSearch) < 1) {
+            // Default to recent lots (e.g., live or ended recently)
+            $this->lotSearchResults = AuctionLot::latest()
+                ->take(10)
                 ->get();
         } else {
-            $this->lotSearchResults = [];
+            $this->lotSearchResults = AuctionLot::where('title', 'like', '%' . $this->lotSearch . '%')
+                ->orWhere('lot_no', 'like', '%' . $this->lotSearch . '%')
+                ->limit(10)
+                ->get();
         }
     }
     
     public function updatedUserSearch()
     {
-        if (strlen($this->userSearch) > 2) {
-            $this->userSearchResults = User::where('name', 'like', '%' . $this->userSearch . '%')
-                ->orWhere('email', 'like', '%' . $this->userSearch . '%')
-                ->take(5)
+        $this->searchUsers();
+    }
+
+    public function searchUsers()
+    {
+        if (strlen($this->userSearch) < 1) {
+            // Default to recent bidders
+             $this->userSearchResults = User::whereHas('bids')
+                ->withMax('bids', 'created_at')
+                ->orderByDesc('bids_max_created_at')
+                ->take(10)
                 ->get();
         } else {
-             $this->userSearchResults = [];
+            $this->userSearchResults = User::where('name', 'like', '%' . $this->userSearch . '%')
+                ->orWhere('email', 'like', '%' . $this->userSearch . '%')
+                ->limit(10)
+                ->get();
         }
     }
 
@@ -100,7 +118,7 @@ class RecordSaleModal extends Component
         
         $this->selectedUser = $user;
         $this->user_id = $id;
-        $this->userSearch = $user->name . ' (' . $user->email . ')';
+        $this->userSearch = $user->name;
         $this->userSearchResults = [];
         $this->buyer_type = 'registered';
     }
