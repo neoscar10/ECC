@@ -44,28 +44,63 @@ class Create extends Component
         return view('livewire.admin.archive.orders.create');
     }
 
+    // Dropdown State
+    public $showProductDropdown = false;
+    public $showUserDropdown = false;
+
     public function updatedProductSearch()
     {
-        if (strlen($this->productSearch) > 2) {
-            $this->searchResults = ArchiveProduct::where('title', 'like', '%' . $this->productSearch . '%')
-                ->where('quantity', '>', 0)
-                ->take(5)
-                ->get();
+        $this->showProductDropdown = true;
+        
+        $query = ArchiveProduct::where('quantity', '>', 0);
+        
+        if (!empty($this->productSearch)) {
+            $query->where('title', 'like', '%' . $this->productSearch . '%');
         } else {
-            $this->searchResults = [];
+            $query->latest('created_at'); // Default order
+        }
+        
+        $this->searchResults = $query->take(30)->get();
+    }
+
+    public function openProductDropdown()
+    {
+        $this->showProductDropdown = true;
+        if (empty($this->searchResults)) {
+            $this->updatedProductSearch();
         }
     }
     
     public function updatedUserSearch()
     {
-        if (strlen($this->userSearch) > 2) {
-            $this->userSearchResults = User::where('name', 'like', '%' . $this->userSearch . '%')
-                ->orWhere('email', 'like', '%' . $this->userSearch . '%')
-                ->take(5)
-                ->get();
+        $this->showUserDropdown = true;
+        
+        $query = User::query();
+        
+        if (!empty($this->userSearch)) {
+            $query->where(function($q) {
+                $q->where('name', 'like', '%' . $this->userSearch . '%')
+                  ->orWhere('email', 'like', '%' . $this->userSearch . '%');
+            });
         } else {
-             $this->userSearchResults = [];
+            $query->latest('created_at');
         }
+        
+        $this->userSearchResults = $query->take(30)->get();
+    }
+
+    public function openUserDropdown()
+    {
+        $this->showUserDropdown = true;
+        if (empty($this->userSearchResults)) {
+            $this->updatedUserSearch();
+        }
+    }
+
+    public function closeDropdowns()
+    {
+        $this->showProductDropdown = false;
+        $this->showUserDropdown = false;
     }
 
     public function selectProduct($id)
@@ -74,6 +109,7 @@ class Create extends Component
         $this->product_id = $id;
         $this->productSearch = $this->selectedProduct->title;
         $this->searchResults = [];
+        $this->showProductDropdown = false;
         
         // Auto-set price if not set or specific logic (e.g. min price)
         if (!$this->unit_price_inr) {
@@ -87,6 +123,7 @@ class Create extends Component
         $this->user_id = $id;
         $this->userSearch = $user->name . ' (' . $user->email . ')';
         $this->userSearchResults = [];
+        $this->showUserDropdown = false;
     }
 
     public function open()
@@ -178,7 +215,8 @@ class Create extends Component
         $this->reset([
             'product_id', 'enquiry_id', 'user_id', 'buyer_type', 
             'external_name', 'external_phone', 'external_email', 'external_address',
-            'qty', 'unit_price_inr', 'notes', 'productSearch', 'userSearch', 'selectedProduct'
+            'qty', 'unit_price_inr', 'notes', 'productSearch', 'userSearch', 'selectedProduct',
+            'showProductDropdown', 'showUserDropdown'
         ]);
         $this->qty = 1;
         $this->buyer_type = 'registered';

@@ -65,29 +65,50 @@
                                 </div>
 
                             @else
-                                <div class="mb-3 position-relative">
+                                <div class="mb-3 position-relative" wire:key="product-search-wrapper" x-on:click.outside="$wire.closeDropdowns()">
                                     <label class="form-label">Search Product</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="ri-search-line"></i></span>
-                                        <input type="text" wire:model.live.debounce.300ms="productSearch" class="form-control" placeholder="Type product name...">
+                                        <input type="text" 
+                                            wire:model.live.debounce.250ms="productSearch" 
+                                            wire:focus="openProductDropdown"
+                                            wire:click.stop="openProductDropdown"
+                                            wire:keydown.escape="closeDropdowns"
+                                            class="form-control" 
+                                            placeholder="Type product name to search...">
                                     </div>
                                     
-                                    @if(count($searchResults) > 0)
-                                        <div class="list-group position-absolute w-100 shadow mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
-                                            @foreach($searchResults as $result)
-                                                <button type="button" wire:click="selectProduct({{ $result->id }})" class="list-group-item list-group-item-action d-flex align-items-center">
-                                                    @if($result->images->first())
-                                                        <img src="{{ Storage::url($result->images->first()->image_path) }}" class="avatar-xs rounded-circle me-2">
-                                                    @endif
-                                                    <div>
-                                                        <div class="fw-medium">{{ $result->title }}</div>
-                                                        <small class="text-muted">Stock: {{ $result->quantity }}</small>
+                                    @if($showProductDropdown)
+                                        <div class="dropdown-menu show w-100 shadow mt-1 p-0 border-0 overflow-hidden" style="position: absolute; inset: 100% auto auto 0; z-index: 1050;">
+                                            <div class="list-group list-group-flush" style="max-height: 260px; overflow-y: auto;">
+                                                @forelse($searchResults as $result)
+                                                    <button type="button" 
+                                                        wire:mousedown.prevent="selectProduct({{ $result->id }})" 
+                                                        class="list-group-item list-group-item-action d-flex align-items-center p-2">
+                                                        <div class="flex-shrink-0 me-2">
+                                                            @if($result->images->first())
+                                                                <img src="{{ Storage::url($result->images->first()->image_path) }}" class="avatar-xs rounded-circle">
+                                                            @else
+                                                                <div class="avatar-xs bg-light rounded-circle d-flex align-items-center justify-content-center">
+                                                                    <i class="ri-image-line text-muted"></i>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <div class="fw-bold text-truncate">{{ $result->title }}</div>
+                                                            <small class="text-muted d-flex justify-content-between">
+                                                                <span>SKU: {{ $result->id }}</span>
+                                                                <span class="{{ $result->quantity > 0 ? 'text-success' : 'text-danger' }}">Qty: {{ $result->quantity }}</span>
+                                                            </small>
+                                                        </div>
+                                                    </button>
+                                                @empty
+                                                    <div class="p-3 text-center text-muted">
+                                                        <small>No products found.</small>
                                                     </div>
-                                                </button>
-                                            @endforeach
+                                                @endforelse
+                                            </div>
                                         </div>
-                                    @elseif(strlen($productSearch) > 2)
-                                        <div class="alert alert-warning mt-2 mb-0">No matching products found with stock > 0.</div>
                                     @endif
                                 </div>
                             @endif
@@ -133,20 +154,36 @@
                                         </div>
                                     </div>
                                 @else
-                                    <div class="mb-3 position-relative">
+                                    <div class="mb-3 position-relative" wire:key="user-search-wrapper" x-on:click.outside="$wire.closeDropdowns()">
                                         <label class="form-label">Search User</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="ri-user-search-line"></i></span>
-                                            <input type="text" wire:model.live.debounce.300ms="userSearch" class="form-control" placeholder="Name or Email...">
+                                            <input type="text" 
+                                                wire:model.live.debounce.250ms="userSearch" 
+                                                wire:focus="openUserDropdown"
+                                                wire:click.stop="openUserDropdown"
+                                                wire:keydown.escape="closeDropdowns"
+                                                class="form-control" 
+                                                placeholder="Name or Email..."
+                                                autocomplete="off">
                                         </div>
-                                         @if(count($userSearchResults) > 0)
-                                            <div class="list-group position-absolute w-100 shadow mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
-                                                @foreach($userSearchResults as $u)
-                                                    <button type="button" wire:click="selectUser({{ $u->id }})" class="list-group-item list-group-item-action">
-                                                        <div class="fw-medium">{{ $u->name }}</div>
-                                                        <small class="text-muted">{{ $u->email }}</small>
-                                                    </button>
-                                                @endforeach
+                                        
+                                        @if($showUserDropdown)
+                                            <div class="dropdown-menu show w-100 shadow mt-1 p-0 border-0 overflow-hidden" style="position: absolute; inset: 100% auto auto 0; z-index: 1050;">
+                                                <div class="list-group list-group-flush" style="max-height: 260px; overflow-y: auto;">
+                                                    @forelse($userSearchResults as $u)
+                                                        <button type="button" 
+                                                            wire:mousedown.prevent="selectUser({{ $u->id }})" 
+                                                            class="list-group-item list-group-item-action p-2">
+                                                            <div class="fw-bold">{{ $u->name }}</div>
+                                                            <small class="text-muted">{{ $u->email }}</small>
+                                                        </button>
+                                                    @empty
+                                                        <div class="p-3 text-center text-muted">
+                                                            <small>No users found.</small>
+                                                        </div>
+                                                    @endforelse
+                                                </div>
                                             </div>
                                         @endif
                                     </div>

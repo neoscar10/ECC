@@ -238,7 +238,7 @@ class AuctionController extends Controller
         // Format Access Object (Archive Style)
         $formattedAccess = $this->presenter->present($lot, Auth::guard('api')->user(), $access);
 
-        return [
+        $response = [
             'id' => $lot->id,
             'lot_no' => $lot->lot_no,
             'title' => $lot->title,
