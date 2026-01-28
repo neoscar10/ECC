@@ -1,6 +1,6 @@
 <div class="row justify-content-center">
     <!-- Summary Panel -->
-    <div class="col-lg-8">
+    <div class="col-lg-12">
         <h6 class="fw-semibold mb-3">Review & Create</h6>
         <div class="card border mb-3">
             <div class="card-body">

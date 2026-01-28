@@ -1,5 +1,5 @@
 <div class="row justify-content-center">
-    <div class="col-lg-10">
+    <div class="col-lg-12">
         <!-- Main Card -->
         <div class="card border shadow-none mb-0">
             <div class="card-header bg-light-subtle border-bottom-0 pb-0">
