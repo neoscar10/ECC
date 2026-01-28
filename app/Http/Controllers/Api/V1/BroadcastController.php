@@ -28,6 +28,14 @@ class BroadcastController extends Controller
 
         // Standard Laravel Broadcast Auth
         // This will call the callbacks defined in routes/channels.php
-        return Broadcast::auth($request);
+        try {
+            return Broadcast::auth($request);
+        } catch (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e) {
+            return response()->json(['message' => 'Access denied for this channel.'], 403);
+        } catch (\Throwable $e) {
+            // Report error but don't expose detail
+            report($e);
+            return response()->json(['message' => 'Server error during broadcast auth.'], 500);
+        }
     }
 }

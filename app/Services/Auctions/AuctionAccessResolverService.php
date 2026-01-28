@@ -14,6 +14,28 @@ class AuctionAccessResolverService
      * Resolve the access object for an auction lot.
      * Mirrors ArchiveAccessResolver::resolveProductAccess
      */
+    /**
+     * Determine if a user can subscribe to the auction lot's websocket channel.
+     * This decouples channel auth from the resolve() response structure (e.g. 'has_visibility').
+     */
+    public function canSubscribeToLotChannel(AuctionLot $lot, ?User $user): bool
+    {
+        if (!$user) return false;
+        
+        // Public -> Always allowed
+        if ($lot->restriction_mode === 'public') {
+            return true;
+        }
+
+        // Check standard restriction logic (hierarchical, allowlist, etc.)
+        $userTier = $user->currentMembership?->membershipTier;
+        return $this->checkStandardRestriction($lot, $userTier);
+    }
+
+    /**
+     * Resolve the access object for an auction lot.
+     * Mirrors ArchiveAccessResolver::resolveProductAccess
+     */
     public function resolve(AuctionLot $lot, ?User $user): array
     {
         $userTier = $user?->currentMembership?->membershipTier;

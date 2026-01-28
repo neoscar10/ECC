@@ -17,11 +17,12 @@ Broadcast::channel('auctions.lot.{lotId}', function ($user, $lotId) {
 
     // Use Access Resolver
     $resolver = new \App\Services\Auctions\AuctionAccessResolverService();
-    $access = $resolver->resolve($lot, $user);
-
-    // If has visibility, allow subscription.
-    // We allow subscription even if not "live" so they can see "upcoming" or "ended" updates.
-    return $access['has_visibility'];
+    try {
+        return $resolver->canSubscribeToLotChannel($lot, $user);
+    } catch (\Throwable $e) {
+        \Illuminate\Support\Facades\Log::error("Channel Auth Error for Lot {$lotId}: " . $e->getMessage());
+        return false;
+    }
 });
 
 Broadcast::channel('admin.members', function ($user) {
