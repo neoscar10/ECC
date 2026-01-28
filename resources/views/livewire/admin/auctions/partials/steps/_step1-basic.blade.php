@@ -31,10 +31,31 @@
     </div>
 
     <!-- Scheduling (Parity with Archive) -->
+    <!-- Scheduling (Parity with Archive) -->
     <div class="col-12">
-        <div class="form-check form-switch mb-2">
-            <input class="form-check-input" type="checkbox" id="goLiveNow" wire:model.live="goLiveNow">
-            <label class="form-check-label" for="goLiveNow">Go Live Now</label>
+        <div class="d-flex gap-4 flex-wrap">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="goLiveNow" wire:model.live="goLiveNow">
+                <label class="form-check-label" for="goLiveNow">Go Live Now</label>
+            </div>
+            
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="outcomeToggle" 
+                       @checked($outcome_decision_mode === 'admin') 
+                       wire:click="$set('outcome_decision_mode', '{{ $outcome_decision_mode === 'system' ? 'admin' : 'system' }}')">
+                <label class="form-check-label" for="outcomeToggle">
+                    Outcome Decision: <span class="fw-semibold {{ $outcome_decision_mode === 'admin' ? 'text-warning' : 'text-success' }}">
+                        {{ $outcome_decision_mode === 'admin' ? 'Admin (Manual)' : 'System (Automatic)' }}
+                    </span>
+                </label>
+            </div>
+        </div>
+        <div class="form-text mt-2">
+            @if($outcome_decision_mode === 'system')
+                System (Automatic): Winner/Unsold is decided automatically when time ends.
+            @else
+                Admin (Manual): Auction stops at end time and waits for admin decision.
+            @endif
         </div>
     </div>
     @if(!$goLiveNow)

@@ -111,9 +111,9 @@
                     
                     {{-- Save Changes (Edit Mode Only, Steps 1-3) --}}
                     @if($isEditMode && $createStep < 4)
-                         <button type="button" class="btn btn-success" wire:click="updateProduct" wire:loading.attr="disabled">
-                            <span wire:loading.remove>Save Changes</span>
-                            <span wire:loading>
+                         <button type="button" class="btn btn-success" wire:click="updateProduct" wire:loading.attr="disabled" wire:target="updateProduct">
+                            <span wire:loading.remove wire:target="updateProduct">Save Changes</span>
+                            <span wire:loading wire:target="updateProduct">
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                 Saving...
                             </span>

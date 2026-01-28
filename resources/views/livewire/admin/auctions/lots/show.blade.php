@@ -15,11 +15,21 @@
     <div class="row">
         <div class="col-lg-8">
             @include('livewire.admin.auctions.lots.partials._hero-gallery', ['lot' => $lot])
+            
+          
+
             @include('livewire.admin.auctions.lots.partials._details-card', ['lot' => $lot, 'accessSummary' => $this->accessSummary, 'timelineEvents' => $timelineEvents])
             @include('livewire.admin.auctions.lots.partials._timeline-card', ['timelineEvents' => $timelineEvents])
         </div>
 
         <div class="col-lg-4">
+            <!-- Decision Manager -->
+            @if($lot->status === 'pending_decision' && $lot->outcome_decision_mode === 'admin')
+                <div class="mb-3">
+                    <livewire:admin.auctions.lots.decision-manager :lot="$lot" :key="'decision-manager-'.$lot->id" />
+                </div>
+            @endif
+            
             {{-- Winner / Unsold Card --}}
             @include('livewire.admin.auctions.lots.partials._winner-card', ['lot' => $lot])
             

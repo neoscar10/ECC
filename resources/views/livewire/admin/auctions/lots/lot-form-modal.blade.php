@@ -87,9 +87,9 @@
                         
                         {{-- Save Changes (Edit Mode Only, Steps 1-4) --}}
                         @if($isEditMode && $createStep < 5)
-                             <button type="button" class="btn btn-success" wire:click="save" wire:loading.attr="disabled">
-                                <span wire:loading.remove>Save Changes</span>
-                                <span wire:loading>Saving...</span>
+                             <button type="button" class="btn btn-success" wire:click="save" wire:loading.attr="disabled" wire:target="save">
+                                <span wire:loading.remove wire:target="save">Save Changes</span>
+                                <span wire:loading wire:target="save">Saving...</span>
                             </button>
                         @endif
 

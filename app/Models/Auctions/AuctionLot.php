@@ -29,6 +29,7 @@ class AuctionLot extends Model
         'blur_enabled' => 'boolean',
         'early_access_enabled' => 'boolean',
         'blur_strategy' => 'string',
+        'decision_made_at' => 'datetime',
     ];
 
     // --- Relationships ---
@@ -63,6 +64,12 @@ class AuctionLot extends Model
     public function winner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'winner_user_id');
+    }
+
+    // Decision Maker
+    public function decisionMaker(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'decision_made_by');
     }
     
     // Media - Mirrors Archive Pattern
@@ -123,6 +130,11 @@ class AuctionLot extends Model
     public function reauctionedFrom(): BelongsTo
     {
         return $this->belongsTo(AuctionLot::class, 'reauctioned_from_lot_id');
+    }
+
+    public function reauctionedTo(): BelongsTo
+    {
+        return $this->belongsTo(AuctionLot::class, 'reauctioned_to_lot_id');
     }
 
     public function order(): \Illuminate\Database\Eloquent\Relations\HasOne

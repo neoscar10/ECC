@@ -67,6 +67,9 @@ class LotFormModal extends Component
     // Index.php had `allowsEarlyAccess` and `early_access_enabled` mapping. 
     public $allowsEarlyAccess = false;
 
+    // Manual Outcome
+    public $outcome_decision_mode = 'system'; // system, admin
+
     public function mount()
     {
         $this->membershipTiers = \App\Models\MembershipTier::where('is_active', true)->orderBy('sort_order')->get();
@@ -106,6 +109,7 @@ class LotFormModal extends Component
         $this->max_extensions = $lot->max_extensions;
         
         $this->allowsEarlyAccess = (bool) $lot->early_access_enabled;
+        $this->outcome_decision_mode = $lot->outcome_decision_mode ?? 'system';
 
         // Access Hydration
         $this->restrictionMode = $lot->restriction_mode ?? 'public';
@@ -142,7 +146,7 @@ class LotFormModal extends Component
             'restrictionMode', 'selectedVisibilityTiers',
             'blurEnabled', 'restrictionType', 'restrictedMinTierId', 'selectedRandomTiers', 'restrictedPrivateTierId',
             'newImages', 'existingImages', 'new360Images', 'existing360Images',
-            'allowsEarlyAccess'
+            'allowsEarlyAccess', 'outcome_decision_mode'
         ]);
         
         // Defaults
@@ -152,6 +156,63 @@ class LotFormModal extends Component
         $this->max_extensions = 5;
         $this->restrictionMode = 'public';
         $this->goLiveNow = true;
+        $this->outcome_decision_mode = 'system';
+    }
+
+    #[On('auctionLotReauctionPrefill')]
+    public function prefillReauction($sourceLotId)
+    {
+        $this->resetForm();
+        $this->isEditMode = false;
+        
+        $sourceLot = AuctionLot::with(['images', 'visibilityTiers', 'clearViewTiers'])->find($sourceLotId);
+        if (!$sourceLot) return;
+
+        $this->title = 'Re-auction: ' . $sourceLot->title; // Helper prefix
+        $this->description = $sourceLot->description;
+        $this->starting_price = $sourceLot->starting_price;
+        $this->min_selling_price = $sourceLot->min_selling_price;
+        $this->min_increment = $sourceLot->min_increment;
+        
+        // Settings copy
+        $this->outcome_decision_mode = $sourceLot->outcome_decision_mode;
+        $this->anti_sniping_enabled = (bool) $sourceLot->anti_sniping_enabled;
+        $this->trigger_window_seconds = $sourceLot->trigger_window_seconds;
+        $this->extend_by_seconds = $sourceLot->extend_by_seconds;
+        $this->max_extensions = $sourceLot->max_extensions;
+
+        // Access copy
+        $this->restrictionMode = $sourceLot->restriction_mode ?? 'public';
+        $this->selectedVisibilityTiers = $sourceLot->visibilityTiers->pluck('id')->toArray();
+        $this->blurEnabled = (bool) $sourceLot->blur_enabled;
+        $this->restrictionType = $sourceLot->restriction_type;
+        $this->restrictedMinTierId = $sourceLot->restricted_min_tier_id;
+        $this->restrictedPrivateTierId = $sourceLot->restricted_private_tier_id;
+         if ($this->restrictionType === 'random') {
+             $this->selectedRandomTiers = $sourceLot->clearViewTiers->pluck('id')->toArray(); 
+        }
+
+        // Images copy logic handled in save? No, we need to copy over or let user re-upload?
+        // Requirement: "Creates a new auction lot using this lot as a template."
+        // Usually implies deep copy of images or manual re-add.
+        // For simple UX, let's keep images empty or try to copy? 
+        // Adding complexity of copying files might be out of scope for "UI polished" step if not explicitly asked to file-copy.
+        // "Re-auction" usually implies same item. 
+        // Let's populate $existingImages as if it was edit, but since it's create, the save logic needs to handle "existing images" on a new lot?
+        // My save logic for Create says:
+        /*
+            if (!empty($this->newImages)) { ... }
+        */
+        // It does NOT look at existingImages for Create.
+        // To support cloning images, I would need to handle "existing" images as "copy to new" in Create.
+        // Given constraints, I will skip image cloning for now to ensure safety, or just leave it blank as "Template".
+        // Use existing patterns.
+
+        $this->createStep = 1;
+        $this->dispatch('show-create-modal');
+        
+        // Notify user
+        $this->dispatch('operation-success', message: 'Re-auction template loaded. Please check details and dates.');
     }
 
     public function closeModal()
@@ -287,6 +348,7 @@ class LotFormModal extends Component
                 'max_extensions' => $this->max_extensions,
                 
                 'early_access_enabled' => (!$this->goLiveNow && $this->allowsEarlyAccess),
+                'outcome_decision_mode' => $this->outcome_decision_mode,
                 
                 'restriction_mode' => $this->restrictionMode,
                 'restriction_type' => $this->restrictionType,

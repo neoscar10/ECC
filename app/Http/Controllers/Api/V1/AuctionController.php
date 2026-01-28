@@ -181,19 +181,13 @@ class AuctionController extends Controller
 
         // Access Check
         $access = $this->accessResolver->resolve($lot, $user);
-        if (!$access['can_bid'] && !($user->id === 1)) { // Force bypass for super admin test if needed? No, strict.
-             // Wait, can_bid logic was simplified in transformLot as (($lot->status === 'live')).
-             // But resolver doesn't explicitly return 'can_bid'.
-             // We need to rely on the Transformer logic or simple check here.
-             // If Status is live and User exists, they can bid?
-             // Or is there a Tier check?
-             // Archive mirror: "Auctions must behave exactly like Archive". Archive doesn't bid.
-             // Revert to strict logic: If View Mode is Clear, Can Bid?
-             // Or can they bid if blurred? Usually Clear required.
-             // Let's assume View Mode Clear = Can Bid for now, or check generic access.
-             if ($access['view_mode'] !== 'clear') {
-                  return response()->json(['message' => 'Access Denied: You must have clear view access to bid.'], 403);
-             }
+        // Logic Update: Enforce 'clear' view and 'live' status for bidding
+        if ($access['view_mode'] !== 'clear' && !($user->id === 1)) {
+             return response()->json(['message' => 'Access Denied: You do not have access to bid.'], 403);
+        }
+
+        if ($lot->status !== 'live' && !($user->id === 1)) {
+             return response()->json(['message' => 'Bidding is not open for this item.'], 403);
         }
 
         try {

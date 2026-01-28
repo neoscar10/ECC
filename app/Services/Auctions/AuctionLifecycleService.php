@@ -52,33 +52,46 @@ class AuctionLifecycleService
             
         foreach ($ending as $lot) {
             \Illuminate\Support\Facades\DB::transaction(function () use ($lot, $now) {
-                // Determine sold vs unsold
-                // Condition: If min_selling_price is set, bid must meet it.
-                // If current_highest_bid is null (no bids), it's automatically unsold.
-                
-                $reserve = $lot->min_selling_price; // Nullable
-                $highestBid = $lot->current_highest_bid; // Nullable
-                
-                $isSold = false;
-                
-                if ($highestBid === null) {
-                    // No bids at all
-                    $isSold = false;
-                } elseif ($reserve !== null && $highestBid < $reserve) {
-                    // Start price met (implied by bid existence), but Reserve NOT met
-                    $isSold = false;
-                } else {
-                    // Reserve is null (so any bid wins) OR Reserve is met
-                    $isSold = true;
+                // Determine outcome using shared service
+                $outcomeService = new \App\Services\Auctions\AuctionOutcomeService();
+                $outcome = $outcomeService->determineOutcome($lot);
+
+                // Handle 'admin' mode
+                if ($lot->outcome_decision_mode === 'admin') {
+                    $lot->status = 'pending_decision';
+                    $lot->ended_at = $now;
+                    $lot->save();
+
+                    $timelineEvent = AuctionEvent::create([
+                        'auction_lot_id' => $lot->id,
+                        'actor_type' => 'system',
+                        'event_type' => 'auction_pending_decision',
+                        'payload' => [
+                            'highest_bid' => $outcome['highest_bid_amount'],
+                            'reserve' => $lot->min_selling_price,
+                            'recommendation' => $outcome['is_sold'] ? 'sold' : 'unsold',
+                            'reason' => $outcome['reason'],
+                            'ended_at' => $now->toIso8601String()
+                        ]
+                    ]);
+
+                    event(new \App\Events\AuctionTimelineEventCreated($timelineEvent));
+                    event(new AuctionStatusChanged($lot, 'pending_decision'));
+                    
+                    Log::info("Auction {$lot->lot_no} pending decision.");
+                    return; // Done for admin mode
                 }
-                
+
+                // Handle 'system' mode (Automatic)
+                $isSold = $outcome['is_sold'];
                 $newStatus = $isSold ? 'ended' : 'unsold';
                 
                 $lot->status = $newStatus;
                 $lot->ended_at = $now;
                 
-                if (!$isSold) {
-                    // IMPORTANT: Nullify winner if not sold
+                if ($isSold) {
+                    $lot->winner_user_id = $outcome['winner_user_id'];
+                } else {
                     $lot->winner_user_id = null;
                 }
                 
@@ -90,8 +103,8 @@ class AuctionLifecycleService
                     'event_type' => 'auction_ended',
                     'payload' => [
                         'status' => $newStatus, 
-                        'final_price' => $highestBid,
-                        'reserve' => $reserve,
+                        'final_price' => $outcome['highest_bid_amount'],
+                        'reserve' => $lot->min_selling_price,
                         'outcome' => $isSold ? 'sold' : 'reserve_not_met'
                     ]
                 ]);
