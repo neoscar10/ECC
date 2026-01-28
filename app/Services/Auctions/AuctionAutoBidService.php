@@ -22,6 +22,37 @@ class AuctionAutoBidService
      */
     public function setAutoBid(AuctionLot $lot, User $user, float $maxBid, float $incrementAmount): AuctionAutoBid
     {
+        // DOMAIN VALIDATION (Mirroring Controller / Bidding Logic)
+        $scale = 2;
+        $errors = [];
+        
+        // 1. Min Increment
+        $minIncrement = (string) ($lot->min_increment ?? '0.00');
+        $reqIncrement = (string) $incrementAmount;
+        
+        if (bccomp($reqIncrement, $minIncrement, $scale) === -1) {
+             $errors['increment_amount'] = ["Increment Amount must be at least {$lot->currency} {$minIncrement}."];
+        }
+
+        // 2. Max Bid
+        $currentBid = (string) ($lot->current_highest_bid ?? '0.00'); // if null, use 0 for addition? No.
+        
+        if ($lot->current_highest_bid) {
+             $threshold = bcadd($currentBid, $minIncrement, $scale);
+        } else {
+             $threshold = (string) $lot->starting_price;
+        }
+
+        $reqMax = (string) $maxBid;
+         
+        if (bccomp($reqMax, $threshold, $scale) === -1) { // max < threshold
+             $errors['max_bid'] = ["Max Bid must be at least {$lot->currency} {$threshold}."];
+        }
+        
+        if (!empty($errors)) {
+             throw \Illuminate\Validation\ValidationException::withMessages($errors);
+        }
+
         return DB::transaction(function () use ($lot, $user, $maxBid, $incrementAmount) {
              // 1. Check Permissions (Controller usually handles this via AccessResolver, but double check)
              // We assume caller checked 'can_auto_bid'.

@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Auctions\Lots;
 use Livewire\Component;
 use App\Models\Auctions\AuctionLot;
 use App\Models\Auctions\AuctionEvent;
+use App\Models\Auctions\AuctionAutoBid;
 use Livewire\Attributes\On;
 
 class Show extends Component
@@ -17,10 +18,12 @@ class Show extends Component
     
     // Realtime UI state
     public $lastBids = [];
+    public $autoBids = [];
     public $timelineEvents = [];
     public $bidCount = 0;
     public $hasBids = false;
     public $highestBid = null;
+    public $highestBidder = null;
     public $docsCount = 0;
     
     // Modals
@@ -61,9 +64,13 @@ class Show extends Component
 
         $this->bidCount = $this->lot->bids()->count();
         $this->hasBids = $this->bidCount > 0;
-        $this->highestBid = $this->hasBids ? (int) $this->lot->bids()->max('amount') : null;
+        
+        $highest = $this->hasBids ? $this->lot->bids()->with('user.currentMembership.membershipTier')->orderByDesc('amount')->first() : null;
+        $this->highestBid = $highest ? (int) $highest->amount : null;
+        $this->highestBidder = $highest ? $highest->user : null;
         
         $this->lastBids = $this->lot->bids()->with('user')->latest('placed_at')->take(10)->get();
+        $this->autoBids = AuctionAutoBid::with('user')->where('auction_lot_id', $this->lotId)->latest()->get();
         $this->timelineEvents = $this->lot->events()->latest()->take(30)->get();
         $this->docsCount = $this->lot->attachments()->count();
     }

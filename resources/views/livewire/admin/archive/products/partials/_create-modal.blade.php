@@ -100,9 +100,26 @@
                     @if($createStep > 1)
                         <button type="button" class="btn btn-light" wire:click="prevStep">Back</button>
                     @else
+                        {{-- Only show Cancel if Back is not available? The original code had a second Cancel button here? --}}
+                        {{-- Original Lines: 
+                             @else
+                                 <button type="button" class="btn btn-light" wire:click="closeModal">Cancel</button>
+                             @endif 
+                        --}}
                         <button type="button" class="btn btn-light" wire:click="closeModal">Cancel</button>
                     @endif
                     
+                    {{-- Save Changes (Edit Mode Only, Steps 1-3) --}}
+                    @if($isEditMode && $createStep < 4)
+                         <button type="button" class="btn btn-success" wire:click="updateProduct" wire:loading.attr="disabled">
+                            <span wire:loading.remove>Save Changes</span>
+                            <span wire:loading>
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                Saving...
+                            </span>
+                        </button>
+                    @endif
+
                     @if($createStep < 4)
                         <button type="button" class="btn btn-primary" wire:click="nextStep" wire:loading.attr="disabled">
                             Next Step <i class="ri-arrow-right-line align-middle ms-1"></i>

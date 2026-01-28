@@ -267,7 +267,7 @@ class LotFormModal extends Component
          $this->validateStep(3);
          $this->validateStep(4);
 
-        DB::transaction(function () {
+        $lot = DB::transaction(function () {
             $start = $this->goLiveNow ? Carbon::now() : Carbon::parse($this->starts_at);
             $end = Carbon::parse($this->ends_at);
             $status = $this->goLiveNow ? 'live' : 'upcoming';
@@ -398,9 +398,15 @@ class LotFormModal extends Component
             // and its inclusion would require more context about its properties ($this->earlyAccess).
             // If it was intended to be added, it would need to be defined elsewhere.
             
-            // Broadcast Update separate from status change (unless status changed too)
-            event(new \App\Events\AuctionLotUpdated($lot)); // Use $lot instead of $this->lot
+            return $lot;
         }); // End of DB::transaction
+
+        try {
+            event(new \App\Events\AuctionLotUpdated($lot));
+        } catch (\Exception $e) {
+            // Swallow broadcast errors (like Pusher timeouts) so saving succeeds
+            logger()->error('Auction Broadcast Failed: ' . $e->getMessage());
+        }
 
         $this->dispatch('hide-create-modal'); // Changed from hide-modal to hide-create-modal to match existing
         $this->dispatch('auction-updated'); // Internal Livewire refresh

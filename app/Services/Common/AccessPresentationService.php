@@ -96,7 +96,7 @@ class AccessPresentationService
         
         // Blur
         if ($reason === 'blurred') {
-             $tierName = $context['clear_view_tier_name'] ?? 'Higher Tier';
+             $tierName = $context['clear_view_tier_name'] ?? 'Higher Level';
              return [
                 'title' => 'Restricted View',
                 'body' => "{$tierName} Tier Required",

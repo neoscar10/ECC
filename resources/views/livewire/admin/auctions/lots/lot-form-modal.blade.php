@@ -85,6 +85,14 @@
                             <button type="button" class="btn btn-light" wire:click="prevStep">Back</button>
                         @endif
                         
+                        {{-- Save Changes (Edit Mode Only, Steps 1-4) --}}
+                        @if($isEditMode && $createStep < 5)
+                             <button type="button" class="btn btn-success" wire:click="save" wire:loading.attr="disabled">
+                                <span wire:loading.remove>Save Changes</span>
+                                <span wire:loading>Saving...</span>
+                            </button>
+                        @endif
+
                         @if($createStep < 5)
                             <button type="button" class="btn btn-primary" wire:click="nextStep" wire:loading.attr="disabled">
                                 Next Step <i class="ri-arrow-right-line align-middle ms-1"></i>

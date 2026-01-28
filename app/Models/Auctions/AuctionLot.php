@@ -28,6 +28,7 @@ class AuctionLot extends Model
         'anti_sniping_enabled' => 'boolean',
         'blur_enabled' => 'boolean',
         'early_access_enabled' => 'boolean',
+        'blur_strategy' => 'string',
     ];
 
     // --- Relationships ---
@@ -98,6 +99,26 @@ class AuctionLot extends Model
             ->withTimestamps();
     }
     
+    public function minClearViewTier(): BelongsTo
+    {
+        return $this->belongsTo(MembershipTier::class, 'min_clear_view_tier_id');
+    }
+
+    public function clearPrivateTier(): BelongsTo
+    {
+        return $this->belongsTo(MembershipTier::class, 'clear_private_tier_id');
+    }
+
+    public function restrictedMinTier(): BelongsTo
+    {
+        return $this->belongsTo(MembershipTier::class, 'restricted_min_tier_id');
+    }
+
+    public function restrictedPrivateTier(): BelongsTo
+    {
+        return $this->belongsTo(MembershipTier::class, 'restricted_private_tier_id');
+    }
+    
     // Lineage
     public function reauctionedFrom(): BelongsTo
     {
@@ -113,5 +134,33 @@ class AuctionLot extends Model
     public function scopeLive($query)
     {
         return $query->where('status', 'live');
+    }
+
+    public function scopeVisibleTo($query, ?\App\Models\User $user, ?MembershipTier $userTier = null)
+    {
+        return $query->where(function ($q) use ($user, $userTier) {
+            // 1. Public is always visible
+            $q->where('restriction_mode', 'public');
+
+            // 2. If user exists, check visibility restrictions
+            if ($userTier) {
+                $q->orWhere(function ($restricted) use ($userTier) {
+                    $restricted->where('restriction_mode', 'restricted')
+                        // MATCH ARCHIVE LOGIC: Permissive checks (OR)
+                        ->where(function ($checks) use ($userTier) {
+                             // A) Allowlist / Visibility Pivot (Primary Archive Mechanism)
+                             $checks->whereHas('visibilityTiers', function ($t) use ($userTier) {
+                                  $t->where('membership_tiers.id', $userTier->id);
+                             })
+                             // B) Hierarchical
+                             ->orWhereHas('restrictedMinTier', function ($t) use ($userTier) {
+                                  $t->where('level', '<=', $userTier->level);
+                             })
+                             // C) Private
+                             ->orWhere('restricted_private_tier_id', $userTier->id);
+                        });
+                });
+            }
+        });
     }
 }

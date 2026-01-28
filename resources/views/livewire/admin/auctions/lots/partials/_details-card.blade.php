@@ -87,26 +87,85 @@
                      @endif
                  </div>
                  
-                 <h6 class="fs-13 text-uppercase text-muted mb-3">Anti-Sniping</h6>
-                 <div class="d-flex gap-3">
-                     <div class="text-center p-2 border rounded bg-light">
-                         <div class="text-muted fs-11 text-uppercase">Status</div>
-                         <div class="fw-bold {{ $lot->anti_sniping_enabled ? 'text-success' : 'text-danger' }}">
-                             {{ $lot->anti_sniping_enabled ? 'Active' : 'Disabled' }}
+                 <div class="d-flex align-items-center mb-3">
+                     <h6 class="fs-13 text-uppercase text-muted mb-0 flex-grow-1">Anti-Sniping</h6>
+                     <hr class="flex-grow-1 ms-3 my-0 border-dashed text-muted opacity-25">
+                 </div>
+
+                 <div class="row g-3">
+                     {{-- Status --}}
+                     <div class="col-6">
+                         <div class="p-2 border rounded bg-light h-100">
+                             <div class="text-muted fs-11 text-uppercase mb-1">Status</div>
+                             <div>
+                                 @if($lot->anti_sniping_enabled)
+                                     <span class="badge bg-success-subtle text-success">Enabled</span>
+                                 @else
+                                     <span class="badge bg-secondary-subtle text-muted">Disabled</span>
+                                 @endif
+                             </div>
                          </div>
                      </div>
-                     @if($lot->anti_sniping_enabled)
-                        <div class="text-center p-2 border rounded bg-light">
-                            <div class="text-muted fs-11 text-uppercase">Window</div>
-                            <div class="fw-bold">{{ $lot->trigger_window_seconds }}s</div>
-                        </div>
-                        <div class="text-center p-2 border rounded bg-light">
-                            <div class="text-muted fs-11 text-uppercase">Extend</div>
-                            <div class="fw-bold">+{{ $lot->extend_by_seconds }}s</div>
-                        </div>
-                     @endif
+
+                     {{-- Max Extensions --}}
+                     <div class="col-6">
+                         <div class="p-2 border rounded bg-light h-100">
+                             <div class="text-muted fs-11 text-uppercase mb-1">Max Extensions</div>
+                             <div class="fw-medium text-dark">
+                                 {{ $lot->anti_sniping_enabled ? ($lot->max_extensions ?? 'Unlimited') : '—' }}
+                             </div>
+                         </div>
+                     </div>
+
+                     {{-- Extension Window --}}
+                     <div class="col-6">
+                         <div class="p-2 border rounded bg-light h-100">
+                             <div class="text-muted fs-11 text-uppercase mb-1">Extension Window</div>
+                             <div class="fw-medium text-dark">
+                                 @if($lot->anti_sniping_enabled && $lot->extend_by_seconds)
+                                     {{ $lot->extend_by_seconds < 60 ? $lot->extend_by_seconds . ' sec' : round($lot->extend_by_seconds/60, 1) . ' min' }}
+                                 @else
+                                     <span class="text-muted">—</span>
+                                 @endif
+                             </div>
+                         </div>
+                     </div>
+
+                     {{-- Trigger Threshold --}}
+                     <div class="col-6">
+                         <div class="p-2 border rounded bg-light h-100">
+                             <div class="text-muted fs-11 text-uppercase mb-1">Trigger Threshold</div>
+                             <div class="fw-medium text-dark">
+                                 @if($lot->anti_sniping_enabled && $lot->trigger_window_seconds)
+                                    Last {{ $lot->trigger_window_seconds < 60 ? $lot->trigger_window_seconds . ' sec' : round($lot->trigger_window_seconds/60, 1) . ' min' }}
+                                 @else
+                                     <span class="text-muted">—</span>
+                                 @endif
+                             </div>
+                         </div>
+                     </div>
+                     
+                    
                  </div>
             </div>
+
+             {{-- Behavior Summary --}}
+                     <div class="col-12">
+                         <div class="p-2 border rounded bg-light-subtle">
+                             <div class="d-flex">
+                                 <i class="ri-information-line text-muted me-2 mt-1"></i>
+                                 <p class="fs-12 text-muted mb-0">
+                                     @if($lot->anti_sniping_enabled)
+                                         If a bid is placed within the last <strong>{{ $lot->trigger_window_seconds }}s</strong>, 
+                                         the auction extends by <strong>{{ $lot->extend_by_seconds }}s</strong> 
+                                         (up to {{ $lot->max_extensions }} times).
+                                     @else
+                                         Anti-sniping is currently disabled for this auction.
+                                     @endif
+                                 </p>
+                             </div>
+                         </div>
+                     </div>
         </div>
         
         @if($lot->earlyAccessWindows->isNotEmpty())

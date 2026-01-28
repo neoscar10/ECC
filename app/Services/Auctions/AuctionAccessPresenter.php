@@ -46,49 +46,36 @@ class AuctionAccessPresenter
 
         // Upgrade Actions
         if ($viewMode !== 'clear') {
-            if ($viewMode === 'blur') {
-                // Upgrade for Clear View works
-                $upgrade = $this->findTierUpgrade($lot, 'clearViewTiers');
-                if ($upgrade) {
-                    $actions[] = [
-                        'type' => 'upgrade_membership',
-                        'label' => 'Upgrade for Clear View',
-                        'target_tier' => $this->formatTier($upgrade),
-                        'deeplink' => '/membership/tiers',
-                        'priority' => 'primary'
-                    ];
+            // Unified upgrade search: Find "Next Tier" that gives Clear View (and implies Visibility)
+            $upgrade = $this->findTierUpgrade($lot, $userTier);
+            
+            if ($upgrade) {
+                $label = 'Upgrade to View';
+                if ($viewMode === 'blur') {
+                    $label = 'Upgrade for Clear View';
                     $messageContext['clear_view_tier_name'] = $upgrade->name;
-                }
-            } elseif ($viewMode === 'blocked') {
-                // Upgrade for Visibility
-                // Use robust findBaseRestrictionUpgrade instead of just checking visibilityTiers
-                $upgrade = $this->findBaseRestrictionUpgrade($lot);
-                
-                if ($upgrade) {
-                    $context = [];
-                     if ($lot->restriction_type === 'private') {
-                          $context['private_tier_name'] = $upgrade['name'] ?? 'Private';
-                     } else {
-                          $context['required_tier_name'] = $upgrade['name'] ?? 'Higher';
-                     }
-                     // Merge context
-                     $messageContext = array_merge($messageContext, $context);
-
-                    $actions[] = [
-                        'type' => 'upgrade_membership',
-                        'label' => 'Upgrade to View',
-                        'target_tier' => $this->formatTier($upgrade),
-                        'deeplink' => '/membership/tiers',
-                        'priority' => 'primary'
-                    ];
                 } else {
+                    $messageContext['required_tier_name'] = $upgrade->name;
+                }
+
+                $actions[] = [
+                    'type' => 'upgrade_membership',
+                    'label' => $label,
+                    'target_tier' => $this->formatTier($upgrade),
+                    'deeplink' => '/membership/tiers',
+                    'priority' => 'primary'
+                ];
+            } else {
+                // No higher tier available to solve this?
+                // Might be private or misconfigured.
+                if ($viewMode === 'blocked') {
                      $messageContext['required_tier_name'] = 'Membership';
                 }
             }
         }
 
         // Auto-Bid Eligibility Action
-        if ($resolverResult['can_bid'] && !$resolverResult['can_auto_bid'] && $userTier) {
+        if ($resolverResult['can_bid'] && !($resolverResult['can_auto_bid'] ?? false)) {
              $upgrade = $this->findAutoBidUpgrade($userTier);
              if ($upgrade) {
                  $actions[] = [
@@ -107,7 +94,7 @@ class AuctionAccessPresenter
             'next_access_at' => null
         ];
 
-        return $this->commonPresenter->present(
+        $presented = $this->commonPresenter->present(
             $viewMode,
             $reason,
             'lot',
@@ -116,6 +103,11 @@ class AuctionAccessPresenter
             $actions,
             $timing
         );
+
+        // Append can_auto_bid to the result
+        $presented['can_auto_bid'] = $resolverResult['can_auto_bid'] ?? false;
+
+        return $presented;
     }
     
     /**
@@ -212,38 +204,78 @@ class AuctionAccessPresenter
         return $attachment->tiers()->orderBy('level', 'asc')->first();
     }
 
-    protected function findTierUpgrade(AuctionLot $lot, string $relation) {
-        // Find lowest tier in the relation set
-        // $relation = 'visibilityTiers' or 'clearViewTiers'
-        return $lot->$relation()->orderBy('level', 'asc')->first();
-    }
-    
-    // Derived from ArchiveAccessResolver::findBaseRestrictionUpgrade
-    protected function findBaseRestrictionUpgrade(AuctionLot $lot)
+    protected function findTierUpgrade(AuctionLot $lot, ?MembershipTier $currentUserTier)
     {
-        if ($lot->restriction_type === 'hierarchical') {
-             return $lot->restrictedMinTier ?? MembershipTier::find($lot->restricted_min_tier_id);
-        }
-
-        if ($lot->restriction_type === 'random') {
-             return $lot->visibilityTiers()->orderBy('level', 'asc')->first();
-        }
-
-        if ($lot->restriction_type === 'private') {
-             return $lot->restrictedPrivateTier ?? MembershipTier::find($lot->restricted_private_tier_id);
-        }
+        // Rule: Find the lowest tier (by level) that:
+        // 1) Has Visibility (is in allowlist if restricted)
+        // 2) Has Clear View (passes blur strategy)
+        // 3) Level > Current User Level
         
-        // Fallback or explicit visibility tiers usage if not set?
-        // If restriction_mode is restricted but type is null, maybe fallback?
-        return $lot->visibilityTiers()->orderBy('level', 'asc')->first();
+        $currentLevel = $currentUserTier ? $currentUserTier->level : 0;
+        
+        // Base Query: Tiers higher than current user
+        $candidates = MembershipTier::where('level', '>', $currentLevel)
+                                    ->where('is_active', true)
+                                    ->orderBy('level', 'asc')
+                                    ->get();
+
+        foreach ($candidates as $tier) {
+            // Check Visibility
+            $hasVisibility = true; 
+            if ($lot->restriction_mode !== 'public') {
+                $hasVisibility = false;
+                if ($lot->restriction_type === 'hierarchical') {
+                     $min = $lot->restrictedMinTier ?? MembershipTier::find($lot->restricted_min_tier_id);
+                     if ($min && $tier->level >= $min->level) $hasVisibility = true;
+                } elseif ($lot->restriction_type === 'private') {
+                     if ($lot->restricted_private_tier_id === $tier->id) $hasVisibility = true;
+                } elseif ($lot->restriction_type === 'random' || $lot->restriction_type === 'allowlist') {
+                     // Check DB pivot for this candidate tier
+                     // Optimization: Eager load or check existence? 
+                     // Since candidates are few, check usage.
+                     if ($lot->visibilityTiers()->whereKey($tier->id)->exists()) $hasVisibility = true;
+                }
+            }
+            
+            if (!$hasVisibility) continue;
+
+            // Check Clear View
+            $canViewClear = false;
+            if (!$lot->blur_enabled) {
+                $canViewClear = true;
+            } else {
+                $blurStrategy = $lot->blur_strategy ?? 'hierarchical';
+                if ($blurStrategy === 'hierarchical') {
+                    $minClear = $lot->minClearViewTier ?? MembershipTier::find($lot->min_clear_view_tier_id);
+                    // User Rule: tier.level >= min_clear_view_tier.level
+                    if ($minClear && $tier->level >= $minClear->level) $canViewClear = true;
+                } elseif ($blurStrategy === 'allowlist' || $blurStrategy === 'random') { // random legacy
+                     if ($lot->clearViewTiers()->whereKey($tier->id)->exists()) $canViewClear = true;
+                } elseif ($blurStrategy === 'private') {
+                     if ($lot->clear_private_tier_id === $tier->id) $canViewClear = true;
+                }
+            }
+
+            if ($canViewClear) {
+                return $tier; // Found the lowest eligible tier
+            }
+        }
+
+        return null;
     }
+
+    // Legacy/Removed methods: findBaseRestrictionUpgrade, checkAttachmentAccess, findAttachmentUpgrade
+    // We will keep checkAttachmentAccess/findAttachmentUpgrade but simplified if needed.
+    // Ideally we apply the same logic for attachments if they have similar complexity.
     
-    public function findAutoBidUpgrade(MembershipTier $currentTier)
+    public function findAutoBidUpgrade(?MembershipTier $currentTier)
     {
+        $currentLevel = $currentTier ? $currentTier->level : 0;
+
         // Find next tier with is_auto_bidding_enabled = true
         return MembershipTier::where('is_active', true)
             ->where('is_auto_bidding_enabled', true)
-            ->where('level', '>', $currentTier->level)
+            ->where('level', '>', $currentLevel)
             ->orderBy('level', 'asc')
             ->first();
     }

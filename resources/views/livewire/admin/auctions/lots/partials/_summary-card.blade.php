@@ -9,7 +9,29 @@
 
             @if($hasBids)
                 <h2 class="text-success mb-2">{{ $lot->currency }} {{ number_format($highestBid) }}</h2>
-                <div class="text-muted fs-12">Based on {{ $bidCount }} bid{{ $bidCount==1?'':'s' }}</div>
+                
+                @if(isset($highestBidder) && $highestBidder)
+                    <div class="mt-4 mb-3 p-3 bg-light rounded border border-dashed">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="text-start">
+                                <span class="badge bg-success-subtle text-success mb-1">Highest Bidder</span>
+                                <h6 class="fs-14 fw-bold mb-0 text-dark">{{ $highestBidder->name }}</h6>
+                                @if($highestBidder->email)
+                                    <div class="text-muted fs-11 text-truncate" style="max-width: 150px;">{{ $highestBidder->email }}</div>
+                                @endif
+                            </div>
+                            <button type="button" class="btn btn-sm btn-subtle-primary waves-effect waves-light" data-bs-toggle="modal" data-bs-target="#highestBidderModal">
+                                <i class="ri-eye-line align-middle me-1"></i> View
+                            </button>
+                        </div>
+                    </div>
+                @else
+                    <div class="mt-3 mb-3 text-muted fst-italic fs-12">
+                        No bidder info available
+                    </div>
+                @endif
+                
+                <div class="text-muted fs-12 mb-3">Based on {{ $bidCount }} bid{{ $bidCount==1?'':'s' }}</div>
             @else
                 <h2 class="text-muted mb-2">No bids yet</h2>
                 <div class="text-muted fs-12">Starting price: {{ $lot->currency }} {{ number_format($lot->starting_price) }}</div>

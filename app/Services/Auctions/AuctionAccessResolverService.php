@@ -5,130 +5,429 @@ namespace App\Services\Auctions;
 use App\Models\Auctions\AuctionLot;
 use App\Models\MembershipTier;
 use App\Models\User;
+use App\Support\Archive\AccessIconNormalizer;
 use Carbon\Carbon;
 
 class AuctionAccessResolverService
 {
     /**
-     * Determine user permissions for a specific lot.
+     * Resolve the access object for an auction lot.
+     * Mirrors ArchiveAccessResolver::resolveProductAccess
      */
     public function resolve(AuctionLot $lot, ?User $user): array
     {
-        $tier = $user?->currentMembership?->membershipTier;
-        $now = now();
-
-        // 1. Base Visibility
-        // Logic Update: Use restriction_mode and restriction_type
-        // Fail Closed if private
+        $userTier = $user?->currentMembership?->membershipTier;
         
-        $hasVisibility = true; 
+        // 1. Check Live Status First (Auctions: status != upcoming?)
+        // Archive uses go_live_at. Auctions use starts_at and status.
+        // If status is 'draft' or 'closed' and we are here, controller might have filtered it,
+        // but let's handle 'upcoming' logic if we want to support Early Access.
+        // For now, assuming basic "Live" check via status for simplicity, or mirroring Archive's go_live check if applicable.
+        // Auctions usually just check 'status'.
         
-        if ($lot->restriction_mode !== 'public') {
-             $hasVisibility = false; // Default closed if not public
-             
-             if ($tier) {
-                 if ($lot->restriction_type === 'hierarchical') {
-                     $min = $lot->restrictedMinTier ?? MembershipTier::find($lot->restricted_min_tier_id);
-                     if ($min && $tier->level >= $min->level) {
-                         $hasVisibility = true;
-                     }
-                 } elseif ($lot->restriction_type === 'private') {
-                      if ($lot->restricted_private_tier_id === $tier->id) {
-                          $hasVisibility = true;
-                      }
-                 } elseif ($lot->restriction_type === 'random') {
-                      // Check visibility pivot
-                      if ($lot->visibilityTiers()->exists()) {
-                          if ($lot->visibilityTiers->contains($tier->id)) {
-                              $hasVisibility = true;
-                          }
-                      }
-                 }
-             }
-        }
+        // [ADAPTATION] Archive checks go_live_now/at. Auctions check status.
+        // If status is 'upcoming', it's like "Not Live Yet".
+        $isLive = ($lot->status === 'live');
+        
+        if (!$isLive && $lot->status === 'upcoming') {
+            // Not Live Yet -> Check Early Access (Mirror Archive)
+            if ($lot->early_access_enabled) {
+                if (!$user) {
+                     return $this->buildLockedAccess(
+                         'early_access_locked',
+                         ['days_remaining' => 0, 'early_access_tier_name' => 'Member'],
+                         ['type' => 'subscribe', 'label' => 'Login', 'deeplink' => '/login'],
+                         $userTier,
+                         'time-lock',
+                         ['go_live_at' => $lot->starts_at?->toIso8601String()]
+                     );
+                }
 
-        // 2. Clear View (Unblurred)
-        $canViewClear = false;
+                $activeWindow = null;
+                if ($userTier?->has_early_access) {
+                    $activeWindow = $lot->earlyAccessWindows()
+                        ->where('membership_tier_id', $userTier->id)
+                        ->where('access_at', '<=', now())
+                        ->first();
+                }
 
-        // If public, check if blur is enabled
-        if ($lot->restriction_mode === 'public') {
-             if ($lot->blur_enabled) {
-                 // Check clear tiers
-                 if ($tier) {
-                     if ($lot->clearViewTiers()->count() > 0) {
-                          if ($lot->clearViewTiers->contains($tier->id)) {
-                              $canViewClear = true;
-                          }
-                     } else {
-                         // If blur enabled but no clear tiers? Assume blocked? Or Open?
-                         // Archive logic: public + blur + no clear tiers = strictly blurred?
-                         // Let's assume strict: false.
-                     }
-                 }
-             } else {
-                 $canViewClear = true;
-             }
-        } else {
-            // Restricted Mode
-            // If visible, is it clear?
-            // Usually if you have access to a private/restricted item, you see it clear?
-            // Unless layered (Restricted Visibility + Blurred). 
-            // Assuming: If you pass visibility check on restricted item, you view it clear, UNLESS blur_enabled is explicitly on?
-            // Let's assume logical inheritance: Visibility Access = Clear View for restricted items unless specified.
-            if ($hasVisibility) {
-                $canViewClear = true; 
-                if ($lot->blur_enabled) {
-                    $canViewClear = false;
-                     if ($tier && $lot->clearViewTiers->contains($tier->id)) {
-                         $canViewClear = true;
-                     }
+                if ($activeWindow) {
+                    return $this->buildOpenAccess('Early Access Granted.', $userTier, ['go_live_at' => $lot->starts_at?->toIso8601String()]);
+                }
+                
+                // Recommendation Logic (Mirror Archive)
+                $activeEarlyTierNow = $lot->earlyAccessWindows()
+                     ->where('access_at', '<=', now())
+                     // ->whereHas('tier', fn($q) => $q->where('has_early_access', true)) // Assuming relations exist
+                     ->with('tier')
+                     ->get()
+                     ->sortBy(fn($w) => $w->tier->level ?? 999)
+                     ->first();
+
+                $nextEarlyWindow = $lot->earlyAccessWindows()
+                     ->where('access_at', '>', now())
+                     ->with('tier')
+                     ->orderBy('access_at', 'asc')
+                     ->first();
+
+                $recommendation = null;
+                if ($nextEarlyWindow) {
+                    $recommendation = ['tier' => $nextEarlyWindow->tier, 'access_at' => $nextEarlyWindow->access_at, 'is_future' => true];
+                } elseif ($activeEarlyTierNow) {
+                    $recommendation = ['tier' => $activeEarlyTierNow->tier, 'access_at' => $lot->starts_at, 'is_future' => false];
+                }
+
+                if ($recommendation) {
+                    $targetDate = $recommendation['is_future'] ? $recommendation['access_at'] : $lot->starts_at;
+                    if (!$targetDate && $lot->starts_at) $targetDate = $lot->starts_at;
+                    
+                    $days = 0;
+                    if ($targetDate && $targetDate->isFuture()) {
+                         $days = max(0, ceil(now()->diffInSeconds($targetDate) / 86400));
+                    }
+
+                    $context = [
+                        'days_remaining' => $days,
+                        'early_access_tier_name' => $recommendation['tier']->name
+                    ];
+
+                    // Build Actions
+                    $actions = [];
+                    $primaryTargetTier = $recommendation['tier'];
+                    $hasRequiredTier = $userTier && $userTier->id === $primaryTargetTier->id;
+
+                    if (!$hasRequiredTier) {
+                        $actions[] = [
+                            'type' => 'upgrade_membership',
+                            'label' => $recommendation['is_future'] ? 'Get Early Access' : 'Upgrade to View',
+                            'target_tier' => $this->formatTier($primaryTargetTier),
+                            'deeplink' => '/membership/tiers',
+                            'priority' => 'primary'
+                        ];
+                    }
+
+                    return $this->buildLockedAccess(
+                        'early_access_locked',
+                        $context,
+                        $actions,
+                        $userTier,
+                        'time-lock',
+                        [
+                            'go_live_at' => $lot->starts_at?->toIso8601String(),
+                            'next_access_at' => ($targetDate instanceof \Carbon\Carbon) ? $targetDate->toIso8601String() : $targetDate
+                        ]
+                    );
                 }
             }
+            
+            // Not Live & No Early Access or Fallback
+            $goLiveText = $lot->starts_at ? "Goes live on " . $lot->starts_at->format('d M Y, h:i A') : 'Stay tuned.';
+            return $this->buildLockedAccess(
+                'not_live_yet',
+                ['title' => 'Coming Soon', 'body' => $goLiveText],
+                ['type' => 'wait', 'label' => 'Coming Soon'],
+                $userTier,
+                'time-lock',
+                ['go_live_at' => $lot->starts_at?->toIso8601String()]
+            );
         }
 
-        // 3. Early Access
-        $earlyAccess = $this->resolveEarlyAccess($lot, $tier, $now);
+        // 2. Lot is Live -> Check Standard Restrictions
+        if ($lot->restriction_mode === 'public') {
+            return $this->checkBlueDisabledOrClear($lot, $userTier);
+        }
         
-        // 4. Bidding Eligibility
-        // Does the user have permission to bid?
-        // Core rule: User must be logged in. 
-        // Optional rule: Specific tiers? (We didn't add bid_tiers pivot, but might use visibility/clear as proxy or generic can_bid)
-        // AND: Status must be Live.
-        $canBid = $user && $lot->status === 'live';
+        if (!$user) {
+             return $this->buildLockedAccess(
+                 'product_restricted',
+                 ['required_tier_name' => 'Member'],
+                 ['type' => 'subscribe', 'label' => 'Join Now', 'deeplink' => '/register'],
+                 $userTier,
+                 'lock'
+             );
+        }
+
+        if ($this->checkStandardRestriction($lot, $userTier)) {
+             // Access Granted via Visibility... check blur
+             return $this->checkBlueDisabledOrClear($lot, $userTier);
+        }
+
+        // Recommend Upgrade (Totally Blocked)
+        $upgrade = $this->findBaseRestrictionUpgrade($lot);
         
-        // 5. Auto Bid Eligibility
-        // Only if User's Tier has can_auto_bid (is_auto_bidding_enabled) = true
-        // AND user has bid permission (live status)
-        // AND user has VISIBILITY (cannot bid on what you cannot see)
-        $canBid = $user && $lot->status === 'live' && $hasVisibility;
-        $canAutoBid = $canBid && ($tier?->is_auto_bidding_enabled ?? false);
+        $context = [];
+        if ($upgrade) {
+            if ($lot->restriction_type === 'private') {
+                 $context['private_tier_name'] = $upgrade['tier']?->name ?? 'Private';
+            } else {
+                 $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
+            }
+        } else {
+             $context['required_tier_name'] = 'Membership';
+        }
+
+        return $this->buildLockedAccess(
+            'product_restricted',
+            $context,
+            [
+                'type' => 'upgrade_membership',
+                'label' => 'Upgrade',
+                'target_tier' => isset($upgrade['tier']) ? $this->formatTier($upgrade['tier']) : null,
+                'deeplink' => '/membership/tiers'
+            ],
+            $userTier,
+            'lock'
+        );
+    }
+
+    private function checkBlueDisabledOrClear(AuctionLot $lot, ?MembershipTier $userTier): array
+    {
+        if ($lot->blur_enabled) {
+             if (!$this->hasClearViewAccess($lot, $userTier)) {
+                  // Visible but Blurred
+                  $upgrade = $this->findClearViewUpgrade($lot);
+                  return $this->buildAccessResponse(
+                      'blur',
+                      'blurred',
+                      ['clear_view_tier_name' => $upgrade['tier']?->name ?? 'Higher Tier'],
+                      [
+                        'type' => 'upgrade_membership',
+                        'label' => 'Upgrade for Clear View',
+                        'target_tier' => $upgrade['tier'] ? $this->formatTier($upgrade['tier']) : null,
+                        'deeplink' => '/membership/tiers'
+                      ],
+                      $userTier,
+                      'lock'
+                  );
+             }
+         }
+         
+        return $this->buildOpenAccess('Access Granted', $userTier);
+    }
+    
+    // --- Access Logic ---
+
+    protected function checkStandardRestriction(AuctionLot $lot, ?MembershipTier $userTier): bool
+    {
+        if ($lot->restriction_mode === 'public') return true;
+        if (!$userTier) return false;
+
+        $type = $lot->restriction_type; 
+        
+        // Hierarchical
+        if ($type === 'hierarchical') {
+            $minTierId = $lot->restricted_min_tier_id;
+            if (!$minTierId) return true; 
+            
+            $minTier = $lot->restrictedMinTier ?? MembershipTier::find($minTierId);
+            if ($minTier) {
+                return $userTier->level >= $minTier->level;
+            }
+            return false; // Fail safe
+        }
+
+        // Allowlist / Random
+        if ($type === 'random' || $type === 'allowlist') {
+             // Check Visibility Tiers Pivot
+             return $lot->visibilityTiers()->where('membership_tier_id', $userTier->id)->exists();
+        }
+
+        // Private
+        if ($type === 'private') {
+            return $lot->restricted_private_tier_id === $userTier->id;
+        }
+
+        return false;
+    }
+
+    protected function hasClearViewAccess(AuctionLot $lot, ?MembershipTier $userTier): bool
+    {
+        if (!$userTier) return false;
+        
+        $strategy = $lot->blur_strategy ?? 'hierarchical'; // Default to hierarchical check if configured as such
+
+        // [ADAPTATION] Support Auction Blur Strategies
+        if ($strategy === 'hierarchical') {
+             $minClearId = $lot->min_clear_view_tier_id;
+             if (!$minClearId) return true; // No restriction?
+             $minClear = $lot->minClearViewTier ?? MembershipTier::find($minClearId);
+             
+             return $minClear && $userTier->level >= $minClear->level;
+        }
+        
+        if ($strategy === 'private') {
+            return $lot->clear_private_tier_id === $userTier->id;
+        }
+
+        // Allowlist / Random
+        return $lot->clearViewTiers()->where('membership_tier_id', $userTier->id)->exists();
+    }
+
+    protected function findBaseRestrictionUpgrade(AuctionLot $lot): ?array
+    {
+        if ($lot->restriction_type === 'hierarchical') {
+             $minTier = $lot->restrictedMinTier ?? MembershipTier::find($lot->restricted_min_tier_id);
+             if ($minTier) return ['tier' => $minTier, 'message' => null];
+        }
+
+        if ($lot->restriction_type === 'random' || $lot->restriction_type === 'allowlist') {
+             // Find lowest tier in allowlist
+             $tier = $lot->visibilityTiers()->orderBy('level', 'asc')->first();
+             if ($tier) return ['tier' => $tier, 'message' => null];
+        }
+
+        if ($lot->restriction_type === 'private') {
+              $p = $lot->restrictedPrivateTier ?? MembershipTier::find($lot->restricted_private_tier_id);
+              if ($p) return ['tier' => $p, 'message' => null];
+        }
+        
+        return null;
+    }
+
+    protected function findClearViewUpgrade(AuctionLot $lot): ?array
+    {
+        // [ADAPTATION] Strategy aware upgrade finder
+        $strategy = $lot->blur_strategy ?? 'hierarchical';
+
+        if ($strategy === 'hierarchical') {
+            $minClear = $lot->minClearViewTier ?? MembershipTier::find($lot->min_clear_view_tier_id);
+            if ($minClear) return ['tier' => $minClear, 'message' => null];
+        }
+        
+        if ($strategy === 'private') {
+             $minClear = $lot->clearPrivateTier ?? MembershipTier::find($lot->clear_private_tier_id);
+             if ($minClear) return ['tier' => $minClear, 'message' => null];
+        }
+
+        // Allowlist
+        $tier = $lot->clearViewTiers()->orderBy('level', 'asc')->first();
+        if ($tier) {
+             return [
+                'tier' => $tier,
+                'message' => "Upgrade to {$tier->name} to view clearly."
+            ];
+        }
+        return null;
+    }
+
+    // --- Response Builders (Copied from ArchiveAccessResolver) ---
+
+    // Note: buildMessage was private in Archive, but we need it here.
+    // I am including it inline as per instruction to be self-contained within this service if needed,
+    // or reusing the logic if I can.
+    // To match Archive STRICTLY, I will copy the logic.
+
+    private function buildMessage(string $reason, array $context = []): array
+    {
+        // Rule 1: Visibility Restricted
+        if (in_array($reason, ['product_restricted', 'category_restricted', 'visibility_restricted', 'attachment_restricted'])) {
+            if (!empty($context['private_tier_name'])) {
+                return [
+                    'title' => strtoupper($context['private_tier_name']),
+                    'body' => 'Members Only',
+                    'icon' => 'diamond'
+                ];
+            }
+
+            $tierName = $context['required_tier_name'] ?? 'Membership';
+            return [
+                'title' => 'Restricted View',
+                'body' => "{$tierName} Tier Required",
+                'icon' => 'lock'
+            ];
+        }
+
+        // Rule 3: Early Access
+        if (in_array($reason, ['early_access_locked', 'early_access_tier_required'])) {
+            $days = $context['days_remaining'] ?? 0;
+            $tierName = $context['early_access_tier_name'] ?? 'Member';
+            
+            return [
+                'title' => "Unlocks in {$days} days",
+                'body' => "Early Access: {$tierName}",
+                'icon' => 'clock'
+            ];
+        }
+        
+        // Blur
+        if ($reason === 'blurred') {
+             $tierName = $context['clear_view_tier_name'] ?? 'Higher Tier';
+             return [
+                'title' => $context['title'] ?? 'Restricted View',
+                'body' => $context['body'] ?? "{$tierName} Tier Required",
+                'icon' => 'lock'
+             ];
+        }
 
         return [
-            'has_visibility' => $hasVisibility,
-            'can_view_clear' => $canViewClear,
-            'should_blur' => !$canViewClear,
-            'can_bid' => $canBid,
-            'can_auto_bid' => $canAutoBid,
-            'early_access' => $earlyAccess,
-            'is_live' => $lot->status === 'live',
-            'is_upcoming' => $lot->status === 'upcoming' || ($lot->status === 'live' && $now->lt($lot->starts_at)), // Just generic check
+            'title' => $context['title'] ?? 'Info',
+            'body' => $context['body'] ?? 'Access Info',
+            'icon' => $context['icon'] ?? 'lock'
         ];
     }
 
-    protected function resolveEarlyAccess(AuctionLot $lot, ?MembershipTier $tier, Carbon $now): array
+    protected function buildOpenAccess(string $title, ?MembershipTier $userTier = null, array $timing = []): array
     {
-        // Copy logic from ArchiveAccessResolver if needed.
-        // Basic: check if lot has early_access rows.
-        // If so, map them.
-        $windows = $lot->earlyAccessWindows;
-        if ($windows->isEmpty()) {
-            return ['is_active' => false];
-        }
-
-        // Logic similar to Archive: find best window for user
         return [
-            'is_active' => true,
-            // ... (simplified for now, expand if strict logic needed)
+            'view_mode' => 'clear', 
+            'reason' => null,
+            'source' => 'lot', // ADAPTED: source=lot
+            'viewer' => $this->formatViewer($userTier),
+            'message' => [
+                'title' => 'Open',
+                'body' => $title,
+                'icon' => 'info'
+            ],
+            'actions' => [],
+            'timing' => array_merge(['go_live_at' => null, 'next_access_at' => null], $timing)
+        ];
+    }
+    
+    protected function buildAccessResponse(string $viewMode, string $reason, array $context, array $actions, ?MembershipTier $userTier, string $icon = 'lock', array $timing = []): array
+    {
+         $message = $this->buildMessage($reason, $context);
+         
+         if (isset($actions['type'])) {
+             $actions = [$actions];
+         }
+         
+         $normalizedActions = array_map(function ($action) {
+             return array_merge(['type' => 'wait', 'label' => null, 'target_tier' => null, 'deeplink' => null, 'priority' => 'primary'], $action);
+         }, $actions);
+
+         return [
+            'view_mode' => $viewMode,
+            'reason' => $reason,
+            'source' => 'lot', 
+            'viewer' => $this->formatViewer($userTier),
+            'message' => $message,
+            'actions' => $normalizedActions,
+            'timing' => array_merge(['go_live_at' => null, 'next_access_at' => null], $timing)
+        ];
+    }
+
+    protected function buildLockedAccess(string $reason, array $context, array $actions, ?MembershipTier $userTier, string $icon = 'lock', array $timing = []): array
+    {
+        return $this->buildAccessResponse('blocked', $reason, $context, $actions, $userTier, $icon, $timing);
+    }
+
+    protected function formatViewer(?MembershipTier $tier): array
+    {
+        return [
+            'membership_tier_id' => $tier?->id,
+            'membership_tier_name' => $tier?->name,
+            'membership_level' => $tier?->level
+        ];
+    }
+
+    protected function formatTier($tier): array
+    {
+        return [
+            'id' => $tier->id,
+            'name' => $tier->name,
+            'level' => $tier->level,
+            'price' => (string) ($tier->price ?? '0.00'),
+            'currency' => $tier->currency ?? 'INR'
         ];
     }
 }
