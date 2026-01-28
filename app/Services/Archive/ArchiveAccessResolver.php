@@ -136,21 +136,39 @@ class ArchiveAccessResolver
                     );
                 }
                 
-                // Calculate Days Remaining
-                $targetDate = $recommendation['is_future'] ? $recommendation['access_at'] : $product->go_live_at;
-                
-                // Safety: If target is go_live and it's null?
-                if (!$targetDate && $product->go_live_at) $targetDate = $product->go_live_at;
+                // Calculate Days Remaining (Viewer Specific)
+                // A) Compute "viewer unlock datetime"
+                $viewerNextWindowFuture = null;
+                if ($userTier?->has_early_access) {
+                     $viewerNextWindowFuture = $product->earlyAccessWindows()
+                         ->where('membership_tier_id', $userTier->id)
+                         ->where('access_at', '>', now())
+                         ->orderBy('access_at', 'asc')
+                         ->first();
+                }
 
+                $viewerUnlockAt = $viewerNextWindowFuture ? $viewerNextWindowFuture->access_at : $product->go_live_at;
+
+                // B) Days remaining based on CALENDAR DAYS
                 $days = 0;
-                if ($targetDate && $targetDate->isFuture()) {
-                     $days = max(0, ceil(now()->diffInSeconds($targetDate) / 86400));
+                if ($viewerUnlockAt instanceof \Carbon\Carbon) {
+                    $days = now()->gte($viewerUnlockAt)
+                        ? 0
+                        : now()->copy()->startOfDay()->diffInDays($viewerUnlockAt->copy()->startOfDay());
                 }
 
                 $context = [
                     'days_remaining' => $days,
                     'early_access_tier_name' => $recommendation['tier']->name
                 ];
+
+                // C) Override body ONLY when viewer is the tier that has the NEXT early access window
+                if (($recommendation['is_future'] ?? false) && $userTier && ($recommendation['tier']->id === $userTier->id)) {
+                    $context['body'] = 'Coming soon...';
+                }
+                
+                // D) Timing next_access_at must match viewerUnlockAt
+                $targetDate = $viewerUnlockAt;
                 
                 // [FIX] Adjust message body for "Live on X" case
                 if (!$recommendation['is_future'] && $activeEarlyTierNow) {
@@ -441,7 +459,7 @@ class ArchiveAccessResolver
             
             return [
                 'title' => "Unlocks in {$days} days",
-                'body' => "Early Access: {$tierName}",
+                'body' => $context['body'] ?? "Early Access: {$tierName}",
                 'icon' => 'clock'
             ];
         }

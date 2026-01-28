@@ -190,7 +190,8 @@ class ArchiveAccessResolverTest extends TestCase
         // Reason should still be early_access_locked
         $this->assertEquals('early_access_locked', $access['reason']);
         // Message should mention Gold
-        $this->assertStringContainsString('Gold', $access['message']['body']);
+        // Message should be "Coming soon..." because user HAS the tier being counted down
+        $this->assertEquals("Coming soon...", $access['message']['body']);
         
         // Actions MUST be empty because user already has Gold
         $this->assertEmpty($access['actions']);
@@ -233,11 +234,13 @@ class ArchiveAccessResolverTest extends TestCase
         // Desired: Show Platinum (future) as next unlock
         
         // Timing
-        $this->assertEquals(now()->addDays(5)->toIso8601String(), $access['timing']['next_access_at']);
+        // Timing - Viewer is Gold. Gold has NO future window. Next access is Go Live (20 days).
+        $this->assertEquals(now()->addDays(20)->toIso8601String(), $access['timing']['next_access_at']);
         
         // Message
         // "Unlocks in 5 days" (approx)
-        $this->assertStringContainsString('5 days', $access['message']['title']);
+        // "Unlocks in 20 days" (approx) - Countdown to Go Live
+        $this->assertStringContainsString('20 days', $access['message']['title']);
         // "Early Access: Platinum" (Next tier)
         $this->assertStringContainsString('Platinum', $access['message']['body']);
         
@@ -286,7 +289,7 @@ class ArchiveAccessResolverTest extends TestCase
         // Current: User is Gold. Next Window is Gold (in 5 days).
         // Message should be about Gold unlock.
         $this->assertStringContainsString('5 days', $access['message']['title']);
-        $this->assertStringContainsString('Gold', $access['message']['body']);
+        $this->assertEquals('Coming soon...', $access['message']['body']);
         
         // Actions: Should NOT be empty. Should offer Sovereign upgrade.
         $this->assertNotEmpty($access['actions']);
