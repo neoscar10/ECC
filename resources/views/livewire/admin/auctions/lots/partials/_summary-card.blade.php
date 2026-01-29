@@ -60,20 +60,7 @@
             @endif
         </div>
 
-        <div class="d-flex justify-content-between border-top border-bottom py-3 mb-4">
-            <div class="text-center">
-                <h5 class="fs-15 mb-0">{{ $bidCount }}</h5>
-                <p class="text-muted mb-0">Bids</p>
-            </div>
-            <div class="text-center">
-                <h5 class="fs-15 mb-0">{{ $lot->images->count() }}</h5>
-                <p class="text-muted mb-0">Images</p>
-            </div>
-            <div class="text-center">
-                <h5 class="fs-15 mb-0">{{ $docsCount }}</h5>
-                <p class="text-muted mb-0">Docs</p>
-            </div>
-        </div>
+        
 
         <div class="d-grid gap-2">
             <a href="{{ route('admin.auctions.lots.index') }}" class="btn btn-soft-dark waves-effect waves-light">

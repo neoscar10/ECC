@@ -53,7 +53,7 @@
                     <div class="card-header align-items-center d-flex">
                         <h4 class="card-title mb-0 flex-grow-1">Auto-Bids</h4>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-borderless table-nowrap table-sm align-middle mb-0">
                                 <thead class="table-light text-muted">

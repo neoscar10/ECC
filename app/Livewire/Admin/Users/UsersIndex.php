@@ -37,11 +37,17 @@ class UsersIndex extends Component
         'deleteUserConfirmed' => 'deleteUser',
     ];
 
+    #[\Livewire\Attributes\On('operation-success')]
+    public function showSuccessAlert($message)
+    {
+        session()->flash('success', $message);
+    }
+
     public function render()
     {
         $usersQuery = User::query()->whereDoesntHave('roles', function($q) {
             $q->whereIn('name', ['super_admin', 'ecc_admin']);
-        });
+        })->with('currentMembership.membershipTier');
 
         if ($this->search) {
             $usersQuery->where(function ($q) {

@@ -1,5 +1,6 @@
 <!-- Deactivate Confirmation Modal -->
-<div wire:ignore.self class="modal fade" id="deactivateModal" tabindex="-1" aria-hidden="true">
+<div wire:ignore.self class="modal fade" id="deactivateModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
+     data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">

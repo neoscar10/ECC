@@ -42,6 +42,7 @@
 
     <!-- Modals -->
     @include('livewire.admin.users.users.partials._user_modal')
+    <livewire:admin.members.update-tier-modal />
     
     @push('scripts')
     <script>

@@ -41,7 +41,7 @@
 
     @include('livewire.admin.members.partials._action-modals')
     
-    @include('livewire.admin.members.partials._update-tier-modal')
+    <livewire:admin.members.update-tier-modal />
 
     @include('livewire.admin.members.partials._scripts')
 </div>

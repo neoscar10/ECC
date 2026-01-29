@@ -71,6 +71,9 @@
                                         <li><a class="dropdown-item" wire:click="viewUser({{ $user->id }})"><i class="ri-eye-fill align-bottom me-2 text-muted"></i> View</a></li>
                                         <!-- Edit disabled as per requirement -->
                                         <!-- <li><a class="dropdown-item edit-item-btn" wire:click="editUser({{ $user->id }})"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Edit</a></li> -->
+                                        @if($user->currentMembership)
+                                            <li><a class="dropdown-item" href="#" wire:click.prevent="$dispatch('open-update-tier-modal', { membershipId: {{ $user->currentMembership->id }} })"><i class="mdi mdi-swap-vertical align-bottom me-2 text-muted"></i> Update Tier</a></li>
+                                        @endif
                                         <li><a class="dropdown-item remove-item-btn" wire:click="confirmDeleteUser({{ $user->id }})"><i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i> Delete</a></li>
                                     </ul>
                                 </div>

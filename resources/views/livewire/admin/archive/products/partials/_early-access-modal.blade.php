@@ -1,4 +1,5 @@
-<div class="modal fade" id="earlyAccessModal" tabindex="-1" aria-hidden="true" wire:ignore.self>
+<div class="modal fade" id="earlyAccessModal" tabindex="-1" aria-hidden="true" wire:ignore.self data-bs-backdrop="static"
+     data-bs-keyboard="false">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">

@@ -148,6 +148,43 @@ class AuctionController extends Controller
             'bids' => null
         ];
 
+        // [New Action] Auto-Bid Upgrade Suggestion
+        // Only if user can view clearly AND can participate (can_bid) but lacks capability (can_auto_bid)
+        if ($canBid && !$canAutoBid) {
+            $currentLevel = $userTier?->level ?? 0;
+            
+            $upgrade = \App\Models\MembershipTier::where('is_active', true)
+                ->where('is_auto_bidding_enabled', true)
+                ->where('level', '>', $currentLevel)
+                ->orderBy('level', 'asc')
+                ->first();
+
+            if ($upgrade) {
+                // Ensure actions array exists
+                if (!isset($response['access']['actions'])) {
+                    $response['access']['actions'] = [];
+                }
+
+                // Append if not duplicated (naive dedupe by label)
+                $exists = collect($response['access']['actions'])->contains('label', 'Upgrade to Enable Auto-Bid');
+                if (!$exists) {
+                    $response['access']['actions'][] = [
+                        'type' => 'upgrade_membership',
+                        'label' => 'Upgrade to Enable Auto-Bid',
+                        'target_tier' => [
+                            'id' => $upgrade->id,
+                            'name' => $upgrade->name,
+                            'level' => $upgrade->level,
+                            'price' => (string) ($upgrade->price ?? '0.00'),
+                            'currency' => $upgrade->currency ?? 'INR'
+                        ],
+                        'deeplink' => '/membership/tiers',
+                        'priority' => 'secondary'
+                    ];
+                }
+            }
+        }
+
         if ($detailed) {
             $response['bids'] = $this->transformBids($lot);
             $response['attachments'] = $this->transformAttachments($lot, $access); // Pass access object context?

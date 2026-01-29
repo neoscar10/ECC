@@ -50,7 +50,7 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink{{ $member->id }}">
                                     <li><a class="dropdown-item" href="#" wire:click.prevent="view({{ $member->id }})"><i class="ri-eye-fill align-bottom me-2 text-muted"></i> View Details</a></li>
-                                    <li><a class="dropdown-item" href="#" wire:click.prevent="openUpdateTierModal({{ $member->id }})"><i class="mdi mdi-swap-vertical align-bottom me-2 text-muted"></i> Update Tier</a></li>
+                                    <li><a class="dropdown-item" href="#" wire:click.prevent="$dispatch('open-update-tier-modal', { membershipId: {{ $member->id }} })"><i class="mdi mdi-swap-vertical align-bottom me-2 text-muted"></i> Update Tier</a></li>
                                     
                                     @if($member->status == 'active')
                                         <li><a class="dropdown-item text-danger" href="#" wire:click.prevent="confirmDeactivate({{ $member->id }})"><i class="ri-close-circle-fill align-bottom me-2"></i> Deactivate</a></li>
