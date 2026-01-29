@@ -13,18 +13,14 @@ class AuctionBidPlaced implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $lot;
-    public $bidAmount;
-    public $bidderId;
+    public $bid;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(AuctionLot $lot, float $bidAmount, int $bidderId)
+    public function __construct(\App\Models\Auctions\AuctionBid $bid)
     {
-        $this->lot = $lot;
-        $this->bidAmount = $bidAmount;
-        $this->bidderId = $bidderId;
+        $this->bid = $bid;
     }
 
     /**
@@ -35,7 +31,7 @@ class AuctionBidPlaced implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('auctions.lot.' . $this->lot->id),
+            new PrivateChannel('auctions.lot.' . $this->bid->auction_lot_id),
         ];
     }
 
@@ -46,14 +42,15 @@ class AuctionBidPlaced implements ShouldBroadcastNow
 
     public function broadcastWith(): array
     {
+        $lot = $this->bid->lot; // Assumes relation is loaded or lazy-loaded
+        
         return [
-            'lot_id' => $this->lot->id,
-            'amount' => $this->bidAmount,
-            'formatted_amount' => number_format($this->bidAmount, 2),
-            'bidder_id' => $this->bidderId, 
-            'current_highest_bid' => $this->lot->current_highest_bid, 
-            'ends_at' => $this->lot->ends_at?->toIso8601String(),
-            'placed_at' => now()->toIso8601String(),
+            'lot_id' => $lot->id,
+            'bidder_id' => $this->bid->user_id,
+            'bid' => \App\Support\Auctions\BidPresenter::present($this->bid),
+            'current_bid' => number_format($lot->current_highest_bid, 2, '.', ''), // String money 2dp
+            'bids_count_total' => $lot->bids()->count(),
+            'ends_at' => $lot->ends_at?->toIso8601String(),
         ];
     }
 }

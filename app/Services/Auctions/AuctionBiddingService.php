@@ -104,7 +104,7 @@ class AuctionBiddingService
             ]);
 
             // 8. Fire Events (Realtime)
-            event(new AuctionBidPlaced($lot, $amount, $user->id));
+            event(new AuctionBidPlaced($bid));
             if ($extended) event(new AuctionExtended($lot, 'anti_sniping'));
             
              // Fire Timeline Event
