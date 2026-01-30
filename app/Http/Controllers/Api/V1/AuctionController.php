@@ -136,6 +136,7 @@ class AuctionController extends Controller
             'description' => $detailed ? $lot->description : null, 
             'status' => $lot->status,
             'bids_count_total' => $lot->bids()->count(),
+            'min_increment' => (string) ($lot->min_increment ?? '0.00'),
             'current_bid' => $lot->current_highest_bid,
             'starting_price' => $lot->starting_price,
             'currency' => $lot->currency,
