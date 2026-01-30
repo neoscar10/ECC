@@ -76,7 +76,37 @@ class AuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
-        $credentials = $request->only('email', 'password');
+        // 1. Light Validation (Accept email OR phone OR login)
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        if (!$request->hasAny(['email', 'phone', 'login'])) {
+             return $this->error('Please provide email or phone number.', 422);
+        }
+
+        // 2. Determine Identifier
+        $identifier = $request->input('login') 
+            ?? $request->input('email') 
+            ?? $request->input('phone');
+
+        // 3. Detect Format (Email vs Phone)
+        $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+
+        // 4. Build Credentials
+        if ($isEmail) {
+            $credentials = [
+                'email' => $identifier,
+                'password' => $request->input('password')
+            ];
+        } else {
+            // Minimal Phone Normalization (trim only as per instructions)
+            $normalizedPhone = trim(str_replace(' ', '', $identifier));
+            $credentials = [
+                'phone' => $normalizedPhone,
+                'password' => $request->input('password')
+            ];
+        }
 
         if (! $token = auth('api')->attempt($credentials)) {
             return $this->error('Unauthorized', 401);
