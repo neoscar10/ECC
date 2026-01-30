@@ -140,6 +140,7 @@ class AuctionController extends Controller
             'current_bid' => $lot->current_highest_bid,
             'starting_price' => $lot->starting_price,
             'currency' => $lot->currency,
+            'starts_at' => $lot->starts_at,
             'ends_at' => $lot->ends_at,
             'is_user_winning' => $user ? $lot->winner_user_id === $user->id : false,
             'can_bid' => $canBid,
