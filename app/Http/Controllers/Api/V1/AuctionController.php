@@ -197,10 +197,65 @@ class AuctionController extends Controller
                 ->where('user_id', $userId)
                 ->first() : null;
 
+            // Prepare details vars
+            $nextRequired = null;
+            $disabledReason = null;
+
+            if ($autoBid) {
+                 $currentHighest = $lot->current_highest_bid ?? 0.00;
+                 $minInc = $lot->min_increment ?? 0.00;
+                 $userInc = $autoBid->increment_amount ?? 0.00;
+                 $effectiveInc = max($minInc, $userInc);
+                 
+                 if ($lot->current_highest_bid) {
+                     $calcNext = $currentHighest + $effectiveInc;
+                 } else {
+                     $calcNext = $lot->starting_price;
+                 }
+                 
+                 // [FIX] Auto-Disable if Max Exceeded (Sync Check)
+                 // If the next required bid is beyond their max, they are effectively disabled.
+                 // We must persist this state change so it sticks.
+                 if ($autoBid->is_enabled && $calcNext > $autoBid->max_bid) {
+                      \Illuminate\Support\Facades\DB::transaction(function() use ($autoBid) {
+                          $fresh = \App\Models\Auctions\AuctionAutoBid::lockForUpdate()->find($autoBid->id);
+                          // Double check inside lock
+                          if ($fresh && $fresh->is_enabled) {
+                              $fresh->is_enabled = false;
+                              $fresh->save();
+                          }
+                      });
+                      
+                      // Update local instance for response
+                      $autoBid->is_enabled = false;
+                      $disabledReason = 'max_exceeded'; // Reason for the disable
+                 }
+
+                 $nextRequired = number_format($calcNext, 2, '.', '');
+            }
+
             $response['auto_bid'] = [
                 'is_enabled' => $autoBid ? (bool)$autoBid->is_enabled : false,
                 'max_bid' => $autoBid ? (string)$autoBid->max_bid : null,
                 'increment_amount' => $autoBid ? (string)$autoBid->increment_amount : null,
+            ];
+
+            $response['auto_bid_details'] = $autoBid ? [
+                'has_auto_bid' => true,
+                'status' => $autoBid->is_enabled ? 'enabled' : 'disabled',
+                'is_enabled' => (bool)$autoBid->is_enabled,
+                'max_bid' => (string)$autoBid->max_bid,
+                'increment_amount' => (string)$autoBid->increment_amount,
+                'disabled_reason' => $disabledReason,
+                'next_required_bid' => $nextRequired,
+            ] : [
+                'has_auto_bid' => false,
+                'status' => 'not_set',
+                'is_enabled' => false,
+                'max_bid' => null,
+                'increment_amount' => null,
+                'disabled_reason' => null,
+                'next_required_bid' => null
             ];
         }
 
