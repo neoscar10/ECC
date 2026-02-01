@@ -41,6 +41,9 @@ class AuctionLifecycleService
                 event(new AuctionStatusChanged($lot, 'live'));
                 
                 Log::info("Auction {$lot->lot_no} started.");
+                
+                // NOTIFICATION: Go Live
+                $this->notifyLifecycleEvent($lot, 'auction_go_live');
             });
         }
         
@@ -79,6 +82,10 @@ class AuctionLifecycleService
                     event(new AuctionStatusChanged($lot, 'pending_decision'));
                     
                     Log::info("Auction {$lot->lot_no} pending decision.");
+                    
+                    // NOTIFICATION: Ended (Waiting for Decision)
+                    $this->notifyLifecycleEvent($lot, 'auction_ended');
+                    
                     return; // Done for admin mode
                 }
 
@@ -113,7 +120,173 @@ class AuctionLifecycleService
                 event(new AuctionStatusChanged($lot, $newStatus));
                 
                 Log::info("Auction {$lot->lot_no} ended as {$newStatus}.");
+                
+                // NOTIFICATION: Ended & Results
+                $this->notifyLifecycleEvent($lot, 'auction_ended');
+                $this->notifyLifecycleEvent($lot, 'auction_results');
+                
+                if ($lot->winner_user_id) {
+                     $this->notifyLifecycleEvent($lot, 'auction_winner');
+                }
             });
+        }
+        
+        // 3. Reminders (Live Auctions)
+        $this->processReminders();
+    }
+    
+    protected function notifyLifecycleEvent(AuctionLot $lot, string $type, array $extra = [])
+    {
+        try {
+            $dedupe = new \App\Services\Notifications\NotificationDedupe();
+            $key = "{$type}:{$lot->id}";
+            if (isset($extra['key_suffix'])) {
+                $key .= ":{$extra['key_suffix']}";
+                unset($extra['key_suffix']);
+            }
+            
+            if ($dedupe->alreadySent($key)) {
+                return;
+            }
+            
+            $formatter = new \App\Services\Notifications\AuctionNotificationFormatter();
+            $topic = \App\Support\Notifications\FcmTopicNamer::auctionTopic($lot);
+            
+            $title = '';
+            $body = '';
+            $extraData = [
+                'status' => $lot->status
+            ];
+            $eventId = null;
+            
+            switch($type) {
+                case 'auction_go_live':
+                    [$title, $body] = $formatter->goLive($lot);
+                    $eventId = "auction_go_live:{$lot->id}";
+                    break;
+                case 'auction_ended':
+                    [$title, $body] = $formatter->ended($lot);
+                    $eventId = "auction_ended:{$lot->id}";
+                    // "status" is already in extraData.
+                    // If lot status is "pending_decision", keep it.
+                    // No need to override unless we want "status_lot".
+                    break;
+                case 'auction_results':
+                     [$title, $body] = $formatter->results($lot);
+                     $eventId = "auction_results:{$lot->id}";
+                     $extraData['status'] = $lot->status; // sold/unsold
+                     $extraData['final_price'] = $lot->current_highest_bid;
+                     $extraData['winner_user_id'] = $lot->winner_user_id;
+                     $extraData['currency'] = $lot->currency; // Added
+                     
+                     if ($lot->winner_user_id) {
+                         // Attempt to get winning bid ID
+                         $winningBid = $lot->bids()->orderByDesc('amount')->first();
+                         if ($winningBid) {
+                             $extraData['winning_bid_id'] = $winningBid->id;
+                         }
+                     }
+                     break;
+                case 'auction_winner':
+                    if (!$lot->winner_user_id) return;
+                    $winner = \App\Models\User::find($lot->winner_user_id);
+                    if ($winner) {
+                        [$title, $body] = $formatter->winner($lot, $winner);
+                        $eventId = "auction_winner:{$lot->id}:{$lot->winner_user_id}";
+                        
+                        // Payload
+                        $extraData['status'] = $lot->status;
+                        $extraData['final_price'] = $lot->current_highest_bid;
+                        $extraData['winner_user_id'] = $lot->winner_user_id;
+                        $extraData['currency'] = $lot->currency; // Added
+                        
+                        // Attempt to get winning bid ID
+                        $winningBid = $lot->bids()->orderByDesc('amount')->first();
+                         if ($winningBid) {
+                             $extraData['winning_bid_id'] = $winningBid->id;
+                         }
+
+                        // Private Send
+                        // Mark sent BEFORE dispatch (at-most-once)
+                        $dedupe->markSent($key, $type, $lot->id, $lot->winner_user_id);
+                        
+                        $payload = $formatter->buildPayload($lot, $type, $extraData, $eventId);
+                        
+                        dispatch(new \App\Jobs\Notifications\SendFcmToUserJob(
+                            $lot->winner_user_id,
+                            $title,
+                            $body,
+                            $payload
+                        ));
+                    }
+                    return; // Done
+                case 'auction_reminder':
+                    $mins = $extra['minutes'] ?? 0;
+                    [$title, $body] = $formatter->reminder($lot, $mins);
+                    $eventId = "auction_reminder:{$lot->id}:{$mins}";
+                    $extraData['minutes_remaining'] = $mins;
+                    break;
+            }
+            
+            if ($title && $body) {
+                // Mark Sent for Topic
+                $dedupe->markSent($key, $type, $lot->id, null, $extra);
+                
+                $payload = $formatter->buildPayload($lot, $type, $extraData, $eventId);
+                
+                dispatch(new \App\Jobs\Notifications\SendFcmToTopicJob(
+                    $topic,
+                    $title,
+                    $body,
+                    $payload
+                ));
+            }
+            
+        } catch (\Exception $e) {
+            Log::error("Lifecycle Notification Error ({$type}): " . $e->getMessage());
+        }
+    }
+    
+    protected function processReminders()
+    {
+        $reminderMinutes = config('auction_notifications.reminder_minutes', [60,30,15,10,5,1]);
+        
+        $liveAuctions = AuctionLot::where('status', 'live')
+            ->whereNotNull('ends_at')
+            ->where('ends_at', '>', now())
+            ->get();
+            
+        foreach ($liveAuctions as $lot) {
+            $minsRemaining = now()->diffInMinutes($lot->ends_at, false);
+            // diffInMinutes rounds down? No, it's integer diff.
+            // Let's use float minutes for better threshold check?
+            // "at specific remaining times" usually means "reached the T minute mark".
+            // e.g. if 29m 30s remaining, diffInMinutes = 29.
+            // We want to trigger when it effectively CROSSES the threshold.
+            
+            // Loop through configured minutes
+            foreach ($reminderMinutes as $threshold) {
+                 // Check if we are "at or closely below" the threshold but HAVEN'T sent yet.
+                 // Simple logic: if minsRemaining <= threshold.
+                 // Dedupe key ensures we send once.
+                 
+                 if ($minsRemaining <= $threshold && $minsRemaining > ($threshold - 1)) {
+                      // We are in the "minute" of the threshold.
+                      // e.g. Threshold 30. Remaining 29.8 => send.
+                      // Wait, diffInMinutes(absolute=false) might return 29 for 29m 59s.
+                      // Correct logic: if remaining is roughly equal to threshold.
+                      // Let's just say: if remaining <= threshold, and we haven't sent it yet.
+                      // This covers "oops we missed minute 30, it's now minute 28". better late than never?
+                      // Usually better to be precise. 
+                      // If we are at 25 mins, and we haven't sent 30, should we? Probably not, it's confusing.
+                      // Let's stick to strict window: threshold >= remaining > threshold - 1.
+                      
+                      $this->notifyLifecycleEvent($lot, 'auction_reminder', [
+                          'minutes' => $threshold,
+                          'key_suffix' => (string)$threshold
+                      ]);
+                 }
+            }
         }
     }
 }

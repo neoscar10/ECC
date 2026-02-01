@@ -90,4 +90,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(\App\Models\Auctions\AuctionBid::class);
     }
+
+    public function deviceTokens()
+    {
+        return $this->hasMany(\App\Models\UserDeviceToken::class);
+    }
+
+    public function auctionNotificationSubscriptions()
+    {
+        return $this->hasMany(\App\Models\Auctions\AuctionNotificationSubscription::class);
+    }
 }

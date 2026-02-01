@@ -112,6 +112,67 @@ class AuctionBiddingService
                  event(new \App\Events\AuctionTimelineEventCreated($timelineEvent));
             }
 
+            // 9. Notifications (FCM)
+            try {
+                // A) Public Topic: Bid Placed
+                // Logic: Exclude 'actor_user_id' in client
+                $formatter = new \App\Services\Notifications\AuctionNotificationFormatter();
+                [$title, $body] = $formatter->bidPlaced($lot, $bid, $user, $isAuto);
+                
+                // Do not expose is_autobid to public
+                $extraData = [
+                    'bid_id' => $bid->id,
+                    'bid_amount' => $bid->amount,
+                    'currency' => $lot->currency,
+                    'actor_user_id' => $user->id,
+                    // 'new_ends_at' => $lot->ends_at is handled by 'ends_at' in builder if we want standard field.
+                    // But current catalog has 'new_ends_at'. Let's keep 'new_ends_at' for backward compat 
+                    // and 'ends_at' will be added by builder automatically.
+                    'new_ends_at' => $lot->ends_at ? $lot->ends_at->toIso8601String() : null,
+                ];
+
+                $eventId = "bid_placed:{$bid->id}";
+                $payload = $formatter->buildPayload($lot, 'bid_placed', $extraData, $eventId);
+
+                $topic = \App\Support\Notifications\FcmTopicNamer::auctionTopic($lot);
+                
+                dispatch(new \App\Jobs\Notifications\SendFcmToTopicJob(
+                    $topic,
+                    $title,
+                    $body,
+                    $payload
+                ));
+
+                // B) Private Auto-Bid Notification (if auto)
+                if ($isAuto) {
+                    [$autoTitle, $autoBody] = $formatter->autoBidExecuted($lot, $bid, $user);
+                    
+                    $autoExtra = [
+                        'bid_id' => $bid->id,
+                        'bid_amount' => $bid->amount,
+                        'currency' => $lot->currency, // Added
+                        'status' => $lot->status, // Added
+                        // Owner knows they are the actor, but good for completeness?
+                        // Catalog says "Add actor_user_id (the owner) ONLY if already available".
+                        'actor_user_id' => $user->id
+                    ];
+                    
+                    $autoEventId = "auto_bid_executed:{$bid->id}";
+                    $autoPayload = $formatter->buildPayload($lot, 'auto_bid_executed', $autoExtra, $autoEventId);
+
+                    dispatch(new \App\Jobs\Notifications\SendFcmToUserJob(
+                        $user->id,
+                        $autoTitle,
+                        $autoBody,
+                        $autoPayload
+                    ));
+                }
+
+            } catch (\Exception $e) {
+                // Non-blocking
+                \Illuminate\Support\Facades\Log::error("Auction Notification Error (Bid): " . $e->getMessage());
+            }
+
             return $lot;
         });
     }

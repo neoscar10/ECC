@@ -95,4 +95,18 @@ Route::prefix('v1')->group(function () {
             return response()->json(['message' => 'Broadcast triggered']);
         });
     });
+
+    // Device Tokens Routes
+    Route::middleware('auth:api')->prefix('me/device-tokens')->group(function () {
+         Route::post('/', [\App\Http\Controllers\Api\V1\UserDeviceTokenController::class, 'register']);
+         Route::get('/', [\App\Http\Controllers\Api\V1\UserDeviceTokenController::class, 'index']);
+         Route::post('/unregister', [\App\Http\Controllers\Api\V1\UserDeviceTokenController::class, 'unregister']);
+         Route::delete('/{id}', [\App\Http\Controllers\Api\V1\UserDeviceTokenController::class, 'destroy']);
+    });
+    
+    // Auction Subscriptions
+    Route::middleware('auth:api')->group(function () {
+        Route::put('auctions/{id}/notification-subscription', [\App\Http\Controllers\Api\V1\AuctionSubscriptionController::class, 'toggle']);
+        Route::get('me/auction-notification-subscriptions', [\App\Http\Controllers\Api\V1\AuctionSubscriptionController::class, 'index']);
+    });
 });

@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             PrivilegesSeeder::class,
             MembershipTiersSeeder::class,
-            ArchiveProductsSeeder::class,
+            // ArchiveProductsSeeder::class,
         ]);
 
         $admin = User::firstOrCreate([
