@@ -1985,6 +1985,183 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "Notifications / Auction",
+            "description": "Endpoints for managing device tokens and auction-specific notification subscriptions (Pulse/Bell).",
+            "item": [
+                {
+                    "name": "Register Device Token",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"token\": \"fcm_token_example\",\n    \"platform\": \"android\",\n    \"device_id\": \"unique_device_id_123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/me/device-tokens",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "me",
+                                "device-tokens"
+                            ]
+                        },
+                        "description": "Register a device token for push notifications.\n\n**Auth:** Bearer Token\n**Body:**\n- `token` (Required)\n- `platform` (in:android,ios)\n- `device_id` (Optional)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Device Tokens",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/me/device-tokens",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "me",
+                                "device-tokens"
+                            ]
+                        },
+                        "description": "List all registered device tokens for the current user."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Unregister Device Token",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"token\": \"fcm_token_example\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/me/device-tokens/unregister",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "me",
+                                "device-tokens",
+                                "unregister"
+                            ]
+                        },
+                        "description": "Unregister a specific device token (e.g. on Logout)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Toggle Subscription",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"enabled\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/auctions/{{auction_lot_id}}/notification-subscription",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "auctions",
+                                "{{auction_lot_id}}",
+                                "notification-subscription"
+                            ]
+                        },
+                        "description": "Toggle notifications for a specific auction (Bell Icon).\n\n**Body:**\n- `enabled` (boolean)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Subscriptions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/me/auction-notification-subscriptions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "me",
+                                "auction-notification-subscriptions"
+                            ]
+                        },
+                        "description": "List all active auction subscriptions."
+                    },
+                    "response": []
+                }
+            ]
         }
     ]
 }
