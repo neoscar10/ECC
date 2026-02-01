@@ -51,8 +51,19 @@ class AuctionController extends Controller
         // 4. Pagination
         $lots = $query->orderBy('created_at', 'desc')->paginate(20);
 
+        // Optimization: Pre-fetch notification subscriptions for these lots
+        $subscribedLotIds = [];
+        if ($user) {
+            $subscribedLotIds = \App\Models\Auctions\AuctionNotificationSubscription::where('user_id', $user->id)
+                ->whereIn('auction_lot_id', $lots->getCollection()->pluck('id'))
+                ->where('is_enabled', true)
+                ->pluck('auction_lot_id')
+                ->flip() // Key by ID for O(1) lookup
+                ->all();
+        }
+
         // 5. Resolve Access for each lot
-        $data = $lots->getCollection()->map(function ($lot) use ($user) {
+        $data = $lots->getCollection()->map(function ($lot) use ($user, $subscribedLotIds) {
             $access = $this->accessResolver->resolve($lot, $user);
 
             // Last Mile Icon Normalization (Mirroring ArchiveResource)
@@ -60,8 +71,10 @@ class AuctionController extends Controller
                 $access['reason'] ?? null,
                 $access['view_mode'] ?? 'blocked'
             );
+            
+            $notificationEnabled = isset($subscribedLotIds[$lot->id]);
 
-            return $this->transformLot($lot, $access);
+            return $this->transformLot($lot, $access, false, $notificationEnabled);
         });
 
         return response()->json([
@@ -101,12 +114,20 @@ class AuctionController extends Controller
             $access['view_mode'] ?? 'blocked'
         );
 
+        $notificationEnabled = false;
+        if ($user) {
+            $notificationEnabled = \App\Models\Auctions\AuctionNotificationSubscription::where('user_id', $user->id)
+                ->where('auction_lot_id', $lot->id)
+                ->where('is_enabled', true)
+                ->exists();
+        }
+
         return response()->json([
-            'data' => $this->transformLot($lot, $access, true)
+            'data' => $this->transformLot($lot, $access, true, $notificationEnabled)
         ]);
     }
 
-    protected function transformLot(AuctionLot $lot, array $access, $detailed = false)
+    protected function transformLot(AuctionLot $lot, array $access, $detailed = false, $notificationEnabled = false)
     {
         $user = Auth::guard('api')->user();
 
@@ -145,6 +166,7 @@ class AuctionController extends Controller
             'is_user_winning' => $user ? $lot->winner_user_id === $user->id : false,
             'can_bid' => $canBid,
             'can_auto_bid' => $canAutoBid,
+            'notification_enabled' => $notificationEnabled,
             'access' => $access,
             'images' => $images,
             'bids' => null
@@ -293,9 +315,14 @@ class AuctionController extends Controller
             // normalization keys...
             $access['message']['icon'] = \App\Support\Archive\AccessIconNormalizer::normalize($access['reason']??null, $access['view_mode']);
 
+            $notificationEnabled = \App\Models\Auctions\AuctionNotificationSubscription::where('user_id', $user->id)
+                ->where('auction_lot_id', $lot->id)
+                ->where('is_enabled', true)
+                ->exists();
+
             return response()->json([
                 'message' => 'Bid placed successfully.',
-                'data' => $this->transformLot($lot->fresh(), $access, true)
+                'data' => $this->transformLot($lot->fresh(), $access, true, $notificationEnabled)
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Bid Failed: ' . $e->getMessage()], 400);
