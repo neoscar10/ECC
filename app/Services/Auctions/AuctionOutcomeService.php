@@ -37,7 +37,7 @@ class AuctionOutcomeService
                 'is_sold' => false,
                 'reason' => 'Reserve price not met.',
                 'highest_bid_amount' => $amount,
-                'winner_user_id' => null, // No winner if reserve not met
+                'winner_user_id' => $highestBid->user_id, // Allow admin to override
                 'reserve_met' => false,
             ];
         }

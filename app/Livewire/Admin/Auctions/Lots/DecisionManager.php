@@ -23,6 +23,12 @@ class DecisionManager extends Component
     {
         $this->lot = $lot;
         $this->calculateOutcome();
+        
+        // Auto-Open Logic (Change 1: Page Load)
+        // If we represent a "Decision Required" state, auto-open.
+        // Logic: Component relies on lot status being 'pending_decision' (via blade @if)
+        // So simply dispatching show event on mount is sufficient.
+        $this->dispatch('open-modal', modalId: 'decisionModal');
     }
     
     public function calculateOutcome()
@@ -35,13 +41,14 @@ class DecisionManager extends Component
     {
         $this->calculateOutcome(); // Refresh to be safe
         $this->showDecisionModal = true;
-        $this->dispatch('show-decision-modal');
+        $this->dispatch('open-modal', modalId: 'decisionModal');
     }
 
     public function declareWinner()
     {
-        if (!$this->outcomeComparison['is_sold']) {
-            $this->dispatch('operation-failed', message: 'Cannot declare winner: ' . $this->outcomeComparison['reason']);
+        // Allow if there is a winner identified (even if reserve not met)
+        if (!$this->outcomeComparison['winner_user_id']) {
+            $this->dispatch('operation-failed', message: 'Cannot declare winner: No bids found.');
             return;
         }
 

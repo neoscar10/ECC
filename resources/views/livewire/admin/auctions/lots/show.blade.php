@@ -24,7 +24,7 @@
 
         <div class="col-lg-4">
             <!-- Decision Manager -->
-            @if($lot->status === 'pending_decision' && $lot->outcome_decision_mode === 'admin')
+            @if(($lot->status === 'pending_decision' || ($lot->status === 'live' && $lot->ends_at && $lot->ends_at->isPast())) && $lot->outcome_decision_mode === 'admin')
                 <div class="mb-3">
                     <livewire:admin.auctions.lots.decision-manager :lot="$lot" :key="'decision-manager-'.$lot->id" />
                 </div>

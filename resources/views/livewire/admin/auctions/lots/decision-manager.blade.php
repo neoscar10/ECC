@@ -85,8 +85,8 @@
                     
                     <div class="d-grid gap-2">
                         <!-- Option A: Declare Winner -->
-                        <button type="button" class="btn btn-outline-success d-flex justify-content-between align-items-center p-3 {{ !$outcomeComparison['is_sold'] ? 'opacity-50' : '' }}"
-                            @if($outcomeComparison['is_sold']) wire:click="declareWinner" @else disabled title="Cannot declare winner: {{ $outcomeComparison['reason'] }}" @endif>
+                        <button type="button" class="btn btn-outline-success d-flex justify-content-between align-items-center p-3 {{ !$outcomeComparison['winner_user_id'] ? 'opacity-50' : '' }}"
+                            @if($outcomeComparison['winner_user_id']) wire:click="declareWinner" @else disabled title="No highest bidder found" @endif>
                             <span class="d-flex align-items-center gap-3">
                                 <i class="ri-trophy-line fs-20"></i>
                                 <span class="text-start">
