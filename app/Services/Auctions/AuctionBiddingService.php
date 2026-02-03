@@ -163,7 +163,7 @@ class AuctionBiddingService
                     // 2. Manual Bid: Send to Topic (includes owner, but that's standard/expected for manual)
                     $topic = \App\Support\Notifications\FcmTopicNamer::auctionTopic($lot);
                     
-                    dispatch(new \App\Jobs\Notifications\SendFcmToTopicJob(
+                    dispatch_sync(new \App\Jobs\Notifications\SendFcmToTopicJob(
                         $topic,
                         $title,
                         $body,
@@ -187,7 +187,7 @@ class AuctionBiddingService
                     $autoEventId = "auto_bid_executed:{$bid->id}";
                     $autoPayload = $formatter->buildPayload($lot, 'auto_bid_executed', $autoExtra, $autoEventId);
 
-                    dispatch(new \App\Jobs\Notifications\SendFcmToUserJob(
+                    dispatch_sync(new \App\Jobs\Notifications\SendFcmToUserJob(
                         $user->id,
                         $autoTitle,
                         $autoBody,
