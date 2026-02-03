@@ -30,14 +30,43 @@ class AuctionNotificationTriggerTest extends TestCase
         $service = app(AuctionBiddingService::class);
         $service->placeBid($lot, $user, 110, 'web', false);
 
-        // 1. Assert Topic Job
-        Queue::assertPushed(SendFcmToTopicJob::class, function ($job) use ($lot) {
-            return str_contains($job->topic, "ecc_auction_{$lot->id}")
-                && $job->title === 'New Bid Placed';
+        // 1. Assert TOPIC Job NOT Pushed (Changed requirement: Manual bids now fan-out)
+        Queue::assertNotPushed(SendFcmToTopicJob::class);
+
+        // 2. Assert User Job Pushed (Fan-out to others would be tested if we had other subscribers, 
+        // but here we just ensure NO user search for the bidder themselves if we had them)
+        // Let's add a subscriber to verify fan-out actually happens for manual too
+    }
+
+    public function test_manual_bid_fans_out_to_subscribers_excluding_bidder()
+    {
+        Queue::fake();
+
+        $bidder = User::factory()->create();
+        $other = User::factory()->create();
+        $lot = AuctionLot::factory()->create(['status' => 'live']);
+
+        // Subscribe both
+        AuctionNotificationSubscription::create(['user_id' => $bidder->id, 'auction_lot_id' => $lot->id, 'is_enabled' => true]);
+        AuctionNotificationSubscription::create(['user_id' => $other->id, 'auction_lot_id' => $lot->id, 'is_enabled' => true]);
+
+        $service = app(AuctionBiddingService::class);
+        $service->placeBid($lot, $bidder, 120, 'web', false);
+
+        // Assert NO Topic
+        Queue::assertNotPushed(SendFcmToTopicJob::class);
+
+        // Assert User Job for Other
+        Queue::assertPushed(SendFcmToUserJob::class, function ($job) use ($other) {
+            return $job->userId === $other->id && $job->title === 'New Bid Placed';
         });
 
-        // 2. Assert NO User Job
-        Queue::assertNotPushed(SendFcmToUserJob::class);
+        // Assert NO User Job for Bidder
+        $jobs = Queue::pushed(SendFcmToUserJob::class);
+        $bidderJobs = $jobs->filter(function($job) use ($bidder) {
+             return $job->userId === $bidder->id && $job->title === 'New Bid Placed';
+        });
+        $this->assertCount(0, $bidderJobs, "Bidder should not receive notification.");
     }
 
     public function test_auto_bid_fans_out_to_subscribers_excluding_owner_and_sends_private_confirmation()
