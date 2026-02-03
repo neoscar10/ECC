@@ -156,7 +156,7 @@ class AuctionBiddingService
                 ]);
 
                 foreach ($subscribers as $subUserId) {
-                    dispatch(new \App\Jobs\Notifications\SendFcmToUserJob(
+                    dispatch_sync(new \App\Jobs\Notifications\SendFcmToUserJob(
                         $subUserId,
                         $title,
                         $body,
