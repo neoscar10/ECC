@@ -75,7 +75,7 @@
                                                 <div class="d-flex align-items-center">
                                                     <div class="flex-shrink-0 me-2">
                                                         @if($enquiry->lot->images->first())
-                                                            <img src="{{ Storage::url($enquiry->lot->images->first()->image_path) }}" alt="" class="avatar-xs rounded-circle">
+                                                            <img src="{{ $enquiry->lot->images->first()->url }}" alt="" class="avatar-xs rounded-circle">
                                                         @else
                                                             <div class="avatar-xs bg-light rounded-circle"></div>
                                                         @endif
@@ -171,7 +171,7 @@
                                     <div class="d-flex gap-3 mb-3">
                                         <div class="flex-shrink-0">
                                             @if($selectedEnquiry->lot->images->first())
-                                                <img src="{{ Storage::url($selectedEnquiry->lot->images->first()->image_path) }}" alt="" class="avatar-sm rounded">
+                                                <img src="{{ $selectedEnquiry->lot->images->first()->url }}" alt="" class="avatar-sm rounded">
                                             @else
                                                 <div class="avatar-sm bg-light rounded d-flex align-items-center justify-content-center">
                                                     <i class="ri-image-2-line fs-20 text-muted"></i>
