@@ -46,6 +46,9 @@ Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admi
         // The Prompt Breadcrumb: <li class="breadcrumb-item"><a href="{{ route('admin.auctions.lots.index') }}">Auction Lots</a></li>
         // So I should define 'lots.index'.
         
+        // Enquiries (New)
+        Route::get('/enquiries', \App\Livewire\Admin\Auctions\Enquiries\Index::class)->name('enquiries');
+
         Route::prefix('lots')->name('lots.')->group(function() {
              Route::get('/', \App\Livewire\Admin\Auctions\Lots\Index::class)->name('index');
              Route::get('/{id}', \App\Livewire\Admin\Auctions\Lots\Show::class)->name('show');

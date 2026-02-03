@@ -71,7 +71,10 @@ Route::prefix('v1')->group(function () {
     // Auction Routes
     Route::middleware('auth:api')->prefix('auctions')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\V1\AuctionController::class, 'index']);
+        // Enquiries List (Must be before {id})
+        Route::get('/enquiries', [\App\Http\Controllers\Api\V1\Auctions\AuctionEnquiryController::class, 'index']);
         Route::get('/{id}', [\App\Http\Controllers\Api\V1\AuctionController::class, 'show']);
+        Route::post('/{id}/enquiries', [\App\Http\Controllers\Api\V1\Auctions\AuctionEnquiryController::class, 'store']); // Create Enquiry
         Route::post('/{id}/bid', [\App\Http\Controllers\Api\V1\AuctionController::class, 'bid']);
         Route::post('/{id}/auto-bid', [\App\Http\Controllers\Api\V1\AuctionController::class, 'autoBid']);
         Route::delete('/{id}/auto-bid', [\App\Http\Controllers\Api\V1\AuctionController::class, 'cancelAutoBid']);
