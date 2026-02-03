@@ -105,6 +105,10 @@ class AuctionBiddingService
 
             // 8. Fire Events (Realtime)
             event(new AuctionBidPlaced($bid));
+            // Fire Personal Event for Owner (allows is_me=true)
+            if ($user->id) {
+                event(new \App\Events\AuctionBidPlacedPersonal($bid, $user->id));
+            }
             if ($extended) event(new AuctionExtended($lot, 'anti_sniping'));
             
              // Fire Timeline Event

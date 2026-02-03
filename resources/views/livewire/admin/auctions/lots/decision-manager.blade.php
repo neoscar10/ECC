@@ -17,7 +17,7 @@
                 <div class="col-sm-6 col-md-6">
                     <div class="p-2 border rounded bg-light">
                         <div class="text-muted fs-11 text-uppercase">Ended At</div>
-                        <div class="fw-bold">{{ $lot->ended_at->format('d M, h:i A') }}</div>
+                        <div class="fw-bold">{{ $lot->ended_at?->format('d M, h:i A') ?? 'N/A' }}</div>
                     </div>
                 </div>
                 <div class="col-sm-6 col-md-6">

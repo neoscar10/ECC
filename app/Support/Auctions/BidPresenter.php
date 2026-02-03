@@ -12,14 +12,15 @@ class BidPresenter
      * @param AuctionBid $bid
      * @return array
      */
-    public static function present(AuctionBid $bid): array
+    public static function present(AuctionBid $bid, ?int $viewerUserId = null): array
     {
         $userId = $bid->user_id;
         $mask = self::generateBidderIdentity($userId);
         
-        // For broadcast, 'is_me' is always false as it goes to all users.
-        // The client uses top-level 'bidder_id' to determine 'is_me' locally.
-        $isMe = false; 
+        // Broadcast logic:
+        // - Global broadcast (AuctionBidPlaced) passes null -> isMe = false.
+        // - Personal broadcast (AuctionBidPlacedPersonal) passes viewerUserId -> isMe = (userId == viewerId).
+        $isMe = ($viewerUserId !== null) && ((int)$viewerUserId === (int)$userId); 
 
         return [
             'amount' => (string) $bid->amount,
@@ -28,7 +29,7 @@ class BidPresenter
             'is_me' => $isMe,
             'is_auto' => false, // Hardcoded false to match AuctionController::transformBids behavior
             'is_highest_bid' => true, // New bids broadcasted are always the highest
-            'bidder_label' => $mask['label'], // Always masked for broadcast
+            'bidder_label' => $isMe ? 'You' : $mask['label'], // Adjusted to show 'You' if isMe is true (consistent with API)
             'bidder_code' => $mask['code'],
             'bidder_badge' => $mask['badge'],
         ];

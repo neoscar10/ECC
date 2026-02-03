@@ -98,4 +98,35 @@ class AuctionNotificationTriggerTest extends TestCase
         });
         $this->assertCount(0, $disabledJobs, "Disabled subscriber should not receive notification.");
     }
+    public function test_bid_dispatches_personal_event_with_is_me_true()
+    {
+        \Illuminate\Support\Facades\Event::fake([
+            \App\Events\AuctionBidPlacedPersonal::class,
+            \App\Events\AuctionBidPlaced::class
+        ]);
+
+        $user = User::factory()->create();
+        $lot = AuctionLot::factory()->create([
+            'status' => 'live',
+            'starting_price' => 100,
+            'current_highest_bid' => null,
+        ]);
+
+        $service = app(AuctionBiddingService::class);
+        $service->placeBid($lot, $user, 110, 'web', false);
+
+        // Assert Personal Event dispatched
+        \Illuminate\Support\Facades\Event::assertDispatched(\App\Events\AuctionBidPlacedPersonal::class, function ($event) use ($user) {
+            $payload = $event->broadcastWith();
+            return $event->viewerUserId === $user->id
+                && $payload['bid']['is_me'] === true
+                && $payload['bid']['bidder_label'] === 'You';
+        });
+        
+        // Assert Global Event dispatched with is_me false
+        \Illuminate\Support\Facades\Event::assertDispatched(\App\Events\AuctionBidPlaced::class, function ($event) {
+            $payload = $event->broadcastWith();
+            return $payload['bid']['is_me'] === false;
+        });
+    }
 }
