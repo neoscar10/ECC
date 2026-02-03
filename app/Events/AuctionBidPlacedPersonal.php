@@ -20,7 +20,7 @@ class AuctionBidPlacedPersonal implements ShouldBroadcastNow
      * Create a new event instance.
      * 
      * @param AuctionBid $bid
-     * @param int|string $viewerUserId The user who is successfully placing this bid (owner)
+     * @param int|string $viewerUserId The user who is successfully placing this bid (owner )
      */
     public function __construct(AuctionBid $bid, $viewerUserId)
     {
