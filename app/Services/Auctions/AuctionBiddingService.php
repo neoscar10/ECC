@@ -134,14 +134,42 @@ class AuctionBiddingService
                 $eventId = "bid_placed:{$bid->id}";
                 $payload = $formatter->buildPayload($lot, 'bid_placed', $extraData, $eventId);
 
-                $topic = \App\Support\Notifications\FcmTopicNamer::auctionTopic($lot);
-                
-                dispatch(new \App\Jobs\Notifications\SendFcmToTopicJob(
-                    $topic,
-                    $title,
-                    $body,
-                    $payload
-                ));
+                // CONDITIONAL DISPATCH
+                if ($isAuto) {
+                    // 1. Auto-Bid: Manual Fan-out to enable subscribers (EXCLUDING owner)
+                    // We do not send to topic because we want to exclude $user->id
+                    $subscribers = \App\Models\Auctions\AuctionNotificationSubscription::where('auction_lot_id', $lot->id)
+                        ->where('is_enabled', true)
+                        ->where('user_id', '!=', $user->id) // Exclude current auto-bidder
+                        ->pluck('user_id');
+
+                    \Illuminate\Support\Facades\Log::info("AuctionBiddingService: Fan-out bid_placed for Auto-Bid", [
+                        'lot_id' => $lot->id,
+                        'bid_id' => $bid->id,
+                        'excluded_user_id' => $user->id,
+                        'recipients_count' => $subscribers->count()
+                    ]);
+
+                    foreach ($subscribers as $subUserId) {
+                        dispatch(new \App\Jobs\Notifications\SendFcmToUserJob(
+                            $subUserId,
+                            $title,
+                            $body,
+                            $payload
+                        ));
+                    }
+
+                } else {
+                    // 2. Manual Bid: Send to Topic (includes owner, but that's standard/expected for manual)
+                    $topic = \App\Support\Notifications\FcmTopicNamer::auctionTopic($lot);
+                    
+                    dispatch(new \App\Jobs\Notifications\SendFcmToTopicJob(
+                        $topic,
+                        $title,
+                        $body,
+                        $payload
+                    ));
+                }
 
                 // B) Private Auto-Bid Notification (if auto)
                 if ($isAuto) {
@@ -150,11 +178,10 @@ class AuctionBiddingService
                     $autoExtra = [
                         'bid_id' => $bid->id,
                         'bid_amount' => $bid->amount,
-                        'currency' => $lot->currency, // Added
-                        'status' => $lot->status, // Added
-                        // Owner knows they are the actor, but good for completeness?
-                        // Catalog says "Add actor_user_id (the owner) ONLY if already available".
-                        'actor_user_id' => $user->id
+                        'currency' => $lot->currency,
+                        'status' => $lot->status,
+                        'actor_user_id' => $user->id,
+                        'new_ends_at' => $lot->ends_at ? $lot->ends_at->toIso8601String() : null,
                     ];
                     
                     $autoEventId = "auto_bid_executed:{$bid->id}";

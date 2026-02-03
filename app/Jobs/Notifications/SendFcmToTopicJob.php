@@ -40,6 +40,10 @@ class SendFcmToTopicJob implements ShouldQueue
      */
     public function handle(FcmSender $sender): void
     {
+        \Illuminate\Support\Facades\Log::info("Job [SendFcmToTopicJob] starting", [
+            'topic' => $this->topic,
+            'title' => $this->title
+        ]);
         $sender->sendToTopic($this->topic, $this->title, $this->body, $this->data, $this->options);
     }
 }

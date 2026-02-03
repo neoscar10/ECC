@@ -77,6 +77,43 @@ class AuctionAutoBidService
              ]);
              
              // 3. Trigger Evaluation (Non-blocking / Delayed)
+             // Check if we should place an initial bid immediately
+             $freshLot = AuctionLot::lockForUpdate()->find($lot->id);
+             
+             // Only act if auction is live (sanity check, covered by validation but status can change)
+             if ($freshLot && $freshLot->status === 'live' && (!$freshLot->ends_at || now()->lt($freshLot->ends_at))) {
+                 $currentWinnerId = $freshLot->winner_user_id;
+                 $currentHighest = $freshLot->current_highest_bid;
+                 
+                 // Condition 1: User is NOT winning
+                 if ($currentWinnerId !== $user->id) {
+                     // Condition 2: Calculate Initial Bid
+                     if ($currentHighest === null) {
+                        // CASE A: No bids yet -> Immediate Bid (Starting Price)
+                        $bidAmount = $freshLot->starting_price;
+                        
+                        // Check affordability
+                        if ($bidAmount <= $maxBid) {
+                             $this->biddingService->placeBid($freshLot, $user, $bidAmount, 'system', true);
+                        }
+                     } else {
+                        // CASE B: Existing bids -> Lag applies
+                        // We check if they COULD bid, to decide if we force a schedule
+                        $reqInc = max($freshLot->min_increment, $incrementAmount);
+                        $bidAmount = $currentHighest + $reqInc;
+                        
+                        if ($bidAmount <= $maxBid) {
+                            // "Ensure it can trigger ... right away" (via lag mechanism)
+                            // We force the schedule by clearing any existing lock
+                            Cache::forget("auctions:auto_bid:pending:{$freshLot->id}");
+                            $this->processAutoBids($freshLot);
+                            return $autoBid; // processed
+                        }
+                     }
+                 }
+             }
+
+             // Standard schedule (fallback if we didn't force it above)
              $this->processAutoBids($lot); 
              
              return $autoBid;
@@ -132,22 +169,44 @@ class AuctionAutoBidService
             'calc_delay' => $delaySeconds
         ]);
 
-        // 3. Concurrency Guard using Cache Lock
+        // 3. Concurrency Guard using Cache Lock (Timestamp based)
         // Key: auctions:auto_bid:pending:{lotId}
-        // TTL: delay + 180s buffer
+        // Value: Timestamp (integer) when the pending schedule expires/executes
         $lockKey = "auctions:auto_bid:pending:{$lotId}";
-        $ttl = $delaySeconds + 180;
+        
+        $currentLock = Cache::get($lockKey);
+        $nowTimestamp = now()->timestamp;
 
-        // Atomic "add" returns true only if key didn't exist
-        if (Cache::add($lockKey, true, $ttl)) {
-            $job = new ProcessAutoBidStepJob($lotId);
-            
-            if ($delaySeconds > 0) {
-                $job->delay(now()->addSeconds($delaySeconds));
-            }
-            
-            dispatch($job);
+        // If lock exists and is in the future, we assume a job is already pending/scheduled
+        if ($currentLock && $currentLock > $nowTimestamp) {
+             Log::info("AutoBid skipped - pending exists: {$lotId}", ['pending_until' => $currentLock]);
+             return;
         }
+
+        // If we are here, either no lock exists OR it is stale (past).
+        // If stale, we proceed to schedule a new one (effectively self-healing).
+        
+        $executeAt = now()->addSeconds($delaySeconds);
+        // We set the lock value to the execution time + small buffer (e.g. 15s grace for job start)
+        // This means "Do not schedule another job until after [Job Start Time + Grace]"
+        $lockValue = $executeAt->timestamp + 15;
+        
+        // TTL should be slightly longer than the value to ensure it expires naturally if we crash
+        $ttlSeconds = $delaySeconds + 60; 
+
+        Cache::put($lockKey, $lockValue, $ttlSeconds);
+
+        Log::info("AutoBid scheduled: {$lotId}", [
+            'delay' => $delaySeconds, 
+            'pending_until' => $lockValue,
+            'was_stale' => ($currentLock && $currentLock <= $nowTimestamp)
+        ]);
+
+        $job = new ProcessAutoBidStepJob($lotId);
+        if ($delaySeconds > 0) {
+            $job->delay($executeAt);
+        }
+        dispatch($job);
     }
 
     /**

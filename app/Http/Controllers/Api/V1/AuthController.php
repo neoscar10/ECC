@@ -168,6 +168,41 @@ class AuthController extends Controller
             'expires_in' => JWTAuth::factory()->getTTL() * 60,
             'user' => $user,
             'application' => $application,
+            'active_subscriptions' => $this->getActiveSubscriptions($user) // [NEW] Sync Data
         ]);
+    }
+
+    /**
+     * Get active subscriptions for the user to sync client state.
+     */
+    protected function getActiveSubscriptions($user)
+    {
+        if (!$user) return [];
+
+        $namer = \App\Support\Notifications\FcmTopicNamer::class;
+        
+        $baseline = [
+            $namer::globalTopic(),
+            $namer::userTopic($user->id),
+        ];
+
+        // Tier Topic
+        $currentMembership = $user->currentMembership;
+        if ($currentMembership && $currentMembership->membership_tier_id) {
+            $baseline[] = $namer::membershipTierTopic($currentMembership->membership_tier_id);
+        }
+
+        // Auction Subscriptions
+        $enabledLotIds = $user->auctionNotificationSubscriptions()
+            ->where('is_enabled', true)
+            ->pluck('auction_lot_id')
+            ->map(function($id) { return (string)$id; })
+            ->values()
+            ->all();
+
+        return [
+            'baseline_topics' => $baseline,
+            'enabled_auction_lot_ids' => $enabledLotIds
+        ];
     }
 }

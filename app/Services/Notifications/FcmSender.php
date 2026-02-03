@@ -122,6 +122,7 @@ class FcmSender
     {
         $tokens = $user->deviceTokens()->where('is_active', true)->pluck('token')->toArray();
         if (empty($tokens)) { 
+             Log::info("FCM_SEND_USER skipped: No active tokens", ['user_id' => $user->id]);
              return; 
         }
 
@@ -140,6 +141,23 @@ class FcmSender
         ]);
 
         $this->sendToTokens($tokens, $title, $body, $data, $options);
+    }
+
+    /**
+     * Send notification to a specific user's TOPIC.
+     * This is an alternative to sendToUser (which loops tokens) and relies on the user being subscribed to their topic.
+     * 
+     * @param int $userId
+     * @param string $title
+     * @param string $body
+     * @param array $data
+     * @param array $options
+     * @return void
+     */
+    public function sendToUserTopic(int $userId, string $title, string $body, array $data = [], array $options = []): void
+    {
+        $topic = \App\Support\Notifications\FcmTopicNamer::userTopic($userId);
+        $this->sendToTopic($topic, $title, $body, $data, $options);
     }
 
     /**
@@ -192,15 +210,15 @@ class FcmSender
 
     protected function sendRaw(array $message, string $contextLog)
     {
+        if (self::$fakeInTesting && app()->environment('testing')) {
+            Log::info("FCM MOCK SEND: {$contextLog}");
+            return true;
+        }
+
         // Safety check for Project ID
         if (empty($this->projectId)) {
              Log::error("FCM Send Failed: Project ID is missing. Check .env or services.php or credentials file.");
              return false;
-        }
-
-        if (self::$fakeInTesting && app()->environment('testing')) {
-            Log::info("FCM MOCK SEND: {$contextLog}");
-            return true;
         }
 
         try {

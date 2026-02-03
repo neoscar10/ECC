@@ -41,9 +41,16 @@ class SendFcmToUserJob implements ShouldQueue
      */
     public function handle(FcmSender $sender): void
     {
+        \Illuminate\Support\Facades\Log::info("Job [SendFcmToUserJob] starting", [
+            'user_id' => $this->userId,
+            'title' => $this->title
+        ]);
+
         $user = User::find($this->userId);
         if ($user) {
             $sender->sendToUser($user, $this->title, $this->body, $this->data, $this->options);
+        } else {
+            \Illuminate\Support\Facades\Log::warning("Job [SendFcmToUserJob]: User not found", ['user_id' => $this->userId]);
         }
     }
 }

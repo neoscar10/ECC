@@ -97,10 +97,15 @@ class AuctionNotificationFormatter
         // Auto-include ends_at if relevant
         if ($lot->ends_at) {
              // Only for relevant types where ends_at logic matters
-             if (in_array($type, ['bid_placed', 'auction_reminder', 'auction_ended', 'auction_results', 'auction_winner'])) {
+             if (in_array($type, ['bid_placed', 'auto_bid_executed', 'auction_reminder', 'auction_ended', 'auction_results', 'auction_winner'])) {
                  $data['ends_at'] = $lot->ends_at->toIso8601String();
              }
         }
+
+        // [New Routing Keys]
+        // Standardize link to auction detail page
+        $data['target_page'] = 'auction_detail';
+        $data['target_id'] = (string)$lot->id;
 
         // Merge extra
         $merged = array_merge($data, $extra);

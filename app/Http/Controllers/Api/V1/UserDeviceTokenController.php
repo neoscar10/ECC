@@ -47,31 +47,64 @@ class UserDeviceTokenController extends Controller
             ]);
         }
         
-        // [Sync Step 2] Auto-subscribe to enabled topics
-        // We must do this AFTER saving the token so we know it's valid, but prompt implies strictly logic.
-        // We fetch enabled subscriptions and subscribe this SINGLE token to all of them.
+        // [Sync Step 2] Baseline Topic Sync (Global, User, Membership)
+        // We do this for creating AND updating tokens to ensure consistency.
+        // We use FcmTopicManager directly.
         try {
+            $fcmManager = app(\App\Services\Notifications\FcmTopicManager::class);
+            $namer = \App\Support\Notifications\FcmTopicNamer::class;
+
+            // 1. Global Topic
+            $globalTopic = $namer::globalTopic();
+            $fcmManager->subscribeTokensToTopic([$tokenRecord->token], $globalTopic);
+            
+            \Illuminate\Support\Facades\Log::info('TOPIC_SYNC', [
+                'action' => 'TOPIC_SUBSCRIBE',
+                'topic' => $globalTopic,
+                'token' => substr($tokenRecord->token, 0, 10) . '***',
+                'user_id' => $user->id
+            ]);
+
+            // 2. User Topic
+            $userTopic = $namer::userTopic($user->id);
+            $fcmManager->subscribeTokensToTopic([$tokenRecord->token], $userTopic);
+
+            \Illuminate\Support\Facades\Log::info('TOPIC_SYNC', [
+                'action' => 'TOPIC_SUBSCRIBE',
+                'topic' => $userTopic,
+                'token' => substr($tokenRecord->token, 0, 10) . '***',
+                'user_id' => $user->id
+            ]);
+
+            // 3. Membership Tier Topic
+            // Resolve Tier ID from User -> Membership -> MembershipTier
+            $currentMembership = $user->currentMembership;
+            if ($currentMembership && $currentMembership->membership_tier_id) {
+                $tierTopic = $namer::membershipTierTopic($currentMembership->membership_tier_id);
+                $fcmManager->subscribeTokensToTopic([$tokenRecord->token], $tierTopic);
+
+                \Illuminate\Support\Facades\Log::info('TOPIC_SYNC', [
+                    'action' => 'TOPIC_SUBSCRIBE',
+                    'topic' => $tierTopic,
+                    'token' => substr($tokenRecord->token, 0, 10) . '***',
+                    'user_id' => $user->id
+                ]);
+            }
+            
+            // 4. Auto-subscribe to enabled Auction topics (Existing Logic)
             $enabledSubs = $user->auctionNotificationSubscriptions()->where('is_enabled', true)->get();
             if ($enabledSubs->isNotEmpty()) {
-                // Resolve Manager via container
-                $fcmManager = app(\App\Services\Notifications\FcmTopicManager::class);
-                
                 foreach ($enabledSubs as $sub) {
-                    // Need lot to get topic name. 
-                    // Optimization: load relation or just use lot_id if Namer supports it (Namer uses Model).
-                    // Let's assume we need to lazy load lots or instantiate dummy.
-                    // Namer static method expects Model instance usually.
-                    // Let's refactor Namer to accept ID or load it. 
-                    // For safety, load relationship.
                     $lot = $sub->auctionLot; 
                     if ($lot) {
-                       $topic = \App\Support\Notifications\FcmTopicNamer::auctionTopic($lot);
+                       $topic = $namer::auctionTopic($lot);
                        $fcmManager->subscribeTokensToTopic([$tokenRecord->token], $topic);
                     }
                 }
             }
+
         } catch (\Exception $e) {
-            // Don't fail registration if FCM fails, just log
+            // Fail-safe: don't fail registration if FCM fails, just log
             \Illuminate\Support\Facades\Log::warning('FCM Sync Failed on Register: ' . $e->getMessage());
         }
 
@@ -133,8 +166,47 @@ class UserDeviceTokenController extends Controller
 
         $user = Auth::guard('api')->user();
         
-        // Find and delete
-        $deleted = $user->deviceTokens()->where('token', $request->token)->delete();
+        // Find token and unsubscribe from everything before deleting
+        // We use 'first' to get model then delete, instead of direct delete query
+        $tokenRecord = $user->deviceTokens()->where('token', $request->token)->first();
+
+        if ($tokenRecord) {
+            try {
+                $fcmManager = app(\App\Services\Notifications\FcmTopicManager::class);
+                $namer = \App\Support\Notifications\FcmTopicNamer::class;
+
+                // 1. Global
+                $fcmManager->unsubscribeTokensFromTopic([$tokenRecord->token], $namer::globalTopic());
+
+                // 2. User
+                $fcmManager->unsubscribeTokensFromTopic([$tokenRecord->token], $namer::userTopic($user->id));
+
+                // 3. Membership Tier (if exists)
+                $currentMembership = $user->currentMembership;
+                if ($currentMembership && $currentMembership->membership_tier_id) {
+                    $tierTopic = $namer::membershipTierTopic($currentMembership->membership_tier_id);
+                    $fcmManager->unsubscribeTokensFromTopic([$tokenRecord->token], $tierTopic);
+                }
+
+                // 4. Auction Topics
+                $enabledSubs = $user->auctionNotificationSubscriptions()->where('is_enabled', true)->get();
+                if ($enabledSubs->isNotEmpty()) {
+                    foreach ($enabledSubs as $sub) {
+                        $lot = $sub->auctionLot; 
+                        if ($lot) {
+                           $topic = $namer::auctionTopic($lot);
+                           $fcmManager->unsubscribeTokensFromTopic([$tokenRecord->token], $topic);
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('FCM Unsubscribe Failed on Unregister: ' . $e->getMessage());
+            }
+
+            $deleted = $tokenRecord->delete();
+        } else {
+            $deleted = false;
+        }
 
         return response()->json([
             'success' => true,
