@@ -929,6 +929,9 @@
                                         <a href="{{ route('admin.auctions.lots.index') }}" class="nav-link {{ request()->routeIs('admin.auctions.lots.index') ? 'active' : '' }}" data-key="t-auction-lots">Auction Lots</a>
                                     </li>
                                     <li class="nav-item">
+                                        <a href="{{ route('admin.auctions.enquiries') }}" class="nav-link {{ request()->routeIs('admin.auctions.enquiries') ? 'active' : '' }}" data-key="t-auction-enquiries">Enquiries</a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a href="{{ route('admin.auctions.orders.index') }}" class="nav-link {{ request()->routeIs('admin.auctions.orders.index') ? 'active' : '' }}" data-key="t-auction-orders">Orders</a>
                                     </li>
                                 </ul>

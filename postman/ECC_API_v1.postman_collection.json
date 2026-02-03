@@ -1983,6 +1983,91 @@
                             ]
                         }
                     ]
+                },
+                {
+                    "name": "Enquiries",
+                    "description": "Submit and manage enquiries for auction lots.",
+                    "item": [
+                        {
+                            "name": "List Enquiries",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/auctions/enquiries?status=new&search=Key",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "auctions",
+                                        "enquiries"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "status",
+                                            "value": "new",
+                                            "description": "Optional: new, contacted, closed"
+                                        },
+                                        {
+                                            "key": "search",
+                                            "value": "Key",
+                                            "description": "Optional: search by contact or lot title"
+                                        }
+                                    ]
+                                },
+                                "description": "List all enquiries (Admin)."
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Submit Enquiry",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"message\": \"Is this item authentic?\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/auctions/{{lot_id}}/enquiries",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "auctions",
+                                        "{{lot_id}}",
+                                        "enquiries"
+                                    ]
+                                },
+                                "description": "Submit an enquiry for a specific auction lot."
+                            },
+                            "response": []
+                        }
+                    ]
                 }
             ]
         },
