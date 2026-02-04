@@ -937,7 +937,21 @@
                                 </ul>
                             </div>
                         </li>
-                        <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-store-2-line"></i> <span>Shop</span></a></li>
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ request()->routeIs('admin.shop.*') ? 'active' : '' }}" href="#sidebarShop" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('admin.shop.*') ? 'true' : 'false' }}" aria-controls="sidebarShop">
+                                <i class="ri-store-2-line"></i> <span data-key="t-shop">Shop</span>
+                            </a>
+                            <div class="collapse menu-dropdown {{ request()->routeIs('admin.shop.*') ? 'show' : '' }}" id="sidebarShop">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.shop.categories') }}" class="nav-link {{ request()->routeIs('admin.shop.categories') ? 'active' : '' }}" data-key="t-shop-categories">Categories</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.shop.tags') }}" class="nav-link {{ request()->routeIs('admin.shop.tags') ? 'active' : '' }}" data-key="t-shop-tags">Tags</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
                         
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-chat-voice-line"></i> <span>Inquiries</span></a></li>
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-slideshow-line"></i> <span>CMS</span></a></li>

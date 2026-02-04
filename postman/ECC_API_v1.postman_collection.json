@@ -2247,6 +2247,411 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "Shop",
+            "description": "Shop and E-commerce endpoints.",
+            "item": [
+                {
+                    "name": "Categories",
+                    "item": [
+                        {
+                            "name": "List Categories (Root)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.data && jsonData.data.length > 0) {",
+                                            "    pm.environment.set(\"category_id\", jsonData.data[0].id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/categories",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "categories"
+                                    ]
+                                },
+                                "description": "List root categories."
+                            }
+                        },
+                        {
+                            "name": "List Categories (Children)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/categories?parent_id={{category_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "categories"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "parent_id",
+                                            "value": "{{category_id}}"
+                                        }
+                                    ]
+                                },
+                                "description": "List children of a specific category."
+                            }
+                        },
+                        {
+                            "name": "Tree",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/categories/tree?depth=3",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "categories",
+                                        "tree"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "depth",
+                                            "value": "3"
+                                        }
+                                    ]
+                                },
+                                "description": "Get category tree structure."
+                            }
+                        },
+                        {
+                            "name": "Category Detail",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/categories/{{category_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "categories",
+                                        "{{category_id}}"
+                                    ]
+                                },
+                                "description": "Get category details."
+                            }
+                        },
+                        {
+                            "name": "Category Children (Explicit)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/categories/{{category_id}}/children",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "categories",
+                                        "{{category_id}}",
+                                        "children"
+                                    ]
+                                },
+                                "description": "Get direct children of a category."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Tags",
+                    "item": [
+                        {
+                            "name": "List Tag Groups",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.data && jsonData.data.length > 0) {",
+                                            "    pm.environment.set(\"tag_group_id\", jsonData.data[0].id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/tags/groups",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "tags",
+                                        "groups"
+                                    ]
+                                },
+                                "description": "List active tag groups."
+                            }
+                        },
+                        {
+                            "name": "List Tags (by Group)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.data && jsonData.data.length > 0) {",
+                                            "    pm.environment.set(\"tag_id\", jsonData.data[0].id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/tags?group_id={{tag_group_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "tags"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "group_id",
+                                            "value": "{{tag_group_id}}"
+                                        }
+                                    ]
+                                },
+                                "description": "List tags in a group."
+                            }
+                        },
+                        {
+                            "name": "Group Detail",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/tags/groups/{{tag_group_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "tags",
+                                        "groups",
+                                        "{{tag_group_id}}"
+                                    ]
+                                },
+                                "description": "Get tag group details."
+                            }
+                        },
+                        {
+                            "name": "Tag Detail",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/tags/{{tag_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "tags",
+                                        "{{tag_id}}"
+                                    ]
+                                },
+                                "description": "Get tag details."
+                            }
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

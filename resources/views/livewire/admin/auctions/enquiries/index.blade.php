@@ -74,6 +74,7 @@
                                             @if($enquiry->lot)
                                                 <div class="d-flex align-items-center">
                                                     <div class="flex-shrink-0 me-2">
+                                                        
                                                         @if($enquiry->lot->images->first())
                                                             <img src="{{ $enquiry->lot->images->first()->url }}" alt="" class="avatar-xs rounded-circle">
                                                         @else

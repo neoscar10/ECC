@@ -80,6 +80,20 @@ Route::prefix('v1')->group(function () {
         Route::delete('/{id}/auto-bid', [\App\Http\Controllers\Api\V1\AuctionController::class, 'cancelAutoBid']);
     });
 
+    // Shop Routes
+    Route::middleware('auth:api')->prefix('shop')->name('shop.')->group(function () {
+        Route::get('categories/tree', [\App\Http\Controllers\Api\V1\Shop\ShopCategoryController::class, 'tree'])->name('categories.tree');
+        Route::get('categories', [\App\Http\Controllers\Api\V1\Shop\ShopCategoryController::class, 'index'])->name('categories.index');
+        Route::get('categories/{id}', [\App\Http\Controllers\Api\V1\Shop\ShopCategoryController::class, 'show'])->name('categories.show');
+        Route::get('categories/{id}/children', [\App\Http\Controllers\Api\V1\Shop\ShopCategoryController::class, 'children'])->name('categories.children');
+
+        // Tags
+        Route::get('tags/groups', [\App\Http\Controllers\Api\V1\Shop\ShopTagGroupController::class, 'index'])->name('tags.groups.index');
+        Route::get('tags/groups/{id}', [\App\Http\Controllers\Api\V1\Shop\ShopTagGroupController::class, 'show'])->name('tags.groups.show');
+        Route::get('tags', [\App\Http\Controllers\Api\V1\Shop\ShopTagController::class, 'index'])->name('tags.index');
+        Route::get('tags/{id}', [\App\Http\Controllers\Api\V1\Shop\ShopTagController::class, 'show'])->name('tags.show');
+    });
+
     // Mobile Broadcasting Auth (JWT)
     Route::middleware('auth:api')->prefix('broadcasting')->group(function () {
         Route::post('auth', [\App\Http\Controllers\Api\V1\BroadcastController::class, 'authenticate']);
