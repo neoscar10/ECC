@@ -12,6 +12,8 @@ use Exception;
 
 class ShopOrderController extends Controller
 {
+    use ApiResponse;
+
     protected CheckoutService $checkoutService;
 
     public function __construct(CheckoutService $checkoutService)
@@ -26,7 +28,7 @@ class ShopOrderController extends Controller
             ->latest('placed_at')
             ->paginate(15);
 
-        return ApiResponse::success('Orders fetched successfully.', ShopOrderResource::collection($orders));
+        return $this->success(ShopOrderResource::collection($orders), 'Orders fetched successfully.');
     }
 
     public function show(Request $request, $id)
@@ -36,7 +38,7 @@ class ShopOrderController extends Controller
             ->with(['items.variationValues'])
             ->firstOrFail();
 
-        return ApiResponse::success('Order details fetched successfully.', new ShopOrderResource($order));
+        return $this->success(new ShopOrderResource($order), 'Order details fetched successfully.');
     }
 
     public function confirmPayment(Request $request, $id)
@@ -47,7 +49,7 @@ class ShopOrderController extends Controller
 
         $order = $this->checkoutService->confirmPayment($order, $request->all());
 
-        return ApiResponse::success('Payment confirmed.', new ShopOrderResource($order));
+        return $this->success(new ShopOrderResource($order), 'Payment confirmed.');
     }
 
     public function cancel(Request $request, $id)
@@ -61,9 +63,9 @@ class ShopOrderController extends Controller
 
         try {
             $order = $this->checkoutService->cancelOrder($order, $request->reason);
-            return ApiResponse::success('Order cancelled successfully.', new ShopOrderResource($order));
+            return $this->success(new ShopOrderResource($order), 'Order cancelled successfully.');
         } catch (Exception $e) {
-            return ApiResponse::error($e->getMessage());
+            return $this->error($e->getMessage());
         }
     }
 }

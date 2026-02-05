@@ -12,6 +12,8 @@ use Exception;
 
 class CheckoutController extends Controller
 {
+    use ApiResponse;
+
     protected CheckoutService $checkoutService;
 
     public function __construct(CheckoutService $checkoutService)
@@ -26,9 +28,9 @@ class CheckoutController extends Controller
                 $request->user(),
                 $request->input('shipping_address_id')
             );
-            return ApiResponse::success('Checkout summary generated.', new CheckoutSummaryResource($data));
+            return $this->success(new CheckoutSummaryResource($data), 'Checkout summary generated.');
         } catch (Exception $e) {
-            return ApiResponse::error($e->getMessage());
+            return $this->error($e->getMessage(), 500);
         }
     }
 
@@ -50,16 +52,19 @@ class CheckoutController extends Controller
 
             $order = $this->checkoutService->placeOrder($request->user(), $request->all());
             
-            return ApiResponse::success(
+            return $this->success(
+                new ShopOrderResource($order),
                 'Order placed successfully.', 
-                new ShopOrderResource($order)
-            )->setStatusCode(201);
+                201
+            );
 
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->error('Resource not found.', 404);
         } catch (Exception $e) {
             if ($e->getCode() === 409) {
-                 return ApiResponse::error($e->getMessage(), 409);
+                 return $this->error($e->getMessage(), 409);
             }
-            return ApiResponse::error($e->getMessage(), 500);
+            return $this->error($e->getMessage(), 500);
         }
     }
 }

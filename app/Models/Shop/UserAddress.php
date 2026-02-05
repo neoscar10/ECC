@@ -1,3 +1,5 @@
+<?php
+
 namespace App\Models\Shop;
 
 use App\Models\User;

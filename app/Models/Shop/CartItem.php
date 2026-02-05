@@ -67,6 +67,19 @@ class CartItem extends Model
         );
     }
 
+    /**
+     * Alias for selectedVariations to match service usage (or define as belongsToMany for cleaner pivot access)
+     */
+    public function variationValues(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(
+            ShopProductVariationValue::class,
+            'cart_item_variation_values',
+            'cart_item_id',
+            'shop_product_variation_value_id'
+        )->withTimestamps();
+    }
+
     // --- Helpers ---
     
     public function getLineTotalAttribute()

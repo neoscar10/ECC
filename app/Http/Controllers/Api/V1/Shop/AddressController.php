@@ -11,10 +11,12 @@ use Illuminate\Validation\Rule;
 
 class AddressController extends Controller
 {
+    use ApiResponse;
+
     public function index(Request $request)
     {
         $addresses = $request->user()->addresses()->orderByDesc('is_default')->latest()->get();
-        return ApiResponse::success('Addresses fetched successfully.', UserAddressResource::collection($addresses));
+        return $this->success(UserAddressResource::collection($addresses), 'Addresses fetched successfully.');
     }
 
     public function store(Request $request)
@@ -39,13 +41,13 @@ class AddressController extends Controller
 
         $address = $request->user()->addresses()->create($validated);
 
-        return ApiResponse::success('Address created successfully.', new UserAddressResource($address));
+        return $this->success(new UserAddressResource($address), 'Address created successfully.');
     }
 
     public function show(Request $request, $id)
     {
         $address = $request->user()->addresses()->findOrFail($id);
-        return ApiResponse::success('Address details fetched successfully.', new UserAddressResource($address));
+        return $this->success(new UserAddressResource($address), 'Address details fetched successfully.');
     }
 
     public function update(Request $request, $id)
@@ -72,7 +74,7 @@ class AddressController extends Controller
 
         $address->update($validated);
 
-        return ApiResponse::success('Address updated successfully.', new UserAddressResource($address));
+        return $this->success(new UserAddressResource($address), 'Address updated successfully.');
     }
 
     public function destroy(Request $request, $id)
@@ -80,6 +82,6 @@ class AddressController extends Controller
         $address = $request->user()->addresses()->findOrFail($id);
         $address->delete();
 
-        return ApiResponse::success('Address deleted successfully.');
+        return $this->success(null, 'Address deleted successfully.');
     }
 }
