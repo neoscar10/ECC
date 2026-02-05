@@ -5,9 +5,11 @@ namespace App\Models\Shop;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ShopProductVariationGroup extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'shop_product_id',
         'name',

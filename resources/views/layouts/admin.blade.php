@@ -955,6 +955,9 @@
                                     <li class="nav-item">
                                         <a href="{{ route('admin.shop.carts') }}" class="nav-link {{ request()->routeIs('admin.shop.carts') ? 'active' : '' }}" data-key="t-shop-carts">Carts</a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.shop.orders') }}" class="nav-link {{ request()->routeIs('admin.shop.orders*') ? 'active' : '' }}" data-key="t-shop-orders">Orders</a>
+                                    </li>
                                 </ul>
                             </div>
                         </li>

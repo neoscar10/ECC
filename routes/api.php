@@ -97,6 +97,23 @@ Route::prefix('v1')->group(function () {
         Route::get('products/suggestions', [\App\Http\Controllers\Api\V1\Shop\ShopProductController::class, 'suggestions'])->name('products.suggestions');
         Route::get('products', [\App\Http\Controllers\Api\V1\Shop\ShopProductController::class, 'index'])->name('products.index');
         Route::get('products/{id}', [\App\Http\Controllers\Api\V1\Shop\ShopProductController::class, 'show'])->name('products.show');
+
+        // Shop Addresses
+        Route::apiResource('addresses', \App\Http\Controllers\Api\V1\Shop\AddressController::class);
+
+        // Shop Checkout
+        Route::prefix('checkout')->group(function () {
+            Route::get('summary', [\App\Http\Controllers\Api\V1\Shop\CheckoutController::class, 'summary']);
+            Route::post('place-order', [\App\Http\Controllers\Api\V1\Shop\CheckoutController::class, 'placeOrder']);
+        });
+
+        // Shop Orders
+        Route::prefix('orders')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\V1\Shop\ShopOrderController::class, 'index']);
+            Route::get('/{id}', [\App\Http\Controllers\Api\V1\Shop\ShopOrderController::class, 'show']);
+            Route::post('/{id}/confirm-payment', [\App\Http\Controllers\Api\V1\Shop\ShopOrderController::class, 'confirmPayment']);
+            Route::post('/{id}/cancel', [\App\Http\Controllers\Api\V1\Shop\ShopOrderController::class, 'cancel']);
+        });
     });
 
 

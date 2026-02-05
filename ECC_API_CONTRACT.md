@@ -741,3 +741,159 @@ Cancel active auto-bid.
 **Auth Endpoint:** `POST /broadcasting/auth`
 Standard Pusher auth. Requires Bearer Token. Send `socket_id` and `channel_name`.
 
+---
+
+## Shop: Checkout & Orders
+
+This module handles User Address management, Cart Checkout pipeline, and Order Management for Shop purchases.
+
+### A. Overview
+
+-   **Checkout Flow**: User manages cart -> Reviews Checkout Summary -> Places Order -> Order is created (`pending_payment`) -> Payment Confirmed -> Order `paid`.
+-   **Stock Logic**: Stock is deducted immediately upon successfully placing an order. If payment fails or order is cancelled, stock is restored.
+-   **Pricing**: 
+    -   Unit Price = `MAX(Product Base Price, MAX(Selected Variation Prices))`.
+-   **Structure**: Shop Orders are distinct from Auction/Archive orders and support multiple line items.
+
+### B. Endpoints
+
+#### 1. User Addresses
+Manage shipping and billing addresses.
+
+**GET /shop/addresses**
+List all saved addresses.
+*   **Auth**: Yes
+*   **Success (200)**:
+    ```json
+    {
+        "success": true,
+        "data": [
+            {
+                "id": 1,
+                "label": "Home",
+                "full_name": "Test User",
+                "city": "Mumbai",
+                "is_default": true,
+                "type": "shipping"
+            }
+        ]
+    }
+    ```
+
+**POST /shop/addresses**
+Create a new address.
+*   **Auth**: Yes
+*   **Body**:
+    ```json
+    {
+        "label": "Office",
+        "full_name": "Test User",
+        "phone": "+919876543210",
+        "line1": "123 Business Park",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "postal_code": "400001",
+        "country": "India",
+        "is_default": false,
+        "type": "shipping"
+    }
+    ```
+
+**PATCH /shop/addresses/{id}**
+Update an address.
+
+**DELETE /shop/addresses/{id}**
+Delete an address.
+
+---
+
+#### 2. Checkout Summary
+**GET /shop/checkout/summary**
+Get totals, fees, and stock validation before placing an order.
+*   **Auth**: Yes
+*   **Query Params**: `shipping_address_id` (optional, for calculating accurate shipping).
+*   **Success (200)**:
+    ```json
+    {
+        "success": true,
+        "data": {
+            "currency": "INR",
+            "subtotal": 1500.00,
+            "shipping_fee": 0.00,
+            "tax_amount": 0.00,
+            "discount_amount": 0.00,
+            "total_amount": 1500.00,
+            "items": [
+                {
+                    "title": "ICC Jersey",
+                    "quantity": 1,
+                    "unit_price": 1500.00,
+                    "line_total": 1500.00,
+                    "variation_values": [{ "id": 5, "caption": "Size M" }],
+                    "stock_issues": []
+                }
+            ],
+            "can_place_order": true
+        }
+    }
+    ```
+
+---
+
+#### 3. Place Order
+**POST /shop/checkout/place-order**
+Convert Cart to Order and deduct stock.
+*   **Auth**: Yes
+*   **Body**:
+    ```json
+    {
+        "shipping_address_id": 1,
+        "billing_address_id": null,
+        "billing_same_as_shipping": true,
+        "notes": "Leave at front desk"
+    }
+    ```
+*   **Success (201)**: Returns `ShopOrder` object.
+*   **Error (409)**: Insufficient Stock. Returns message specifying which variation is out of stock.
+
+---
+
+#### 4. Orders
+**GET /shop/orders**
+List past orders (paginated).
+
+**GET /shop/orders/{id}**
+Get order details.
+*   **Success (200)**:
+    ```json
+    {
+        "success": true,
+        "data": {
+            "id": 101,
+            "order_number": "SHP-20260205-ABC123",
+            "status": "pending_payment",
+            "payment_status": "unpaid",
+            "totals": { "total_amount": 1500.00 },
+            "shipping_address": { ... },
+            "items": [ ... ]
+        }
+    }
+    ```
+
+---
+
+#### 5. Order Actions
+
+**POST /shop/orders/{id}/confirm-payment**
+Mock endpoint to simulate payment gateway success.
+*   **Auth**: Yes
+*   **Body**: `{ "method": "mock_card", "reference": "REF123" }`
+*   **Success (200)**: Order becomes `paid`.
+
+**POST /shop/orders/{id}/cancel**
+Cancel an **unpaid** order and restore stock.
+*   **Auth**: Yes
+*   **Body**: `{ "reason": "Changed mind" }`
+*   **Success (200)**: Order becomes `cancelled`.
+
+

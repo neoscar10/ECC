@@ -2986,6 +2986,319 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "Addresses",
+                    "item": [
+                        {
+                            "name": "List Addresses",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/addresses",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "addresses"
+                                    ]
+                                },
+                                "description": "List all saved user addresses."
+                            }
+                        },
+                        {
+                            "name": "Create Address",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"label\": \"Home\",\n    \"full_name\": \"John Doe\",\n    \"phone\": \"+1234567890\",\n    \"line1\": \"123 Main St\",\n    \"city\": \"Mumbai\",\n    \"state\": \"MH\",\n    \"postal_code\": \"400001\",\n    \"country\": \"India\",\n    \"is_default\": true,\n    \"type\": \"shipping\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/addresses",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "addresses"
+                                    ]
+                                },
+                                "description": "Create a new address."
+                            }
+                        },
+                        {
+                            "name": "Delete Address",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/addresses/{{address_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "addresses",
+                                        "{{address_id}}"
+                                    ]
+                                },
+                                "description": "Delete a user address."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Checkout",
+                    "item": [
+                        {
+                            "name": "Get Summary",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/checkout/summary?shipping_address_id={{address_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "checkout",
+                                        "summary"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "shipping_address_id",
+                                            "value": "{{address_id}}"
+                                        }
+                                    ]
+                                },
+                                "description": "Get checkout totals and stock validation."
+                            }
+                        },
+                        {
+                            "name": "Place Order",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"shipping_address_id\": {{address_id}},\n    \"billing_address_id\": null,\n    \"billing_same_as_shipping\": true,\n    \"notes\": \"Leave at front desk\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/checkout/place-order",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "checkout",
+                                        "place-order"
+                                    ]
+                                },
+                                "description": "Place the order (deducts stock, creates order)."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Orders",
+                    "item": [
+                        {
+                            "name": "List Orders",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/orders",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "orders"
+                                    ]
+                                },
+                                "description": "List past orders."
+                            }
+                        },
+                        {
+                            "name": "Get Order",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/orders/{{order_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "orders",
+                                        "{{order_id}}"
+                                    ]
+                                },
+                                "description": "Get order details."
+                            }
+                        },
+                        {
+                            "name": "Confirm Payment (Mock)",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"method\": \"mock_card\",\n    \"reference\": \"REF_MOCK_123\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/orders/{{order_id}}/confirm-payment",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "orders",
+                                        "{{order_id}}",
+                                        "confirm-payment"
+                                    ]
+                                },
+                                "description": "Simulate payment confirmation."
+                            }
+                        },
+                        {
+                            "name": "Cancel Order",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"reason\": \"Changed mind\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/orders/{{order_id}}/cancel",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "orders",
+                                        "{{order_id}}",
+                                        "cancel"
+                                    ]
+                                },
+                                "description": "Cancel an unpaid order."
+                            }
+                        }
+                    ]
                 }
             ]
         }
