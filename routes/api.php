@@ -99,6 +99,16 @@ Route::prefix('v1')->group(function () {
         Route::get('products/{id}', [\App\Http\Controllers\Api\V1\Shop\ShopProductController::class, 'show'])->name('products.show');
     });
 
+
+    // Cart Routes
+    Route::middleware('auth:api')->prefix('cart')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\Shop\CartController::class, 'index']);
+        Route::delete('/', [\App\Http\Controllers\Api\V1\Shop\CartController::class, 'clear']);
+        Route::post('/items', [\App\Http\Controllers\Api\V1\Shop\CartController::class, 'addItem']);
+        Route::match(['put', 'patch'], '/items/{id}', [\App\Http\Controllers\Api\V1\Shop\CartController::class, 'updateItem']);
+        Route::delete('/items/{id}', [\App\Http\Controllers\Api\V1\Shop\CartController::class, 'removeItem']);
+    });
+
     // Mobile Broadcasting Auth (JWT)
     Route::middleware('auth:api')->prefix('broadcasting')->group(function () {
         Route::post('auth', [\App\Http\Controllers\Api\V1\BroadcastController::class, 'authenticate']);
