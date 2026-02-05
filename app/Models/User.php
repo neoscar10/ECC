@@ -100,4 +100,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(\App\Models\Auctions\AuctionNotificationSubscription::class);
     }
+
+    public function addresses()
+    {
+        return $this->hasMany(\App\Models\Shop\UserAddress::class);
+    }
 }

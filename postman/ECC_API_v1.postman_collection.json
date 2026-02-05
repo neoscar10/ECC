@@ -3015,7 +3015,7 @@
                                         "addresses"
                                     ]
                                 },
-                                "description": "List all saved user addresses."
+                                "description": "List all saved user addresses (Linked via User::addresses)."
                             }
                         },
                         {
@@ -3143,7 +3143,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"shipping_address_id\": {{address_id}},\n    \"billing_address_id\": null,\n    \"billing_same_as_shipping\": true,\n    \"notes\": \"Leave at front desk\"\n}"
+                                    "raw": "{\n    \"shipping_address_id\": {{address_id}},\n    \"billing_address_id\": null,\n    \"billing_same_as_shipping\": true,\n    \"notes\": \"Some random note 123\"\n}"
                                 },
                                 "url": {
                                     "raw": "{{base_url}}/{{api_prefix}}/shop/checkout/place-order",

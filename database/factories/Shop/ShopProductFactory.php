@@ -17,7 +17,6 @@ class ShopProductFactory extends Factory
             'description' => $this->faker->paragraph,
             'base_price' => $this->faker->randomFloat(2, 10, 1000),
             'is_active' => true,
-            'is_featured' => false,
         ];
     }
 }
