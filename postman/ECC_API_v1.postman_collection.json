@@ -551,7 +551,7 @@
             "item": [
                 {
                     "name": "Membership Applications",
-                    "description": "Step-by-step membership application flow.\n\n**Prerequisites:** User must be registered and authenticated (`{{application_id}}` required for most steps).\n\n### Reference: Application State Fields\n\n**current_step**\n- `personal_details` — Initial state, waiting for user info.\n- `cricket_profile` — Personal details saved, waiting for preferences.\n- `collector_intent` — Profile saved, waiting for investment focus.\n- `tier_selection` — Intent saved & tier recommended, waiting for selection.\n- `payment` — Tier selected (paid), waiting for payment confirmation.\n- `submitted` — Payment done (or free tier), ready for final submission.\n- `waiting_approval` — Submitted, waiting for admin approval (restricted tiers).\n- `access_granted` — Submitted & approved, membership active.\n\n**status**\n- `draft` — Application in progress, not yet submitted.\n- `submitted` — User finished flow, waiting for review or auto-grant.\n- `under_review` — Admin is currently reviewing.\n- `approved` — Application accepted, membership granted.\n- `rejected` — Application denied.",
+                    "description": "Step-by-step membership application flow.\n\n**Prerequisites:** User must be registered and authenticated (`{{application_id}}` required for most steps).\n\n### Reference: Application State Fields\n\n**current_step**\n- `personal_details` \u2014 Initial state, waiting for user info.\n- `cricket_profile` \u2014 Personal details saved, waiting for preferences.\n- `collector_intent` \u2014 Profile saved, waiting for investment focus.\n- `tier_selection` \u2014 Intent saved & tier recommended, waiting for selection.\n- `payment` \u2014 Tier selected (paid), waiting for payment confirmation.\n- `submitted` \u2014 Payment done (or free tier), ready for final submission.\n- `waiting_approval` \u2014 Submitted, waiting for admin approval (restricted tiers).\n- `access_granted` \u2014 Submitted & approved, membership active.\n\n**status**\n- `draft` \u2014 Application in progress, not yet submitted.\n- `submitted` \u2014 User finished flow, waiting for review or auto-grant.\n- `under_review` \u2014 Admin is currently reviewing.\n- `approved` \u2014 Application accepted, membership granted.\n- `rejected` \u2014 Application denied.",
                     "item": [
                         {
                             "name": "01 Get Current Application",
@@ -1458,7 +1458,7 @@
                                         }
                                     ]
                                 },
-                                "description": "Products from categories not visible to the user’s membership tier are excluded from results.\n\nList all products. Locked products are included with `is_open: false`.\n\n### Query Params\n| Param | Type | Default | Description |\n| :--- | :--- | :--- | :--- |\n| `category_id` | int | null | **Required/Recommended** to filter by category. Checks `archive_category_id`. |\n| `page` | int | 1 | Page number. |\n\n### "
+                                "description": "Products from categories not visible to the user\u2019s membership tier are excluded from results.\n\nList all products. Locked products are included with `is_open: false`.\n\n### Query Params\n| Param | Type | Default | Description |\n| :--- | :--- | :--- | :--- |\n| `category_id` | int | null | **Required/Recommended** to filter by category. Checks `archive_category_id`. |\n| `page` | int | 1 | Page number. |\n\n### "
                             },
                             "response": [
                                 {
@@ -2647,6 +2647,180 @@
                                     ]
                                 },
                                 "description": "Get tag details."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Products",
+                    "description": "Product catalog and details",
+                    "item": [
+                        {
+                            "name": "List Products",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/products?page=1&per_page=15&sort=newest",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "products"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "1",
+                                            "description": "Page number"
+                                        },
+                                        {
+                                            "key": "per_page",
+                                            "value": "15",
+                                            "description": "Items per page"
+                                        },
+                                        {
+                                            "key": "q",
+                                            "value": "bat",
+                                            "disabled": true,
+                                            "description": "Search keyword"
+                                        },
+                                        {
+                                            "key": "category_ids",
+                                            "value": "7,9",
+                                            "disabled": true,
+                                            "description": "Comma separated category IDs"
+                                        },
+                                        {
+                                            "key": "tags[brands]",
+                                            "value": "12",
+                                            "disabled": true,
+                                            "description": "Tag filter (group=id)"
+                                        },
+                                        {
+                                            "key": "price_min",
+                                            "value": "100",
+                                            "disabled": true
+                                        },
+                                        {
+                                            "key": "price_max",
+                                            "value": "5000",
+                                            "disabled": true
+                                        },
+                                        {
+                                            "key": "in_stock",
+                                            "value": "true",
+                                            "disabled": true
+                                        },
+                                        {
+                                            "key": "sort",
+                                            "value": "newest",
+                                            "description": "newest, oldest, price_asc, price_desc, title_asc, title_desc"
+                                        }
+                                    ]
+                                },
+                                "description": "List shop products with filtering and searching.\n\n**Filters:**\n- `category_ids`: Comma separated or array\n- `tags[group_slug]=id`: AND logic across groups\n- `price_min`, `price_max`\n- `in_stock`: boolean\n- `q`: search title/desc"
+                            }
+                        },
+                        {
+                            "name": "Get Product Filters",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/products/filters",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "products",
+                                        "filters"
+                                    ]
+                                },
+                                "description": "Get data required to build the filter UI.\n\nReturns:\n- Category Tree\n- Tag Groups and Tags\n- Price Range (min/max global)\n- Sort Options"
+                            }
+                        },
+                        {
+                            "name": "Get Product Suggestions",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/products/suggestions?q=bat&limit=8",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "products",
+                                        "suggestions"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "q",
+                                            "value": "bat",
+                                            "description": "Search term (min 2 chars)"
+                                        },
+                                        {
+                                            "key": "limit",
+                                            "value": "8",
+                                            "description": "Max results"
+                                        }
+                                    ]
+                                },
+                                "description": "Get list of simple product suggestions for autocomplete search."
+                            }
+                        },
+                        {
+                            "name": "Get Product Detail",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/shop/products/:id",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "shop",
+                                        "products",
+                                        ":id"
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "id",
+                                            "value": "1",
+                                            "description": "Product ID"
+                                        }
+                                    ]
+                                },
+                                "description": "Get full product details including media, variations, and defaults."
                             }
                         }
                     ]

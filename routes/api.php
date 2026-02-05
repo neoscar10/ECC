@@ -92,6 +92,11 @@ Route::prefix('v1')->group(function () {
         Route::get('tags/groups/{id}', [\App\Http\Controllers\Api\V1\Shop\ShopTagGroupController::class, 'show'])->name('tags.groups.show');
         Route::get('tags', [\App\Http\Controllers\Api\V1\Shop\ShopTagController::class, 'index'])->name('tags.index');
         Route::get('tags/{id}', [\App\Http\Controllers\Api\V1\Shop\ShopTagController::class, 'show'])->name('tags.show');
+        // Products
+        Route::get('products/filters', [\App\Http\Controllers\Api\V1\Shop\ShopProductController::class, 'filters'])->name('products.filters');
+        Route::get('products/suggestions', [\App\Http\Controllers\Api\V1\Shop\ShopProductController::class, 'suggestions'])->name('products.suggestions');
+        Route::get('products', [\App\Http\Controllers\Api\V1\Shop\ShopProductController::class, 'index'])->name('products.index');
+        Route::get('products/{id}', [\App\Http\Controllers\Api\V1\Shop\ShopProductController::class, 'show'])->name('products.show');
     });
 
     // Mobile Broadcasting Auth (JWT)

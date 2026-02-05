@@ -62,5 +62,6 @@ Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admi
     Route::prefix('shop')->name('shop.')->group(function () {
         Route::get('/categories', \App\Livewire\Admin\Shop\Categories\CategoriesExplorer::class)->name('categories');
         Route::get('/tags', \App\Livewire\Admin\Shop\Tags\TagsExplorer::class)->name('tags');
+        Route::get('/products', \App\Livewire\Admin\Shop\Products\Index::class)->name('products');
     });
 });

@@ -1,0 +1,29 @@
+<div class="row g-3">
+    <div class="col-6">
+        <label class="form-label">Title <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" wire:model="title" placeholder="e.g., Cricket Bat 2026">
+        @error('title') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Base Price <span class="text-danger">*</span></label>
+        <div class="input-group">
+            <span class="input-group-text">{{ $currency }}</span>
+            <input type="number" step="0.01" class="form-control" wire:model="base_price" placeholder="0.00">
+        </div>
+        @error('base_price') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+    </div>
+    
+    <div class="col-12">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" wire:model="description" rows="5" placeholder="Enter product description"></textarea>
+    </div>
+    @error('description') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+
+    <div class="col-md-6">
+        <label class="form-label">Status</label>
+        <div class="form-check form-switch form-switch-lg">
+            <input class="form-check-input" type="checkbox" id="isActiveSwitch" wire:model="is_active">
+            <label class="form-check-label" for="isActiveSwitch">Active</label>
+        </div>
+    </div>
+</div>
