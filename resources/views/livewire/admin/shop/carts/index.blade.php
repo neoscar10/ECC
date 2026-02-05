@@ -94,11 +94,11 @@
                                 </td>
                                 <td>
                                     @if($cart->is_abandoned)
-                                        <span class="badge badge-soft-danger">Abandoned</span>
+                                        <span class="text-danger">Abandoned</span>
                                     @elseif($cart->items_count == 0)
-                                        <span class="badge badge-soft-secondary">Empty</span>
+                                        <span class="text-secondary">Empty</span>
                                     @else
-                                        <span class="badge badge-soft-success">Active</span>
+                                        <span class="text-success">Active</span>
                                     @endif
                                 </td>
                                 <td>
