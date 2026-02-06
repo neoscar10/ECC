@@ -15,7 +15,14 @@
     
     <div class="col-12">
         <label class="form-label">Description</label>
-        <textarea class="form-control" wire:model="description" rows="5" placeholder="Enter product description"></textarea>
+        <x-ui.markdown-editor
+    id="product_description_md"
+    wire:model.defer="description"
+    :value="$description"
+    :editorKey="$descriptionEditorKey"
+/>
+
+
     </div>
     @error('description') <span class="text-danger text-sm">{{ $message }}</span> @enderror
 

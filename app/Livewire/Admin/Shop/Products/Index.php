@@ -41,6 +41,7 @@ class Index extends Component
     // Step 1: Basic
     public $title;
     public $description;
+    public $descriptionEditorKey = 'init'; // Forcing re-init of Markdown Editor
     public $base_price;
     public $currency = 'INR';
     public $is_active = true;
@@ -53,6 +54,7 @@ class Index extends Component
     public $selectedCategories = []; // Array of IDs
     
     // Tags
+
     public $selectedTagValueByGroup = []; // [group_id => tag_id]
     public $tagGroupSearches = []; // [group_id => 'search string']
 
@@ -309,8 +311,10 @@ class Index extends Component
         $this->resetForm();
         $this->isEditMode = false;
         $this->showCreateModal = true;
+        // Generate new key for fresh editor
+        $this->descriptionEditorKey = 'create-' . uniqid();
         $this->dispatch('show-create-modal');
-        $this->dispatch('product-desc-md:reset');
+        $this->dispatch('md:reset', id: 'product_description_md');
     }
 
     public function edit($id)
@@ -323,6 +327,9 @@ class Index extends Component
 
         $this->title = $product->title;
         $this->description = $product->description;
+        // Generate edit key
+        $this->descriptionEditorKey = 'edit-' . $id . '-' . uniqid();
+
         $this->base_price = $product->base_price;
         $this->currency = $product->currency;
         $this->is_active = $product->is_active;
@@ -385,14 +392,15 @@ class Index extends Component
 
         $this->showCreateModal = true;
         $this->dispatch('show-create-modal');
-        $this->dispatch('product-desc-md:init', description: $this->description);
+        $this->dispatch('md:set', id: 'product_description_md', value: $this->description);
     }
 
     public function closeModal()
     {
         $this->showCreateModal = false;
         $this->dispatch('hide-create-modal');
-        $this->dispatch('product-desc-md:reset');
+        $this->dispatch('md:reset', id: 'product_description_md');
+        $this->descriptionEditorKey = 'closed-' . uniqid();
     }
 
     // --- Media Logic ---
