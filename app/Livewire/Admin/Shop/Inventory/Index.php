@@ -20,17 +20,13 @@ class Index extends Component
     public $sortField = 'updated_at';
     public $sortDirection = 'desc';
 
-    public $expandedRows = [];
-    public $loadingRows = [];
-
-    // State for inline editing
-    // simpleStockValues[productId] = qty
-    public $simpleStockValues = []; 
-    
-    // variationStockValues[variationValueId] = qty
-    public $variationStockValues = [];
-
     public $lowStockThreshold = 5;
+
+    // Modal State
+    public $showAdjustModal = false;
+    public $editingProduct = null;
+    public $editingStockQty = 0; // For Simple
+    public $editingVariationStock = []; // [variation_value_id => qty]
 
     public function mount()
     {
@@ -41,80 +37,75 @@ class Index extends Component
     public function updatingFilterStatus() { $this->resetPage(); }
     public function updatingFilterType() { $this->resetPage(); }
 
-    public function toggleExpand($productId)
+    public function openAdjustStockModal($productId)
     {
-        if (in_array($productId, $this->expandedRows)) {
-            $this->expandedRows = array_diff($this->expandedRows, [$productId]);
-            unset($this->simpleStockValues[$productId]);
-            // We don't easily unset variation values without iterating, but it's fine to keep them in memory briefly or clear them.
-        } else {
-            $this->expandedRows[] = $productId;
-            $this->loadRowData($productId);
-        }
-    }
+        $this->editingProduct = ShopProduct::with(['variationGroups.values'])->findOrFail($productId);
+        
+        // Reset state
+        $this->editingStockQty = 0;
+        $this->editingVariationStock = [];
 
-    public function loadRowData($productId)
-    {
-        $product = ShopProduct::with(['variationGroups.values'])->find($productId);
-        if (!$product) return;
-
-        if ($product->variationGroups->isEmpty()) {
-            $this->simpleStockValues[$productId] = $product->stock_qty;
+        if ($this->editingProduct->variationGroups->isEmpty()) {
+            // Simple
+            $this->editingStockQty = $this->editingProduct->stock_qty ?? 0;
         } else {
-            foreach ($product->variationGroups as $group) {
+            // Variant
+            foreach ($this->editingProduct->variationGroups as $group) {
                 foreach ($group->values as $val) {
-                    $this->variationStockValues[$val->id] = $val->stock_qty;
+                    $this->editingVariationStock[$val->id] = $val->stock_qty ?? 0;
                 }
             }
         }
+
+        $this->showAdjustModal = true;
+        $this->dispatch('show-adjust-stock-modal');
     }
 
-    public function saveSimpleStock($productId)
+    public function closeAdjustStockModal()
     {
-        $this->validate([
-            "simpleStockValues.{$productId}" => 'required|integer|min:0',
-        ]);
-
-        $qty = $this->simpleStockValues[$productId];
-
-        DB::transaction(function () use ($productId, $qty) {
-            $product = ShopProduct::where('id', $productId)->lockForUpdate()->firstOrFail();
-            $product->update(['stock_qty' => $qty]);
-        });
-        
-        $this->dispatch('alert', type: 'success', message: 'Stock updated.');
+        $this->showAdjustModal = false;
+        $this->editingProduct = null;
+        $this->editingVariationStock = [];
+        $this->dispatch('hide-adjust-stock-modal');
     }
 
-    public function saveVariationStock($variationId)
+    public function saveStockAdjustment()
     {
-        $this->validate([
-            "variationStockValues.{$variationId}" => 'required|integer|min:0',
-        ]);
+        if (!$this->editingProduct) return;
 
-        $qty = $this->variationStockValues[$variationId];
+        $isVariant = $this->editingProduct->variationGroups->isNotEmpty();
 
-        DB::transaction(function () use ($variationId, $qty) {
-            $val = ShopProductVariationValue::where('id', $variationId)->lockForUpdate()->firstOrFail();
-            $val->update(['stock_qty' => $qty]);
-        }); // Parent product touch() happens automatically if relation set up, or we might need to touch parent.
-        
-        // Touch parent to update 'Last Updated'
-        $val = ShopProductVariationValue::find($variationId);
-        if($val && $val->group && $val->group->product) {
-            $val->group->product->touch();
+        if ($isVariant) {
+            $this->validate([
+                'editingVariationStock.*' => 'required|integer|min:0',
+            ]);
+
+            DB::transaction(function () {
+                foreach ($this->editingVariationStock as $id => $qty) {
+                    ShopProductVariationValue::where('id', $id)->update(['stock_qty' => $qty]);
+                }
+                $this->editingProduct->touch();
+            });
+
+        } else {
+            $this->validate([
+                'editingStockQty' => 'required|integer|min:0',
+            ]);
+
+            $this->editingProduct->update(['stock_qty' => $this->editingStockQty]);
         }
 
-        $this->dispatch('alert', type: 'success', message: 'Variation stock updated.');
+        $this->closeAdjustStockModal();
+        $this->dispatch('alert', type: 'success', message: 'Stock updated successfully.');
     }
 
     public function render()
     {
         $query = ShopProduct::query();
 
-        // 1. Eager load sum of variation stock for performance
-        // We use withSum to get 'variation_values_sum_stock_qty'.
-        // Note: variationValues is a HasManyThrough in ShopProduct model.
-        $query->withSum('variationValues', 'stock_qty');
+        // 1. Eager load sum of variation stock for performance AND count for type detection
+        $query->withSum('variationValues', 'stock_qty')
+              ->withCount('variationGroups');
 
         // 2. Search
         if ($this->search) {
@@ -131,19 +122,7 @@ class Index extends Component
             $query->has('variationGroups');
         }
 
-        // 4. Sort (Preliminary)
-        // We need to retrieve results to filter by status efficiently if we calculate status in PHP,
-        // OR we try to filter by status in SQL.
-        // SQL is better for pagination.
-        
-        // Logic for Total Stock in SQL:
-        // COALESCE(variation_values_sum_stock_qty, stock_qty, 0)
-        // Note: withSum creates `variation_values_sum_stock_qty`.
-        // ShopProduct logic: if has variants, use sum. If not, use stock_qty.
-        // But stock_qty is null for variants usually? 
-        // Let's assume: if variation_values_sum_stock_qty IS NOT NULL, use it. Else use stock_qty.
-        
-        // Add select raw for total stock to sort/filter
+        // 4. Total Stock Calculation for Sorting/Listing
         $query->addSelect(['total_computed_stock' => function ($sub) {
             $sub->selectRaw('COALESCE(
                 (SELECT SUM(stock_qty) FROM shop_product_variation_values 

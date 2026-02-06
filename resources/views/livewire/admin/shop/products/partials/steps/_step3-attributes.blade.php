@@ -25,6 +25,7 @@
                                     @endif
                                 </label>
                             </div>
+                            <hr>
                         @endforeach
                     </div>
                 @else
