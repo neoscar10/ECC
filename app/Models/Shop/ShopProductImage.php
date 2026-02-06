@@ -23,5 +23,8 @@ class ShopProductImage extends Model
         return $this->belongsTo(ShopProduct::class, 'shop_product_id');
     }
     
-    // Accessor for full URL if needed, but usually handled in resource/API
+    public function getUrlAttribute(): string
+    {
+        return \Illuminate\Support\Facades\Storage::url($this->image_path);
+    }
 }

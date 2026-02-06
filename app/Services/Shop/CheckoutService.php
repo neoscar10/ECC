@@ -122,21 +122,44 @@ class CheckoutService
                 // Lock selected variations for stock check
                 $variationIds = $item->variationValues->pluck('id')->toArray();
                 
-                // Sort IDs to prevent deadlocks if locking multiple
-                sort($variationIds); // Not strictly needed for `whereIn->lockForUpdate`, but good practice
-                
-                $lockedVariations = ShopProductVariationValue::whereIn('id', $variationIds)
-                    ->lockForUpdate()
-                    ->get();
-                
-                // Re-validate stock for EACH variation value
-                foreach ($lockedVariations as $val) {
-                    if ($val->stock_qty < $item->quantity) {
-                         throw new Exception("Insufficient stock for {$val->caption}. Requested: {$item->quantity}, Available: {$val->stock_qty}", 409);
+                if (empty($variationIds)) {
+                    // Simple Product Logic
+                    $product = $item->product()->lockForUpdate()->first();
+                    
+                    if (!$product) {
+                        throw new Exception("Product not found or unavailable.", 404);
                     }
                     
-                    // Deduct
-                    $val->decrement('stock_qty', $item->quantity);
+                    // Allow null stock_qty to mean unlimited? User prompt says "enforce tracked stock for simple products"
+                    // Assume strict enforcement based on prompt.
+                    // If stock_qty is null, we treat as 0 or error? Let's treat valid stock_qty as required.
+                    
+                    $currentStock = (int) $product->stock_qty;
+                    
+                    if ($currentStock < $item->quantity) {
+                         throw new Exception("Insufficient stock for {$product->title}. Requested: {$item->quantity}, Available: {$currentStock}", 409);
+                    }
+                    
+                    $product->decrement('stock_qty', $item->quantity);
+                    
+                } else {
+                    // Variant Product Logic
+                    // Sort IDs to prevent deadlocks if locking multiple
+                    sort($variationIds); 
+                    
+                    $lockedVariations = ShopProductVariationValue::whereIn('id', $variationIds)
+                        ->lockForUpdate()
+                        ->get();
+                    
+                    // Re-validate stock for EACH variation value
+                    foreach ($lockedVariations as $val) {
+                        if ($val->stock_qty < $item->quantity) {
+                             throw new Exception("Insufficient stock for {$val->caption}. Requested: {$item->quantity}, Available: {$val->stock_qty}", 409);
+                        }
+                        
+                        // Deduct
+                        $val->decrement('stock_qty', $item->quantity);
+                    }
                 }
 
                 $lineTotal = $item->quantity * $item->unit_price;
@@ -234,8 +257,14 @@ class CheckoutService
             $order->load(['items.variationValues']);
 
             foreach ($order->items as $item) {
-                foreach ($item->variationValues as $val) {
-                    $val->increment('stock_qty', $item->quantity);
+                if ($item->variationValues->isNotEmpty()) {
+                    foreach ($item->variationValues as $val) {
+                        $val->increment('stock_qty', $item->quantity);
+                    }
+                } else {
+                    if ($item->product) {
+                        $item->product()->increment('stock_qty', $item->quantity);
+                    }
                 }
             }
 
@@ -244,6 +273,51 @@ class CheckoutService
                 'cancelled_at' => now(),
                 'notes' => $order->notes . "\n[Cancelled: $reason]",
             ]);
+
+            return $order;
+        });
+    }
+
+    /**
+     * Admin Force Cancel (Allows cancelling paid orders).
+     */
+    public function adminCancelOrder(ShopOrder $order, string $reason): ShopOrder
+    {
+        if (in_array($order->status, ['cancelled', 'delivered', 'returned'])) {
+             // Maybe allow cancelling 'processing'/'packed'/'shipped' but definitely not if already cancelled or returned.
+             // Delivered? Usually implies return flow, but we can stick to 'cancelled' status check.
+             if ($order->status === 'cancelled') return $order;
+        }
+
+        return DB::transaction(function () use ($order, $reason) {
+            $order->load(['items.variationValues']);
+
+            // Restore Stock
+            // Restore Stock
+            foreach ($order->items as $item) {
+                if ($item->variationValues->isNotEmpty()) {
+                    foreach ($item->variationValues as $val) {
+                        $val->increment('stock_qty', $item->quantity);
+                    }
+                } else {
+                     if ($item->product) {
+                        $item->product()->increment('stock_qty', $item->quantity);
+                    }
+                }
+            }
+
+            $updateData = [
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+                'notes' => $order->notes . "\n[Admin Cancelled: $reason]",
+            ];
+
+            // If paid, mark as refunded for simple tracking (mock refund)
+            if ($order->payment_status === 'paid') {
+                $updateData['payment_status'] = 'refunded';
+            }
+
+            $order->update($updateData);
 
             return $order;
         });

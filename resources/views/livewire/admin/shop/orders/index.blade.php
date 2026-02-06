@@ -20,48 +20,47 @@
     {{-- Main Card --}}
     <div class="card">
         <div class="card-header border-0">
-            <div class="row g-4">
-                <div class="col-sm-auto">
-                    {{-- Actions if needed --}}
-                </div>
-                <div class="col-sm">
-                    <div class="d-flex justify-content-sm-end">
-                        <div class="search-box ms-2">
-                            <input type="text" class="form-control" wire:model.live.debounce.300ms="search" placeholder="Search Orders...">
-                            <i class="ri-search-line search-icon"></i>
-                        </div>
+            <div class="row g-2">
+                {{-- Filters & Search in one row --}}
+                <div class="col-lg-3">
+                    <div class="search-box">
+                        <input type="text" class="form-control search" wire:model.live.debounce.300ms="search" placeholder="Search Orders...">
+                        <i class="ri-search-line search-icon"></i>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="card-body">
-            {{-- Filters --}}
-            <div class="row g-3 mb-4">
-                <div class="col-md-3">
+                <div class="col-lg-2">
                     <select class="form-select" wire:model.live="filterStatus">
-                        <option value="">All Statuses</option>
-                        <option value="pending_payment">Pending Payment</option>
-                        <option value="paid">Paid</option>
+                        <option value="">All Fulfillment</option>
+                        <option value="placed">Placed</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="processing">Processing</option>
+                        <option value="packed">Packed</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
                         <option value="cancelled">Cancelled</option>
-                        <option value="fulfilled">Fulfilled</option>
-                        <option value="failed">Failed</option>
+                        <option value="returned">Returned</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg-2">
                     <select class="form-select" wire:model.live="filterPaymentStatus">
-                        <option value="">All Payment Statuses</option>
+                        <option value="">All Payment</option>
                         <option value="unpaid">Unpaid</option>
+                        <option value="pending">Pending</option>
                         <option value="paid">Paid</option>
                         <option value="failed">Failed</option>
                         <option value="refunded">Refunded</option>
                     </select>
                 </div>
+                <div class="col-auto ms-auto">
+                    {{-- Optional Actions like Export can go here --}}
+                </div>
             </div>
+        </div>
 
+        <div class="card-body pt-0">
             {{-- Table --}}
             <div class="table-responsive table-card mb-1">
-                <table class="table align-middle table-nowrap">
+                <table class="table table-nowrap align-middle">
                     <thead class="table-light text-muted">
                         <tr>
                             <th>Order ID</th>
@@ -78,13 +77,12 @@
                             <tr>
                                 <td><a href="{{ route('admin.shop.orders.show', $order->id) }}" class="fw-medium link-primary">{{ $order->order_number }}</a></td>
                                 <td>
-                                    @if($order->user)
-                                        <div class="d-flex align-items-center">
-                                            <div class="flex-grow-1">{{ $order->user->name }}</div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h5 class="fs-14 mb-1">{{ $order->user->name ?? 'Guest' }}</h5>
+                                            <p class="text-muted mb-0">{{ $order->user->email ?? '' }}</p>
                                         </div>
-                                    @else
-                                        <span class="text-muted">Unknown User</span>
-                                    @endif
+                                    </div>
                                 </td>
                                 <td>
                                     {{ $order->placed_at ? $order->placed_at->format('d M Y, h:i A') : '-' }}
@@ -96,31 +94,36 @@
                                     @php
                                         $pymtClass = match($order->payment_status) {
                                             'paid' => 'success',
-                                            'unpaid' => 'warning',
+                                            'pending' => 'warning text-dark',
                                             'failed' => 'danger',
                                             'refunded' => 'info',
                                             default => 'secondary'
                                         };
                                     @endphp
-                                    <span class="badge badge-soft-{{ $pymtClass }} text-uppercase">{{ str_replace('_', ' ', $order->payment_status) }}</span>
+                                    <span class="badge bg-{{ $pymtClass }}">{{ ucfirst($order->payment_status) }}</span>
                                 </td>
                                 <td>
                                     @php
                                         $statusClass = match($order->status) {
-                                            'fulfilled' => 'success',
-                                            'paid' => 'info',
-                                            'pending_payment' => 'warning',
-                                            'cancelled' => 'danger',
-                                            'failed' => 'dark',
+                                            'delivered', 'fulfilled' => 'success',
+                                            'shipped' => 'warning text-dark',
+                                            'packed', 'processing', 'confirmed' => 'info',
+                                            'cancelled', 'returned' => 'danger',
                                             default => 'secondary'
                                         };
                                     @endphp
-                                    <span class="badge badge-soft-{{ $statusClass }} text-uppercase">{{ str_replace('_', ' ', $order->status) }}</span>
+                                    <span class="badge bg-{{ $statusClass }}">{{ ucfirst($order->status) }}</span>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.shop.orders.show', $order->id) }}" class="btn btn-sm btn-soft-primary">
-                                        View
-                                    </a>
+                                    <div class="dropdown d-inline-block">
+                                        <button class="btn btn-soft-secondary btn-sm dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="ri-more-fill align-middle"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a href="{{ route('admin.shop.orders.show', $order->id) }}" class="dropdown-item"><i class="ri-eye-fill align-bottom me-2 text-muted"></i> View</a></li>
+                                            <li><a href="#" wire:click.prevent="openStatusModal({{ $order->id }})" class="dropdown-item"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Manage Status</a></li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -144,4 +147,56 @@
             </div>
         </div>
     </div>
+
+    {{-- Status Modal --}}
+    @if($showStatusModal)
+    <div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Order Status</h5>
+                    <button type="button" class="btn-close" wire:click="closeStatusModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 p-3 bg-light rounded">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-medium">Order: {{ $selectedOrderNumber }}</span>
+                            <span class="text-muted">{{ $selectedOrderCustomer }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Payment Status</label>
+                        <select class="form-select" wire:model="paymentStatusDraft">
+                            <option value="unpaid">Unpaid</option>
+                            <option value="pending">Pending</option>
+                            <option value="paid">Paid</option>
+                            <option value="failed">Failed</option>
+                            <option value="refunded">Refunded</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Fulfillment Status</label>
+                        <select class="form-select" wire:model="statusDraft">
+                            <option value="placed">Placed</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="processing">Processing</option>
+                            <option value="packed">Packed</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="returned">Returned</option>
+                        </select>
+                        <div class="form-text text-muted">Change order progress manually. Does not trigger stock restoration if cancelled.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" wire:click="closeStatusModal">Cancel</button>
+                    <button type="button" class="btn btn-primary" wire:click="saveStatus">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

@@ -16,9 +16,63 @@ class Index extends Component
     public $filterStatus = '';
     public $filterPaymentStatus = '';
 
+    // Modal State
+    public $showStatusModal = false;
+    public $selectedOrderId = null;
+    public $statusDraft = '';
+    public $paymentStatusDraft = '';
+    public $selectedOrderNumber = '';
+    public $selectedOrderCustomer = '';
+
     public function updatingSearch()
     {
         $this->resetPage();
+    }
+
+    public function openStatusModal($orderId)
+    {
+        $order = ShopOrder::with('user')->findOrFail($orderId);
+        $this->selectedOrderId = $order->id;
+        $this->statusDraft = $order->status;
+        $this->paymentStatusDraft = $order->payment_status;
+        $this->selectedOrderNumber = $order->order_number;
+        $this->selectedOrderCustomer = $order->user->name ?? 'Guest';
+        $this->showStatusModal = true;
+    }
+
+    public function closeStatusModal()
+    {
+        $this->showStatusModal = false;
+        $this->reset('selectedOrderId', 'statusDraft', 'paymentStatusDraft', 'selectedOrderNumber', 'selectedOrderCustomer');
+    }
+
+    public function saveStatus()
+    {
+        $this->validate([
+            'statusDraft' => 'required|in:placed,confirmed,processing,packed,shipped,delivered,cancelled,returned',
+            'paymentStatusDraft' => 'required|in:unpaid,pending,paid,failed,refunded',
+        ]);
+
+        $order = ShopOrder::findOrFail($this->selectedOrderId);
+        
+        $order->update([
+            'status' => $this->statusDraft,
+            'payment_status' => $this->paymentStatusDraft,
+        ]);
+
+        // Side effects
+        if ($this->paymentStatusDraft === 'paid' && !$order->paid_at) {
+            $order->update(['paid_at' => now()]);
+        }
+        
+        // Note: Simple update does not handle stock restoration if cancelled here.
+        // We rely on the Detail page for full cancellation flow logic if needed, 
+        // or we could add a warning in the modal that this is a simple status override.
+        // For Index page "quick status", simple override is often standard behavior, 
+        // but let's stick to simple update as requested to minimal change.
+
+        session()->flash('success', 'Order status updated successfully.');
+        $this->closeStatusModal();
     }
 
     public function render()

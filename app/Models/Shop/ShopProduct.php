@@ -18,6 +18,7 @@ class ShopProduct extends Model
         'slug',
         'description',
         'base_price',
+        'stock_qty',
         'currency',
         'is_active',
         'computed_min_price',
@@ -27,6 +28,7 @@ class ShopProduct extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'base_price' => 'decimal:2',
+        'stock_qty' => 'integer',
         'computed_min_price' => 'decimal:2',
         'computed_max_price' => 'decimal:2',
     ];
@@ -81,5 +83,38 @@ class ShopProduct extends Model
             // OR products that have NO variation groups (Simple products, assumed infinite stock)
             ->orWhereDoesntHave('variationGroups');
         });
+    }
+
+    // --- Accessors ---
+
+    public function getComputedStockAttribute(): int
+    {
+        // 1. Simple Product
+        if ($this->relationLoaded('variationGroups') && $this->variationGroups->isEmpty()) {
+            return (int) $this->stock_qty;
+        }
+        
+        // If relations not loaded (fallback), we assume simple if stock_qty is set? 
+        // Safer to rely on the eager load which we will enforce in Index.
+        if (!$this->relationLoaded('variationGroups')) {
+             return (int) $this->stock_qty; 
+        }
+
+        // 2. Variable Product
+        // Effective Stock = MIN( Sum of stock for each group )
+        // e.g. Group A has 10 total, Group B has 100 total. We can only sell 10 units.
+        
+        $minGroupStock = null;
+        
+        foreach ($this->variationGroups as $group) {
+            // Ensure values are loaded or lazy load
+            $currentGroupStock = $group->values->sum('stock_qty');
+            
+            if ($minGroupStock === null || $currentGroupStock < $minGroupStock) {
+                $minGroupStock = $currentGroupStock;
+            }
+        }
+        
+        return (int) ($minGroupStock ?? 0);
     }
 }

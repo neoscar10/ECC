@@ -953,6 +953,9 @@
                                         <a href="{{ route('admin.shop.products') }}" class="nav-link {{ request()->routeIs('admin.shop.products') ? 'active' : '' }}" data-key="t-shop-products">Products</a>
                                     </li>
                                     <li class="nav-item">
+                                        <a href="{{ route('admin.shop.inventory') }}" class="nav-link {{ request()->routeIs('admin.shop.inventory') ? 'active' : '' }}" data-key="t-shop-inventory">Inventory</a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a href="{{ route('admin.shop.carts') }}" class="nav-link {{ request()->routeIs('admin.shop.carts') ? 'active' : '' }}" data-key="t-shop-carts">Carts</a>
                                     </li>
                                     <li class="nav-item">

@@ -65,6 +65,7 @@
                             <th>Product</th>
                             <th>Categories</th>
                             <th>Tags</th>
+                            <th>Stock</th>
                             <th>Price</th>
                             <th>Status</th>
                             <th>Action</th>
@@ -91,19 +92,38 @@
                                 </td>
                                 <td>
                                     @foreach($product->categories as $cat)
-                                        <span class="badge badge-soft-info text-info">{{ $cat->name }}</span>
+                                        <span class="badg-info text-info">{{ $cat->name }}</span>
                                     @endforeach
                                 </td>
                                 <td>
                                     @foreach($product->tags as $tag)
-                                        <span class="badge badge-soft-secondary text-secondary">{{ $tag->name }}</span>
+                                        <span class="badge badge-secondary text-secondary">{{ $tag->name }}</span>
                                     @endforeach
+                                </td>
+                                <td>
+                                    @php
+                                        $stock = $product->computed_stock;
+                                        $isLow = $stock > 0 && $stock <= 10;
+                                        $isOut = $stock === 0;
+                                        $badgeClass = $isOut ? 'bg-danger' : ($isLow ? 'bg-warning text-dark' : 'bg-success');
+                                        $stockLabel = $isOut ? 'Out of Stock' : ($isLow ? 'Low Stock' : 'In Stock');
+                                    @endphp
+                                    
+                                    <div>
+                                        <span class="badge {{ $badgeClass }}">{{ $stockLabel }}</span>
+                                        <div class="mt-1 small">
+                                            <span class="fw-semibold">{{ $stock }}</span> units
+                                            @if($product->variation_groups_count > 0)
+                                                <span class="text-muted ms-1" title="Effective stock based on variations">(Var)</span>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
                                     <span class="text-body fw-medium">{{ $product->currency }} {{ number_format($product->base_price, 2) }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge badge-soft-{{ $product->is_active ? 'success' : 'danger' }}">
+                                    <span class="badge text-{{ $product->is_active ? 'success' : 'danger' }}">
                                         {{ $product->is_active ? 'Active' : 'Inactive' }}
                                     </span>
                                 </td>
@@ -118,6 +138,13 @@
                                                     <i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Edit
                                                 </button>
                                             </li>
+                                            @if($product->variation_groups_count > 0)
+                                            <li>
+                                                <button class="dropdown-item" wire:click="openVariationsOnly({{ $product->id }})">
+                                                    <i class="ri-layout-grid-line align-bottom me-2 text-muted"></i> Variations
+                                                </button>
+                                            </li>
+                                            @endif
                                             <div class="dropdown-divider"></div>
                                             <li>
                                                 <a class="dropdown-item remove-item-btn" href="javascript:void(0);">

@@ -2,11 +2,18 @@
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="createProductModalLabel">{{ $isEditMode ? 'Edit Product' : 'Add Product' }}</h5>
+                <h5 class="modal-title" id="createProductModalLabel">
+                    @if($variationsOnlyMode)
+                        Manage Variations
+                    @else
+                        {{ $isEditMode ? 'Edit Product' : 'Add Product' }}
+                    @endif
+                </h5>
                 <button type="button" class="btn-close" wire:click="closeModal" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- Stepper Navigation -->
+                @if(!$variationsOnlyMode)
                 <div class="shop-product-stepper mb-5">
                     <div class="sp-stepper d-flex justify-content-between position-relative">
                         <!-- Step 1: Basic -->
@@ -51,6 +58,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -105,25 +113,32 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" wire:click="closeModal" data-bs-dismiss="modal">Cancel</button>
-                <div class="d-flex gap-2">
-                    @if($createStep > 1)
-                        <button type="button" class="btn btn-light" wire:click="$set('createStep', {{ $createStep - 1 }})">Back</button>
-                    @endif
+                
+                @if($variationsOnlyMode)
+                     <button type="button" class="btn btn-success" wire:click="saveVariationsOnly">
+                        <i class="ri-save-line align-bottom me-1"></i> Save Changes
+                    </button>
+                @else
+                    <div class="d-flex gap-2">
+                        @if($createStep > 1)
+                            <button type="button" class="btn btn-light" wire:click="$set('createStep', {{ $createStep - 1 }})">Back</button>
+                        @endif
 
-                    @if($isEditMode)
-                        <button type="button" class="btn btn-success" wire:click="updateProduct">
-                            <i class="ri-save-line align-bottom me-1"></i> Save Changes
-                        </button>
-                    @endif
+                        @if($isEditMode)
+                            <button type="button" class="btn btn-success" wire:click="updateProduct">
+                                <i class="ri-save-line align-bottom me-1"></i> Save Changes
+                            </button>
+                        @endif
 
-                    @if($createStep < 5)
-                        <button type="button" class="btn btn-primary" wire:click="$set('createStep', {{ $createStep + 1 }})">Next</button>
-                    @else
-                        <button type="submit" form="productForm" class="btn btn-success">
-                            {{ $isEditMode ? 'Update' : 'Create' }}
-                        </button>
-                    @endif
-                </div>
+                        @if($createStep < 5)
+                            <button type="button" class="btn btn-primary" wire:click="$set('createStep', {{ $createStep + 1 }})">Next</button>
+                        @else
+                            <button type="submit" form="productForm" class="btn btn-success">
+                                {{ $isEditMode ? 'Update' : 'Create' }}
+                            </button>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
     </div>

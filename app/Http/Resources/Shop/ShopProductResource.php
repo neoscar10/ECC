@@ -24,6 +24,8 @@ class ShopProductResource extends JsonResource
             'short_description' => Str::limit(strip_tags($this->description), 100),
             'currency' => $this->currency,
             'base_price' => number_format($this->base_price, 2, '.', ''),
+            'stock_qty' => $this->relationLoaded('variationGroups') && $this->variationGroups->isNotEmpty() ? null : $this->stock_qty,
+            'is_active' => (bool)$this->is_active,
 
             'primary_image' => $primaryImage ? [
                 'url' => url('storage/' . $primaryImage->image_path),

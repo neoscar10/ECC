@@ -33,6 +33,7 @@ class Index extends Component
     // Modal States
     public $showCreateModal = false;
     public $isEditMode = false;
+    public $variationsOnlyMode = false;
     public $productId;
 
     // --- Form Fields ---
@@ -56,6 +57,10 @@ class Index extends Component
     public $tagGroupSearches = []; // [group_id => 'search string']
 
     // Step 3: Variations & Images
+    public $has_variants = false;
+    public $variantsLocked = false;
+    public $stock_qty; 
+
     public $variationGroups = []; 
     // Structure with Gallery Images:
     // [
@@ -96,7 +101,14 @@ class Index extends Component
     public function render()
     {
         $products = ShopProduct::query()
-            ->with(['categories', 'tags', 'images'])
+            ->with([
+                'categories', 
+                'tags', 
+                'images',
+                'variationGroups' => fn($q) => $q->select('id', 'shop_product_id'),
+                'variationGroups.values' => fn($q) => $q->select('id', 'group_id', 'stock_qty')
+            ])
+            ->withCount('variationGroups')
             ->when($this->search, fn($q) => $q->where('title', 'like', '%'.$this->search.'%'))
             ->when($this->filterCategory, function($q) {
                 $q->whereHas('categories', fn($c) => $c->where('id', $this->filterCategory));
@@ -314,6 +326,14 @@ class Index extends Component
         $this->base_price = $product->base_price;
         $this->currency = $product->currency;
         $this->is_active = $product->is_active;
+
+        // Simple Stock Logic
+        $this->stock_qty = $product->stock_qty;
+        // If it has groups, it has variants.
+        // If it has no groups, it might be a new simple product or an old product with no variants.
+        // We set toggle accordingly.
+        $this->has_variants = $product->variationGroups()->exists(); // Logic: defined by existence of groups
+        $this->variantsLocked = $this->has_variants; // Lock if coming from DB with variants
 
         $this->selectedCategories = $product->categories->pluck('id')->toArray();
         
@@ -591,6 +611,10 @@ class Index extends Component
             'selectedCategories' => 'required|array|min:1',
         ]);
 
+        if (!$this->has_variants) {
+             $this->validate(['stock_qty' => 'required|integer|min:0']);
+        }
+
         DB::transaction(function () {
             // 1. Create Product
             $product = ShopProduct::create([
@@ -600,6 +624,7 @@ class Index extends Component
                 'base_price' => $this->base_price,
                 'currency' => $this->currency,
                 'is_active' => $this->is_active,
+                'stock_qty' => $this->has_variants ? null : $this->stock_qty,
             ]);
 
             // 2. Attach Categories
@@ -688,6 +713,14 @@ class Index extends Component
         $this->activeVariationValueIndex = null;
         
         $this->createStep = 1;
+        
+        $this->createStep = 1;
+        
+        $this->has_variants = false;
+        $this->variantsLocked = false;
+        $this->stock_qty = null;
+        
+        $this->variationsOnlyMode = false;
     }
 
     // --- Update / Edit Mode Logic ---
@@ -729,6 +762,10 @@ class Index extends Component
             'base_price' => 'required|numeric|min:0',
             'selectedCategories' => 'required|array|min:1',
         ]);
+
+        if (!$this->has_variants) {
+             $this->validate(['stock_qty' => 'required|integer|min:0']);
+        }
 
         $product = ShopProduct::findOrFail($this->productId);
 
@@ -800,6 +837,14 @@ class Index extends Component
 
     private function saveVariations(ShopProduct $product)
     {
+        if (!$this->has_variants) {
+            $this->validate(['stock_qty' => 'required|integer|min:0']);
+            $product->update(['stock_qty' => $this->stock_qty]);
+            return; // No variations to save
+        } else {
+            // Force null if has variants
+            $product->update(['stock_qty' => null]);
+        }
         // Full replacement of variations logic is complex because of IDs.
         // Strategy: Process changes. 
         // For simplicity in this "Minimal Logic" update: 
@@ -916,5 +961,43 @@ class Index extends Component
             // Model doesn't seem to have SoftDeletes on Values (only Product).
             // I'll leave "orphans" for now to adhere strictly to "No DB Deletes" (safer).
         }
+    }
+
+    public function openVariationsOnly($id)
+    {
+        $this->resetForm();
+        $this->edit($id); // Load all data
+        
+        $this->variationsOnlyMode = true;
+        $this->createStep = 4; // Force validation/view to Step 4 context
+        
+        $this->dispatch('show-create-modal');
+    }
+
+    public function saveVariationsOnly()
+    {
+        // Validation logic - similar to store/update but focused
+        if (!$this->has_variants) {
+             $this->validate(['stock_qty' => 'required|integer|min:0']);
+        }
+        
+        $product = ShopProduct::findOrFail($this->productId);
+
+        DB::transaction(function () use ($product) {
+            
+            // 1. Save "Stock Qty" if simple (and ensure it is nulled if not)
+            if (!$this->has_variants) {
+                $product->update(['stock_qty' => $this->stock_qty]);
+            } else {
+                 $product->update(['stock_qty' => null]);
+            }
+
+            // 2. Save Variations
+            // We can reuse saveVariations($product) from the class.
+            $this->saveVariations($product);
+        });
+
+        $this->closeModal();
+        $this->dispatch('alert', type: 'success', message: 'Variations updated successfully.');
     }
 }
