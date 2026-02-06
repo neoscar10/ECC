@@ -326,7 +326,7 @@ class CheckoutService
     private function generateOrderNumber(): string
     {
         // Format: SHP-YYYYMMDD-XXXX
-        $prefix = 'SHP-' . now()->format('Ymd') . '-';
+        $prefix = 'ECC-' . now()->format('Ymd') . '-';
         $random = strtoupper(\Illuminate\Support\Str::random(6));
         return $prefix . $random;
         // In high volume, check uniqueness.
