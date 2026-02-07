@@ -37,12 +37,17 @@
                 <div class="text-muted fs-12">Starting price: {{ $lot->currency }} {{ number_format($lot->starting_price) }}</div>
             @endif
 
-            @if($lot->status === 'live')
+            @if($lot->status === 'live' || $lot->status === 'upcoming')
                 <div class="mt-3">
-                    <small class="text-muted text-uppercase fw-bold mb-2 d-block">Time Remaining</small>
+                    <small id="countdownLabel" class="text-muted text-uppercase fw-bold mb-2 d-block">
+                        {{ $lot->status === 'upcoming' ? 'Starts In' : 'Time Remaining' }}
+                    </small>
                     <div class="d-inline-block">
                         <div class="badge bg-danger-subtle text-danger fs-15 py-2 px-4 shadow-sm" wire:ignore>
-                            <div id="auctionCountdown" class="d-flex align-items-center justify-content-center" data-end-at="{{ $lot->ends_at?->toIso8601String() }}">
+                            <div id="auctionCountdown" 
+                                 class="d-flex align-items-center justify-content-center" 
+                                 data-starts-at="{{ $lot->starts_at?->toIso8601String() }}"
+                                 data-end-at="{{ $lot->ends_at?->toIso8601String() }}">
                                 <i class="ri-time-line align-middle me-2"></i>
                                 <span class="fw-bold">Calculating...</span>
                             </div>

@@ -7,28 +7,77 @@
     function updateCountdowns() {
         if (!timerEl) return; 
 
+        const startsAtStr = timerEl.getAttribute('data-starts-at');
         const endsAtStr = timerEl.getAttribute('data-end-at');
-        if (!endsAtStr) return;
+        
+        // If neither exists, we can't count
+        if (!endsAtStr && !startsAtStr) return;
 
-        const end = new Date(endsAtStr).getTime();
         const now = new Date().getTime();
-        const diff = end - now;
+        
+        let target = null;
+        let mode = 'end'; // default
 
-        if (diff <= 0) {
-            if (timerEl.innerHTML.indexOf('Ended') === -1) {
-                timerEl.innerHTML = '<span class="text-muted text-uppercase fw-bold">Ended</span>';
-                // Dispatch event to Livewire only ONCE when it hits zero
-                if (!window.__eccAuctionEndedDispatched) {
-                    window.__eccAuctionEndedDispatched = true;
-                    console.log('Dispatching auction-countdown-ended');
-                    Livewire.dispatch('auction-countdown-ended');
-                    // Also generic refresh to ensure status badges update
-                    setTimeout(() => Livewire.dispatch('refresh-panels'), 1000); 
-                }
+        // 1. Check if we are before start
+        if (startsAtStr) {
+            const start = new Date(startsAtStr).getTime();
+            if (now < start) {
+                target = start;
+                mode = 'start';
             }
-            return;
         }
-        // Reset flag if time is extended
+
+        // 2. If not starting, checking if we are before end
+        if (!target && endsAtStr) {
+            const end = new Date(endsAtStr).getTime();
+            target = end;
+            mode = 'end';
+        }
+
+        // 3. Update Label if it exists
+        const labelEl = document.getElementById('countdownLabel');
+        if (labelEl) {
+            if (mode === 'start') labelEl.innerText = 'Starts In';
+            else if (mode === 'end') labelEl.innerText = 'Time Remaining';
+        }
+
+        // 4. Calculate Diff
+        // If we have a target, diff is target - now.
+        // If no target (implying invalid data?), or if we are in 'end' mode and passed it, we handle finish.
+        
+        if (!target) return; // Should not happen if data is valid
+
+        const diff = target - now;
+
+        // 5. Check lifecycle ends
+        if (diff <= 0) {
+            // A) If we were counting to START, we just let the next tick pick up the END target.
+            //    But to avoid 1-second flicker of "00s", we can return immediately to let next tick run.
+            if (mode === 'start') {
+                return; 
+            }
+
+            // B) If we were counting to END, then it is truly ended.
+            if (mode === 'end') {
+                if (timerEl.innerHTML.indexOf('Ended') === -1) {
+                    timerEl.innerHTML = '<span class="text-muted text-uppercase fw-bold">Ended</span>';
+                    
+                    if (labelEl) labelEl.innerText = 'Status';
+
+                    // Dispatch event to Livewire only ONCE when it hits zero
+                    if (!window.__eccAuctionEndedDispatched) {
+                        window.__eccAuctionEndedDispatched = true;
+                        console.log('Dispatching auction-countdown-ended');
+                        Livewire.dispatch('auction-countdown-ended');
+                        // Also generic refresh to ensure status badges update
+                        setTimeout(() => Livewire.dispatch('refresh-panels'), 1000); 
+                    }
+                }
+                return;
+            }
+        }
+        
+        // Reset flag if time is extended or we are just running normal
         window.__eccAuctionEndedDispatched = false;
 
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -41,6 +90,7 @@
             display = `<span class="fw-bold">${days}d</span> <span class="fw-medium">${hours}h ${minutes}m ${seconds}s</span>`;
         } else {
             // Highlight hours if less than 24h
+            // If mode is start, maybe nice validation color? Keep standard for now.
             const colorClass = hours < 1 ? 'text-danger' : 'text-dark';
             display = `<span class="fw-bold ${colorClass}">${hours}h ${minutes}m ${seconds}s</span>`;
         }
