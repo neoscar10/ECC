@@ -27,6 +27,9 @@ Route::prefix('v1')->group(function () {
              // OTP
              Route::post('request-otp', [\App\Http\Controllers\Api\V1\PhoneVerificationController::class, 'requestOtp']);
              Route::post('verify-otp', [\App\Http\Controllers\Api\V1\PhoneVerificationController::class, 'verifyOtp']);
+
+             // Password Change
+             Route::post('change-password', [AuthController::class, 'changePassword']);
         });
     });
 

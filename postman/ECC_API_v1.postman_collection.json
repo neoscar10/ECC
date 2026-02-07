@@ -542,6 +542,68 @@
                             "body": "{\n    \"success\": false,\n    \"message\": \"Validation Error\",\n    \"data\": null,\n    \"meta\": null,\n    \"errors\": {\n        \"password\": [\"The password confirmation does not match.\"]\n    }\n}"
                         }
                     ]
+                },
+                {
+                    "name": "08 Change Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"current_password\": \"password\",\n    \"password\": \"NewPass123!\",\n    \"password_confirmation\": \"NewPass123!\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/auth/change-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "auth",
+                                "change-password"
+                            ]
+                        },
+                        "description": "Change the authenticated user's password.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Body:**\n- `current_password` (Required)\n- `password` (Required, Min 8, Confirmed)\n- `password_confirmation` (Required)"
+                    },
+                    "response": [
+                        {
+                            "name": "Success (200)",
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n    \"success\": true,\n    \"message\": \"Password changed successfully\",\n    \"data\": null,\n    \"meta\": null,\n    \"errors\": null\n}"
+                        },
+                        {
+                            "name": "Validation Error (422)",
+                            "status": "Unprocessable Content",
+                            "code": 422,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n    \"success\": false,\n    \"message\": \"The provided current password does not match your actual password.\",\n    \"data\": null,\n    \"meta\": null,\n    \"errors\": {\n        \"current_password\": [\n            \"The provided current password does not match your actual password.\"\n        ]\n    }\n}"
+                        }
+                    ]
                 }
             ]
         },

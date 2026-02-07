@@ -156,6 +156,41 @@ class AuthController extends Controller
     }
 
     /**
+     * Change the authenticated user's password.
+     */
+    public function changePassword(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required',
+            'password' => 'required|string|min:8|confirmed',
+            'password_confirmation' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error('Validation Error', 422, $validator->errors());
+        }
+
+        $user = auth('api')->user();
+
+        // 1. Verify Current Password
+        if (!Hash::check($request->current_password, $user->password)) {
+             return $this->error('The provided current password does not match your actual password.', 422, [
+                 'current_password' => ['The provided current password does not match your actual password.']
+             ]);
+        }
+
+        // 2. Update Password
+        $user->forceFill([
+            'password' => Hash::make($request->password)
+        ])->setRememberToken(\Illuminate\Support\Str::random(60));
+
+        $user->save();
+
+        // 3. Return Success (Token remains valid)
+        return $this->success(null, 'Password changed successfully');
+    }
+
+    /**
      * Get the token array structure.
      */
     protected function respondWithToken(string $token, $user = null, $application = null): JsonResponse
