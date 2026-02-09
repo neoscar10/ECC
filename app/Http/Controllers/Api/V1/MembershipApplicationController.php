@@ -32,32 +32,34 @@ class MembershipApplicationController extends Controller
         $application = $this->getApplicationOr404($id, $request->user());
 
         $validator = Validator::make($request->all(), [
-            'full_name' => 'required|string',
-            'date_of_birth' => 'required|date',
-            'country' => 'required|string',
-            'city' => 'required|string',
+            'full_name' => 'required|string|max:255',
+            'date_of_birth' => 'required|date|before:today',
+            'country' => 'required|string|max:100',
+            'city' => 'required|string|max:100',
         ]);
 
         if ($validator->fails()) {
             return $this->error('Validation Error', 422, $validator->errors());
         }
 
-        // Update User
-        $user = $request->user();
-        $user->update([
-            'full_name' => $request->full_name,
-            'date_of_birth' => $request->date_of_birth,
-            'country' => $request->country,
-            'city' => $request->city,
-        ]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request, $application) {
+            // Update User
+            $user = $request->user();
+            $user->update([
+                'full_name' => $request->full_name,
+                'date_of_birth' => $request->date_of_birth,
+                'country' => $request->country,
+                'city' => $request->city,
+            ]);
 
-        // Update Application
-        $application->update([
-            'personal_details_json' => $request->all(),
-            'current_step' => 'cricket_profile'
-        ]);
+            // Update Application
+            $application->update([
+                'personal_details_json' => $request->all(),
+                'current_step' => 'cricket_profile'
+            ]);
+        });
 
-        return $this->success($application, 'Personal details saved.');
+        return $this->success($application->fresh(), 'Personal details saved.');
     }
 
     public function saveCricketProfile(Request $request, $id): JsonResponse
