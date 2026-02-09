@@ -639,7 +639,7 @@
                     "response": []
                 },
                 {
-                    "name": "Update Profile",
+                    "name": "Update Profile ",
                     "request": {
                         "method": "PATCH",
                         "header": [
