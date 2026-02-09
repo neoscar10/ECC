@@ -610,7 +610,59 @@ List active auctions.
 }
 ```
 
-#### 2. Get Auction Details
+```
+
+#### 2. Get Auction Dossier
+`GET /auctions/dossier`
+
+Retrieve a paginated list of auctions the user has participated in, including status (Leading, Outbid, Won).
+
+| Param | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `per_page` | int | 10 | Pagination limit. |
+
+**Success (200):**
+```json
+{
+    "data": [
+        {
+            "auction_id": 1,
+            "lot_no": "2026-001",
+            "title": "Signed Bat",
+            "image_url": "https://...",
+            "auction_status": "live",
+            "dossier_status": "leading",
+            "my_max_bid": {
+                "amount": "50000.00",
+                "currency": "INR"
+            },
+            "current_bid": {
+                "amount": "50000.00",
+                "currency": "INR"
+            },
+            "hammer_price": null,
+            "sale": {
+                "is_recorded": false,
+                "winner_user_id": 123,
+                "payment_status": "na",
+                "payment_status_label": null
+            },
+            "labels": {
+                "top_right": "LEADING",
+                "line_1": "Current: ₹50,000",
+                "line_2": null
+            },
+            "deep_link": {
+                "type": "auction_detail",
+                "id": 1
+            }
+        }
+    ],
+    "meta": { ... }
+}
+```
+
+#### 3. Get Auction Details
 `GET /auctions/{id}`
 
 Get full details including bids and attachments.

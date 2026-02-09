@@ -1732,6 +1732,42 @@
                     "name": "Lots",
                     "item": [
                         {
+                            "name": "Get Auction Dossier",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/auctions/dossier?per_page=10",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "auctions",
+                                        "dossier"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "per_page",
+                                            "value": "10",
+                                            "description": "Pagination limit"
+                                        }
+                                    ]
+                                },
+                                "description": "Retrieve a paginated list of auctions the user has participated in, including detailed status (Leading, Outbid, Won)."
+                            },
+                            "response": []
+                        },
+                        {
                             "name": "List Lots",
                             "request": {
                                 "method": "GET",
