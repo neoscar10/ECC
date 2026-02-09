@@ -610,8 +610,6 @@ List active auctions.
 }
 ```
 
-```
-
 #### 2. Get Auction Dossier
 `GET /auctions/dossier`
 
@@ -792,6 +790,121 @@ Cancel active auto-bid.
 
 **Auth Endpoint:** `POST /broadcasting/auth`
 Standard Pusher auth. Requires Bearer Token. Send `socket_id` and `channel_name`.
+
+---
+
+## Profile
+
+### Get Profile
+
+**Endpoint:** `GET /api/v1/profile`
+**Headers:**
+- `Authorization: Bearer <token>`
+- `Accept: application/json`
+
+**Response:**
+```json
+{
+    "success": true,
+    "message": "Profile retrieved successfully.",
+    "data": {
+        "user": {
+            "id": 1,
+            "name": "John Doe",
+            "full_name": "Johnathan Doe",
+            "email": "john@example.com",
+            "phone": "+1234567890",
+            "member_code": "EXEC-001",
+            "avatar_url": "https://api.ecc.com/storage/users/1/avatar/avatar.jpg",
+            "avatar_required": false
+        },
+        "membership": {
+            "tier": {
+                "id": 1,
+                "code": "platinum",
+                "name": "Platinum",
+                "is_active": true
+            },
+            "status": "active",
+            "expires_at": "2026-12-31T00:00:00.000000Z"
+        }
+    },
+    "meta": null,
+    "errors": null
+}
+```
+
+### Update Profile
+
+**Endpoint:** `PATCH /api/v1/profile`
+**Headers:**
+- `Authorization: Bearer <token>`
+- `Accept: application/json`
+- `Content-Type: application/json`
+
+**Body:**
+```json
+{
+    "full_name": "Johnathan Doe Updated",
+    "date_of_birth": "1990-01-01",
+    "country": "UAE",
+    "city": "Dubai",
+    "phone": "+971501234567"
+}
+```
+
+**Response:** Same as Get Profile (fresh data).
+
+### Upload Avatar
+
+**Endpoint:** `POST /api/v1/profile/avatar`
+**Headers:**
+- `Authorization: Bearer <token>`
+- `Accept: application/json`
+- `Content-Type: multipart/form-data`
+
+**Body:**
+- `avatar`: File (image/jpeg, image/png, etc.)
+
+**Response:** Same as Get Profile (fresh data with new avatar_url).
+
+### Get Membership Details
+
+**Endpoint:** `GET /api/v1/profile/membership`
+**Headers:**
+- `Authorization: Bearer <token>`
+- `Accept: application/json`
+
+**Response:**
+```json
+{
+    "success": true,
+    "message": "Membership details retrieved.",
+    "data": {
+        "status": "active",
+        "joined_at": "2025-01-01T00:00:00.000000Z",
+        "expires_at": "2026-01-01T00:00:00.000000Z",
+        "tier": {
+            "id": 1,
+            "code": "platinum",
+            "name": "Platinum",
+            "level": 1,
+            "benefits": ["Benefit 1", "Benefit 2"]
+        },
+        "privileges": [
+            {
+                "id": 1,
+                "key": "private_viewing",
+                "name": "Private Viewing",
+                "description": "Access to private viewings",
+                "icon": "eye"
+            }
+        ]
+    },
+    "meta": null,
+    "errors": null
+}
+```
 
 ---
 

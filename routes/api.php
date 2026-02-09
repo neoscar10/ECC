@@ -23,6 +23,9 @@ Route::prefix('v1')->group(function () {
              Route::post('refresh', [AuthController::class, 'refresh']);
              Route::post('logout', [AuthController::class, 'logout']);
              Route::get('me', [AuthController::class, 'me']);
+
+
+
              
              // OTP
              Route::post('request-otp', [\App\Http\Controllers\Api\V1\PhoneVerificationController::class, 'requestOtp']);
@@ -41,6 +44,14 @@ Route::prefix('v1')->group(function () {
 
     // Protected Application Routes
     Route::middleware('auth:api')->group(function () {
+        // Profile Routes
+        Route::prefix('profile')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\V1\Profile\ProfileController::class, 'show']);
+            Route::patch('/', [\App\Http\Controllers\Api\V1\Profile\ProfileController::class, 'update']);
+            Route::post('/avatar', [\App\Http\Controllers\Api\V1\Profile\ProfileController::class, 'uploadAvatar']);
+            Route::get('/membership', [\App\Http\Controllers\Api\V1\Profile\ProfileController::class, 'membership']);
+        });
+
         Route::get('/membership-application/current', [App\Http\Controllers\Api\V1\MembershipApplicationController::class, 'current']);
         
         // Membership Tiers

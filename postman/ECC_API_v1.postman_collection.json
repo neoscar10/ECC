@@ -608,6 +608,143 @@
             ]
         },
         {
+            "name": "Profile",
+            "item": [
+                {
+                    "name": "Get Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "profile"
+                            ]
+                        },
+                        "description": "Get authenticated user profile"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"full_name\": \"John Doe Updated\",\n    \"city\": \"Dubai\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "profile"
+                            ]
+                        },
+                        "description": "Update user profile details"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Upload Avatar",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "avatar",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/profile/avatar",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "profile",
+                                "avatar"
+                            ]
+                        },
+                        "description": "Upload user avatar"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Membership Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/profile/membership",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "profile",
+                                "membership"
+                            ]
+                        },
+                        "description": "Get detailed membership info with privileges"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Membership",
             "description": "Membership related endpoints including applications, tiers, status and meta options.",
             "item": [
