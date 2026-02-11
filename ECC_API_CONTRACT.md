@@ -117,6 +117,28 @@ Login for existing users.
     }
     ```
 
+#### POST /auth/login/otp/request
+Request OTP for login (Dummy).
+*   **Auth:** No
+*   **Body:**
+    ```json
+    {
+        "phone": "+1234567890"
+    }
+    ```
+
+#### POST /auth/login/otp/verify
+Verify OTP and Login (Dummy).
+*   **Auth:** No
+*   **Body:**
+    ```json
+    {
+        "phone": "+1234567890",
+        "otp": "123456"
+    }
+    ```
+*   **Success Response:** Returns Access Token (same as login).
+
 #### GET /auth/me
 Get current user details.
 *   **Auth:** Yes

@@ -93,23 +93,26 @@ class AuthController extends Controller
         // 3. Detect Format (Email vs Phone)
         $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
 
-        // 4. Build Credentials
+        // 4. Check if user exists first
+        $userQuery = User::query();
         if ($isEmail) {
-            $credentials = [
-                'email' => $identifier,
-                'password' => $request->input('password')
-            ];
+            $userQuery->where('email', $identifier);
+            $credentials = ['email' => $identifier, 'password' => $request->input('password')];
         } else {
-            // Minimal Phone Normalization (trim only as per instructions)
+            // Minimal Phone Normalization
             $normalizedPhone = trim(str_replace(' ', '', $identifier));
-            $credentials = [
-                'phone' => $normalizedPhone,
-                'password' => $request->input('password')
-            ];
+            $userQuery->where('phone', $normalizedPhone);
+            $credentials = ['phone' => $normalizedPhone, 'password' => $request->input('password')];
+        }
+
+        $user = $userQuery->first();
+
+        if (! $user) {
+            return $this->error('We could not find an account with that email/phone.', 404);
         }
 
         if (! $token = auth('api')->attempt($credentials)) {
-            return $this->error('Unauthorized', 401);
+            return $this->error('Incorrect password. Please try again.', 401);
         }
 
         $user = auth('api')->user();

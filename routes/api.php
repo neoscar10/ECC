@@ -12,6 +12,10 @@ Route::prefix('v1')->group(function () {
         Route::post('register', [AuthController::class, 'register']);
         Route::post('login', [AuthController::class, 'login']);
 
+        // OTP Login (Public)
+        Route::post('login/otp/request', [\App\Http\Controllers\Api\V1\Auth\AuthOtpController::class, 'requestOtp']);
+        Route::post('login/otp/verify', [\App\Http\Controllers\Api\V1\Auth\AuthOtpController::class, 'verifyOtp']);
+
         // Password Reset Routes
         Route::middleware('throttle:5,1')->group(function () {
             Route::post('password/request-otp', [App\Http\Controllers\Api\V1\Auth\PasswordResetController::class, 'requestOtp']);

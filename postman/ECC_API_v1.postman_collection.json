@@ -604,6 +604,95 @@
                             "body": "{\n    \"success\": false,\n    \"message\": \"The provided current password does not match your actual password.\",\n    \"data\": null,\n    \"meta\": null,\n    \"errors\": {\n        \"current_password\": [\n            \"The provided current password does not match your actual password.\"\n        ]\n    }\n}"
                         }
                     ]
+                },
+                {
+                    "name": "Login with OTP (Dummy)",
+                    "item": [
+                        {
+                            "name": "Request OTP (Dummy)",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"phone\": \"+1234567890\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/auth/login/otp/request",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "auth",
+                                        "login",
+                                        "otp",
+                                        "request"
+                                    ]
+                                },
+                                "description": "Request OTP for login (Dummy).\n\n**Auth:** Public\n\n**Body:**\n- `phone`"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Verify OTP & Login (Dummy)",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"phone\": \"+1234567890\",\n    \"otp\": \"123456\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/auth/login/otp/verify",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "auth",
+                                        "login",
+                                        "otp",
+                                        "verify"
+                                    ]
+                                },
+                                "description": "Verify OTP and Login (Dummy).\n\n**Auth:** Public\n\n**Body:**\n- `phone`\n- `otp` (Any 6 digits)\n\n**Response:**\n- `access_token`\n- `user`"
+                            },
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.success && jsonData.data.access_token) {",
+                                            "    pm.environment.set(\"jwt_token\", jsonData.data.access_token);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "response": []
+                        }
+                    ]
                 }
             ]
         },
