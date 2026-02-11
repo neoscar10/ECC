@@ -23,6 +23,7 @@ class Index extends Component
     public $search = '';
     public $filterType = '';
     public $filterStatus = '';
+    public $filterPlacement = '';
 
     // Data for dropdowns
     public $membershipTiers = [];
@@ -35,42 +36,63 @@ class Index extends Component
 
     // --- Form Fields ---
     public $title;
-    public $type = 'card'; // card, banner
+    public $placement = ''; // home, explore, profile, announcements
+    public $type = 'card'; // card, banner, slider, text
     public $isActive = true;
-    public $sortOrder = 0;
+    public $sortOrder = 0; // Auto-managed, but kept in state if needed
     
-    // Content Fields (Mapped to JSON)
+    // Content Fields
     public $contentTitle;
     public $contentSubtitle;
     public $contentBody;
+    public $contentBadge;
     public $contentCtaText;
-    public $contentCtaUrl;
+    // contentCtaUrl REMOVED
     public $contentImage; // file upload
     public $existingContentImage; // url string
+    public $hasDetailPage = false;
+    public $contentMarkdown;
     
+    // Slider Config Fields
+    public $sliderMode = 'category'; // category, manual, images
+    public $sliderSource = ''; // shop, archive, auctions
+    public $sliderCategoryId;
+    public $sourceCategories = []; // Mock or load
+    public $sliderLimit = 10;
+    
+    public $itemSearchQuery = '';
+    public $searchResults = [];
+    public $selectedSliderItems = []; // [{id, name, image...}]
+
+    public $sliderImages = []; // [{image_path, title, subtitle, sort}]
+    public $newSlideImage; // Temporary upload for new slide
+
     // Restriction Fields
     public $restrictionMode = 'public';
-    public $restrictionType; // hierarchical, random, private
+    public $restrictionType; // hierarchical, private, random
     public $restrictedMinTierId;
     public $restrictedPrivateTierId;
     public $selectedVisibilityTiers = [];
-    public $selectedRandomTiers = []; // For Random type specifically? Archive uses visibility pivot for random
+    public $selectedRandomTiers = []; 
     
     // Blur Fields
     public $blurEnabled = false;
-    // public $blurStrategy; // We can default to hierarchical or mirror restriction type?
-    // Let's assume strategy mirrors restriction type for simplicity unless overridden
-    // Archive UI consolidates logic.
     
     // Helpers
     public $computedVisibilityTierIds = [];
 
     // Wizard State
-    public $createStep = 1; // 1: Content, 2: Access & Blur
+    public $createStep = 1; 
 
     public function mount()
     {
         $this->membershipTiers = MembershipTier::where('is_active', true)->orderBy('sort_order')->get();
+        // Mock Categories for now or load real ones if models exist
+        $this->sourceCategories = [
+            ['id' => 1, 'name' => 'Bats'],
+            ['id' => 2, 'name' => 'Gloves'],
+            ['id' => 3, 'name' => 'Memorabilia'],
+        ];
     }
 
     public function render()
@@ -83,6 +105,9 @@ class Index extends Component
         if ($this->filterType) {
             $query->where('type', $this->filterType);
         }
+        if ($this->filterPlacement) {
+            $query->where('placement', $this->filterPlacement);
+        }
         if ($this->filterStatus === 'active') {
             $query->where('is_active', true);
         } elseif ($this->filterStatus === 'inactive') {
@@ -90,7 +115,7 @@ class Index extends Component
         }
 
         return view('livewire.admin.cms.blocks.index', [
-            'blocks' => $query->orderBy('sort_order')->latest()->paginate(10)
+            'blocks' => $query->orderBy('placement')->orderBy('sort_order')->paginate(10)
         ]);
     }
 
@@ -111,9 +136,6 @@ class Index extends Component
 
     public function computeEligibleBlurTiers()
     {
-        // For CMS blocks, if restriction is public, ALL tiers are theoretically visible?
-        // But if public, usually no need for restriction logic.
-        // If restricted, visibility set defines the universe.
         if ($this->restrictionMode === 'public') {
              $this->computedVisibilityTierIds = $this->membershipTiers->pluck('id')->map(fn($id)=>(string)$id)->toArray();
         } else {
@@ -121,43 +143,144 @@ class Index extends Component
         }
     }
 
+    public function updatedSliderSource($value)
+    {
+        // Reset category/items when source changes
+        $this->sliderCategoryId = null;
+        $this->selectedSliderItems = [];
+        $this->itemSearchQuery = '';
+        $this->searchResults = [];
+    }
+    
+    public function updatedSliderMode()
+    {
+         // Reset mode specific fields?
+    }
+
+    public function updatedItemSearchQuery()
+    {
+        if (strlen($this->itemSearchQuery) > 2) {
+            // Mock Search - Replace with real search logic based on $this->sliderSource
+            $this->searchResults = [
+                ['id' => 101, 'name' => 'Suggest: ' . $this->itemSearchQuery . ' (1)', 'image' => null],
+                ['id' => 102, 'name' => 'Suggest: ' . $this->itemSearchQuery . ' (2)', 'image' => null],
+            ];
+        } else {
+            $this->searchResults = [];
+        }
+    }
+
+    public function addSliderItem($id)
+    {
+        // Add to selectedSliderItems if not exists
+        $exists = collect($this->selectedSliderItems)->contains('id', $id);
+        if (!$exists) {
+            // Find item details from search results or DB
+            $item = collect($this->searchResults)->firstWhere('id', $id);
+            if ($item) {
+                $this->selectedSliderItems[] = $item;
+            }
+        }
+        $this->itemSearchQuery = ''; 
+        $this->searchResults = [];
+    }
+
+    public function removeSliderItem($index)
+    {
+        unset($this->selectedSliderItems[$index]);
+        $this->selectedSliderItems = array_values($this->selectedSliderItems);
+    }
+    
+    public function updateSliderItemOrder($list)
+    {
+        $ordered = [];
+        foreach($list as $item) {
+            $ordered[] = collect($this->selectedSliderItems)->firstWhere('id', $item['value']);
+        }
+        $this->selectedSliderItems = $ordered;
+    }
+
+    public function addSlide()
+    {
+        $this->validate([
+            'newSlideImage' => 'required|image|max:5120',
+        ]);
+
+        $path = $this->newSlideImage->store('cms/slides', 'public');
+        $url = Storage::url($path);
+
+        $this->sliderImages[] = [
+            'image_path' => $path,
+            'image_url' => $url,
+            'title' => '',
+            'subtitle' => '',
+            'sort' => count($this->sliderImages) + 1
+        ];
+        
+        $this->newSlideImage = null;
+    }
+
+    public function removeSlide($index)
+    {
+        unset($this->sliderImages[$index]);
+        $this->sliderImages = array_values($this->sliderImages);
+    }
+
     public function validateStep($step)
     {
-        if ($step === 1) {
+        if ($step === 1) { // Basic
             $this->validate([
+                'placement' => 'required|string',
                 'title' => 'required|string|max:255',
-                'type' => 'required|in:card,banner',
                 'isActive' => 'boolean',
-                'sortOrder' => 'integer',
-                // Content validations
-                'contentTitle' => 'nullable|string',
-                'contentImage' => 'nullable|image|max:10240',
             ]);
-        } elseif ($step === 2) {
+        } elseif ($step === 2) { // Type
             $this->validate([
-                'restrictionMode' => 'required|in:public,restricted',
-                // Visibility
-                'selectedVisibilityTiers' => ['exclude_unless:restrictionMode,restricted', 'required', 'array', 'min:1'],
-                
-                // Restriction Type (Logic driver)
-                'restrictionType' => ['exclude_unless:restrictionMode,restricted', 'required', 'in:hierarchical,random,private'],
-                
-                // Hierarchical
-                'restrictedMinTierId' => ['exclude_unless:restrictionType,hierarchical', 'required', 'exists:membership_tiers,id'],
-                
-                // Private
-                'restrictedPrivateTierId' => ['exclude_unless:restrictionType,private', 'required', 'exists:membership_tiers,id'],
+                'type' => 'required|in:card,banner,slider,text', 
+                'sliderMode' => 'required_if:type,slider|in:category,manual,images',
+            ]);
+        } elseif ($step === 3) { // Builder
+            $rules = [
+                'contentTitle' => 'required|string',
+                'hasDetailPage' => 'boolean',
+            ];
+            
+            if ($this->hasDetailPage) {
+                $rules['contentCtaText'] = 'required|string';
+                $rules['contentMarkdown'] = 'required|string';
+            }
 
-                // Blur
+            if ($this->type === 'banner' || $this->type === 'card') {
+                 // Image optional for card/text, required for banner? User said Image required for Banner.
+                 if ($this->type === 'banner' && !$this->existingContentImage) {
+                     $rules['contentImage'] = 'required|image|max:10240';
+                 } else {
+                     $rules['contentImage'] = 'nullable|image|max:10240';
+                 }
+            }
+            
+            if ($this->type === 'slider') {
+                $rules['sliderSource'] = 'required_unless:sliderMode,images';
+                
+                if ($this->sliderMode === 'category') {
+                    $rules['sliderCategoryId'] = 'required';
+                } elseif ($this->sliderMode === 'manual') {
+                    $rules['selectedSliderItems'] = 'required|array|min:1';
+                } elseif ($this->sliderMode === 'images') {
+                    $rules['sliderImages'] = 'required|array|min:1';
+                }
+            }
+            
+            $this->validate($rules);
+
+        } elseif ($step === 4) { // Access
+             $this->validate([
+                'restrictionMode' => 'required|in:public,restricted',
+                'selectedVisibilityTiers' => ['exclude_unless:restrictionMode,restricted', 'required', 'array', 'min:1'],
+                'restrictionType' => ['exclude_unless:restrictionMode,restricted', 'exclude_if:blurEnabled,false', 'exclude_unless:blurEnabled,true', 'required_if:blurEnabled,true', 'in:hierarchical,random,private'],
+                'restrictedMinTierId' => ['exclude_unless:restrictionType,hierarchical', 'required', 'exists:membership_tiers,id'],
+                'restrictedPrivateTierId' => ['exclude_unless:restrictionType,private', 'required', 'exists:membership_tiers,id'],
                 'blurEnabled' => 'boolean',
-                // If blur enabled, we need clear view settings?
-                // For simplicity, we can say: 
-                // - Hierarchical: Min Tier => Clear View from that tier up.
-                // - Private: That tier gets clear view. 
-                // - Random: Selected tiers get clear view? Or require separate selection?
-                // Archive defaults to:
-                // Hierarchical -> Min Tier sets clear view base?
-                // Let's stick to simple logic: If blur, logic determines clear view based on restriction type.
             ]);
         }
     }
@@ -165,7 +288,7 @@ class Index extends Component
     public function nextStep()
     {
         $this->validateStep($this->createStep);
-        if ($this->createStep < 2) {
+        if ($this->createStep < 5) {
             $this->createStep++;
         }
     }
@@ -174,6 +297,15 @@ class Index extends Component
     {
         if ($this->createStep > 1) {
             $this->createStep--;
+        }
+    }
+    
+    public function goToStep($step)
+    {
+        // Can only jump specific steps if previous valid? 
+        // Auction Modal allows jumping BACK but not forward past current progress.
+        if ($step < $this->createStep) {
+            $this->createStep = $step;
         }
     }
 
@@ -197,6 +329,7 @@ class Index extends Component
         $block = CmsBlock::with(['visibilityTiers', 'clearViewTiers'])->findOrFail($id);
 
         $this->title = $block->title;
+        $this->placement = $block->placement;
         $this->type = $block->type;
         $this->isActive = $block->is_active;
         $this->sortOrder = $block->sort_order;
@@ -206,10 +339,27 @@ class Index extends Component
         $this->contentTitle = $content['title'] ?? '';
         $this->contentSubtitle = $content['subtitle'] ?? '';
         $this->contentBody = $content['body'] ?? '';
+        $this->contentBadge = $content['badge'] ?? '';
         $this->contentCtaText = $content['cta_text'] ?? '';
-        $this->contentCtaUrl = $content['cta_url'] ?? '';
+        $this->hasDetailPage = $content['has_detail_page'] ?? false;
+        $this->contentMarkdown = $content['detail_markdown'] ?? '';
         $this->existingContentImage = $content['image_url'] ?? null;
         
+        // Type Config (Slider)
+        $typeConfig = $block->type_config ?? [];
+        if ($this->type === 'slider') {
+             $this->sliderMode = $typeConfig['mode'] ?? 'category';
+             $this->sliderSource = $typeConfig['source'] ?? '';
+             if ($this->sliderMode === 'category') {
+                  $this->sliderCategoryId = $typeConfig['category_id'] ?? null;
+                  $this->sliderLimit = $typeConfig['limit'] ?? 10;
+             } elseif ($this->sliderMode === 'manual') {
+                  $this->selectedSliderItems = $typeConfig['items'] ?? [];
+             } elseif ($this->sliderMode === 'images') {
+                  $this->sliderImages = $typeConfig['slides'] ?? [];
+             }
+        }
+
         // Access
         $this->restrictionMode = $block->restriction_mode;
         $this->restrictionType = $block->restriction_type;
@@ -234,6 +384,8 @@ class Index extends Component
     {
         $this->validateStep(1);
         $this->validateStep(2);
+        $this->validateStep(3);
+        $this->validateStep(4);
 
         // Upload Image
         $imageUrl = $this->existingContentImage;
@@ -246,29 +398,55 @@ class Index extends Component
             'title' => $this->contentTitle,
             'subtitle' => $this->contentSubtitle,
             'body' => $this->contentBody,
+            'badge' => $this->contentBadge,
             'cta_text' => $this->contentCtaText,
-            'cta_url' => $this->contentCtaUrl,
-            'image_url' => $imageUrl
+            'image_url' => $imageUrl,
+            'has_detail_page' => $this->hasDetailPage,
+            'detail_markdown' => $this->hasDetailPage ? $this->contentMarkdown : null,
         ];
+        
+        // Build Type Config
+        $typeConfigPayload = null;
+        if ($this->type === 'slider') {
+            $typeConfigPayload = [
+                'mode' => $this->sliderMode,
+                'source' => $this->sliderSource,
+            ];
+            if ($this->sliderMode === 'category') {
+                $typeConfigPayload['category_id'] = $this->sliderCategoryId;
+                $typeConfigPayload['limit'] = $this->sliderLimit;
+                $typeConfigPayload['sort'] = 'newest'; // Defaulting
+            } elseif ($this->sliderMode === 'manual') {
+                $typeConfigPayload['items'] = $this->selectedSliderItems;
+            } elseif ($this->sliderMode === 'images') {
+                $typeConfigPayload['slides'] = $this->sliderImages;
+            }
+        }
 
         DB::beginTransaction();
         try {
+            // Sort Order
+            if (!$this->isEditMode) {
+                 $maxSort = CmsBlock::where('placement', $this->placement)->max('sort_order');
+                 $this->sortOrder = $maxSort ? $maxSort + 1 : 1;
+            }
+
             $data = [
                 'title' => $this->title,
+                'placement' => $this->placement,
                 'type' => $this->type,
                 'content' => $contentPayload,
+                'type_config' => $typeConfigPayload,
                 'is_active' => $this->isActive,
                 'sort_order' => $this->sortOrder,
                 'restriction_mode' => $this->restrictionMode,
-                'restriction_type' => $this->restrictionMode === 'public' ? 'hierarchical' : $this->restrictionType, // default
+                'restriction_type' => $this->restrictionMode === 'public' ? 'hierarchical' : ($this->restrictionType ?: 'hierarchical'),
                 'restricted_min_tier_id' => $this->restrictionMode === 'public' ? null : $this->restrictedMinTierId,
                 'restricted_private_tier_id' => $this->restrictionMode === 'public' ? null : $this->restrictedPrivateTierId,
                 'blur_enabled' => $this->blurEnabled,
                 'blur_strategy' => $this->restrictionMode === 'public' ? 'hierarchical' : ($this->restrictionType ?? 'hierarchical'),
             ];
 
-            // Derive Clear View Min Tier ID from Restricted Min Tier if hierarchical
-            // (Simplification: Access Tier also defines Clear View Tier if Blur is ON)
             if ($this->blurEnabled && $data['restriction_type'] === 'hierarchical') {
                  $data['min_clear_view_tier_id'] = $this->restrictedMinTierId;
             } else {
@@ -289,48 +467,36 @@ class Index extends Component
                 $block->visibilityTiers()->detach();
             }
             
-            // Sync Clear View Tiers (For Random/Private/Allowlist logic)
-            // If Blur & Hierarchical, we handled min_clear_view_tier_id above. Column logic handles it.
-            // If Blur & Private, we might want to sync pivot? Or just rely on private ID.
-            // Archive Logic: "Clear View" pivot is distinct.
-            // Simplified: If Private, sync that one tier to clear view pivot too.
+            // Sync Clear View Tiers (Simplified)
             $clearTiers = [];
-            if ($this->blurEnabled) {
-                 if ($data['restriction_type'] === 'private' && $this->restrictedPrivateTierId) {
-                     $clearTiers = [$this->restrictedPrivateTierId];
-                 } elseif ($data['restriction_type'] === 'random') { // "random" here mapping to Allowlist logic in UI
-                     // If random, assume all visible are clear? Or need distinct selection?
-                     // Let's assume for Blocks: Visible = Clear unless we add 3rd step.
-                     // Wait, if Visible = Clear, then Blur is useless?
-                     // Blur implies: Visible (list) but Blurred (detail).
-                     // If Random: Select Tiers that can SEE (Visibility).
-                     // Which of those can See CLEARLY?
-                     // Archive UI has separate selection.
-                     // I'll simplifiy: If Random & Blur, NO ONE sees clearly (teased for everyone in that list)? 
-                     // Or ALL see clearly?
-                     // Let's fallback to: Random + Blur = Visual Teaser for everyone in that visibility set?
-                     // AccessResolver expects: if blur_enabled AND NOT in clearViewTiers -> Blurred.
-                     // So if I want them to see clearly, I MUST put them in clearViewTiers.
-                     // If I put NO ONE in clearViewTiers, everyone sees blur.
-                     // I will sync ALL selected visibility tiers to Clear View for now, effectively disabling blur for Random 
-                     // UNLESS I add a UI for it.
-                     // Let's just disable blur for Random in UI validation or force it off.
-                     // OR, assume Random = "Allowed to View", and if Blur is ON, they are ALL blurred? 
-                     // That seems a valid use case: "Here is a card, you can see it exists, but content is blurred."
-                     // So clearTiers = [].
-                 } else if ($data['restriction_type'] === 'hierarchical') {
-                      // Handled by min_clear_view_tier_id
-                 }
+            if ($this->blurEnabled && $data['restriction_type'] === 'private') {
+                 if ($this->restrictedPrivateTierId) $clearTiers = [$this->restrictedPrivateTierId];
             }
             $block->clearViewTiers()->sync($clearTiers);
 
             DB::commit();
             $this->closeModal();
             $this->dispatch('refresh-blocks'); 
+            session()->flash('success', 'Block saved successfully.');
             
         } catch (\Exception $e) {
             DB::rollBack();
             $this->addError('general', $e->getMessage());
+        }
+    }
+    
+    public function updateOrder($orderedIds) // Called from Drag & Drop
+    {
+        if (!is_array($orderedIds)) return;
+        
+        DB::beginTransaction();
+        try {
+            foreach ($orderedIds as $index => $id) {
+                CmsBlock::where('id', $id)->update(['sort_order' => $index + 1]);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
         }
     }
 
@@ -338,7 +504,6 @@ class Index extends Component
     {
         $this->blockId = $id;
         $this->confirmingDelete = true;
-        // dispatch open modal?
     }
 
     public function confirmDelete()
@@ -358,14 +523,24 @@ class Index extends Component
     public function resetForm()
     {
         $this->title = '';
+        $this->placement = '';
         $this->type = 'card';
         $this->contentTitle = '';
         $this->contentSubtitle = '';
         $this->contentBody = '';
+        $this->contentBadge = '';
         $this->contentCtaText = '';
-        $this->contentCtaUrl = '';
+        $this->hasDetailPage = false;
+        $this->contentMarkdown = '';
         $this->contentImage = null;
         $this->existingContentImage = null;
+        
+        $this->sliderMode = 'category';
+        $this->sliderSource = '';
+        $this->sliderCategoryId = null;
+        $this->selectedSliderItems = [];
+        $this->sliderImages = [];
+        
         $this->restrictionMode = 'public';
         $this->restrictionType = null;
         $this->restrictedMinTierId = null;

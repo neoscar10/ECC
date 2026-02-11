@@ -19,6 +19,7 @@ class CmsBlock extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'content' => 'array',
+        'type_config' => 'array',
         'blur_enabled' => 'boolean',
     ];
 
