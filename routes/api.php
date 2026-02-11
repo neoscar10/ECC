@@ -82,6 +82,11 @@ Route::prefix('v1')->group(function () {
         Route::post('enquiries', [\App\Http\Controllers\Api\V1\Archive\ArchiveEnquiryController::class, 'store']);
     });
 
+    // CMS Routes
+    Route::middleware('auth:api')->prefix('cms')->group(function () {
+        Route::get('blocks', [\App\Http\Controllers\Api\V1\Cms\CmsBlockController::class, 'index']);
+    });
+
     // Auction Routes
     Route::middleware('auth:api')->prefix('auctions')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\V1\AuctionController::class, 'index']);

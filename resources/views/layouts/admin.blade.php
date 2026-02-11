@@ -966,7 +966,18 @@
                         </li>
                         
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-chat-voice-line"></i> <span>Inquiries</span></a></li>
-                        <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-slideshow-line"></i> <span>CMS</span></a></li>
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ request()->routeIs('admin.cms.*') ? 'active' : '' }}" href="#sidebarCms" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('admin.cms.*') ? 'true' : 'false' }}" aria-controls="sidebarCms">
+                                <i class="ri-slideshow-line"></i> <span data-key="t-cms">CMS</span>
+                            </a>
+                            <div class="collapse menu-dropdown {{ request()->routeIs('admin.cms.*') ? 'show' : '' }}" id="sidebarCms">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.cms.blocks.index') }}" class="nav-link {{ request()->routeIs('admin.cms.blocks.index') ? 'active' : '' }}" data-key="t-cms-blocks">Blocks</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-pie-chart-line"></i> <span>Reports</span></a></li>
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-settings-3-line"></i> <span>Settings</span></a></li>
                     </ul>
