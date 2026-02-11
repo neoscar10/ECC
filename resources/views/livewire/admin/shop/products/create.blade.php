@@ -159,7 +159,7 @@
                         <div class="dropzone p-4 border-dashed text-center rounded" 
                              style="cursor: pointer; position: relative;">
                              {{-- Fix #1: Bind to single-level property --}}
-                             <input type="file" wire:model="activeGalleryUploads" multiple accept="image/*"
+                             <input type="file" wire:model="activeGalleryUploads" multiple accept="image/png,image/jpeg"
                                 class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
                                 style="cursor: pointer;">
                              <div class="text-muted">

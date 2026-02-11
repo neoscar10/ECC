@@ -383,6 +383,7 @@ class Index extends Component
                     'is_default' => (bool)$val->is_default,
                     'color_hex' => $val->color_hex,
                     'presentation_image' => null, 
+                    'presentation_image_url' => $val->presentation_image_path ? Storage::url($val->presentation_image_path) : null,
                     'new_gallery_images' => [],
                     'existing_gallery_images' => $existingGallery 
                 ];
@@ -408,7 +409,7 @@ class Index extends Component
     public function updatedNewImages()
     {
         $this->validate([
-            'newImages.*' => 'image|max:10240', // 10MB Max
+            'newImages.*' => 'image|mimes:jpeg,png|max:10240', // 10MB Max
         ]);
     }
 
@@ -457,7 +458,7 @@ class Index extends Component
     public function updatedActiveGalleryUploads()
     {
         $this->validate([
-            'activeGalleryUploads.*' => 'image|max:10240', 
+            'activeGalleryUploads.*' => 'image|mimes:jpeg,png|max:10240', 
         ]);
         
         // We just keep them in $activeGalleryUploads until "Save" is clicked
@@ -574,6 +575,7 @@ class Index extends Component
                 [
                     'caption' => '', 'price' => 0, 'stock_qty' => 0, 'is_default' => true, 'color_hex' => null, 
                     'presentation_image' => null,
+                    'presentation_image_url' => null,
                     'new_gallery_images' => [],
                     'existing_gallery_images' => []
                 ]
@@ -593,6 +595,7 @@ class Index extends Component
         $this->variationGroups[$groupIndex]['values'][] = [
             'caption' => '', 'price' => 0, 'stock_qty' => 0, 'is_default' => $default, 'color_hex' => null, 
             'presentation_image' => null,
+            'presentation_image_url' => null,
             'new_gallery_images' => [],
             'existing_gallery_images' => []
         ];
@@ -865,6 +868,24 @@ class Index extends Component
         // User rule: "Do NOT delete any DB records".
         // OK, so we MUST update.
         
+        // Validation Logic for Variations (Step 4)
+        foreach ($this->variationGroups as $gIndex => $gData) {
+            // Validation A: If Has Images is ON, ensure at least one image exists for each value
+            if ($gData['has_images'] ?? false) {
+                foreach (($gData['values'] ?? []) as $vIndex => $vData) {
+                    $newCount = count($vData['new_gallery_images'] ?? []);
+                    $existingCount = count($vData['existing_gallery_images'] ?? []);
+                    
+                    if (($newCount + $existingCount) === 0) {
+                        $this->addError("variationGroups.{$gIndex}.values.{$vIndex}.gallery", "Required");
+                        // We also throw a general error to stop saving
+                        $this->addError("variation_validation_error", "Please add images for all values in '{$gData['name']}'.");
+                        return; // Stop processing
+                    }
+                }
+            }
+        }
+        
         // Limitation: The current `edit()` method I added earlier didn't push `id` into `$this->variationGroups`.
         // I need to update `edit()` to include IDs first? 
         // Or I can fetch the product's actual relation and try to match by index? No, index is reliable only if not reordered.
@@ -959,6 +980,14 @@ class Index extends Component
                             ]);
                         }
                     }
+                }
+
+                // Process Presentation Image (Thumbnail)
+                if ($gData['presentation_type'] === 'image' && !empty($vData['presentation_image'])) {
+                     if ($vData['presentation_image'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                         $thumbPath = $vData['presentation_image']->store('shop/variations/thumbnails', 'public');
+                         $val->update(['presentation_image_path' => $thumbPath]);
+                     }
                 }
             }
             // Cleanup deleted values? 

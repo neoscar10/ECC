@@ -114,6 +114,7 @@ class ShopProductDetailResource extends JsonResource
                                 'price' => number_format($val->price, 2, '.', ''),
                                 'stock' => $val->stock_qty,
                                 'is_default' => (bool)$val->is_default,
+                                'presentation_image_url' => $val->presentation_image_path ? url('storage/' . $val->presentation_image_path) : null,
                                 'display' => [
                                     'image_url' => $group->presentation_type == 'image' && $val->presentation_image_path 
                                         ? url('storage/' . $val->presentation_image_path) : null,

@@ -879,7 +879,12 @@
                             <div class="collapse menu-dropdown {{ $isMembershipActive ? 'show' : '' }}" id="sidebarMembership">
                                 <ul class="nav nav-sm flex-column">
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.membership.applications') }}" class="nav-link {{ request()->routeIs('admin.membership.applications') ? 'active' : '' }}" data-key="t-applications">Applications</a>
+                                        <a href="{{ route('admin.membership.applications') }}" class="nav-link {{ request()->routeIs('admin.membership.applications') ? 'active' : '' }}" data-key="t-applications">
+                                            <span>Applications</span>
+                                            @if($pendingMembershipApplicationsCount > 0)
+                                                <span class="badge bg-warning text-dark ms-auto">{{ $pendingMembershipApplicationsCount }}</span>
+                                            @endif
+                                        </a>
                                     </li>
                                     <li class="nav-item">
                                         <a href="{{ route('admin.membership.tiers') }}" class="nav-link {{ request()->routeIs('admin.membership.tiers') ? 'active' : '' }}" data-key="t-tiers">Tiers</a>
@@ -907,7 +912,12 @@
                                         <a href="{{ route('admin.archive.products') }}" class="nav-link {{ request()->routeIs('admin.archive.products') ? 'active' : '' }}" data-key="t-products">Products</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.archive.enquiries') }}" class="nav-link {{ request()->routeIs('admin.archive.enquiries') ? 'active' : '' }}" data-key="t-enquiries">Enquiries</a>
+                                        <a href="{{ route('admin.archive.enquiries') }}" class="nav-link {{ request()->routeIs('admin.archive.enquiries') ? 'active' : '' }}" data-key="t-enquiries">
+                                            <span>Enquiries</span>
+                                            @if($newArchiveEnquiriesCount > 0)
+                                                <span class="badge bg-danger ms-auto">{{ $newArchiveEnquiriesCount }}</span>
+                                            @endif
+                                        </a>
                                     </li>
                                     <li class="nav-item">
                                         <a href="{{ route('admin.archive.orders.index') }}" class="nav-link {{ request()->routeIs('admin.archive.orders.*') ? 'active' : '' }}" data-key="t-orders">Orders</a>
@@ -929,7 +939,12 @@
                                         <a href="{{ route('admin.auctions.lots.index') }}" class="nav-link {{ request()->routeIs('admin.auctions.lots.index') ? 'active' : '' }}" data-key="t-auction-lots">Auction Lots</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.auctions.enquiries') }}" class="nav-link {{ request()->routeIs('admin.auctions.enquiries') ? 'active' : '' }}" data-key="t-auction-enquiries">Enquiries</a>
+                                        <a href="{{ route('admin.auctions.enquiries') }}" class="nav-link {{ request()->routeIs('admin.auctions.enquiries') ? 'active' : '' }}" data-key="t-auction-enquiries">
+                                            <span>Enquiries</span>
+                                            @if($newAuctionEnquiriesCount > 0)
+                                                <span class="badge bg-danger ms-auto">{{ $newAuctionEnquiriesCount }}</span>
+                                            @endif
+                                        </a>
                                     </li>
                                     <li class="nav-item">
                                         <a href="{{ route('admin.auctions.orders.index') }}" class="nav-link {{ request()->routeIs('admin.auctions.orders.index') ? 'active' : '' }}" data-key="t-auction-orders">Orders</a>

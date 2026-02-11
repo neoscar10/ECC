@@ -21,7 +21,7 @@
 
         <!-- Upload Input -->
         <div class="input-group">
-            <input type="file" class="form-control" multiple wire:model="newImages" id="mainImageInput" accept="image/*">
+            <input type="file" class="form-control" multiple wire:model="newImages" id="mainImageInput" accept="image/png,image/jpeg">
             <label class="input-group-text" for="mainImageInput">Upload</label>
         </div>
         <div class="d-flex align-items-center mt-1">
@@ -67,7 +67,7 @@
         @endif
 
         <div class="input-group">
-            <input type="file" class="form-control" multiple wire:model="new360Images" id="360ImageInput" accept="image/*">
+            <input type="file" class="form-control" multiple wire:model="new360Images" id="360ImageInput" accept="image/png,image/jpeg">
              <label class="input-group-text" for="360ImageInput">Upload 360°</label>
         </div>
         <div class="d-flex align-items-center mt-1">

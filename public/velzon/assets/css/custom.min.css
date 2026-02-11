@@ -1,2 +1,19 @@
+/* Custom Admin Overrides */
 
-/*# sourceMappingURL=custom.min.css.map */
+/* Fix for clipped dropdowns in tables with few rows */
+.table-responsive, 
+.table-card {
+    /* Ensure container is tall enough so dropdown isn't clipped by the container edge */
+    min-height: 250px; 
+    /* Add bottom padding so the last row's dropdown has space to open downwards */
+    padding-bottom: 60px;
+    /* Ensure scrollbar works */
+    overflow-x: auto;
+}
+
+/* Ensure dropdowns overlay correctly */
+.table-responsive .dropdown-menu, 
+.table-card .dropdown-menu {
+    position: absolute; /* Bootstrap default, but ensure it */
+    z-index: 1050; /* Ensure high z-index */
+}

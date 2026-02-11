@@ -269,6 +269,11 @@ class Index extends Component
             $this->validate($rules);
         } elseif ($step === 2) {
             // Media
+            $this->validate([
+                'newImages.*' => 'image|mimes:jpeg,png|max:10240',
+                'new360Images.*' => 'image|mimes:jpeg,png|max:10240',
+            ]);
+
             if (empty($this->existingImages) && empty($this->newImages)) {
                 $this->addError('newImages', 'At least one main image is required.');
                 return false;

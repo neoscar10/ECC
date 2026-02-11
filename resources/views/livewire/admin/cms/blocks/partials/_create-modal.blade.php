@@ -77,7 +77,7 @@
                             
                             <div class="mb-3">
                                 <label class="form-label">Image</label>
-                                <input type="file" class="form-control mb-2" wire:model="contentImage">
+                                <input type="file" class="form-control mb-2" wire:model="contentImage" accept="image/png,image/jpeg">
                                 @if($contentImage)
                                      <img src="{{ $contentImage->temporaryUrl() }}" class="img-fluid rounded border" style="max-height: 200px;">
                                 @elseif($existingContentImage)

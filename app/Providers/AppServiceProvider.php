@@ -20,5 +20,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         \App\Models\Membership::observe(\App\Observers\MembershipObserver::class);
+        
+        // Share counts with admin sidebar
+        \Illuminate\Support\Facades\View::composer('layouts.admin', \App\View\Composers\AdminSidebarComposer::class);
     }
 }

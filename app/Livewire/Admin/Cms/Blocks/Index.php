@@ -203,7 +203,7 @@ class Index extends Component
     public function addSlide()
     {
         $this->validate([
-            'newSlideImage' => 'required|image|max:5120',
+            'newSlideImage' => 'required|image|mimes:jpeg,png|max:5120',
         ]);
 
         $path = $this->newSlideImage->store('cms/slides', 'public');
@@ -253,9 +253,9 @@ class Index extends Component
             if ($this->type === 'banner' || $this->type === 'card') {
                  // Image optional for card/text, required for banner? User said Image required for Banner.
                  if ($this->type === 'banner' && !$this->existingContentImage) {
-                     $rules['contentImage'] = 'required|image|max:10240';
+                     $rules['contentImage'] = 'required|image|mimes:jpeg,png|max:10240';
                  } else {
-                     $rules['contentImage'] = 'nullable|image|max:10240';
+                     $rules['contentImage'] = 'nullable|image|mimes:jpeg,png|max:10240';
                  }
             }
             

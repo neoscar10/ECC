@@ -51,7 +51,7 @@ class Index extends Component
             'description' => 'nullable|string',
             'visibility' => 'required|in:public,restricted',
             'is_active' => 'boolean',
-            'image' => 'nullable|image|max:10240', // 10MB
+            'image' => 'nullable|image|mimes:jpeg,png|max:10240', // 10MB
             'selectedTiers' => 'required_if:visibility,restricted|array',
             'selectedTiers.*' => 'exists:membership_tiers,id',
         ];

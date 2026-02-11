@@ -100,6 +100,7 @@
                                             <th style="width: 120px;">Price</th>
                                             <th style="width: 100px;">Stock</th>
                                             @if($group['presentation_type'] == 'color') <th style="width: 80px;">Color</th> @endif
+                                            @if($group['presentation_type'] == 'image') <th style="width: 80px;">Thumbnail</th> @endif
                                             @if($group['has_images']) <th>Gallery</th> @endif
                                             <th style="width: 80px;">Default</th>
                                             <th style="width: 50px;"></th>
@@ -126,6 +127,30 @@
                                                             wire:model="variationGroups.{{ $gIndex }}.values.{{ $vIndex }}.color_hex">
                                                     </td>
                                                 @endif
+
+                                                @if($group['presentation_type'] == 'image')
+                                                    <td>
+                                                        <div class="position-relative border rounded overflow-hidden" style="width: 40px; height: 40px;">
+                                                            @php
+                                                                $pImg = $value['presentation_image'] ?? null;
+                                                                $pUrl = $value['presentation_image_url'] ?? null;
+                                                            @endphp
+                                                            
+                                                            @if(is_object($pImg) && method_exists($pImg, 'temporaryUrl'))
+                                                                <img src="{{ $pImg->temporaryUrl() }}" class="w-100 h-100 object-fit-cover">
+                                                            @elseif($pUrl)
+                                                                <img src="{{ $pUrl }}" class="w-100 h-100 object-fit-cover">
+                                                            @else
+                                                                <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center text-muted">
+                                                                    <i class="ri-image-line"></i>
+                                                                </div>
+                                                            @endif
+                                                            
+                                                            <input type="file" class="position-absolute top-0 start-0 opacity-0 w-100 h-100 cursor-pointer" 
+                                                                wire:model="variationGroups.{{ $gIndex }}.values.{{ $vIndex }}.presentation_image" accept="image/png,image/jpeg">
+                                                        </div>
+                                                    </td>
+                                                @endif
                                                 
                                                 @if($group['has_images'])
                                                     <td>
@@ -145,6 +170,9 @@
                                                                 <span class="badge bg-secondary ms-1">{{ $total }}</span>
                                                             @endif
                                                          </button>
+                                                         @error("variationGroups.{$gIndex}.values.{$vIndex}.gallery")
+                                                            <div class="text-danger font-size-10 mt-1">{{ $message }}</div>
+                                                         @enderror
                                                     </td>
                                                 @endif
     

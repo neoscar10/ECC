@@ -36,7 +36,7 @@
                      @if($type !== 'slider')
                          <div class="mb-4">
                              <label class="form-label">Main Image</label>
-                             <input type="file" class="form-control mb-2" wire:model.live="contentImage">
+                             <input type="file" class="form-control mb-2" wire:model.live="contentImage" accept="image/png,image/jpeg">
                              @if($existingContentImage)
                                  <div class="d-flex align-items-center gap-2">
                                      <img src="{{ $existingContentImage }}" height="40" class="rounded">
@@ -125,7 +125,7 @@
                              <div class="mb-3">
                                  <label class="form-label">Add Slide</label>
                                  <div class="d-flex gap-2">
-                                     <input type="file" class="form-control" wire:model="newSlideImage">
+                                     <input type="file" class="form-control" wire:model="newSlideImage" accept="image/png,image/jpeg">
                                      <button type="button" class="btn btn-secondary" wire:click="addSlide">Add</button>
                                  </div>
                                  <div wire:loading wire:target="newSlideImage" class="text-muted fs-12 mt-1">Uploading...</div>
