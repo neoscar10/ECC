@@ -84,6 +84,10 @@ Route::prefix('v1')->group(function () {
         
         // Enquiry
         Route::post('enquiries', [\App\Http\Controllers\Api\V1\Archive\ArchiveEnquiryController::class, 'store']);
+        
+        // Concierge Ledger
+        Route::get('concierge-ledger', [\App\Http\Controllers\Api\V1\Archive\ArchiveConciergeLedgerController::class, 'index']);
+        Route::get('concierge-ledger/{id}', [\App\Http\Controllers\Api\V1\Archive\ArchiveConciergeLedgerController::class, 'show']);
     });
 
     // CMS Routes

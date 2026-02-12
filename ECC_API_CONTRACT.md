@@ -525,6 +525,59 @@ In this example, the product is open, but one attachment is premium.
     *   **Restricted**: Attachment can be restricted to a **subset** of the Product's allowed tiers.
     *   *Example*: Product is open to Gold & Platinum. "Secret Video" attachment is Platinum ONLY. Gold users see the product, but the video is locked.
 
+### F. Concierge Ledger
+The Concierge Ledger tracks the user's enquiry history for archive items.
+
+#### 1. List Ledger Items
+`GET /archive/concierge-ledger`
+
+Paginated list of unique items the user has enquired about, ordered by the latest enquiry.
+
+**Success (200):**
+```json
+{
+    "data": [
+        {
+            "item": {
+                "id": 101,
+                "title": "Vintage Bat",
+                "primary_image_url": "https://..."
+            },
+            "enquiry_summary": {
+                "last_enquiry_id": 5,
+                "last_enquiry_status": "new",
+                "last_enquiry_created_at": "2024-02-12T10:00:00Z",
+                "enquiries_count_for_item": 3
+            },
+            "created_at": "2024-02-12T10:00:00Z"
+        }
+    ],
+    "meta": { "pagination": { ... } }
+}
+```
+
+#### 2. Get Item History
+`GET /archive/concierge-ledger/{id}`
+
+Get detailed history for a specific item. Returns 404 if the user has never enquired about this item.
+
+**Success (200):**
+```json
+{
+    "data": {
+        "item": { ... }, // Full Archive Product Resource
+        "enquiries": [
+            {
+                "id": 5,
+                "status": "new",
+                "message": "Is this available?",
+                "created_at": "2024-02-12T10:00:00Z"
+            }
+        ]
+    }
+}
+```
+
 ---
 
 ### F. Client UI Guidelines (Flutter)

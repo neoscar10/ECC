@@ -1881,6 +1881,81 @@
                     ]
                 },
                 {
+                    "name": "Concierge Ledger",
+                    "item": [
+                        {
+                            "name": "List Ledger Items",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/archive/concierge-ledger?per_page=20",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "archive",
+                                        "concierge-ledger"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "1",
+                                            "disabled": true
+                                        },
+                                        {
+                                            "key": "per_page",
+                                            "value": "20"
+                                        }
+                                    ]
+                                },
+                                "description": "Get paginated list of unique archive items the user has enquired about.\n\n**Auth:** Bearer Token\n\n**Query Params:**\n- `page`: Page number (default 1)\n- `per_page`: Items per page (default 20)"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Get Item History",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{jwt_token}}"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/{{api_prefix}}/archive/concierge-ledger/{{archive_product_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "{{api_prefix}}",
+                                        "archive",
+                                        "concierge-ledger",
+                                        "{{archive_product_id}}"
+                                    ]
+                                },
+                                "description": "Show enquiry history for a single archive item.\n\n**Auth:** Bearer Token\n**Params:**\n- `id`: Archive Product ID"
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
                     "name": "Enquiries",
                     "description": "Submit and manage enquiries for archive products.",
                     "item": [
