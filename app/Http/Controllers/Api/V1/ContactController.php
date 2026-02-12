@@ -22,23 +22,17 @@ class ContactController extends Controller
             ->orderBy('sort_order', 'asc')
             ->get();
 
-        // Fallback defaults if DB is empty (should be seeded, but good to have)
-        $conciergePhone = $config?->concierge_phone ?? '+44 (0) 20 7123 4567';
-        $supportEmail = $config?->support_email ?? 'members@executivecricket.club';
+        // Return DB values directly. If config doesn't exist, we return nulls.
+        $conciergePhone = $config?->concierge_phone; // Nullable in DB
+        $supportEmail = $config?->support_email;     // Nullable in DB
 
-        $mappedSubjects = $subjects->isEmpty() 
-            ? [
-                ['key' => 'membership_upgrade', 'label' => 'Membership Upgrade'],
-                ['key' => 'dining_reservations', 'label' => 'Dining Reservations'],
-                ['key' => 'general_feedback', 'label' => 'General Feedback'],
-                ['key' => 'other', 'label' => 'Other']
-            ]
-            : $subjects->map(function ($subject) {
-                return [
-                    'key' => $subject->key,
-                    'label' => $subject->label,
-                ];
-            });
+        // If no subjects in DB, return empty array. Do not auto-fill defaults.
+        $mappedSubjects = $subjects->map(function ($subject) {
+            return [
+                'key' => $subject->key,
+                'label' => $subject->label,
+            ];
+        });
 
         return $this->success([
             'direct_lines' => [

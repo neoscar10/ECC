@@ -15,7 +15,7 @@ class ContactConfigTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function it_returns_default_config_if_db_empty()
+    public function it_returns_empty_config_if_db_empty()
     {
         $response = $this->getJson('/api/v1/contact/config');
 
@@ -28,8 +28,10 @@ class ContactConfigTest extends TestCase
                 ]
             ]);
             
-        // Check default hardcoded fallback in controller
-        $this->assertEquals('+44 (0) 20 7123 4567', $response->json('data.direct_lines.0.value'));
+        // Check that values are null/empty, NOT hardcoded defaults
+        $this->assertNull($response->json('data.direct_lines.0.value'));
+        $this->assertNull($response->json('data.direct_lines.1.value'));
+        $this->assertEmpty($response->json('data.subjects'));
     }
 
     /** @test */
