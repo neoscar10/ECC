@@ -17,27 +17,45 @@ class ContactController extends Controller
      */
     public function config()
     {
+        $config = \App\Models\ContactConfig::first();
+        $subjects = \App\Models\ContactSubject::where('is_active', true)
+            ->orderBy('sort_order', 'asc')
+            ->get();
+
+        // Fallback defaults if DB is empty (should be seeded, but good to have)
+        $conciergePhone = $config?->concierge_phone ?? '+44 (0) 20 7123 4567';
+        $supportEmail = $config?->support_email ?? 'members@executivecricket.club';
+
+        $mappedSubjects = $subjects->isEmpty() 
+            ? [
+                ['key' => 'membership_upgrade', 'label' => 'Membership Upgrade'],
+                ['key' => 'dining_reservations', 'label' => 'Dining Reservations'],
+                ['key' => 'general_feedback', 'label' => 'General Feedback'],
+                ['key' => 'other', 'label' => 'Other']
+            ]
+            : $subjects->map(function ($subject) {
+                return [
+                    'key' => $subject->key,
+                    'label' => $subject->label,
+                ];
+            });
+
         return $this->success([
             'direct_lines' => [
                 [
                     'key' => 'club_concierge',
                     'label' => 'Club Concierge',
                     'type' => 'phone',
-                    'value' => '+44 (0) 20 7123 4567' // In a real app, fetch from config/env
+                    'value' => $conciergePhone
                 ],
                 [
                     'key' => 'membership_support',
                     'label' => 'Membership Support',
                     'type' => 'email',
-                    'value' => 'members@executivecricket.club' // In a real app, fetch from config/env
+                    'value' => $supportEmail
                 ]
             ],
-            'subjects' => [
-                ['key' => 'membership_upgrade', 'label' => 'Membership Upgrade'],
-                ['key' => 'dining_reservations', 'label' => 'Dining Reservations'],
-                ['key' => 'general_feedback', 'label' => 'General Feedback'],
-                ['key' => 'other', 'label' => 'Other']
-            ]
+            'subjects' => $mappedSubjects
         ]);
     }
 

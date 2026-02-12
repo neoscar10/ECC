@@ -3695,7 +3695,7 @@
                                 "config"
                             ]
                         },
-                        "description": "Get contact configuration including direct lines and subject options."
+                        "description": "Get contact configuration including direct lines and subject options.\n\n**Note:** Values are configured via Admin Dashboard."
                     },
                     "response": []
                 },

@@ -808,6 +808,7 @@ The **Contact** module allows authenticated users to send secure messages to the
 `GET /contact/config`
 
 Returns configuration options for the contact form, including direct phone lines and available subjects.
+**Note:** These values are configured via the Admin Dashboard.
 
 **Success (200):**
 ```json

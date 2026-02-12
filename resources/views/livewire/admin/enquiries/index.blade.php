@@ -27,6 +27,10 @@
                         </div>
                         <div class="col-sm">
                             <div class="d-flex justify-content-sm-end gap-2">
+                                <button type="button" class="btn btn-info" wire:click="$dispatch('open-config-modal')">
+                                    <i class="ri-settings-4-line align-bottom me-1"></i> Configure Contact Details
+                                </button>
+
                                 <div class="search-box ms-2">
                                     <input wire:model.live.debounce.300ms="search" type="text" class="form-control" placeholder="Search enquiries...">
                                     <i class="ri-search-line search-icon"></i>
@@ -44,8 +48,10 @@
                     </div>
                 </div>
                 
+                @livewire('admin.enquiries.config')
+
                 <div class="card-body">
-                    <div class="table-responsive table-card mb-3">
+                    <div class="table-responsive table-card mb-3" style="min-height: 500px;">
                         <table class="table align-middle table-nowrap mb-0" id="customerTable">
                             <thead class="table-light">
                                 <tr>
