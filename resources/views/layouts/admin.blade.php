@@ -1,5 +1,5 @@
 ﻿<!doctype html>
-<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable" data-theme="default" data-theme-colors="default">
+<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable" data-theme="material" data-theme-colors="default">
 
 
 <!-- Mirrored from themesbrand.com/velzon/html/master/ by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 17 Sep 2025 07:33:06 GMT -->
@@ -31,56 +31,18 @@
     <link href="{{ asset('velzon/assets') }}/css/app.min.css" rel="stylesheet" type="text/css" />
     <!-- custom Css-->
     <link href="{{ asset('velzon/assets') }}/css/custom.min.css" rel="stylesheet" type="text/css" />
-    <style>
-        :root {
-            --vz-primary: #e0a743;
-            --vz-primary-rgb: 247, 184, 75;
-            --bs-primary: #e0a743;
-            --bs-primary-rgb: 247, 184, 75;
-            --vz-primary-text-emphasis: #212529; 
-            --bs-primary-text-emphasis: #212529;
-            --vz-link-color: #e0a743;
-            --bs-link-color: #e0a743;
-        }
-        .btn-primary {
-            --bs-btn-bg: #f2b90d;
-            --bs-btn-border-color: #f2b90d;
-            --bs-btn-hover-bg: #e0a743;
-            --bs-btn-hover-border-color: #e0a743;
-            --bs-btn-color: #212529;
-            --bs-btn-hover-color: #212529;
-        }
-        .text-primary { color: #a27b04ff !important; }
-        a { color: #f2b90d; }
-        a:hover { color: #e0a743; }
-        .page-item.active .page-link {
-            background-color: #f2b90d;
-            border-color: #f2b90d;
-            color: #212529;
-        }
-        /* Fix for various Velzon components using primary */
-        .form-check-input:checked {
-            background-color: #f2b90d;
-            border-color: #f2b90d;
-        }
-        .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
-            background-color: #f2b90d;
-            color: #212529;
-        }
-        .badge.bg-primary {
-            background-color: #f2b90d !important;
-            color: #212529;
-        }
-    </style>
+
     <script>
-        // Enforce Corporate Theme (Vertical, Dark Sidebar, Light Topbar)
-        if (localStorage.getItem('data-layout') !== 'vertical' || localStorage.getItem('data-sidebar') !== 'dark') {
+        // Enforce Material Theme (Vertical, Dark Sidebar, Light Topbar, Material Theme)
+        if (localStorage.getItem('data-layout') !== 'vertical' || localStorage.getItem('data-sidebar') !== 'dark' || localStorage.getItem('data-theme') !== 'material') {
             localStorage.setItem('data-layout', 'vertical');
             localStorage.setItem('data-sidebar', 'dark');
             localStorage.setItem('data-topbar', 'light');
             localStorage.setItem('data-sidebar-size', 'lg');
             localStorage.setItem('data-sidebar-image', 'none');
             localStorage.setItem('data-preloader', 'disable');
+            localStorage.setItem('data-theme', 'material');
+            localStorage.setItem('data-theme-colors', 'default');
         }
     </script>
 
