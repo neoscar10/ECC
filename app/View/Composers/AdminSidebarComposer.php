@@ -23,6 +23,7 @@ class AdminSidebarComposer
                 'pendingMembershipApplicationsCount' => MembershipApplication::whereIn('status', ['pending', 'draft', 'submitted'])->count(),
                 'newAuctionEnquiriesCount' => AuctionEnquiry::where('status', 'new')->count(),
                 'newArchiveEnquiriesCount' => ArchiveProductEnquiry::where('status', 'new')->count(),
+                'newContactEnquiriesCount' => \App\Models\ContactEnquiry::where('status', 'new')->count(),
             ];
         });
 

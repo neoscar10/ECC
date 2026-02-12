@@ -797,7 +797,96 @@ Returns 403 but includes `data.access` to explain why.
 }
 ```
 
-**Success (200):** Returns updated lot data.
+
+---
+
+## Contact
+
+The **Contact** module allows authenticated users to send secure messages to the club concierge or support teams.
+
+### 1. Get Contact Config
+`GET /contact/config`
+
+Returns configuration options for the contact form, including direct phone lines and available subjects.
+
+**Success (200):**
+```json
+{
+    "success": true,
+    "data": {
+        "direct_lines": [
+            {
+                "key": "club_concierge",
+                "label": "Club Concierge",
+                "type": "phone",
+                "value": "+44 (0) 20 7123 4567"
+            }
+        ],
+        "subjects": [
+            { "key": "membership_upgrade", "label": "Membership Upgrade" },
+            { "key": "dining_reservations", "label": "Dining Reservations" },
+            { "key": "general_feedback", "label": "General Feedback" },
+            { "key": "other", "label": "Other" }
+        ]
+    }
+}
+```
+
+### 2. Submit Enquiry
+`POST /contact/enquiries`
+
+Submit a new general enquiry.
+
+| Param | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `subject` | string | Yes | Must be one of the keys from `config`. |
+| `message` | string | Yes | The enquiry content (min 5 chars). |
+
+**Body:**
+```json
+{
+    "subject": "membership_upgrade",
+    "message": "I would like to upgrade to Platinum."
+}
+```
+
+**Success (201):**
+```json
+{
+    "success": true,
+    "message": "Enquiry submitted successfully.",
+    "data": {
+        "id": 12,
+        "subject": "membership_upgrade",
+        "status": "new",
+        "created_at": "2026-02-12T12:00:00Z"
+    }
+}
+```
+
+### 3. List My Enquiries
+`GET /me/contact-enquiries`
+
+List all enquires submitted by the current user.
+
+**Success (200):**
+```json
+{
+    "success": true,
+    "data": [
+        {
+            "id": 12,
+            "subject": "membership_upgrade",
+            "message": "I would like to upgrade...",
+            "status": "new",
+            "admin_note": null,
+            "created_at": "2026-02-12T12:00:00Z"
+        }
+    ],
+    "meta": { "pagination": { ... } }
+}
+```
+
 
 #### 4. Setup Auto-Bid
 `POST /auctions/{id}/auto-bid`

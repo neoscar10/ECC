@@ -3670,6 +3670,102 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "Contact",
+            "item": [
+                {
+                    "name": "Get Contact Config",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/contact/config",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "contact",
+                                "config"
+                            ]
+                        },
+                        "description": "Get contact configuration including direct lines and subject options."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Submit Enquiry",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"subject\": \"membership_upgrade\",\n    \"message\": \"I am interested in upgrading my membership to Platinum.\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/contact/enquiries",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "contact",
+                                "enquiries"
+                            ]
+                        },
+                        "description": "Submit a new contact enquiry.\n\n**Auth:** Bearer Token\n**Body:**\n- `subject` (required, from config options)\n- `message` (required)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List My Enquiries",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/me/contact-enquiries",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "me",
+                                "contact-enquiries"
+                            ]
+                        },
+                        "description": "List all enquiries submitted by the authenticated user."
+                    },
+                    "response": []
+                }
+            ]
         }
     ]
 }

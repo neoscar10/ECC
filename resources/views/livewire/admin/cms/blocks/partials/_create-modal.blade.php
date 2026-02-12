@@ -1,6 +1,6 @@
 <!-- Create/Edit Modal -->
 <div class="modal fade" id="createBlockModal" tabindex="-1" aria-hidden="true" wire:ignore.self>
-    <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{{ $isEditMode ? 'Edit Block' : 'Create Block' }}</h5>

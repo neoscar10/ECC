@@ -189,4 +189,12 @@ Route::prefix('v1')->group(function () {
         Route::put('auctions/{id}/notification-subscription', [\App\Http\Controllers\Api\V1\AuctionSubscriptionController::class, 'toggle']);
         Route::get('me/auction-notification-subscriptions', [\App\Http\Controllers\Api\V1\AuctionSubscriptionController::class, 'index']);
     });
+
+    // Contact Routes
+    Route::prefix('contact')->group(function () {
+        Route::get('config', [\App\Http\Controllers\Api\V1\ContactController::class, 'config']);
+        Route::middleware('auth:api')->post('enquiries', [\App\Http\Controllers\Api\V1\ContactController::class, 'store']);
+    });
+
+    Route::middleware('auth:api')->get('me/contact-enquiries', [\App\Http\Controllers\Api\V1\ContactController::class, 'index']);
 });

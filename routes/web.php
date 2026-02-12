@@ -71,6 +71,10 @@ Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admi
         Route::get('/carts', \App\Livewire\Admin\Shop\Carts\Index::class)->name('carts');
         Route::get('/inventory', \App\Livewire\Admin\Shop\Inventory\Index::class)->name('inventory');
         Route::get('/orders', \App\Livewire\Admin\Shop\Orders\Index::class)->name('orders');
+        Route::get('/orders', \App\Livewire\Admin\Shop\Orders\Index::class)->name('orders');
         Route::get('/orders/{id}', \App\Livewire\Admin\Shop\Orders\Show::class)->name('orders.show');
     });
+
+    // Enquiries
+    Route::get('/enquiries', \App\Livewire\Admin\Enquiries\Index::class)->name('enquiries.index');
 });

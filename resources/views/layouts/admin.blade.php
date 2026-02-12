@@ -994,7 +994,14 @@
                             </div>
                         </li>
                         
-                        <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-chat-voice-line"></i> <span>Inquiries</span></a></li>
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ request()->routeIs('admin.enquiries.index') ? 'active' : '' }}" href="{{ route('admin.enquiries.index') }}">
+                                <i class="ri-chat-voice-line"></i> <span data-key="t-contact-enquiries">Enquiries</span>
+                                @if($newContactEnquiriesCount > 0)
+                                    <span class="badge bg-danger ms-auto">{{ $newContactEnquiriesCount }}</span>
+                                @endif
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ request()->routeIs('admin.cms.*') ? 'active' : '' }}" href="#sidebarCms" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('admin.cms.*') ? 'true' : 'false' }}" aria-controls="sidebarCms">
                                 <i class="ri-slideshow-line"></i> <span data-key="t-cms">CMS</span>
