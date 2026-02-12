@@ -41,15 +41,16 @@ class ShopProductController extends Controller
             });
         }
 
-        // Tags Filter (AND across groups)
-        // Request Usage: ?tags[brands]=12&tags[model]=33
+        // Tags Filter (AND across groups, OR within group)
+        // Request Usage: ?tags[brands]=12,13&tags[model]=33
         if ($request->filled('tags') && is_array($request->tags)) {
-            foreach ($request->tags as $groupSlug => $tagId) {
-                if (!$tagId) continue;
-                // We filter by tag ID. Group Slug validation is implicit if we assume ID is correct.
-                // However, strictly speaking, we just need to ensure the product has this specific tag.
-                $query->whereHas('tags', function ($q) use ($tagId) {
-                    $q->where('shop_tags.id', $tagId);
+            foreach ($request->tags as $groupSlug => $tagVal) {
+                if (!$tagVal) continue;
+
+                $tagIds = is_array($tagVal) ? $tagVal : explode(',', $tagVal);
+
+                $query->whereHas('tags', function ($q) use ($tagIds) {
+                    $q->whereIn('shop_tags.id', $tagIds);
                 });
             }
         }
