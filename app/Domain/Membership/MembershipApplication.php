@@ -12,6 +12,11 @@ class MembershipApplication extends Model
 {
     use HasFactory;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\MembershipApplicationFactory::new();
+    }
+
     protected $guarded = [];
 
     protected $casts = [

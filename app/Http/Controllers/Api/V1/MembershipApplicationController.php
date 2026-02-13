@@ -39,7 +39,7 @@ class MembershipApplicationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->error('Validation Error', 422, $validator->errors());
+            return $this->error('Validation failed: Personal details are incomplete.', 422, $validator->errors());
         }
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($request, $application) {
@@ -73,7 +73,7 @@ class MembershipApplicationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->error('Validation Error', 422, $validator->errors());
+            return $this->error('Validation failed: Cricket profile data is invalid.', 422, $validator->errors());
         }
 
         // Map and Cleanse Inputs
@@ -122,7 +122,7 @@ class MembershipApplicationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->error('Validation Error', 422, $validator->errors());
+            return $this->error('Validation failed: Collector intent data is invalid.', 422, $validator->errors());
         }
 
         // Map inputs
@@ -181,7 +181,7 @@ class MembershipApplicationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->error('Validation Error', 422, $validator->errors());
+            return $this->error('Validation failed: Invalid tier selection.', 422, $validator->errors());
         }
 
         $tier = \App\Models\MembershipTier::find($request->tier_id);
@@ -217,7 +217,7 @@ class MembershipApplicationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->error('Validation Error', 422, $validator->errors());
+            return $this->error('Validation failed: Payment details are invalid.', 422, $validator->errors());
         }
 
         if ($request->has('card_number') || $request->has('cvv')) {
@@ -314,10 +314,24 @@ class MembershipApplicationController extends Controller
     {
         $app = MembershipApplication::where('id', $id)->where('user_id', $user->id)->first();
         if (!$app) {
-            abort(404, 'Application not found.');
+            // Use ApiResponse exception or return response directly? 
+            // Helper functions in controller cannot return Response easily if expected to return object.
+            // But we can throw an exception that is handled, or use abort with json.
+            // Since we want specific envelope, let's use abort with 404, but we need to ensure handler catches it.
+            // Actually, we should check if we can return a response.
+            // If we are in a helper, better to return null and let caller handle, OR throw specific exception.
+            // Let's use abort, but formatted?
+            // "abort(404, 'Message')" renders default 404 page or JSON if API.
+            // bootstrap/app.php handles NotFoundHttpException. 
+            // We'll trust bootstrap/app.php to render it as JSON, but we want SPECIFIC message.
+            // The bootstrap handler I saw uses 'Resource not found.' hardcoded.
+            // effectively overriding the message.
+            
+            // Use custom domain exception which is handled in bootstrap/app.php
+            throw new \App\Exceptions\MembershipApplicationException('Membership application not found.', 404);
         }
         if ($app->status === 'rejected') {
-            abort(403, 'Application is rejected.');
+            throw new \App\Exceptions\MembershipApplicationException('Application is rejected.', 403);
         }
         return $app;
     }

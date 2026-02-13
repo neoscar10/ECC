@@ -90,6 +90,20 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
+        $exceptions->render(function (\App\Exceptions\MembershipApplicationException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'data' => null,
+                    'meta' => null,
+                    'errors' => null,
+                ], $e->getCode() ?: 400); 
+            }
+        });
+
+
+
         $exceptions->render(function (\Throwable $e, $request) {
             if ($request->is('api/*')) {
                 // Return debug info if app.debug is true

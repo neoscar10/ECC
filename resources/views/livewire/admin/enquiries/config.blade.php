@@ -11,7 +11,7 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="concierge_phone" class="form-label">Club Concierge Phone</label>
-                                <input type="text" class="form-control" id="concierge_phone" wire:model="concierge_phone" placeholder="+44 (0) 20 7123 4567">
+                                <input type="text" class="form-control" id="concierge_phone" wire:model="concierge_phone" placeholder="+91 12345 12345">
                                 @error('concierge_phone') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                             <div class="col-md-6 mb-3">
