@@ -13,6 +13,7 @@ use App\Mail\MembershipApplicationApprovedMail;
 use App\Mail\MembershipApplicationRejectedMail;
 use App\Services\Notifications\NotificationDedupe;
 use App\Jobs\Notifications\SendFcmToUserJob;
+use Illuminate\Support\Facades\Log;
 
 class Index extends Component
 {
@@ -101,31 +102,46 @@ class Index extends Component
             $dedupeKey = "account_approved:user:{$app->user_id}";
 
             if (!$dedupeService->alreadySent($dedupeKey)) {
-                $payload = [
-                    'type' => 'account_approved',
-                    'user_id' => (string)$app->user_id,
-                    'membership_tier_id' => $tier ? (string)$tier->id : null,
-                    'status' => 'approved',
-                    'approved_at' => now()->toIso8601String(),
-                    'target_page' => 'account_status',
-                    'target_id' => (string)$app->user_id,
-                ];
+                $tokensCount = $app->user->deviceTokens()->where('is_active', true)->count();
 
-                SendFcmToUserJob::dispatch(
-                    $app->user_id,
-                    'Account Approved',
-                    'Your ECC account has been approved. You can now access member features.',
-                    $payload
-                );
+                if ($tokensCount === 0) {
+                     Log::info('ACCOUNT_APPROVED_SEND_SKIPPED_NO_TOKENS', ['user_id' => $app->user->id]);
+                     // Mark as sent to prevent retrying loop, even though skipped
+                     $dedupeService->markSent($dedupeKey, 'account_approved', null, $app->user_id, ['status' => 'skipped_no_tokens']);
+                } else {
+                    Log::info('ACCOUNT_APPROVED_SEND_START', [
+                        'user_id' => $app->user->id,
+                        'tokens_count' => $tokensCount
+                    ]);
 
-                $dedupeService->markSent($dedupeKey, 'account_approved', null, $app->user_id, $payload);
+                    $payload = [
+                        'type' => 'account_approved',
+                        'user_id' => (string)$app->user_id,
+                        'membership_tier_id' => $tier ? (string)$tier->id : null,
+                        'status' => 'approved',
+                        'approved_at' => now()->toIso8601String(),
+                        'target_page' => 'account_status',
+                        'target_id' => (string)$app->user_id,
+                    ];
 
-                \Illuminate\Support\Facades\Log::info('ACCOUNT_APPROVED_NOTIFICATION_DISPATCH', [
-                    'user_id' => $app->user_id,
-                    'membership_tier_id' => $tier ? $tier->id : null,
-                    'dedupe_key' => $dedupeKey,
-                    'mode' => 'queued'
-                ]);
+                    try {
+                        SendFcmToUserJob::dispatchSync(
+                            $app->user_id,
+                            'Account Approved',
+                            'Your ECC account has been approved. You can now access member features.',
+                            $payload
+                        );
+                        
+                        Log::info('ACCOUNT_APPROVED_SEND_SUCCESS', ['user_id' => $app->user->id]);
+                        $dedupeService->markSent($dedupeKey, 'account_approved', null, $app->user_id, $payload);
+
+                    } catch (\Exception $e) {
+                         Log::error('ACCOUNT_APPROVED_SEND_FAILED', [
+                            'user_id' => $app->user->id,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                }
             }
         }
 
