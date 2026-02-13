@@ -40,7 +40,7 @@ class MembershipApplication extends Model
 
     public function membershipTier(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\MembershipTier::class);
+        return $this->belongsTo(\App\Models\MembershipTier::class, 'selected_tier_id');
     }
 
     public function membership()

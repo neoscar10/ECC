@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\MembershipApplicationApprovedMail;
 use App\Mail\MembershipApplicationRejectedMail;
+use App\Services\Notifications\NotificationDedupe;
+use App\Jobs\Notifications\SendFcmToUserJob;
 
 class Index extends Component
 {
@@ -90,6 +92,40 @@ class Index extends Component
             } catch (\Exception $e) {
                 // Log email failure but don't stop flow
                 \Illuminate\Support\Facades\Log::error('Failed to send approval email: ' . $e->getMessage());
+            }
+        }
+
+        // 4. Send Push Notification (Account Approved)
+        if ($app->user) {
+            $dedupeService = app(NotificationDedupe::class);
+            $dedupeKey = "account_approved:user:{$app->user_id}";
+
+            if (!$dedupeService->alreadySent($dedupeKey)) {
+                $payload = [
+                    'type' => 'account_approved',
+                    'user_id' => (string)$app->user_id,
+                    'membership_tier_id' => $tier ? (string)$tier->id : null,
+                    'status' => 'approved',
+                    'approved_at' => now()->toIso8601String(),
+                    'target_page' => 'account_status',
+                    'target_id' => (string)$app->user_id,
+                ];
+
+                SendFcmToUserJob::dispatch(
+                    $app->user_id,
+                    'Account Approved',
+                    'Your ECC account has been approved. You can now access member features.',
+                    $payload
+                );
+
+                $dedupeService->markSent($dedupeKey, 'account_approved', null, $app->user_id, $payload);
+
+                \Illuminate\Support\Facades\Log::info('ACCOUNT_APPROVED_NOTIFICATION_DISPATCH', [
+                    'user_id' => $app->user_id,
+                    'membership_tier_id' => $tier ? $tier->id : null,
+                    'dedupe_key' => $dedupeKey,
+                    'mode' => 'queued'
+                ]);
             }
         }
 
