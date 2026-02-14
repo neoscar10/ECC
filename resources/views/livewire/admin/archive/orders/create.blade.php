@@ -208,7 +208,7 @@
                                 </div>
                             @endif
                             
-                            @endif
+                            {{-- End Buyer Details Section --}}
                             
                             {{-- Fulfillment Method --}}
                             <div class="mb-3">
