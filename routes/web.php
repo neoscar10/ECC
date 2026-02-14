@@ -77,4 +77,8 @@ Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admi
 
     // Enquiries
     Route::get('/enquiries', \App\Livewire\Admin\Enquiries\Index::class)->name('enquiries.index');
+
+    // Vault Access
+    Route::get('/vault-access', \App\Livewire\Admin\Vault\Index::class)->name('vault-access.index');
+    Route::get('/vault-access/{user}', \App\Livewire\Admin\Vault\Show::class)->name('vault-access.show');
 });

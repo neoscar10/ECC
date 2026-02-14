@@ -23,7 +23,7 @@ class ContentBlockMobileResolver
     /**
      * Resolve a CMS Block into a Mobile-friendly DTO array.
      */
-    public function resolve(CmsBlock $block, ?User $user, bool $includeItems = true, int $itemLimit = 10): array
+    public function resolve(CmsBlock $block, ?User $user, bool $includeItems = true, int $itemLimit = 10, bool $includeDetail = false): array
     {
         // 1. Resolve Access State
         $access = $this->resolveAccess($block, $user);
@@ -66,6 +66,11 @@ class ContentBlockMobileResolver
         // 3. Body Text (Only if clear)
         if ($isClear) {
             $mobileBlock['body_text'] = $content['body'] ?? null;
+            
+            // Add Detail Markdown if requested and available
+            if ($includeDetail && ($content['has_detail_page'] ?? false)) {
+                $mobileBlock['detail_markdown'] = $content['detail_markdown'] ?? null;
+            }
         }
 
         // 4. Slider Resolution

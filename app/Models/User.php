@@ -111,4 +111,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(\App\Models\Shop\UserAddress::class);
     }
+
+    public function vaultItems()
+    {
+        return $this->hasMany(UserVaultItem::class);
+    }
 }

@@ -64,6 +64,25 @@ class OrderService
                 }
             }
 
+            // 6. Handle Vault
+            if (($data['fulfillment_method'] ?? 'delivery') === 'vault' && $data['buyer_type'] === 'registered') {
+                app(\App\Services\VaultService::class)->lockItemForUser(
+                    User::find($data['user_id']),
+                    [
+                        'source_type' => 'archive_product',
+                        'source_id' => $product->id,
+                        'sale_context_type' => Order::class,
+                        'sale_context_id' => $order->id,
+                        'item_title' => $product->title,
+                        'item_ref' => $product->code,
+                        'item_image_url' => $product->image_url, // Assuming accessor/column exists
+                        'currency' => 'INR', // Default or from product
+                        'price' => $data['unit_price_inr'],
+                        'notes' => 'Locked via Archive Sale',
+                    ]
+                );
+            }
+
             return $order;
         });
     }
@@ -122,6 +141,25 @@ class OrderService
             ]);
 
             event(new AuctionTimelineEventCreated($timelineEvent));
+
+            // 5. Handle Vault
+            if (($data['fulfillment_method'] ?? 'delivery') === 'vault' && $data['buyer_type'] === 'registered') {
+                app(\App\Services\VaultService::class)->lockItemForUser(
+                    User::find($data['user_id']),
+                    [
+                        'source_type' => 'auction_lot',
+                        'source_id' => $lot->id,
+                        'sale_context_type' => Order::class,
+                        'sale_context_id' => $order->id,
+                        'item_title' => $lot->title,
+                        'item_ref' => $lot->lot_no,
+                        'item_image_url' => $lot->image_url, // Assuming accessor/column exists
+                        'currency' => 'INR',
+                        'price' => $data['unit_price_inr'],
+                        'notes' => 'Locked via Auction Sale',
+                    ]
+                );
+            }
 
             return $order;
         });

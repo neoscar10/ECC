@@ -187,6 +187,9 @@ Route::prefix('v1')->group(function () {
          Route::delete('/{id}', [\App\Http\Controllers\Api\V1\UserDeviceTokenController::class, 'destroy']);
     });
     
+    // Vault
+    Route::middleware('auth:api')->get('me/vault', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'index']);
+
     // Auction Subscriptions
     Route::middleware('auth:api')->group(function () {
         Route::put('auctions/{id}/notification-subscription', [\App\Http\Controllers\Api\V1\AuctionSubscriptionController::class, 'toggle']);

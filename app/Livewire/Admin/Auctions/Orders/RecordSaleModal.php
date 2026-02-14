@@ -38,6 +38,9 @@ class RecordSaleModal extends Component
     
     public $selectedLot = null;
     public $selectedUser = null;
+    
+    public $fulfillment_method = 'delivery';
+    public $can_vault = false;
 
     protected $listeners = ['open-record-sale-modal' => 'open'];
 
@@ -121,6 +124,16 @@ class RecordSaleModal extends Component
         $this->userSearch = $user->name;
         $this->userSearchResults = [];
         $this->buyer_type = 'registered';
+        
+        $this->checkVaultAccess($user);
+    }
+
+    public function checkVaultAccess($user)
+    {
+        $this->can_vault = app(\App\Services\VaultService::class)->userHasAccess($user);
+        if (!$this->can_vault) {
+            $this->fulfillment_method = 'delivery';
+        }
     }
 
     public function open($lotId = null)
@@ -143,7 +156,13 @@ class RecordSaleModal extends Component
             'user_id' => 'required_if:buyer_type,registered|nullable|exists:users,id',
             'external_name' => 'required_if:buyer_type,external|nullable|string',
             'payment_method' => 'required|string',
+            'fulfillment_method' => 'required|in:delivery,vault',
         ]);
+        
+        if ($this->fulfillment_method === 'vault' && !$this->can_vault) {
+             $this->addError('fulfillment_method', "User does not have vault access.");
+             return;
+        }
 
         try {
             $service->createAuctionOrder([
@@ -159,6 +178,7 @@ class RecordSaleModal extends Component
                 'payment_reference' => $this->payment_reference,
                 'paid_at' => $this->paid_at,
                 'notes' => $this->notes,
+                'fulfillment_method' => $this->fulfillment_method,
             ], auth()->user());
 
             $this->showModal = false;
@@ -184,8 +204,9 @@ class RecordSaleModal extends Component
             'auction_lot_id', 'user_id', 'buyer_type', 
             'external_name', 'external_phone', 'external_email', 'external_address',
             'unit_price_inr', 'notes', 'lotSearch', 'userSearch', 
-            'selectedLot', 'selectedUser', 'payment_reference'
+            'selectedLot', 'selectedUser', 'payment_reference', 'can_vault'
         ]);
+        $this->fulfillment_method = 'delivery';
         $this->paid_at = now()->format('Y-m-d\TH:i');
         $this->payment_method = 'Offline';
         $this->buyer_type = 'registered';

@@ -89,7 +89,7 @@ class ContentBlockController extends Controller
             ->visibleTo($user, $userTier)
             ->findOrFail($id);
 
-        $resolved = $this->resolver->resolve($block, $user, true, 20);
+        $resolved = $this->resolver->resolve($block, $user, true, 20, true);
 
         return response()->json([
             'success' => true,

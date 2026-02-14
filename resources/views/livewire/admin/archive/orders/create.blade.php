@@ -208,6 +208,31 @@
                                 </div>
                             @endif
                             
+                            @endif
+                            
+                            {{-- Fulfillment Method --}}
+                            <div class="mb-3">
+                                <label class="form-label d-block">Fulfillment Method</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="fulfillment_method" id="fm_del" value="delivery" wire:model.live="fulfillment_method">
+                                    <label class="btn btn-outline-secondary" for="fm_del">
+                                        <i class="ri-truck-line align-middle me-1"></i> Delivery / Pickup
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="fulfillment_method" id="fm_vlt" value="vault" wire:model.live="fulfillment_method" 
+                                        @if(!$can_vault || $buyer_type === 'external') disabled @endif>
+                                    <label class="btn btn-outline-secondary" for="fm_vlt">
+                                        <i class="ri-safe-2-line align-middle me-1"></i> Lock in Vault
+                                    </label>
+                                </div>
+                                @if($buyer_type === 'registered' && !$can_vault && $user_id)
+                                    <div class="text-warning fs-11 mt-1"><i class="ri-alert-line"></i> User's membership tier does not support Vault Access.</div>
+                                @elseif($buyer_type === 'external')
+                                    <div class="text-muted fs-11 mt-1">Vault access available for registered members only.</div>
+                                @endif
+                                @error('fulfillment_method') <span class="text-danger fs-11">{{ $message }}</span> @enderror
+                            </div>
+
                             {{-- Summary Total --}}
                              <div class="mt-4 pt-4 border-top">
                                 <div class="d-flex justify-content-between align-items-center mb-0">

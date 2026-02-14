@@ -38,6 +38,7 @@ class MembershipDetailsResource extends JsonResource
                 'code' => $tier->code,
                 'name' => $tier->name,
                 'level' => $tier->id, // Assuming ID proxies for level or add level column if exists
+                'has_vault_access' => $tier->has_vault_access,
                 'benefits' => $tier->benefits_json,
             ],
             'privileges' => $privileges->map(function ($p) {

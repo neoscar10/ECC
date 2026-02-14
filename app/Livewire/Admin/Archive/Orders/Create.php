@@ -28,6 +28,8 @@ class Create extends Component
     public $qty = 1;
     public $unit_price_inr;
     public $notes;
+    public $fulfillment_method = 'delivery'; // delivery, vault
+    public $can_vault = false;
 
     // UI State
     public $productSearch = '';
@@ -124,6 +126,16 @@ class Create extends Component
         $this->userSearch = $user->name . ' (' . $user->email . ')';
         $this->userSearchResults = [];
         $this->showUserDropdown = false;
+
+        $this->checkVaultAccess($user);
+    }
+
+    public function checkVaultAccess($user)
+    {
+        $this->can_vault = app(\App\Services\VaultService::class)->userHasAccess($user);
+        if (!$this->can_vault) {
+            $this->fulfillment_method = 'delivery';
+        }
     }
 
     public function open()
@@ -169,7 +181,13 @@ class Create extends Component
             'buyer_type' => 'required|in:registered,external',
             'user_id' => 'required_if:buyer_type,registered|nullable|exists:users,id',
             'external_name' => 'required_if:buyer_type,external|nullable|string',
+            'fulfillment_method' => 'required|in:delivery,vault',
         ]);
+
+        if ($this->fulfillment_method === 'vault' && !$this->can_vault) {
+             $this->addError('fulfillment_method', "User does not have vault access.");
+             return;
+        }
 
         if ($this->selectedProduct && $this->qty > $this->selectedProduct->quantity) {
             $this->addError('qty', "Only {$this->selectedProduct->quantity} items available in stock.");
@@ -189,6 +207,7 @@ class Create extends Component
                 'qty' => $this->qty,
                 'unit_price_inr' => $this->unit_price_inr,
                 'notes' => $this->notes,
+                'fulfillment_method' => $this->fulfillment_method,
             ], auth()->user());
 
             $this->showModal = false;
@@ -216,8 +235,9 @@ class Create extends Component
             'product_id', 'enquiry_id', 'user_id', 'buyer_type', 
             'external_name', 'external_phone', 'external_email', 'external_address',
             'qty', 'unit_price_inr', 'notes', 'productSearch', 'userSearch', 'selectedProduct',
-            'showProductDropdown', 'showUserDropdown'
+            'showProductDropdown', 'showUserDropdown', 'can_vault'
         ]);
+        $this->fulfillment_method = 'delivery';
         $this->qty = 1;
         $this->buyer_type = 'registered';
     }

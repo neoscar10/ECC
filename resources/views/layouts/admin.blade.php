@@ -910,6 +910,8 @@
                             </div>
                         </li>
 
+
+
                         @php
                             $isArchiveActive = request()->routeIs('admin.archive.*');
                         @endphp
@@ -1013,6 +1015,15 @@
                                     </li>
                                 </ul>
                             </div>
+                        </li>
+                        
+                        @php
+                            $isVaultActive = request()->routeIs('admin.vault-access.*');
+                        @endphp
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ $isVaultActive ? 'active' : '' }}" href="{{ route('admin.vault-access.index') }}">
+                                <i class="ri-safe-2-line"></i> <span data-key="t-vault">Vault Access</span>
+                            </a>
                         </li>
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-pie-chart-line"></i> <span>Reports</span></a></li>
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-settings-3-line"></i> <span>Settings</span></a></li>
