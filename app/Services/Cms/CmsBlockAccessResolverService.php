@@ -18,6 +18,25 @@ class CmsBlockAccessResolverService
 
         // 1. Check Standard Restrictions (Hierarchy, Private, Allowlist)
         if ($block->restriction_mode === 'public') {
+            // Check Blur first
+            if ($block->blur_enabled) {
+                 if (!$this->hasClearViewAccess($block, $userTier)) {
+                      $upgrade = $this->findClearViewUpgrade($block);
+                      return $this->buildAccessResponse(
+                          'blur',
+                          'blurred',
+                          ['clear_view_tier_name' => $upgrade['tier']?->name ?? 'Higher Tier'],
+                          [
+                            'type' => 'upgrade_membership',
+                            'label' => 'Upgrade for Clear View',
+                            'target_tier' => $upgrade['tier'] ? $this->formatTier($upgrade['tier']) : null,
+                            'deeplink' => '/membership/tiers'
+                          ],
+                          $userTier,
+                          'lock'
+                      );
+                 }
+            }
             return $this->buildOpenAccess('Block is public.', $userTier);
         }
         

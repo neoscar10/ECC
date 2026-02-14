@@ -39,16 +39,16 @@
                     </div>
                     
                     <div class="card-body border border-dashed border-end-0 border-start-0">
-                         <div class="row g-3">
-                            <div class="col-xxl-4 col-sm-6">
+                         <div class="row g-2 align-items-center">
+                            <div class="col-md-3 service-filter">
                                 <div class="search-box">
                                     <input type="text" class="form-control search" placeholder="Search for blocks..." wire:model.live.debounce.500ms="search">
                                     <i class="ri-search-line search-icon"></i>
                                 </div>
                             </div>
-                            <div class="col-xxl-2 col-sm-4">
+                            <div class="col-md-auto">
                                 <div>
-                                    <select class="form-control" wire:model.live="filterPlacement">
+                                    <select class="form-control" wire:model.live="filterPlacement" style="min-width: 140px;">
                                         <option value="">All Placements</option>
                                         <option value="home">Home</option>
                                         <option value="explore">Explore</option>
@@ -57,9 +57,9 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-xxl-2 col-sm-4">
+                            <div class="col-md-auto">
                                 <div>
-                                    <select class="form-control" wire:model.live="filterType">
+                                    <select class="form-control" wire:model.live="filterType" style="min-width: 120px;">
                                         <option value="">All Types</option>
                                         <option value="card">Card</option>
                                         <option value="banner">Banner</option>
@@ -68,9 +68,9 @@
                                     </select>
                                 </div>
                             </div>
-                             <div class="col-xxl-2 col-sm-4">
+                             <div class="col-md-auto">
                                 <div>
-                                    <select class="form-control" wire:model.live="filterStatus">
+                                    <select class="form-control" wire:model.live="filterStatus" style="min-width: 120px;">
                                         <option value="">All Status</option>
                                         <option value="active">Active</option>
                                         <option value="inactive">Inactive</option>
@@ -127,19 +127,24 @@
                                             </td>
                                             <td>
                                                 @if($block->is_active)
-                                                    <span class="badge badge-soft-success text-uppercase">Active</span>
+                                                    <span class="badge bg-success-subtle text-success text-uppercase">Active</span>
                                                 @else
-                                                    <span class="badge badge-soft-danger text-uppercase">Inactive</span>
+                                                    <span class="badge bg-danger-subtle text-danger text-uppercase">Inactive</span>
                                                 @endif
                                             </td>
                                             <td>
-                                                <div class="d-flex gap-2">
-                                                    <div class="edit">
-                                                        <button class="btn btn-sm btn-success edit-item-btn" wire:click="edit({{ $block->id }})">Edit</button>
-                                                    </div>
-                                                    <div class="remove">
-                                                        <button class="btn btn-sm btn-danger remove-item-btn" wire:confirm="Are you sure you want to delete this block?" wire:click="delete({{ $block->id }})">Remove</button>
-                                                    </div>
+                                                <div class="dropdown d-inline-block">
+                                                    <button class="btn btn-soft-secondary btn-sm dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <i class="ri-more-fill align-middle"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end">
+                                                        <li><a href="javascript:void(0);" class="dropdown-item edit-item-btn" wire:click="edit({{ $block->id }})"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Edit</a></li>
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="dropdown-item remove-item-btn" wire:confirm="Are you sure you want to delete this block?" wire:click="delete({{ $block->id }})">
+                                                                <i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i> Delete
+                                                            </a>
+                                                        </li>
+                                                    </ul>
                                                 </div>
                                             </td>
                                         </tr>
@@ -234,7 +239,7 @@
                         <div class="tab-content text-muted">
                             @if($createStep === 1) @include('livewire.admin.cms.blocks.partials._step1-basic')
                             @elseif($createStep === 2) @include('livewire.admin.cms.blocks.partials._step2-type')
-                            @elseif($createStep === 3) @include('livewire.admin.cms.blocks.partials._step3-builder')
+                            @elseif($createStep === 3) @include('livewire.admin.cms.blocks.partials._step3-builder', ['builderSummary' => $this->builderSummary])
                             @elseif($createStep === 4) @include('livewire.admin.cms.blocks.partials._step4-access')
                             @elseif($createStep === 5) @include('livewire.admin.cms.blocks.partials._step5-review')
                             @endif

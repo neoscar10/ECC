@@ -3766,6 +3766,110 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "Content (CMS)",
+            "item": [
+                {
+                    "name": "Get Placements",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/content/placements",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "content",
+                                "placements"
+                            ]
+                        },
+                        "description": "Get list of available content placements (e.g. 'home', 'explore')."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Blocks (Home)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}",
+                                "description": "Optional. Provide to see member-specific content.",
+                                "disabled": true
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/content/blocks?placement=home&include_items=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "content",
+                                "blocks"
+                            ],
+                            "query": [
+                                {
+                                    "key": "placement",
+                                    "value": "home",
+                                    "description": "Required placement key"
+                                },
+                                {
+                                    "key": "include_items",
+                                    "value": "1",
+                                    "description": "Include slider items"
+                                }
+                            ]
+                        },
+                        "description": "Fetch blocks for a placement. Supports optional authentication."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Block Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}",
+                                "disabled": true
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/content/blocks/{{block_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "content",
+                                "blocks",
+                                "{{block_id}}"
+                            ]
+                        },
+                        "description": "Get full detail of a specific block."
+                    },
+                    "response": []
+                }
+            ]
         }
     ]
 }

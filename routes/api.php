@@ -93,6 +93,9 @@ Route::prefix('v1')->group(function () {
     // CMS Routes
     Route::middleware('auth:api')->prefix('cms')->group(function () {
         Route::get('blocks', [\App\Http\Controllers\Api\V1\Cms\CmsBlockController::class, 'index']);
+        // Mobile CMS Routes
+        Route::get('mobile-blocks', [\App\Http\Controllers\Api\V1\Content\ContentBlockController::class, 'index']);
+        Route::get('mobile-blocks/{id}', [\App\Http\Controllers\Api\V1\Content\ContentBlockController::class, 'show']);
     });
 
     // Auction Routes
@@ -197,4 +200,11 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::middleware('auth:api')->get('me/contact-enquiries', [\App\Http\Controllers\Api\V1\ContactController::class, 'index']);
+
+    // Mobile Content Routes (Public / Optional Auth)
+    Route::prefix('content')->group(function () {
+        Route::get('placements', [\App\Http\Controllers\Api\V1\Content\ContentBlockController::class, 'placements']);
+        Route::get('blocks', [\App\Http\Controllers\Api\V1\Content\ContentBlockController::class, 'index']);
+        Route::get('blocks/{id}', [\App\Http\Controllers\Api\V1\Content\ContentBlockController::class, 'show']);
+    });
 });

@@ -27,13 +27,24 @@
                     @if($contentImage || $existingContentImage)
                         <img src="{{ $contentImage ? $contentImage->temporaryUrl() : $existingContentImage }}" class="w-100 h-100 object-fit-cover">
                     @endif
-                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark" style="opacity: 0.3;"></div>
-                    <div class="position-absolute bottom-0 start-0 p-3 text-white">
-                        @if($contentBadge) <span class="badge bg-primary mb-1">{{ $contentBadge }}</span> @endif
-                        <h6 class="fw-bold mb-0 text-white">{{ $contentTitle ?: 'Banner Title' }}</h6>
-                        @if($contentSubtitle) <small class="d-block text-white-50">{{ $contentSubtitle }}</small> @endif
-                    </div>
+                    
+                    @if(($textPosition ?? 'below') === 'above')
+                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark" style="opacity: 0.3;"></div>
+                        <div class="position-absolute bottom-0 start-0 p-3 text-white">
+                            @if($contentBadge) <span class="badge bg-primary mb-1">{{ $contentBadge }}</span> @endif
+                            <h6 class="fw-bold mb-0 text-white">{{ $contentTitle ?: 'Banner Title' }}</h6>
+                            @if($contentSubtitle) <small class="d-block text-white-50">{{ $contentSubtitle }}</small> @endif
+                        </div>
+                    @endif
                 </div>
+                
+                @if(($textPosition ?? 'below') === 'below')
+                    <div class="p-3 bg-white">
+                        @if($contentBadge) <span class="badge bg-primary mb-1">{{ $contentBadge }}</span> @endif
+                        <h6 class="fw-bold mb-0 text-dark">{{ $contentTitle ?: 'Banner Title' }}</h6>
+                        @if($contentSubtitle) <small class="d-block text-muted">{{ $contentSubtitle }}</small> @endif
+                    </div>
+                @endif
                 @if($hasDetailPage)
                     <div class="p-2 bg-white">
                         <button class="btn btn-sm btn-dark w-100">{{ $contentCtaText ?: 'View Details' }}</button>
@@ -42,24 +53,40 @@
             </div>
 
         @elseif($type === 'card')
-             <!-- Card Preview -->
-             <div class="card border-0 shadow-sm mb-3">
-                @if($contentImage || $existingContentImage)
-                    <div style="height: 140px; background-color: #f0f0f0;">
-                         <img src="{{ $contentImage ? $contentImage->temporaryUrl() : $existingContentImage }}" class="w-100 h-100 object-fit-cover rounded-top">
-                    </div>
-                @endif
-                <div class="card-body p-3">
-                    @if($contentBadge) <span class="badge bg-light text-primary mb-2">{{ $contentBadge }}</span> @endif
-                    <h6 class="card-title fw-bold mb-1">{{ $contentTitle ?: 'Card Title' }}</h6>
-                    @if($contentSubtitle) <h6 class="card-subtitle text-muted fs-12 mb-2">{{ $contentSubtitle }}</h6> @endif
-                    <p class="card-text fs-12 text-muted mb-3">{{ Str::limit($contentBody, 80) }}</p>
-                    
-                    @if($hasDetailPage)
-                        <button class="btn btn-sm btn-outline-dark w-100">{{ $contentCtaText ?: 'Learn More' }}</button>
-                    @endif
-                </div>
-             </div>
+              <!-- Card Preview -->
+              <div class="card border-0 shadow-sm mb-3 position-relative overflow-hidden">
+                 @if($contentImage || $existingContentImage)
+                     <div style="height: 140px; background-color: #f0f0f0;" class="position-relative">
+                          <img src="{{ $contentImage ? $contentImage->temporaryUrl() : $existingContentImage }}" class="w-100 h-100 object-fit-cover rounded-top">
+                          
+                          @if(($textPosition ?? 'below') === 'above')
+                             <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark" style="opacity: 0.3;"></div>
+                             <div class="position-absolute bottom-0 start-0 p-3 text-white">
+                                 @if($contentBadge) <span class="badge bg-light text-primary mb-1">{{ $contentBadge }}</span> @endif
+                                 <h6 class="card-title fw-bold mb-0">{{ $contentTitle ?: 'Card Title' }}</h6>
+                                 @if($contentSubtitle) <small class="d-block text-white-50">{{ $contentSubtitle }}</small> @endif
+                             </div>
+                          @endif
+                     </div>
+                 @endif
+
+                 @if(($textPosition ?? 'below') === 'below')
+                 <div class="card-body p-3">
+                     @if($contentBadge) <span class="badge bg-light text-primary mb-2">{{ $contentBadge }}</span> @endif
+                     <h6 class="card-title fw-bold mb-1">{{ $contentTitle ?: 'Card Title' }}</h6>
+                     @if($contentSubtitle) <h6 class="card-subtitle text-muted fs-12 mb-2">{{ $contentSubtitle }}</h6> @endif
+                     <p class="card-text fs-12 text-muted mb-3">{{ Str::limit($contentBody, 80) }}</p>
+                     
+                     @if($hasDetailPage)
+                         <button class="btn btn-sm btn-outline-dark w-100">{{ $contentCtaText ?: 'Learn More' }}</button>
+                     @endif
+                 </div>
+                 @elseif($hasDetailPage)
+                     <div class="p-2">
+                          <button class="btn btn-sm btn-outline-dark w-100">{{ $contentCtaText ?: 'Learn More' }}</button>
+                     </div>
+                 @endif
+              </div>
 
         @elseif($type === 'slider')
             <!-- Slider Preview -->
@@ -95,16 +122,29 @@
                 @else
                     <!-- Item Slider Preview (Category/Manual) -->
                     <div class="d-flex gap-2 overflow-hidden" style="margin-right: -16px;">
-                        <!-- Mock Items -->
-                        @for($i=1; $i<=3; $i++)
-                        <div class="card border-0 shadow-sm flex-shrink-0" style="width: 140px;">
-                            <div class="bg-light rounded-top" style="height: 100px;"></div>
-                            <div class="card-body p-2">
-                                <h6 class="fs-12 fw-bold mb-1 text-truncate">Sample Item {{ $i }}</h6>
-                                <p class="fs-10 text-muted mb-0">INR 1,200</p>
+                        @if($sliderMode === 'category' && isset($previewData['items']) && !empty($previewData['items']))
+                            @foreach($previewData['items'] as $item)
+                                <div class="card border-0 shadow-sm flex-shrink-0" style="width: 140px;">
+                                    <div class="bg-light rounded-top position-relative" style="height: 100px;">
+                                        @if(!empty($item['image']))
+                                            <img src="{{ $item['image'] }}" class="w-100 h-100 object-fit-cover rounded-top">
+                                        @else
+                                            <div class="d-flex align-items-center justify-content-center h-100 text-muted fs-10">No Image</div>
+                                        @endif
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <h6 class="fs-12 fw-bold mb-1 text-truncate" title="{{ $item['title'] }}">{{ $item['title'] }}</h6>
+                                        <p class="fs-10 text-muted mb-0">{{ $item['price'] ?? '' }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                             <!-- Empty State -->
+                            <div class="d-flex flex-column align-items-center justify-content-center w-100 text-muted py-4">
+                                <i class="ri-inbox-line fs-24 mb-2"></i>
+                                <span class="fs-12">No items found</span>
                             </div>
-                        </div>
-                        @endfor
+                        @endif
                          <div class="flex-shrink-0" style="width: 20px;"></div>
                     </div>
                 @endif

@@ -1,3 +1,21 @@
+
+@push('styles')
+<style>
+    @media (min-width: 992px) {
+        .cms-preview-sticky {
+            position: sticky;
+            top: 20px; /* Adjust as needed, user suggested 1rem or 90px. 20px matches existing behavior */
+            z-index: 9;
+        }
+    }
+    @media (max-width: 991.98px) {
+        .cms-preview-sticky {
+            position: static;
+        }
+    }
+</style>
+@endpush
+
 <div class="row g-4">
     <!-- Builder Form -->
     <div class="col-lg-7">
@@ -5,6 +23,25 @@
             <div class="card-header bg-light">
                 <h6 class="mb-0 fw-semibold">Content Builder</h6>
             </div>
+            
+            <!-- Summary Panel -->
+            @if($builderSummary)
+            <div class="px-3 pt-3">
+                <div class="card bg-light border-0 mb-0">
+                    <div class="card-body p-2">
+                         <div class="row g-2">
+                             @foreach($builderSummary as $label => $val)
+                                 <div class="col-6 col-sm-4">
+                                     <small class="text-uppercase text-muted fs-10 d-block">{{ $label }}</small>
+                                     <span class="fw-medium fs-12 text-dark">{{ $val }}</span>
+                                 </div>
+                             @endforeach
+                         </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <div class="card-body">
                 <!-- Common Fields -->
                 <div class="row g-3 mb-4">
@@ -13,16 +50,20 @@
                          <input type="text" class="form-control" wire:model.live="contentTitle" placeholder="Public title">
                          @error('contentTitle') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
+                    @if(!($type === 'slider' && $sliderMode === 'category'))
                     <div class="col-md-6">
                          <label class="form-label">Subtitle</label>
                          <input type="text" class="form-control" wire:model.live="contentSubtitle">
                     </div>
-                     <div class="col-md-6">
+                    <div class="col-md-6">
                          <label class="form-label">Badge Text</label>
                          <input type="text" class="form-control" wire:model.live="contentBadge" placeholder="e.g. New">
                     </div>
+                    @endif
+
+
                     
-                    @if($type !== 'slider')
+                    @if($type !== 'slider' && $type !== 'banner')
                     <div class="col-12">
                          <label class="form-label">Body Text</label>
                          <textarea class="form-control" rows="2" wire:model.live="contentBody"></textarea>
@@ -46,6 +87,22 @@
                              @error('contentImage') <span class="text-danger small">{{ $message }}</span> @enderror
                          </div>
                      @endif
+
+                     <div class="row mt-3">
+                        <div class="col-md-6">
+                             <label class="form-label">Text Position</label>
+                             <div class="d-flex gap-3">
+                                 <div class="form-check">
+                                     <input class="form-check-input" type="radio" name="textPos" id="tpBelow" value="below" wire:model.live="textPosition">
+                                     <label class="form-check-label" for="tpBelow">Below Image</label>
+                                 </div>
+                                 <div class="form-check">
+                                     <input class="form-check-input" type="radio" name="textPos" id="tpAbove" value="above" wire:model.live="textPosition">
+                                     <label class="form-check-label" for="tpAbove">Overlay Image</label>
+                                 </div>
+                             </div>
+                        </div>
+                     </div>
                 @endif
 
                 <!-- Slider Specifics -->
@@ -68,22 +125,99 @@
 
                     <!-- Category Mode -->
                     @if($sliderMode === 'category')
-                         <div class="mt-3">
-                             <label class="form-label">Select Category</label>
-                             {{-- Dynamic dropdown based on source would go here. For now, simple input or mock --}}
-                             <select class="form-select" wire:model.live="sliderCategoryId">
-                                  <option value="">Select Category...</option>
-                                  @foreach($sourceCategories as $cat)
-                                     <option value="{{ $cat['id'] }}">{{ $cat['name'] }}</option>
-                                  @endforeach
-                             </select>
-                             @error('sliderCategoryId') <span class="text-danger small">{{ $message }}</span> @enderror
-                             
-                             <div class="mt-3">
-                                 <label class="form-label">Item Limit</label>
-                                 <input type="number" class="form-control" wire:model.live="sliderLimit" min="1" max="50">
+                        @if($sliderSource === 'auctions')
+                             <div class="mt-3" x-data="{ 
+                                open: @entangle('lotsDropdownOpen'),
+                                closeDropdown() { this.open = false; } 
+                             }" @click.outside="closeDropdown()">
+                                 <label class="form-label">Select Auction Lots <span class="text-danger">*</span></label>
+                                 <p class="text-muted text-xs">Search and select one or more lots to display.</p>
+                                 
+                                 <div class="position-relative">
+                                     <div class="input-group">
+                                         <span class="input-group-text"><i class="ri-search-line"></i></span>
+                                         <input type="text" class="form-control" 
+                                            placeholder="Search lots by title or number..." 
+                                            wire:model.live.debounce.300ms="lotSearch"
+                                            wire:focus="focusLotsSearch"
+                                            @keydown.escape="closeDropdown()"
+                                         >
+                                     </div>
+
+                                     <!-- Dropdown Results -->
+                                     <div x-show="open" x-transition 
+                                          class="position-absolute w-100 bg-white border shadow rounded mt-1 z-3" 
+                                          style="max-height: 260px; overflow-y: auto; display: none;">
+                                          
+                                          @if(count($lotSearchResults) > 0)
+                                             <div class="list-group list-group-flush">
+                                                 @foreach($lotSearchResults as $item)
+                                                     @php
+                                                         $isSelected = collect($selectedSliderItems)->contains('id', $item['id']);
+                                                     @endphp
+                                                     <button type="button" 
+                                                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {{ $isSelected ? 'bg-light text-muted' : '' }}" 
+                                                        wire:click="addSliderItem({{ $item['id'] }})"
+                                                        @if($isSelected) disabled @endif
+                                                     >
+                                                         <div>
+                                                             <div class="fw-semibold text-truncate" style="max-width: 250px;">{{ $item['name'] }}</div>
+                                                             <div class="small text-muted d-flex gap-2">
+                                                                 <span class="badge bg-light text-dark border">{{ ucfirst($item['status']) }}</span>
+                                                                 <span>{{ $item['price'] }}</span>
+                                                             </div>
+                                                         </div>
+                                                         @if(!$isSelected)
+                                                            <span class="badge bg-primary-subtle text-primary">Add</span>
+                                                         @else
+                                                            <span class="badge bg-light text-muted"><i class="ri-check-line"></i></span>
+                                                         @endif
+                                                     </button>
+                                                 @endforeach
+                                             </div>
+                                          @else
+                                             <div class="p-3 text-center text-muted small">No lots found matching "{{ $lotSearch }}"</div>
+                                          @endif
+                                     </div>
+                                 </div>
+
+                                 <label class="form-label mt-3">Selected Lots </label>
+                                 @if(count($selectedSliderItems) > 0)
+                                     <ul class="list-group" wire:sortable="updateSliderItemOrder">
+                                         @foreach($selectedSliderItems as $index => $item)
+                                             <li class="list-group-item d-flex justify-content-between align-items-center" wire:sortable.item="{{ $item['id'] }}" draggable="true">
+                                                 <div class="d-flex align-items-center gap-2">
+                                                     <i class="ri-drag-move-2-line text-muted handle" wire:sortable.handle style="cursor: grab;"></i>
+                                                     <span>{{ $item['name'] }}</span>
+                                                 </div>
+                                                 <button type="button" class="btn btn-sm btn-icon btn-ghost-danger" wire:click="removeSliderItem({{ $index }})"><i class="ri-delete-bin-line"></i></button>
+                                             </li>
+                                         @endforeach
+                                     </ul>
+                                 @else
+                                     <div class="alert alert-light border border-dashed text-center text-muted mb-0">No lots selected yet.</div>
+                                 @endif
+                                 @error('selectedSliderItems') <span class="text-danger small">{{ $message }}</span> @enderror
                              </div>
-                         </div>
+                        
+                        @else
+                             <!-- Shop / Archive Categories -->
+                             <div class="mt-3">
+                                 <label class="form-label">Select Category <span class="text-danger">*</span></label>
+                                 <select class="form-select" wire:model.live="sliderCategoryId">
+                                      <option value="">Select Category...</option>
+                                      @foreach($sourceCategories as $cat)
+                                         <option value="{{ $cat['id'] }}">{!! $cat['name'] !!}</option>
+                                      @endforeach
+                                 </select>
+                                 @error('sliderCategoryId') <span class="text-danger small">{{ $message }}</span> @enderror
+                                 
+                                 <div class="mt-3">
+                                     <label class="form-label">Item Limit</label>
+                                     <input type="number" class="form-control" wire:model.live="sliderLimit" min="1" max="50">
+                                 </div>
+                             </div>
+                        @endif
                     
                     <!-- Manual Mode -->
                     @elseif($sliderMode === 'manual')
@@ -110,7 +244,6 @@
                                      <li class="list-group-item d-flex justify-content-between align-items-center" wire:sortable.item="{{ $item['id'] }}" draggable="true">
                                          <div class="d-flex align-items-center gap-2">
                                              <i class="ri-drag-move-2-line text-muted handle" wire:sortable.handle></i>
-                                             <span>{{ $item['name'] }}</span>
                                          </div>
                                          <button type="button" class="btn btn-sm btn-icon btn-ghost-danger" wire:click="removeSliderItem({{ $index }})"><i class="ri-delete-bin-line"></i></button>
                                      </li>
@@ -156,6 +289,7 @@
                 @endif
                 
                 <!-- Detail Page Toggle -->
+                @if(!($type === 'slider' && $sliderMode === 'category'))
                 <hr class="border-dashed my-4">
                 <div class="form-check form-switch form-switch-md mb-3">
                      <input class="form-check-input" type="checkbox" role="switch" id="detailPageSwitch" wire:model.live="hasDetailPage">
@@ -171,23 +305,28 @@
                          </div>
                          <div class="col-12">
                              <label class="form-label">Detail Content (Markdown) <span class="text-danger">*</span></label>
-                             <textarea class="form-control font-monospace" rows="6" wire:model.lazy="contentMarkdown"></textarea>
+                             <x-ui.markdown-editor wire:model.lazy="contentMarkdown" :value="$contentMarkdown" id="blockMarkdown" height="300" />
                              @error('contentMarkdown') <span class="text-danger small">{{ $message }}</span> @enderror
                          </div>
                     </div>
+                @endif
                 @endif
             </div>
         </div>
     </div>
 
     <!-- Live Preview -->
-    <div class="col-lg-5">
-        <div class="sticky-top" style="top: 20px; z-index: 1;">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="text-muted text-uppercase fw-semibold fs-12 mb-0">Live Mobile Preview</h6>
-                <span class="badge bg-light text-dark">iPhone 14</span>
+    <div class="col-12 col-lg-5">
+        <div class="cms-preview-sticky">
+            <div class="card border shadow-sm">
+                <div class="card-header bg-light d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0 fw-semibold text-uppercase fs-12 text-muted">Rough Live Mobile Preview</h6>
+                    <span class="badge bg-white text-dark border">Phone</span>
+                </div>
+                <div class="card-body bg-light d-flex justify-content-center p-3">
+                    @include('livewire.admin.cms.blocks.partials._mobile-preview')
+                </div>
             </div>
-            @include('livewire.admin.cms.blocks.partials._mobile-preview')
         </div>
     </div>
 </div>
