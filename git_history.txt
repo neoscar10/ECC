@@ -1,0 +1,20 @@
+﻿49dbe56 (HEAD -> main) added access object to the vault summary endpoint
+4a2fb80 fixeed archive order error
+622f737 updated detail page to hold detail markdown for cms
+8cbd207 fixed dragable feat in the cms
+072bea2 completed the cms
+1b8b201 made notification sync instead of queued for approvals
+ae7b0c0 added seand notification feature upon account approval
+df6a59a updated message for response in the membership application validation
+03335a2 removed hardcoded data from enquiries contact config
+26e7079 added a config modal for contact details
+c38eba9 feat: enquiries endpoint and API
+c284c66 removed get item history from ledger
+ee3ddd4 implemented the Concierge Ledger feature
+807bf9d updted theme to material
+2f1745c updted theme
+efe154a added dummy otp login
+525827d updated theme customizer to specification
+d56294e fixed table hiding actions toggle
+0ff3e20 completed cms
+464f541 added type fields to auction images for migration

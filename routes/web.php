@@ -71,7 +71,6 @@ Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admi
         Route::get('/carts', \App\Livewire\Admin\Shop\Carts\Index::class)->name('carts');
         Route::get('/inventory', \App\Livewire\Admin\Shop\Inventory\Index::class)->name('inventory');
         Route::get('/orders', \App\Livewire\Admin\Shop\Orders\Index::class)->name('orders');
-        Route::get('/orders', \App\Livewire\Admin\Shop\Orders\Index::class)->name('orders');
         Route::get('/orders/{id}', \App\Livewire\Admin\Shop\Orders\Show::class)->name('orders.show');
     });
 
@@ -80,7 +79,15 @@ Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admi
 
     // Vault Access
     Route::get('/vault-access', \App\Livewire\Admin\Vault\Index::class)->name('vault-access.index');
-    Route::get('/vault-access', \App\Livewire\Admin\Vault\Index::class)->name('vault-access.index');
     Route::get('/vault-access/{user}', \App\Livewire\Admin\Vault\Show::class)->name('vault-access.show');
-    
+
+    // Reports
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', \App\Livewire\Admin\Reports\Index::class)->name('index');
+        Route::get('/sales', \App\Livewire\Admin\Reports\SalesReport::class)->name('sales');
+        Route::get('/membership', \App\Livewire\Admin\Reports\MembershipReport::class)->name('membership');
+        Route::get('/auctions', \App\Livewire\Admin\Reports\AuctionReport::class)->name('auctions');
+        Route::get('/enquiries', \App\Livewire\Admin\Reports\EnquiryReport::class)->name('enquiries');
+        Route::get('/vault', \App\Livewire\Admin\Reports\VaultLedgerReport::class)->name('vault');
+    });
 });

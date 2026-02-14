@@ -1025,7 +1025,11 @@
                                 <i class="ri-safe-2-line"></i> <span data-key="t-vault">Vault Access</span>
                             </a>
                         </li>
-                        <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-pie-chart-line"></i> <span>Reports</span></a></li>
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}">
+                                <i class="ri-pie-chart-line"></i> <span data-key="t-reports">Reports</span>
+                            </a>
+                        </li>
                         <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-settings-3-line"></i> <span>Settings</span></a></li>
                     </ul>
                 </div>
