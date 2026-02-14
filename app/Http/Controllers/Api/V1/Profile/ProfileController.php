@@ -105,6 +105,16 @@ class ProfileController extends Controller
         $user = $request->user();
         $data = $this->service->getMembershipDetails($user);
 
+        // Inject Vault Details
+        $data['vault'] = [
+            'can_access' => (bool) $user->has_vault_access,
+            'counts' => [
+                 'locked' => $user->vaultItems()->locked()->count(),
+                 'removed' => $user->vaultItems()->removed()->count(),
+                 'total' => $user->vaultItems()->count()
+            ]
+        ];
+
         return $this->success(
             new MembershipDetailsResource($data),
             'Membership details retrieved.'

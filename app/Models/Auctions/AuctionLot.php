@@ -175,4 +175,10 @@ class AuctionLot extends Model
             }
         });
     }
+
+    public function getImageUrlAttribute()
+    {
+        $image = $this->images->first();
+        return $image ? \Illuminate\Support\Facades\Storage::url($image->image_path) : null;
+    }
 }

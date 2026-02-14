@@ -116,4 +116,20 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(UserVaultItem::class);
     }
+
+    public function getMemberCodeAttribute(): string
+    {
+        return 'EXEC-' . str_pad($this->id, 4, '0', STR_PAD_LEFT);
+    }
+
+    public function getDisplayLocationAttribute(): string
+    {
+        $parts = array_filter([$this->city, $this->country]);
+        return empty($parts) ? '—' : implode(', ', $parts);
+    }
+
+    public function getHasVaultAccessAttribute(): bool
+    {
+        return (bool) $this->currentMembership?->membershipTier?->has_vault_access;
+    }
 }

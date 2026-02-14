@@ -188,7 +188,11 @@ Route::prefix('v1')->group(function () {
     });
     
     // Vault
-    Route::middleware('auth:api')->get('me/vault', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'index']);
+    Route::middleware('auth:api')->prefix('me/vault')->group(function () {
+        Route::get('summary', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'summary']);
+        Route::get('/', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'index']);
+        Route::get('{id}', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'show']);
+    });
 
     // Auction Subscriptions
     Route::middleware('auth:api')->group(function () {

@@ -127,4 +127,10 @@ class ArchiveProduct extends Model
     {
         return $this->hasMany(\App\Models\Order::class);
     }
+
+    public function getImageUrlAttribute()
+    {
+        $image = $this->images->first();
+        return $image ? \Illuminate\Support\Facades\Storage::url($image->image_path) : null;
+    }
 }

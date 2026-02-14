@@ -19,11 +19,53 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-body text-center">
+                    <div class="d-flex justify-content-start mb-3">
+                         <a href="{{ route('admin.vault-access.index') }}" class="btn btn-sm btn-soft-secondary"><i class="ri-arrow-left-line align-bottom me-1"></i> Back to List</a>
+                    </div>
+                    
                     <h5 class="card-title mb-3">Member Profile</h5>
                     <img src="{{ $this->user->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($this->user->name) }}" class="rounded-circle avatar-lg img-thumbnail mb-3" alt="user-profile-image">
                     <h5 class="mb-1">{{ $this->user->name }}</h5>
                     <p class="text-muted mb-2">{{ $this->user->email }}</p>
-                    <span class="badge bg-primary text-uppercase">{{ $this->user->currentMembership->membershipTier->name }}</span>
+                    <span class="badge bg-primary text-uppercase mb-4">{{ $this->user->currentMembership->membershipTier->name }}</span>
+                    
+                    <div class="text-start mt-2">
+                        <h6 class="fs-12 text-uppercase text-muted mb-3">Personal Details</h6>
+                        <div class="table-responsive">
+                            <table class="table table-borderless table-sm table-nowrap mb-0">
+                                <tbody>
+                                    <tr>
+                                        <th class="ps-0" scope="row">Member Code :</th>
+                                        <td class="text-muted">{{ $this->user->member_code }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="ps-0" scope="row">Phone :</th>
+                                        <td class="text-muted">{{ $this->user->phone ?? '—' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="ps-0" scope="row">Location :</th>
+                                        <td class="text-muted">{{ $this->user->display_location }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="ps-0" scope="row">Joined :</th>
+                                        <td class="text-muted">{{ $this->user->created_at->format('d M, Y') }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 pt-3 border-top text-start">
+                         <h6 class="fs-12 text-uppercase text-muted mb-3">Vault Stats</h6>
+                         <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Locked Items</span>
+                            <span class="badge bg-success-subtle text-success">{{ $this->user->vaultItems()->locked()->count() }}</span>
+                         </div>
+                         <div class="d-flex justify-content-between">
+                            <span class="text-muted">Released Items</span>
+                            <span class="badge bg-secondary-subtle text-secondary">{{ $this->user->vaultItems()->removed()->count() }}</span>
+                         </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -50,8 +92,8 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="flex-shrink-0 me-3">
-                                                    @if($item->item_image_url)
-                                                        <img src="{{ $item->item_image_url }}" alt="" class="avatar-sm rounded">
+                                                    @if($item->display_image_url)
+                                                        <img src="{{ $item->display_image_url }}" alt="" class="avatar-sm rounded" onerror="this.onerror=null;this.src='https://placehold.co/100?text=No+Image';">
                                                     @else
                                                         <div class="avatar-sm bg-light rounded d-flex align-items-center justify-content-center">
                                                             <i class="ri-image-2-line fs-20 text-muted"></i>

@@ -50,6 +50,7 @@ class MembershipDetailsResource extends JsonResource
                     'icon' => $p->icon,
                 ];
             }),
+            'vault' => $this['vault'] ?? null,
         ];
     }
 }

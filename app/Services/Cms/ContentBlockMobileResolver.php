@@ -117,7 +117,7 @@ class ContentBlockMobileResolver
     {
         if (!$url) return null;
         if (filter_var($url, FILTER_VALIDATE_URL)) return $url;
-        return asset($url);
+        return Storage::url($url);
     }
 
     protected function resolveSliderData(CmsBlock $block, bool $includeItems, int $limit): array
