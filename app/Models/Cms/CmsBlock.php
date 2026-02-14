@@ -14,6 +14,11 @@ class CmsBlock extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\CmsBlockFactory::new();
+    }
+
     protected $guarded = [];
 
     protected $casts = [

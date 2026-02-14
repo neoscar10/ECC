@@ -3,10 +3,9 @@
         <label class="form-label">Placement <span class="text-danger">*</span></label>
         <select class="form-select" wire:model.live="placement">
             <option value="">Select Placement...</option>
-            <option value="home">Home</option>
-            <option value="explore">Explore</option>
-            <option value="profile">Profile</option>
-            <option value="announcements">Announcements</option>
+            @foreach(config('cms.placements') as $key => $label)
+                <option value="{{ $key }}">{{ $label }}</option>
+            @endforeach
         </select>
         @error('placement') <span class="text-danger small">{{ $message }}</span> @enderror
     </div>

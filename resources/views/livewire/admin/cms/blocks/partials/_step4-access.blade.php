@@ -88,8 +88,27 @@
                     </div>
                 @elseif($restrictionType === 'random')
                     {{-- Random types logic --}}
-                    <div class="alert alert-warning border-0 mb-3">
-                        <i class="ri-alert-line me-1"></i> Random (Allowlist) Blur not explicitly supported in UI yet. All visible tiers will see clear content.
+                    <div class="col-md-12">
+                        <label class="form-label">Select Clear View Tiers</label>
+                        <div class="row g-2" wire:key="clear-tiers-{{ $restrictionMode }}-{{ md5(json_encode($computedVisibilityTierIds)) }}">
+                            @foreach($membershipTiers as $tier)
+                                @if(in_array($tier->id, $computedVisibilityTierIds))
+                                    <div class="col-6">
+                                        <div class="form-check card-radio">
+                                            <input class="form-check-input" type="checkbox" value="{{ $tier->id }}" wire:model.live="selectedRandomTiers" id="randTier_{{ $tier->id }}">
+                                            <label class="form-check-label" for="randTier_{{ $tier->id }}">
+                                                <span class="fs-14 mb-1 d-block">{{ $tier->name }}</span>
+                                                <span class="text-muted text-xs">Level {{ $tier->level }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                         @if(empty($computedVisibilityTierIds))
+                            <p class="text-muted small">No tiers visible.</p>
+                        @endif
+                        @error('selectedRandomTiers') <span class="text-danger text-sm">{{ $message }}</span> @enderror
                     </div>
                     @if($selectedRandomTiers)
                          <div class="text-muted small">Selected: {{ count($selectedRandomTiers) }} tiers</div>

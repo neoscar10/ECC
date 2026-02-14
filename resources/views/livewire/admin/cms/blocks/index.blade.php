@@ -1,4 +1,5 @@
 <div>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <div class="container-fluid">
         <!-- Page Header -->
         <div class="row">
@@ -50,10 +51,9 @@
                                 <div>
                                     <select class="form-control" wire:model.live="filterPlacement" style="min-width: 140px;">
                                         <option value="">All Placements</option>
-                                        <option value="home">Home</option>
-                                        <option value="explore">Explore</option>
-                                        <option value="profile">Profile</option>
-                                        <option value="announcements">Announcements</option>
+                                        @foreach(config('cms.placements') as $key => $label)
+                                            <option value="{{ $key }}">{{ $label }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
@@ -94,10 +94,20 @@
                                         <th class="sort" data-sort="action">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody class="list form-check-all" wire:sortable="updateOrder">
+                                <tbody class="list form-check-all" wire:ignore x-data x-init="
+                                    new Sortable($el, {
+                                        animation: 150,
+                                        handle: '.handle',
+                                        onEnd: function (evt) {
+                                            $wire.updateOrder(
+                                                Array.from($el.children).map(item => item.dataset.id)
+                                            );
+                                        }
+                                    })
+                                ">
                                     @forelse($blocks as $block)
-                                        <tr wire:sortable.item="{{ $block->id }}" wire:key="block-{{ $block->id }}">
-                                            <td class="text-center" style="cursor: move;" wire:sortable.handle>
+                                        <tr data-id="{{ $block->id }}" wire:key="block-{{ $block->id }}">
+                                            <td class="text-center handle" style="cursor: move;">
                                                 <i class="ri-drag-move-2-line fs-18 text-muted"></i>
                                             </td>
                                             <td><span class="badge bg-light text-dark text-uppercase">{{ $block->placement }}</span></td>
@@ -120,9 +130,6 @@
                                                     <span class="badge bg-success-subtle text-success">Public</span>
                                                 @else
                                                     <span class="badge bg-warning-subtle text-warning">Restricted</span>
-                                                    @if($block->blur_enabled)
-                                                        <span class="badge bg-secondary-subtle text-secondary">+ Blur</span>
-                                                    @endif
                                                 @endif
                                             </td>
                                             <td>

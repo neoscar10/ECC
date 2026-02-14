@@ -146,6 +146,20 @@ class Index extends Component
         if ($this->restrictionMode === 'public') {
              $this->computedVisibilityTierIds = $this->membershipTiers->pluck('id')->map(fn($id)=>(string)$id)->toArray();
         } else {
+             $this->computedVisibilityTierIds = array_map(fn($id)=>(string)$id, $this->selectedVisibilityTiers);
+        }
+        
+        // Sanitize
+        if ($this->blurEnabled) {
+             if ($this->restrictedMinTierId && !in_array((string)$this->restrictedMinTierId, $this->computedVisibilityTierIds)) {
+                 $this->restrictedMinTierId = null;
+             }
+             if ($this->restrictedPrivateTierId && !in_array((string)$this->restrictedPrivateTierId, $this->computedVisibilityTierIds)) {
+                 $this->restrictedPrivateTierId = null;
+             }
+             if (!empty($this->selectedRandomTiers)) {
+                 $this->selectedRandomTiers = array_values(array_intersect($this->selectedRandomTiers, $this->computedVisibilityTierIds));
+             }
         }
     }
 
@@ -516,7 +530,7 @@ class Index extends Component
     {
         if ($step === 1) { // Basic
             $this->validate([
-                'placement' => 'required|string',
+                'placement' => 'required|string|in:' . implode(',', array_keys(config('cms.placements'))),
                 'title' => 'required|string|max:255',
                 'isActive' => 'boolean',
             ]);
@@ -569,6 +583,8 @@ class Index extends Component
                 'restrictionType' => ['exclude_unless:restrictionMode,restricted', 'exclude_if:blurEnabled,false', 'exclude_unless:blurEnabled,true', 'required_if:blurEnabled,true', 'in:hierarchical,random,private'],
                 'restrictedMinTierId' => ['exclude_unless:restrictionType,hierarchical', 'required', 'exists:membership_tiers,id'],
                 'restrictedPrivateTierId' => ['exclude_unless:restrictionType,private', 'required', 'exists:membership_tiers,id'],
+                'selectedRandomTiers' => ['exclude_unless:restrictionType,random', 'required', 'array', 'min:1'],
+                'selectedRandomTiers.*' => ['exists:membership_tiers,id'],
                 'blurEnabled' => 'boolean',
             ]);
         }
@@ -791,51 +807,66 @@ class Index extends Component
                  $data['min_clear_view_tier_id'] = null;
             }
 
-            if ($this->isEditMode) {
-                $block = CmsBlock::findOrFail($this->blockId);
-                $block->update($data);
-            } else {
-                $block = CmsBlock::create($data);
-            }
-
-            // Sync Tiers
-            if ($this->restrictionMode === 'restricted') {
-                $block->visibilityTiers()->sync($this->selectedVisibilityTiers);
-            } else {
-                $block->visibilityTiers()->detach();
-            }
-            
-            // Sync Clear View Tiers (Simplified)
-            $clearTiers = [];
-            if ($this->blurEnabled && $data['restriction_type'] === 'private') {
-                 if ($this->restrictedPrivateTierId) $clearTiers = [$this->restrictedPrivateTierId];
-            }
-            $block->clearViewTiers()->sync($clearTiers);
-
-            DB::commit();
-            $this->closeModal();
-            $this->dispatch('refresh-blocks'); 
-            session()->flash('success', 'Block saved successfully.');
-            
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $this->addError('general', $e->getMessage());
+        if ($this->isEditMode) {
+            $block = CmsBlock::findOrFail($this->blockId);
+            $block->update($data);
+        } else {
+            $block = CmsBlock::create($data);
         }
+
+        // Sync Tiers & Clear View Tiers
+        // Sync Tiers & Clear View Tiers
+        if ($this->restrictionMode === 'restricted') {
+            $block->visibilityTiers()->sync($this->selectedVisibilityTiers);
+            
+            // Sync Clear View Tiers
+            $finalClearTiers = [];
+            if ($this->blurEnabled) {
+                 if ($this->restrictionType === 'hierarchical' && $this->restrictedMinTierId) { // Check if min tier selected
+                      // We need to resolve all tiers >= min tier that are also in visibility set
+                      $min = MembershipTier::find($this->restrictedMinTierId);
+                      if ($min) {
+                          $potential = MembershipTier::where('level', '>=', $min->level)->pluck('id')->toArray();
+                          $finalClearTiers = array_intersect($potential, $this->computedVisibilityTierIds);
+                      }
+                 } elseif ($this->restrictionType === 'random') {
+                      $finalClearTiers = $this->selectedRandomTiers;
+                 } elseif ($this->restrictionType === 'private' && $this->restrictedPrivateTierId) {
+                      $finalClearTiers = [$this->restrictedPrivateTierId];
+                 }
+                 $block->clearViewTiers()->sync($finalClearTiers);
+            } else {
+                 $block->clearViewTiers()->detach();
+            }
+        } else {
+            $block->visibilityTiers()->detach();
+            $block->clearViewTiers()->detach();
+        }
+
+        DB::commit();
+        
+        $this->dispatch('hide-create-modal');
+        $this->resetForm();
+        session()->flash('success', $this->isEditMode ? 'Block updated successfully.' : 'Block created successfully.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        session()->flash('error', 'Error saving block: ' . $e->getMessage());
     }
-    
-    public function updateOrder($orderedIds) // Called from Drag & Drop
+    }
+
+    public function updateOrder($orderedIds)
     {
         if (!is_array($orderedIds)) return;
         
-        DB::beginTransaction();
-        try {
+        DB::transaction(function() use ($orderedIds) {
             foreach ($orderedIds as $index => $id) {
+                // $index is 0-based, so sort_order = index + 1
                 CmsBlock::where('id', $id)->update(['sort_order' => $index + 1]);
             }
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-        }
+        });
+        
+        session()->flash('success', 'Order updated successfully.');
     }
 
     public function delete($id)

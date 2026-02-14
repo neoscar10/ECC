@@ -23,15 +23,17 @@ class ContentBlockController extends Controller
      */
     public function placements()
     {
-        $placements = CmsBlock::select('placement')
-            ->distinct()
-            ->where('is_active', true)
-            // ->whereHas('blocks', fn($q) => $q->active()) // Optimization if needed
-            ->pluck('placement');
+        // Return canonical placements from config
+        $placements = config('cms.placements', []);
+        
+        // Format as list of objects for frontend consistency/extensibility
+        $formatted = [];
+        foreach ($placements as $key => $label) {
+            $formatted[] = ['key' => $key, 'label' => $label];
+        }
 
         return response()->json([
-            'success' => true,
-            'data' => $placements,
+            'data' => $formatted
         ]);
     }
 

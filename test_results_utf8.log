@@ -1,0 +1,9 @@
+﻿
+   PASS  Tests\Feature\Cms\CmsApiAccessTest
+  Γ£ô api returnΓÇª 1.38s  
+  Γ£ô api handleΓÇª 0.30s  
+  Γ£ô api hidesΓÇª  0.05s  
+
+  Tests:    3 passed (16 assertions)
+  Duration: 2.18s
+
