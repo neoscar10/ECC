@@ -107,7 +107,10 @@ class SalesReport extends Component
     {
         $sales = $this->getSalesDataQuery()->paginate(15);
         
-        $totals = $this->getSalesDataQuery()->select([
+        $totalsQuery = $this->getSalesDataQuery();
+        $totalsQuery->orders = null; // Clear order by for aggregate
+        
+        $totals = $totalsQuery->select([
             DB::raw('COUNT(*) as count'),
             DB::raw('SUM(total_amount) as total_revenue')
         ])->first();

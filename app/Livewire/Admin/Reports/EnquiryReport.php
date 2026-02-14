@@ -102,7 +102,10 @@ class EnquiryReport extends Component
     {
         $enquiries = $this->getEnquiryQuery()->paginate(15);
         
-        $totals = $this->getEnquiryQuery()->select([
+        $totalsQuery = $this->getEnquiryQuery();
+        $totalsQuery->orders = null;
+        
+        $totals = $totalsQuery->select([
             DB::raw('COUNT(*) as count'),
         ])->first();
 
