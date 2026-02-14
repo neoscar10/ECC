@@ -14,7 +14,7 @@
                 
                 <div class="d-flex justify-content-between mb-4">
                     <div class="{{ $createStep >= 1 ? 'text-primary' : 'text-muted' }}">1. Content</div>
-                    <div class="{{ $createStep >= 2 ? 'text-primary' : 'text-muted' }}">2. Access & Restrictions</div>
+                    <div class="{{ $createStep >= 2 ? 'text-primary' : 'text-muted' }}">2. Access & Restrictions.</div>
                 </div>
 
                 <!-- Step 1: Content -->
