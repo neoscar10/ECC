@@ -87,7 +87,6 @@ Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admi
         Route::get('/sales', \App\Livewire\Admin\Reports\SalesReport::class)->name('sales');
         Route::get('/membership', \App\Livewire\Admin\Reports\MembershipReport::class)->name('membership');
         Route::get('/auctions', \App\Livewire\Admin\Reports\AuctionReport::class)->name('auctions');
-        Route::get('/enquiries', \App\Livewire\Admin\Reports\EnquiryReport::class)->name('enquiries');
         Route::get('/vault', \App\Livewire\Admin\Reports\VaultLedgerReport::class)->name('vault');
     });
 });

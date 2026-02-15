@@ -46,6 +46,9 @@
         }
     </script>
 
+    <!-- apexcharts -->
+    <script src="{{ asset('velzon/assets') }}/libs/apexcharts/apexcharts.min.js"></script>
+
 @livewireStyles
 </head>
 
@@ -1097,8 +1100,6 @@
     <script src="{{ asset('velzon/assets') }}/js/pages/plugins/lord-icon-2.1.0.js"></script>
     <script src="{{ asset('velzon/assets') }}/js/plugins.js"></script>
 
-    <!-- apexcharts -->
-    <script src="{{ asset('velzon/assets') }}/libs/apexcharts/apexcharts.min.js"></script>
 
     <!-- Vector map-->
     <script src="{{ asset('velzon/assets') }}/libs/jsvectormap/jsvectormap.min.js"></script>
@@ -1116,6 +1117,7 @@
     
     @vite(['resources/js/app.js'])
     
+    @include('admin.reports.partials._charts_js')
     @stack('scripts')
 @livewireScripts
 </body>

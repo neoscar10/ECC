@@ -33,13 +33,6 @@ class Index extends Component
                 'route' => route('admin.reports.auctions'),
             ],
             [
-                'title' => 'Enquiries Analysis',
-                'description' => 'Monitor lead volume and conversion status across all enquiry channels.',
-                'icon' => 'ri-chat-voice-line',
-                'color' => 'danger',
-                'route' => route('admin.reports.enquiries'),
-            ],
-            [
                 'title' => 'Vault Ledger',
                 'description' => 'Historical log of items entering and leaving user vaults.',
                 'icon' => 'ri-safe-2-line',

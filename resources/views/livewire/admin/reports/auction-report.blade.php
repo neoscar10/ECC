@@ -1,43 +1,119 @@
 <div>
+    <x-admin.reports.partials._report_header 
+        title="Auction Performance Report" 
+        :backRoute="route('admin.reports.index')" 
+        :breadcrumbs="['Auctions' => '#']" 
+    />
+
     <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                <h4 class="mb-sm-0">Auction Performance Report</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Admin</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.reports.index') }}">Reports</a></li>
-                        <li class="breadcrumb-item active">Auctions</li>
-                    </ol>
+        <div class="col-xl-3 col-md-6">
+            <x-admin.kpi-card 
+                title="Total Lots" 
+                :value="$kpis['total_lots']" 
+                icon="ri-auction-line" 
+                color="primary" 
+                action="viewKpiDetails('total_lots')" 
+            />
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <x-admin.kpi-card 
+                title="Total Engagement" 
+                :value="$kpis['total_bids']" 
+                icon="ri-hammer-line" 
+                color="warning" 
+                action="viewKpiDetails('total_bids')" 
+            />
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <x-admin.kpi-card 
+                title="Auction Revenue" 
+                :value="$kpis['total_revenue']" 
+                prefix="₹"
+                icon="ri-money-dollar-circle-line" 
+                color="success" 
+                action="viewKpiDetails('total_revenue')" 
+            />
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <x-admin.kpi-card 
+                title="Success Rate" 
+                :value="$kpis['success_rate']" 
+                suffix="%"
+                icon="ri-checkbox-circle-line" 
+                color="info" 
+                action="viewKpiDetails('success_rate')" 
+            />
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <div class="col-xl-4">
+            <div class="card card-height-100">
+                <div class="card-header align-items-center d-flex">
+                    <h4 class="card-title mb-0 flex-grow-1">Lots by Status</h4>
+                </div>
+                <div class="card-body">
+                    <div id="status_donut_chart" wire:ignore style="min-height: 280px;"></div>
+                    <div class="chart-empty-state d-none py-5 text-center">
+                        <i class="ri-pie-chart-line display-4 text-light"></i>
+                        <h5 class="mt-2 text-muted">No data available</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-8">
+            <div class="card card-height-100" id="reportTrendSection">
+                <div class="card-header align-items-center d-flex">
+                    <h4 class="card-title mb-0 flex-grow-1">Bids Trend</h4>
+                </div>
+                <div class="card-body">
+                    <div id="bids_trend_chart" wire:ignore style="min-height: 280px;"></div>
+                    <div class="chart-empty-state d-none py-5 text-center">
+                        <i class="ri-pulse-line display-4 text-light"></i>
+                        <h5 class="mt-2 text-muted">No bids recorded in this period</h5>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-xl-6">
-            <x-admin.kpi-card 
-                title="Total Lots in View" 
-                :value="$totalLots" 
-                icon="ri-auction-line" 
-                color="primary" 
-                link="#" 
-            />
+        <!-- Filter Row -->
+        <div class="col-lg-12" id="reportTableSection">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-lg-4">
+                            <div class="search-box">
+                                <input type="text" class="form-control" placeholder="Search lot or ref #..." wire:model.live.debounce.400ms="search">
+                                <i class="ri-search-line search-icon"></i>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <input type="date" class="form-control" wire:model.live="startDate">
+                        </div>
+                        <div class="col-lg-2">
+                            <input type="date" class="form-control" wire:model.live="endDate">
+                        </div>
+                        <div class="col-lg-2">
+                            <select class="form-select" wire:model.live="status">
+                                <option value="">All Statuses</option>
+                                @foreach($statusOptions as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-lg-2">
+                            <button type="button" class="btn btn-primary w-100" wire:click="export">
+                                <i class="ri-download-2-line align-bottom me-1"></i> Export CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-xl-6">
-            <x-admin.kpi-card 
-                title="Total Engagement (Bids)" 
-                :value="$totalBids" 
-                icon="ri-hammer-line" 
-                color="warning" 
-                link="#" 
-            />
-        </div>
-    </div>
 
-    <x-admin.report-filters exportAction="export" :statusOptions="$statusOptions" />
-
-    <div class="row">
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-body">
@@ -67,7 +143,7 @@
                                     </td>
                                     <td>₹{{ number_format($lot->starting_price, 2) }}</td>
                                     <td>
-                                        @if($lot->current_highest_bid > 0)
+                                        @if(($lot->current_highest_bid ?? 0) > 0)
                                             ₹{{ number_format($lot->current_highest_bid, 2) }}
                                         @else
                                             <span class="text-muted">No bids</span>
@@ -100,4 +176,30 @@
             </div>
         </div>
     </div>
+
+    @include('admin.reports.partials._kpi_details_modal')
+
+    @script
+    <script>
+        $wire.on('open-kpi-modal', () => {
+            const modal = new bootstrap.Modal(document.getElementById('kpiDetailsModal'));
+            modal.show();
+        });
+
+        $wire.on('report:scrollToTable', () => {
+            const el = document.getElementById('reportTableSection');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        $wire.on('report:scrollToTrend', () => {
+            const el = document.getElementById('reportTrendSection');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Initial load
+        document.addEventListener('livewire:initialized', () => {
+            $wire.call('refresh');
+        });
+    </script>
+    @endscript
 </div>

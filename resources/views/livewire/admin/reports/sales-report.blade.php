@@ -1,44 +1,113 @@
 <div>
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                <h4 class="mb-sm-0">Sales Report</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Admin</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.reports.index') }}">Reports</a></li>
-                        <li class="breadcrumb-item active">Sales</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </div>
+    <x-admin.reports.partials._report_header 
+        title="Sales Report" 
+        :backRoute="route('admin.reports.index')" 
+        :breadcrumbs="['Sales' => '#']" 
+    />
 
     <div class="row">
         <div class="col-xl-6">
             <x-admin.kpi-card 
                 title="Total Orders" 
-                :value="$totalCount" 
+                :value="$kpis['total_count']" 
                 icon="ri-shopping-bag-line" 
                 color="primary" 
-                link="#" 
+                action="viewKpiDetails('total_orders')" 
             />
         </div>
         <div class="col-xl-6">
             <x-admin.kpi-card 
                 title="Total Revenue" 
-                :value="$totalRevenue" 
+                :value="$kpis['total_revenue']" 
                 prefix="₹" 
                 icon="ri-money-dollar-circle-line" 
                 color="success" 
-                link="#" 
+                action="viewKpiDetails('total_revenue')" 
             />
         </div>
     </div>
 
-    <x-admin.report-filters exportAction="export" />
-
+    <!-- Charts Row -->
     <div class="row">
+        <div class="col-xl-6">
+            <div class="card card-height-100">
+                <div class="card-header align-items-center d-flex">
+                    <h4 class="card-title mb-0 flex-grow-1">Orders by Source</h4>
+                </div>
+                <div class="card-body position-relative">
+                    <div id="orders_source_chart" wire:ignore style="min-height: 280px;"></div>
+                    <div class="chart-empty-state d-none py-5 text-center">
+                        <i class="ri-shopping-bag-3-line display-4 text-light"></i>
+                        <h5 class="mt-2 text-muted">No data for selected range</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card card-height-100">
+                <div class="card-header align-items-center d-flex">
+                    <h4 class="card-title mb-0 flex-grow-1">Revenue by Source (INR)</h4>
+                </div>
+                <div class="card-body position-relative">
+                    <div id="revenue_source_chart" wire:ignore style="min-height: 280px;"></div>
+                    <div class="chart-empty-state d-none py-5 text-center">
+                        <i class="ri-money-dollar-circle-line display-4 text-light"></i>
+                        <h5 class="mt-2 text-muted">No data for selected range</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Row -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card mb-0">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-lg-4">
+                            <div class="search-box">
+                                <input type="text" class="form-control" placeholder="Search order # or customer..." wire:model.live.debounce.400ms="search">
+                                <i class="ri-search-line search-icon"></i>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <input type="date" class="form-control" wire:model.live="startDate">
+                        </div>
+                        <div class="col-lg-2">
+                            <input type="date" class="form-control" wire:model.live="endDate">
+                        </div>
+                        <div class="col-lg-2">
+                            <select class="form-select" wire:model.live="source">
+                                <option value="all">All Sources</option>
+                                <option value="shop">Shop</option>
+                                <option value="auction">Auction</option>
+                                <option value="archive">Archive</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="btn-group w-100">
+                                <button type="button" class="btn btn-primary dropdown-toggle w-100" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="ri-download-2-line align-bottom me-1"></i> Download
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <h6 class="dropdown-header">Export Sales Data</h6>
+                                    <a class="dropdown-item" href="javascript:void(0);" wire:click="export('current')">Current Filters</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="javascript:void(0);" wire:click="export('all')">Export All</a>
+                                    <a class="dropdown-item" href="javascript:void(0);" wire:click="export('shop')">Shop Summary</a>
+                                    <a class="dropdown-item" href="javascript:void(0);" wire:click="export('auction')">Auction Summary</a>
+                                    <a class="dropdown-item" href="javascript:void(0);" wire:click="export('archive')">Archive Summary</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="reportTableSection">
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-body">
@@ -94,4 +163,24 @@
             </div>
         </div>
     </div>
+
+    @include('admin.reports.partials._kpi_details_modal')
+
+    @script
+    <script>
+        $wire.on('open-kpi-modal', () => {
+            const modal = new bootstrap.Modal(document.getElementById('kpiDetailsModal'));
+            modal.show();
+        });
+
+        $wire.on('report:scrollToTable', () => {
+            document.getElementById('reportTableSection').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Initial load
+        document.addEventListener('livewire:initialized', () => {
+            $wire.call('refresh');
+        });
+    </script>
+    @endscript
 </div>

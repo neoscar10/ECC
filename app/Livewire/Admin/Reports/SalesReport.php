@@ -19,8 +19,23 @@ class SalesReport extends Component
     public $startDate;
     public $endDate;
     public $search = '';
+    public $source = 'all';
+    
+    // KPI Details Modal State
+    public $kpiModalTitle;
+    public $kpiModalHeaders = [];
+    public $kpiModalRows = [];
+    public $kpiModalFooter;
+    public $kpiModalAction;
+    public $kpiFilterActive = false;
+    public $kpiFilterName = '';
 
-    protected $queryString = ['startDate', 'endDate', 'search'];
+    protected $queryString = ['startDate', 'endDate', 'search', 'source'];
+
+    protected $listeners = [
+        'refreshReport' => '$refresh',
+        'reports:request-charts' => 'refresh'
+    ];
 
     public function mount()
     {
@@ -28,97 +43,143 @@ class SalesReport extends Component
         $this->endDate = Carbon::now()->format('Y-m-d');
     }
 
+    public function updated($propertyName)
+    {
+        if (in_array($propertyName, ['startDate', 'endDate', 'search', 'source'])) {
+            $this->resetPage();
+            $this->dispatch('reports:render-charts', report: 'sales', payload: $this->getMetrics()['charts']);
+        }
+    }
+
     public function refresh()
     {
         $this->resetPage();
+        $this->dispatch('reports:render-charts', report: 'sales', payload: $this->getMetrics()['charts']);
     }
 
-    public function export()
+    public function viewKpiDetails($key)
     {
-        $data = $this->getSalesDataQuery()->get();
-        
-        $headers = ['Date', 'Order #', 'Source', 'Customer', 'Amount (INR)', 'Status'];
-        
-        $exportData = $data->map(function($sale) {
-            return [
-                $sale->paid_at ? Carbon::parse($sale->paid_at)->format('Y-m-d H:i') : 'N/A',
-                $sale->order_number,
-                ucfirst($sale->source),
-                $sale->customer_name,
-                number_format($sale->total_amount, 2),
-                ucfirst($sale->status),
-            ];
-        });
+        $service = app(\App\Services\Reports\SalesReportMetricsService::class);
+        $metrics = $service->getMetrics($this->startDate, $this->endDate, $this->search, $this->source);
 
-        return CsvExporter::download($exportData, $headers, 'sales-report-' . now()->format('Y-m-d') . '.csv');
+        if ($key === 'total_orders') {
+            $this->kpiModalTitle = "Orders Breakdown";
+            $this->kpiModalHeaders = ["Source", "Orders Count", "% of Total"];
+            
+            $total = $metrics['total_orders'] ?: 1;
+            $this->kpiModalRows = [
+                ['Shop', $metrics['details']['shop']['count'], round(($metrics['details']['shop']['count'] / $total) * 100, 1) . '%'],
+                ['Auction', $metrics['details']['auction']['count'], round(($metrics['details']['auction']['count'] / $total) * 100, 1) . '%'],
+                ['Archive', $metrics['details']['archive']['count'], round(($metrics['details']['archive']['count'] / $total) * 100, 1) . '%'],
+            ];
+            $this->kpiModalFooter = "Total Orders: <strong>{$metrics['total_orders']}</strong>";
+            $this->kpiModalAction = null;
+            
+            $this->dispatch('open-kpi-modal');
+            $this->dispatch('report:scrollToTable');
+        }
+
+        if ($key === 'total_revenue') {
+            $this->kpiModalTitle = "Revenue Breakdown";
+            $this->kpiModalHeaders = ["Source", "Revenue (INR)", "% of Total"];
+            
+            $total = $metrics['total_revenue'] ?: 1;
+            $this->kpiModalRows = [
+                ['Shop', '₹' . number_format($metrics['details']['shop']['revenue'], 2), round(($metrics['details']['shop']['revenue'] / $total) * 100, 1) . '%'],
+                ['Auction', '₹' . number_format($metrics['details']['auction']['revenue'], 2), round(($metrics['details']['auction']['revenue'] / $total) * 100, 1) . '%'],
+                ['Archive', '₹' . number_format($metrics['details']['archive']['revenue'], 2), round(($metrics['details']['archive']['revenue'] / $total) * 100, 1) . '%'],
+            ];
+            $this->kpiModalFooter = "Total Revenue: <strong>₹" . number_format($metrics['total_revenue'], 2) . "</strong>";
+            $this->kpiModalAction = null;
+
+            $this->dispatch('open-kpi-modal');
+        }
+    }
+
+    private function getMetrics()
+    {
+        $metrics = app(\App\Services\Reports\SalesReportMetricsService::class)->getMetrics(
+            $this->startDate,
+            $this->endDate,
+            $this->search,
+            $this->source
+        );
+
+        return [
+            'kpis' => [
+                'total_count' => $metrics['total_orders'],
+                'total_revenue' => $metrics['total_revenue'],
+            ],
+            'charts' => $metrics['chart']
+        ];
+    }
+
+    public function export($sourceType = 'all')
+    {
+        $startDate = $this->startDate;
+        $endDate = $this->endDate;
+        $search = $this->search;
+        $appliedSource = $sourceType === 'current' ? $this->source : $sourceType;
+
+        $query = app(\App\Services\Reports\SalesReportMetricsService::class)->getBaseQuery(
+            $startDate, $endDate, $search, $appliedSource
+        )->orderBy('paid_at', 'desc');
+
+        $fileName = "sales-report-{$appliedSource}-" . now()->format('Y-m-d') . ".csv";
+
+        return response()->streamDownload(function () use ($query, $appliedSource, $startDate, $endDate) {
+            $file = fopen('php://output', 'w');
+            
+            // BOM for UTF-8 Excel support
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Metadata
+            fputcsv($file, ['Report:', 'Sales Report']);
+            fputcsv($file, ['Source:', ucfirst($appliedSource)]);
+            fputcsv($file, ['Date Range:', "{$startDate} to {$endDate}"]);
+            fputcsv($file, ['Generated At:', now()->format('Y-m-d H:i:s')]);
+            fputcsv($file, []); // Blank line
+
+            // Headers
+            fputcsv($file, ['Date', 'Order #', 'Source', 'Customer', 'Amount (INR)', 'Status']);
+
+            // Data
+            $query->chunk(500, function ($rows) use ($file) {
+                foreach ($rows as $row) {
+                    fputcsv($file, [
+                        $row->paid_at ? Carbon::parse($row->paid_at)->format('Y-m-d H:i') : 'N/A',
+                        $row->order_number,
+                        ucfirst($row->source),
+                        $row->customer_name,
+                        number_format($row->total_amount, 2, '.', ''),
+                        ucfirst($row->status),
+                    ]);
+                }
+            });
+
+            fclose($file);
+        }, $fileName);
     }
 
     private function getSalesDataQuery()
     {
-        $shopOrders = DB::table('shop_orders')
-            ->join('users', 'shop_orders.user_id', '=', 'users.id')
-            ->where('shop_orders.payment_status', 'paid')
-            ->select([
-                'shop_orders.paid_at',
-                'shop_orders.order_number',
-                DB::raw("'shop' as source"),
-                'users.name as customer_name',
-                'shop_orders.total_amount',
-                'shop_orders.status',
-            ]);
-
-        $otherOrders = DB::table('orders')
-            ->join('users', 'orders.user_id', '=', 'users.id')
-            ->whereNotNull('orders.paid_at')
-            ->select([
-                'orders.paid_at',
-                DB::raw("CONCAT('ECC-', orders.id) as order_number"),
-                'orders.source',
-                'users.name as customer_name',
-                'orders.subtotal_inr as total_amount',
-                DB::raw("'paid' as status"),
-            ]);
-
-        $query = $shopOrders->unionAll($otherOrders);
-
-        // Wrap in a subquery for filtering and ordering
-        $finalQuery = DB::table(DB::raw("({$query->toSql()}) as combined_sales"))
-            ->mergeBindings($query);
-
-        if ($this->startDate) {
-            $finalQuery->where('paid_at', '>=', $this->startDate . ' 00:00:00');
-        }
-
-        if ($this->endDate) {
-            $finalQuery->where('paid_at', '<=', $this->endDate . ' 23:59:59');
-        }
-
-        if ($this->search) {
-            $finalQuery->where(function($q) {
-                $q->where('order_number', 'like', '%' . $this->search . '%')
-                  ->orWhere('customer_name', 'like', '%' . $this->search . '%');
-            });
-        }
-
-        return $finalQuery->orderBy('paid_at', 'desc');
+        return app(\App\Services\Reports\SalesReportMetricsService::class)->getBaseQuery(
+            $this->startDate,
+            $this->endDate,
+            $this->search,
+            $this->source
+        )->orderBy('paid_at', 'desc');
     }
 
     public function render()
     {
+        $metrics = $this->getMetrics();
         $sales = $this->getSalesDataQuery()->paginate(15);
-        
-        $totalsQuery = $this->getSalesDataQuery();
-        $totalsQuery->orders = null; // Clear order by for aggregate
-        
-        $totals = $totalsQuery->select([
-            DB::raw('COUNT(*) as count'),
-            DB::raw('SUM(total_amount) as total_revenue')
-        ])->first();
 
         return view('livewire.admin.reports.sales-report', [
             'sales' => $sales,
-            'totalCount' => $totals->count,
-            'totalRevenue' => $totals->total_revenue,
+            'kpis' => $metrics['kpis'],
+            'charts' => $metrics['charts']
         ]);
     }
 }

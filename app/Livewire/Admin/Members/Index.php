@@ -18,6 +18,12 @@ class Index extends Component
 
     public $search = '';
     
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'tierFilter' => ['except' => ''],
+        'statusFilter' => ['except' => 'active'],
+    ];
+    
     // Alerts
     public $successMessage = '';
     

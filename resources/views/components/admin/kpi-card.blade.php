@@ -5,7 +5,8 @@
     'color' => 'primary',
     'trend' => null,
     'trendColor' => 'success',
-    'link' => '#',
+    'link' => null,
+    'action' => null,
     'prefix' => '',
 ])
 
@@ -26,7 +27,11 @@
         <div class="d-flex align-items-end justify-content-between mt-4">
             <div>
                 <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ $prefix }}{{ is_numeric($value) ? number_format($value) : $value }}</h4>
-                <a href="{{ $link }}" class="text-decoration-underline text-muted">View details</a>
+                @if($action)
+                    <a href="javascript:void(0);" wire:click="{{ $action }}" class="text-decoration-underline text-muted">View details</a>
+                @elseif($link)
+                    <a href="{{ $link }}" class="text-decoration-underline text-muted">View details</a>
+                @endif
             </div>
             <div class="avatar-sm flex-shrink-0">
                 <span class="avatar-title bg-{{ $color }}-subtle rounded fs-3">
