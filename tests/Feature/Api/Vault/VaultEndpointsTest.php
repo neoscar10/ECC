@@ -22,16 +22,18 @@ class VaultEndpointsTest extends TestCase
         MembershipTier::factory()->create(['name' => 'Gold', 'level' => 2, 'has_vault_access' => true]);
     }
 
-    public function test_vault_summary_forbidden_for_no_access_tier()
+    public function test_vault_summary_returns_restricted_access_for_no_access_tier()
     {
         $user = User::factory()->create();
         $this->assignTier($user, 'Silver');
 
         $response = $this->actingAs($user, 'api')->getJson('/api/v1/me/vault/summary');
 
-        $response->assertStatus(403)
-            ->assertJsonPath('meta.code', 'VAULT_ACCESS_REQUIRED')
-            ->assertJsonStructure(['success', 'message', 'meta' => ['upgrade']]);
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.can_access_vault', false)
+            ->assertJsonPath('meta.code', 'VAULT_ACCESS_RESTRICTED')
+            ->assertJsonStructure(['success', 'message', 'data' => ['access', 'can_access_vault', 'counts']]);
     }
 
     public function test_vault_summary_allowed_for_access_tier()

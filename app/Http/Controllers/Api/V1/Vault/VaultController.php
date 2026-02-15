@@ -22,15 +22,21 @@ class VaultController extends Controller
 
         if (!$user->has_vault_access) {
             return response()->json([
-                'success' => false,
-                'message' => 'Your membership tier does not include Vault access.',
+                'success' => true,
+                'message' => 'Vault access is restricted for your membership tier.',
                 'data' => [
-                    'access' => $access
+                    'access' => $access,
+                    'can_access_vault' => false,
+                    'counts' => [
+                        'locked' => 0,
+                        'removed' => 0,
+                        'total' => 0
+                    ]
                 ],
                 'meta' => [
-                    'code' => 'VAULT_ACCESS_REQUIRED'
+                    'code' => 'VAULT_ACCESS_RESTRICTED'
                 ]
-            ], 403);
+            ], 200);
         }
 
         // 200 Payload
