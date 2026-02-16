@@ -63,13 +63,14 @@
         <div class="col-xl-8">
             <div class="card card-height-100">
                 <div class="card-header align-items-center d-flex">
-                    <h4 class="card-title mb-0 flex-grow-1">Vault Activity Trend</h4>
+                    <h4 class="card-title mb-0 flex-grow-1">Net Vault Position</h4>
+                    <div id="vaultFocusNote"></div>
                 </div>
                 <div class="card-body">
-                    <div id="vault_activity_chart" wire:ignore style="min-height: 280px;"></div>
+                    <div id="vaultNetTrendChart" wire:ignore style="min-height: 300px;"></div>
                     <div class="chart-empty-state d-none py-5 text-center">
                         <i class="ri-pulse-line display-4 text-light"></i>
-                        <h5 class="mt-2 text-muted">No activity in this period</h5>
+                        <h5 class="mt-2 text-muted">No vault activity for selected range</h5>
                     </div>
                 </div>
             </div>
@@ -236,11 +237,6 @@
         $wire.on('report:scrollToTable', () => {
             const el = document.getElementById('reportTableSection');
             if (el) el.scrollIntoView({ behavior: 'smooth' });
-        });
-
-        // Initial load
-        document.addEventListener('livewire:initialized', () => {
-            $wire.call('refresh');
         });
     </script>
     @endscript

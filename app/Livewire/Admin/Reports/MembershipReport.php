@@ -47,14 +47,18 @@ class MembershipReport extends Component
     {
         if (in_array($propertyName, ['startDate', 'endDate', 'status', 'tierId', 'search'])) {
             $this->resetPage();
-            $this->dispatch('reports:render-charts', report: 'membership', payload: $this->getMetrics());
+            $payload = $this->getMetrics();
+            logger()->info('membership:charts:updated', ['property' => $propertyName, 'payload' => $payload]);
+            $this->dispatch('reports:render-charts', report: 'membership', payload: $payload);
         }
     }
 
     public function refresh()
     {
         $this->resetPage();
-        $this->dispatch('reports:render-charts', report: 'membership', payload: $this->getMetrics());
+        $payload = $this->getMetrics();
+        logger()->info('membership:charts:payload', ['payload' => $payload]);
+        $this->dispatch('reports:render-charts', report: 'membership', payload: $payload);
     }
 
     public function viewKpiDetails($key)

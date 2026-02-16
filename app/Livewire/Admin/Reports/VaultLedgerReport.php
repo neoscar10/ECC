@@ -42,20 +42,23 @@ class VaultLedgerReport extends Component
     {
         $this->startDate = Carbon::now()->subMonths(6)->format('Y-m-d');
         $this->endDate = Carbon::now()->format('Y-m-d');
+        
+        // Ensure charts render on first load
+        $this->dispatch('reports:charts', report: 'vault', payload: $this->getMetrics()['charts']);
     }
 
     public function updated($propertyName)
     {
         if (in_array($propertyName, ['startDate', 'endDate', 'status', 'search'])) {
             $this->resetPage();
-            $this->dispatch('reports:render-charts', report: 'vault', payload: $this->getMetrics()['charts']);
+            $this->dispatch('reports:charts', report: 'vault', payload: $this->getMetrics()['charts']);
         }
     }
 
     public function refresh()
     {
         $this->resetPage();
-        $this->dispatch('reports:render-charts', report: 'vault', payload: $this->getMetrics()['charts']);
+        $this->dispatch('reports:charts', report: 'vault', payload: $this->getMetrics()['charts']);
     }
 
     public function viewKpiDetails($key)

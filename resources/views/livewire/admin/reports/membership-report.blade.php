@@ -28,7 +28,7 @@
                     <h4 class="card-title mb-0 flex-grow-1">Members by Tier</h4>
                 </div>
                 <div class="card-body position-relative">
-                    <div id="tier_distribution_chart" wire:ignore style="min-height: 280px;"></div>
+                    <div id="membersByTierChart" wire:ignore style="min-height: 280px;"></div>
                     <div class="chart-empty-state d-none py-5 text-center">
                         <i class="ri-pie-chart-line display-4 text-light"></i>
                         <h5 class="mt-2 text-muted">No data found</h5>
@@ -42,7 +42,7 @@
                     <h4 class="card-title mb-0 flex-grow-1">Status Breakdown</h4>
                 </div>
                 <div class="card-body position-relative">
-                    <div id="status_distribution_chart" wire:ignore style="min-height: 280px;"></div>
+                    <div id="statusBreakdownChart" wire:ignore style="min-height: 280px;"></div>
                     <div class="chart-empty-state d-none py-5 text-center">
                         <i class="ri-donut-chart-line display-4 text-light"></i>
                         <h5 class="mt-2 text-muted">No data found</h5>
@@ -56,7 +56,7 @@
                     <h4 class="card-title mb-0 flex-grow-1">Signups Trend</h4>
                 </div>
                 <div class="card-body position-relative">
-                    <div id="membership_trend_chart" wire:ignore style="min-height: 280px;"></div>
+                    <div id="signupsTrendChart" wire:ignore style="min-height: 280px;"></div>
                     <div class="chart-empty-state d-none py-5 text-center">
                         <i class="ri-line-chart-line display-4 text-light"></i>
                         <h5 class="mt-2 text-muted">No data found</h5>
