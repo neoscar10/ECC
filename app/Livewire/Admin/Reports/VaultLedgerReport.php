@@ -16,7 +16,7 @@ class VaultLedgerReport extends Component
 
     public $startDate;
     public $endDate;
-    public $status = 'locked';
+    public $status = '';
     public $search = '';
     
     // KPI Details Modal State
