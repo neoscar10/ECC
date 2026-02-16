@@ -6,8 +6,8 @@
 
         const chartConfigs = {
             sales: {
-                orders: (data) => ({
-                    series: [{ name: 'Orders', data: data.orders || [] }],
+                ordersBySource: (data) => ({
+                    series: [{ name: 'Orders', data: data.series || [] }],
                     chart: { type: 'bar', height: 280, toolbar: { show: false } },
                     colors: ['#405189'],
                     plotOptions: { bar: { borderRadius: 4, horizontal: false, columnWidth: '45%' } },
@@ -15,8 +15,8 @@
                     xaxis: { categories: data.labels || [] },
                     grid: { borderColor: '#f1f1f1' }
                 }),
-                revenue: (data) => ({
-                    series: [{ name: 'Revenue', data: data.revenue || [] }],
+                revenueBySource: (data) => ({
+                    series: [{ name: 'Revenue', data: data.series || [] }],
                     chart: { type: 'bar', height: 280, toolbar: { show: false } },
                     colors: ['#0ab39c'],
                     plotOptions: { bar: { borderRadius: 4, horizontal: false, columnWidth: '45%' } },
@@ -142,7 +142,7 @@
             let chartData = payload[chartKey] || (payload.charts ? payload.charts[chartKey] : null);
             
             if (!chartData) {
-                console.warn(`ECC Charts: No data found for ${reportType}:${chartKey} in payload.`);
+                console.warn(`ECC Charts: No data found for ${reportType}:${chartKey} in payload.`, payload);
                 return;
             }
 
@@ -162,6 +162,8 @@
 
             if (emptyState) emptyState.classList.toggle('d-none', hasData);
             container.classList.toggle('d-none', !hasData);
+
+            console.log(`ECC Charts: ${containerId} hasData = ${hasData}`, options.series);
 
             if (!hasData) {
                 if (window.ECCCharts[containerId]) {
@@ -189,11 +191,9 @@
         };
 
         const initAllCharts = (report, payload) => {
-            console.log(`ECC Charts: Initializing ${report} charts with payload:`, payload);
-            
             if (report === 'sales') {
-                renderChart('sales', 'orders', 'orders_source_chart', payload);
-                renderChart('sales', 'revenue', 'revenue_source_chart', payload);
+                renderChart('sales', 'ordersBySource', 'salesOrdersBySourceChart', payload);
+                renderChart('sales', 'revenueBySource', 'salesRevenueBySourceChart', payload);
             } else if (report === 'membership') {
                 renderChart('membership', 'tier', 'membersByTierChart', payload);
                 renderChart('membership', 'status', 'statusBreakdownChart', payload);
@@ -223,7 +223,7 @@
             });
 
             // Initial request if navigating to a report page
-            if (document.querySelector('[id$="Chart"]')) {
+            if (document.querySelector('[id*="_chart"], [id$="Chart"]')) {
                 console.log("ECC Charts: Found chart containers on load. Requesting data.");
                 Livewire.dispatch('reports:request-charts');
             }
@@ -243,7 +243,7 @@
             window.ECCCharts = {};
 
             setTimeout(() => {
-                if (document.querySelector('[id$="Chart"]')) {
+                if (document.querySelector('[id*="_chart"], [id$="Chart"]')) {
                     console.log("ECC Charts: Post-nav request.");
                     Livewire.dispatch('reports:request-charts');
                 }

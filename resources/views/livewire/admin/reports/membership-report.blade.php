@@ -22,7 +22,7 @@
 
     <!-- Charts Row -->
     <div class="row">
-        <div class="col-xl-4">
+        <div class="col-xl-3">
             <div class="card card-height-100">
                 <div class="card-header align-items-center d-flex">
                     <h4 class="card-title mb-0 flex-grow-1">Members by Tier</h4>
@@ -36,7 +36,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-4">
+        <div class="col-xl-3">
             <div class="card card-height-100">
                 <div class="card-header align-items-center d-flex">
                     <h4 class="card-title mb-0 flex-grow-1">Status Breakdown</h4>
@@ -50,7 +50,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-4">
+        <div class="col-xl-6">
             <div class="card card-height-100">
                 <div class="card-header align-items-center d-flex">
                     <h4 class="card-title mb-0 flex-grow-1">Signups Trend</h4>

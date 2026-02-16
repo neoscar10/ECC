@@ -35,17 +35,28 @@ class SalesReportMetricsService
             ->keyBy('source');
 
             $sources = ['shop', 'auction', 'archive'];
-            $chartData = [
-                'orders' => [],
-                'revenue' => [],
-                'labels' => ['Shop', 'Auction', 'Archive']
-            ];
+            $ordersData = [];
+            $revenueData = [];
+            
+            // Normalize source stats keys to lowercase for robust matching
+            $normalizedStats = $sourceStats->mapWithKeys(fn($item, $key) => [strtolower($key) => $item]);
 
             foreach ($sources as $s) {
-                $stat = $sourceStats->get($s);
-                $chartData['orders'][] = $stat ? (int) $stat->order_count : 0;
-                $chartData['revenue'][] = $stat ? (float) $stat->revenue : 0;
+                $stat = $normalizedStats->get($s);
+                $ordersData[] = $stat ? (int) $stat->order_count : 0;
+                $revenueData[] = $stat ? (float) $stat->revenue : 0;
             }
+
+            $chartData = [
+                'ordersBySource' => [
+                    'series' => $ordersData,
+                    'labels' => ['Shop', 'Auction', 'Archive']
+                ],
+                'revenueBySource' => [
+                    'series' => $revenueData,
+                    'labels' => ['Shop', 'Auction', 'Archive']
+                ]
+            ];
 
             return [
                 'total_orders' => (int) ($totals->count ?? 0),
@@ -86,8 +97,7 @@ class SalesReportMetricsService
 
         $query = $shopOrders->unionAll($otherOrders);
 
-        $finalQuery = DB::table(DB::raw("({$query->toSql()}) as combined_sales"))
-            ->mergeBindings($query);
+        $finalQuery = DB::table(DB::query()->fromSub($query, 'combined_sales'));
 
         if ($startDate) {
             $finalQuery->where('paid_at', '>=', $startDate . ' 00:00:00');

@@ -41,20 +41,25 @@ class SalesReport extends Component
     {
         $this->startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
         $this->endDate = Carbon::now()->format('Y-m-d');
+
+        // Initial chart render
+        $this->dispatch('reports:charts', report: 'sales', payload: $this->getMetrics()['charts']);
     }
 
     public function updated($propertyName)
     {
         if (in_array($propertyName, ['startDate', 'endDate', 'search', 'source'])) {
             $this->resetPage();
-            $this->dispatch('reports:render-charts', report: 'sales', payload: $this->getMetrics()['charts']);
+            $this->dispatch('reports:charts', report: 'sales', payload: $this->getMetrics()['charts']);
         }
     }
 
     public function refresh()
     {
         $this->resetPage();
-        $this->dispatch('reports:render-charts', report: 'sales', payload: $this->getMetrics()['charts']);
+        $payload = $this->getMetrics()['charts'];
+        logger()->info('Sales Charts Payload', ['payload' => $payload]);
+        $this->dispatch('reports:charts', report: 'sales', payload: $payload);
     }
 
     public function viewKpiDetails($key)

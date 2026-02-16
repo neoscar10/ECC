@@ -35,7 +35,7 @@
                     <h4 class="card-title mb-0 flex-grow-1">Orders by Source</h4>
                 </div>
                 <div class="card-body position-relative">
-                    <div id="orders_source_chart" wire:ignore style="min-height: 280px;"></div>
+                    <div id="salesOrdersBySourceChart" wire:ignore style="min-height: 280px;"></div>
                     <div class="chart-empty-state d-none py-5 text-center">
                         <i class="ri-shopping-bag-3-line display-4 text-light"></i>
                         <h5 class="mt-2 text-muted">No data for selected range</h5>
@@ -49,7 +49,7 @@
                     <h4 class="card-title mb-0 flex-grow-1">Revenue by Source (INR)</h4>
                 </div>
                 <div class="card-body position-relative">
-                    <div id="revenue_source_chart" wire:ignore style="min-height: 280px;"></div>
+                    <div id="salesRevenueBySourceChart" wire:ignore style="min-height: 280px;"></div>
                     <div class="chart-empty-state d-none py-5 text-center">
                         <i class="ri-money-dollar-circle-line display-4 text-light"></i>
                         <h5 class="mt-2 text-muted">No data for selected range</h5>
@@ -175,11 +175,6 @@
 
         $wire.on('report:scrollToTable', () => {
             document.getElementById('reportTableSection').scrollIntoView({ behavior: 'smooth' });
-        });
-
-        // Initial load
-        document.addEventListener('livewire:initialized', () => {
-            $wire.call('refresh');
         });
     </script>
     @endscript
