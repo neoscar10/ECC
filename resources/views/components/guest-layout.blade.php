@@ -3,9 +3,9 @@
 <head>
 
     <meta charset="utf-8" />
-    <title>{{ $title ?? 'Executive Cricket Club' }}</title>
+    <title>{{ $title ?? 'Executive Club Cricket' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta content="Executive Cricket Club Admin" name="description" />
+    <meta content="Executive Club Cricket Admin" name="description" />
     <!-- App favicon -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 

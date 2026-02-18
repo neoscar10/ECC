@@ -24,7 +24,7 @@ class MembershipApplicationApprovedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Membership Application Approved - Executive Cricket Club',
+            subject: 'Membership Application Approved - Executive Club Cricket',
         );
     }
 

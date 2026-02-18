@@ -6,7 +6,7 @@
 <head>
 
     <meta charset="utf-8" />
-    <title>Dashboard | Executive Cricket Club</title>
+    <title>Dashboard | Executive Club Cricket</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="Themesbrand" name="author" />
@@ -67,24 +67,24 @@
                         <span class="logo-sm">
                             <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
 
-                             <h5 class="text-dark pt-3">Executive Cricket Club</h3>
+                             <h5 class="text-dark pt-3">Executive Club Cricket</h3>
                         </span>
                         <span class="">
                             <!-- <img src="{{ asset('velzon/assets') }}/images/logo-dark.png" alt="" height="17"> -->
 
-                             <h5 class="text-white pt-3">Executive Cricket Club</h3>
+                             <h5 class="text-white pt-3">Executive Club Cricket</h3>
                         </span>
                     </a>
 
                     <a href="index-2.html" class="logo logo-light">
                         <span class="logo-sm">
                             <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
-                              <h5 class="text-white pt-3">Executive Cricket Club</h3>
+                              <h5 class="text-white pt-3">Executive Club Cricket</h3>
                         </span>
                         <span class="">
                             <!-- <img src="{{ asset('velzon/assets') }}/images/logo-light.png" alt="" height="17"> -->
 
-                             <h5 class="text-white pt-3">Executive Cricket Club</h3>
+                             <h5 class="text-white pt-3">Executive Club Cricket</h3>
                         </span>
                     </a>
                 </div>
@@ -439,22 +439,22 @@
                 <a href="index-2.html" class="logo logo-dark">
                     <span class="logo-sm">
                         <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
-                          <h3 class="text-dark pt-2">Executive Cricket Club</h3>
+                          <h3 class="text-dark pt-2">Executive Club Cricket</h3>
                     </span>
                     <span class="">
                         <!-- <img src="{{ asset('velzon/assets') }}/images/logo-dark.png" alt="" height="17"> -->
-                         <h3 class="text-dark pt-2">Executive Cricket Club</h3>
+                         <h3 class="text-dark pt-2">Executive Club Cricket</h3>
                     </span>
                 </a>
                 <!-- Light Logo-->
                 <a href="index-2.html" class="logo logo-light">
                     <span class="logo-sm">
                         <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
-                          <h5 class="text-white pt-2">Executive Cricket Club</h3>
+                          <h5 class="text-white pt-2">Executive Club Cricket</h3>
                     </span>
                     <span class="">
                         <!-- <img src="{{ asset('velzon/assets') }}/images/logo-light.png" alt="" height="17"> -->
-                          <h5 class="text-white pt-2">Executive Cricket Club</h3>
+                          <h5 class="text-white pt-2">Executive Club Cricket</h3>
                     </span>
                 </a>
                 <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
@@ -692,7 +692,7 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-6">
-                            <script>document.write(new Date().getFullYear())</script> © Executive Cricket Club.
+                            <script>document.write(new Date().getFullYear())</script> © Executive Club Cricket.
                         </div>
                         <div class="col-sm-6">
                             <div class="text-sm-end d-none d-sm-block">

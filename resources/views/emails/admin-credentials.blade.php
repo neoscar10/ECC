@@ -5,7 +5,7 @@
 </head>
 <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-        <h2 style="color: #0ab39c;">Welcome to Executive Cricket Club</h2>
+        <h2 style="color: #0ab39c;">Welcome to Executive Club Cricket</h2>
         <p>Hello {{ $user->name }},</p>
         <p>An administrator account has been created for you. Please find your login details below:</p>
         

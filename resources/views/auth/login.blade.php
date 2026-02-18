@@ -121,7 +121,7 @@
                     <div class="col-lg-12">
                         <div class="text-center">
                             <p class="mb-0">&copy;
-                                <script>document.write(new Date().getFullYear())</script> Executive Cricket Club. Crafted with <i class="mdi mdi-heart text-danger"></i> Store Site
+                                <script>document.write(new Date().getFullYear())</script> Executive Club Cricket. Crafted with <i class="mdi mdi-heart text-danger"></i> Store Site
                             </p>
                         </div>
                     </div>

@@ -11,7 +11,7 @@
     <!-- App Header -->
     <div class="app-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
         <i class="ri-menu-2-line"></i>
-        <span class="fw-bold">Executive Cricket Club</span>
+        <span class="fw-bold">Executive Club Cricket</span>
         <i class="ri-notification-3-line"></i>
     </div>
 
