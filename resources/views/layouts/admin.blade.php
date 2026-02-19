@@ -8,8 +8,8 @@
     <meta charset="utf-8" />
     <title>Dashboard | Executive Club Cricket</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
-    <meta content="Themesbrand" name="author" />
+    <meta content="Executive Club Cricket | From archive Items, to Auctions and to cricket store, all in one place" name="description" />
+    <meta content="Executive Club Cricket" name="author" />
     <!-- App favicon -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
