@@ -1,0 +1,20 @@
+﻿--- Testing: Draft Application (draft) ---
+Status: draft -> Redirect Route: http://127.0.0.1:8000/membership/application/step-7
+
+--- Testing: Submitted Application (submitted) ---
+Status: submitted -> Redirect Route: NULL (Allow /home)
+
+--- Testing: Approved Application (approved) ---
+Status: approved -> Redirect Route: NULL (Allow /home)
+
+--- Testing: Active Application (active) ---
+Status: active -> Redirect Route: NULL (Allow /home)
+
+--- Testing: Rejected Application (rejected) ---
+Status: rejected -> Redirect Route: NULL (Allow /home)
+
+--- Testing: Payment Pending Application (payment_pending) ---
+Status: payment_pending -> Redirect Route: http://127.0.0.1:8000/membership/application/step-7
+
+--- Testing: No Application, No Membership ---
+No App -> Redirect Route: http://127.0.0.1:8000/membership/application/step-3

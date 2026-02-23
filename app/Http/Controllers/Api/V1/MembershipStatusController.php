@@ -19,7 +19,7 @@ class MembershipStatusController extends Controller
         $pending = $user->memberships()->where('status', 'pending')->latest()->first();
 
         // Get active application step if any
-        $application = \App\Domain\Membership\MembershipApplication::where('user_id', $user->id)
+        $application = MembershipApplication::where('user_id', $user->id)
             ->where('status', '!=', 'rejected')
             ->latest()
             ->first();

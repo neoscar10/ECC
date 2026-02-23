@@ -4,7 +4,7 @@ namespace App\View\Composers;
 
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Cache;
-use App\Domain\Membership\MembershipApplication;
+use App\Models\MembershipApplication;
 use App\Models\Auctions\AuctionEnquiry;
 use App\Models\Archive\ArchiveProductEnquiry;
 

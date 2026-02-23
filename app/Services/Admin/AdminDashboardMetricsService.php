@@ -6,7 +6,7 @@ use App\Models\Membership;
 use App\Models\Archive\ArchiveProductEnquiry;
 use App\Models\Auctions\AuctionEnquiry;
 use App\Models\ContactEnquiry;
-use App\Domain\Membership\MembershipApplication;
+use App\Models\MembershipApplication;
 use App\Models\Shop\ShopOrder;
 use App\Models\Order;
 use App\Models\Shop\ShopProductVariationValue;
@@ -82,13 +82,16 @@ class AdminDashboardMetricsService
     private function getLatestNewEnquiries(int $limit): \Illuminate\Support\Collection
     {
         $archive = ArchiveProductEnquiry::with('user')->where('status', 'new')->latest()->limit($limit)->get()
-            ->map(fn($e) => ['type' => 'Archive', 'subject' => $e->contact_name ?? $e->user?->name, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.archive.enquiries')]);
+            ->map(fn($e) => ['type' => 'Archive', 'subject' => $e->contact_name ?? $e->user?->name, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.archive.enquiries')])
+            ->toBase();
             
         $auction = AuctionEnquiry::with('user')->where('status', 'new')->latest()->limit($limit)->get()
-            ->map(fn($e) => ['type' => 'Auction', 'subject' => $e->contact_name ?? $e->user?->name, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.auctions.enquiries')]);
+            ->map(fn($e) => ['type' => 'Auction', 'subject' => $e->contact_name ?? $e->user?->name, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.auctions.enquiries')])
+            ->toBase();
             
         $contact = ContactEnquiry::with('user')->where('status', 'new')->latest()->limit($limit)->get()
-            ->map(fn($e) => ['type' => 'General', 'subject' => $e->subject, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.enquiries.index')]);
+            ->map(fn($e) => ['type' => 'General', 'subject' => $e->subject, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.enquiries.index')])
+            ->toBase();
 
         return $archive->concat($auction)->concat($contact)->sortByDesc('date')->take($limit);
     }

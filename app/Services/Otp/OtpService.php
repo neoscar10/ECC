@@ -18,11 +18,14 @@ class OtpService
         $ttlMinutes = 10;
         $key = 'phone_otp_' . $user->id;
 
+        $expiresAt = now()->addMinutes($ttlMinutes);
+
         // Store OTP in cache (generic driver) with 10 min TTL
         Cache::put($key, [
             'otp' => $otp,
-            'phone' => $phone
-        ], now()->addMinutes($ttlMinutes));
+            'phone' => $phone,
+            'expires_at' => $expiresAt,
+        ], $expiresAt);
 
         return [
             'ttl_minutes' => $ttlMinutes,
@@ -55,6 +58,24 @@ class OtpService
         }
 
         return false;
+    }
+
+    /**
+     * Get remaining seconds for the OTP.
+     */
+    public function getExpiry(User $user): int
+    {
+        $key = 'phone_otp_' . $user->id;
+        $cached = Cache::get($key);
+
+        if (!$cached || !isset($cached['expires_at'])) {
+            return 0;
+        }
+
+        $expiresAt = $cached['expires_at'];
+        $remaining = now()->diffInSeconds($expiresAt, false);
+
+        return (int) max(0, $remaining);
     }
     /**
      * Request a Password Reset OTP for the given user and identifier.

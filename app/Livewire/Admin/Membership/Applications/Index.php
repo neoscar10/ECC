@@ -5,7 +5,7 @@ namespace App\Livewire\Admin\Membership\Applications;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
-use App\Domain\Membership\MembershipApplication;
+use App\Models\MembershipApplication;
 use App\Models\Membership;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;

@@ -8,7 +8,9 @@ use App\Http\Resources\Shop\ShopProductResource;
 use App\Models\Shop\ShopCategory;
 use App\Models\Shop\ShopProduct;
 use App\Models\Shop\ShopTagGroup;
+use App\Services\Shop\ShopProductService;
 use App\Support\ApiResponse;
+use App\Validation\Shop\ShopRules;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,84 +19,23 @@ class ShopProductController extends Controller
 {
     use ApiResponse;
 
+    protected ShopProductService $shopProductService;
+
+    public function __construct(ShopProductService $shopProductService)
+    {
+        $this->shopProductService = $shopProductService;
+    }
+
     public function index(Request $request): JsonResponse
     {
-        $query = ShopProduct::query()->active()->with('images', 'categories', 'tags.group');
+        $request->validate(ShopRules::listing());
 
-        // Text Search
-        if ($request->filled('q')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('title', 'like', '%' . $request->q . '%')
-                  ->orWhere('description', 'like', '%' . $request->q . '%');
-            });
-        }
-
-        // Category Filter (OR logic)
-        if ($request->filled('category_ids')) {
-            // Support both ?category_ids=1,2 and ?category_ids[]=1
-            $catIds = is_array($request->category_ids) 
-                ? $request->category_ids 
-                : explode(',', $request->category_ids);
-                
-            $query->whereHas('categories', function (Builder $q) use ($catIds) {
-                $q->whereIn('shop_categories.id', $catIds);
-            });
-        }
-
-        // Tags Filter (AND across groups, OR within group)
-        // Request Usage: ?tags[brands]=12,13&tags[model]=33
-        if ($request->filled('tags') && is_array($request->tags)) {
-            foreach ($request->tags as $groupSlug => $tagVal) {
-                if (!$tagVal) continue;
-
-                $tagIds = is_array($tagVal) ? $tagVal : explode(',', $tagVal);
-
-                $query->whereHas('tags', function ($q) use ($tagIds) {
-                    $q->whereIn('shop_tags.id', $tagIds);
-                });
-            }
-        }
-
-        // Price Range
-        if ($request->filled('price_min')) {
-            $query->where('base_price', '>=', $request->price_min);
-        }
-        if ($request->filled('price_max')) {
-            $query->where('base_price', '<=', $request->price_max);
-        }
+        $filters = $request->only(['q', 'category_ids', 'tags', 'price_min', 'price_max', 'sort', 'in_stock']);
         
-        // In Stock Filter
-        if ($request->boolean('in_stock')) {
-            $query->inStock();
-        }
-
-        // Sorting
-        $sort = $request->get('sort', 'newest');
-        switch ($sort) {
-            case 'price_asc':
-            case 'price_low':
-                $query->orderBy('base_price', 'asc');
-                break;
-            case 'price_desc':
-            case 'price_high':
-                $query->orderBy('base_price', 'desc');
-                break;
-            case 'title_asc':
-                $query->orderBy('title', 'asc');
-                break;
-            case 'title_desc':
-                $query->orderBy('title', 'desc');
-                break;
-            case 'oldest':
-                $query->orderBy('created_at', 'asc');
-                break;
-            case 'newest':
-            default:
-                $query->latest(); // created_at desc
-                break;
-        }
-
-        $products = $query->paginate($request->input('per_page', 20));
+        $products = $this->shopProductService->getProducts(
+            $filters,
+            $request->input('per_page', 20)
+        );
 
         return $this->success(
             ShopProductResource::collection($products),
@@ -107,7 +48,7 @@ class ShopProductController extends Controller
                     'total' => $products->total(),
                     'last_page' => $products->lastPage(),
                 ],
-                'filters_applied' => $request->only(['q', 'category_ids', 'tags', 'price_min', 'price_max', 'sort', 'in_stock'])
+                'filters_applied' => $filters
             ]
         );
     }
@@ -194,10 +135,7 @@ class ShopProductController extends Controller
      */
     public function suggestions(Request $request): JsonResponse
     {
-        $validation = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'q' => 'required|string|min:2',
-            'limit' => 'integer|min:1|max:20'
-        ]);
+        $validation = \Illuminate\Support\Facades\Validator::make($request->all(), ShopRules::suggestions());
 
         if ($validation->fails()) {
             return $this->error('Validation error', 422, $validation->errors()->toArray());

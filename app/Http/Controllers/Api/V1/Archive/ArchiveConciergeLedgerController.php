@@ -16,78 +16,32 @@ class ArchiveConciergeLedgerController extends Controller
 {
     use ApiResponse;
 
+    protected $conciergeService;
+
+    public function __construct(\App\Services\Archive\ArchiveConciergeService $conciergeService)
+    {
+        $this->conciergeService = $conciergeService;
+    }
+
     /**
      * Get paginated list of unique archive items the user has enquired about.
      * Ordered by most recent enquiry.
      */
     public function index(Request $request): JsonResponse
     {
-        $userId = $request->user()->id;
         $perPage = $request->input('per_page', 20);
-
-        // 1. Subquery: Find the MAX(id) (latest enquiry) for each archive_product_id for this user
-        $latestEnquiryIdsQuery = ArchiveProductEnquiry::select(DB::raw('MAX(id)'))
-            ->where('user_id', $userId)
-            ->groupBy('archive_product_id');
-
-        // 2. Fetch the full Enquiry models that match these MAX IDs
-        //    Eager load the product and its images (for thumbnail)
-        $ledgerEntries = ArchiveProductEnquiry::whereIn('id', $latestEnquiryIdsQuery)
-            ->with(['product.images']) 
-            ->orderBy('id', 'desc') // Latest enquiry first
-            ->paginate($perPage);
-
-        // 3. Transform the pagination result
-        $data = $ledgerEntries->map(function ($enquiry) use ($userId) {
-            $product = $enquiry->product;
-            
-            // Should not happen due to foreign key, but safety check
-            if (!$product) {
-                return null;
-            }
-
-            // Get total count of enquiries for this specific product by this user
-            // We can do a quick count query here. For 20 items per page, 20 fast queries is acceptable.
-            // A more complex join with GROUP BY could get counts in one go, but this is cleaner to read.
-            $count = ArchiveProductEnquiry::where('user_id', $userId)
-                ->where('archive_product_id', $product->id)
-                ->count();
-
-            // Resolve thumbnail
-            $img = $product->images->sortBy('sort_order')->first();
-            $thumbnailUrl = $img ? url(Storage::url($img->image_path)) : null;
-
-            return [
-                'item' => [
-                    'id' => $product->id,
-                    'title' => $product->title,
-                    'primary_image_url' => $thumbnailUrl,
-                    // 'sku' or 'lot_code' if available in schema. 
-                    // ArchiveProduct schema inspection didn't show sku/lot_code explicitly in fillable/casts, 
-                    // but we will omit if unsure to strictly follow "no invention".
-                ],
-                'enquiry_summary' => [
-                    'last_enquiry_id' => $enquiry->id,
-                    'last_enquiry_status' => $enquiry->status,
-                    'last_enquiry_created_at' => $enquiry->created_at->toIso8601String(),
-                    'enquiries_count_for_item' => $count,
-                ],
-                // Ledger row timestamps derived from the latest enquiry interaction
-                'created_at' => $enquiry->created_at->toIso8601String(),
-                // 'updated_at' => $enquiry->updated_at->toIso8601String(),
-            ];
-        })->filter(); // Remove nulls if any product invalid
+        $paginator = $this->conciergeService->getUserRequests($request->user(), $perPage);
 
         return $this->success(
-            $data->values(), // Reset keys after filter
+            $paginator->items(),
             'Concierge ledger fetched successfully.',
             200,
             [
                 'pagination' => [
-                    'page' => $ledgerEntries->currentPage(),
-                    'per_page' => $ledgerEntries->perPage(),
-                    'total' => $ledgerEntries->total(),
-                    'last_page' => $ledgerEntries->lastPage(),
+                    'page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
                 ]
             ]
         );

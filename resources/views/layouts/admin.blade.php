@@ -383,7 +383,7 @@
                             <img class="rounded-circle header-profile-user" src="{{ asset('velzon/assets') }}/images/users/user-dummy-img.jpg" alt="Header Avatar">
                             <span class="text-start ms-xl-2">
                                 <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{ Auth::user()->name }}</span>
-                                <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">{{ Auth::user()->role }}</span>
+                                <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">{{ is_array(Auth::user()->role) ? implode(', ', Auth::user()->role) : Auth::user()->role }}</span>
                             </span>
                         </span>
                     </button>

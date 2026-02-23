@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'verified_phone' => \App\Http\Middleware\EnsurePhoneVerified::class,
+            'ensure_registration_complete' => \App\Http\Middleware\EnsureRegistrationComplete::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

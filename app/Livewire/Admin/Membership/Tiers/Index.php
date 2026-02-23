@@ -292,7 +292,7 @@ class Index extends Component
         $this->checkSuperAdmin();
         // Guard rail: check relationships
         
-        $hasApps = \App\Domain\Membership\MembershipApplication::where('selected_tier_id', $id)->orWhere('recommended_tier_id', $id)->exists();
+        $hasApps = MembershipApplication::where('selected_tier_id', $id)->orWhere('recommended_tier_id', $id)->exists();
         $hasMemberships = \App\Models\Membership::where('membership_tier_id', $id)->exists();
 
         if ($hasApps || $hasMemberships) {

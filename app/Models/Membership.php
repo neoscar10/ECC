@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\MembershipApplication;
 
 class Membership extends Model
 {
@@ -26,7 +27,7 @@ class Membership extends Model
 
     public function sourceApplication()
     {
-        return $this->belongsTo(\App\Domain\Membership\MembershipApplication::class, 'source_application_id');
+        return $this->belongsTo(MembershipApplication::class, 'source_application_id');
     }
 
     public function approver()

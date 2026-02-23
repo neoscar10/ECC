@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\ApiResponse;
+use App\Services\Auth\AuthService;
+use App\Validation\Auth\AuthRules;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,56 +17,39 @@ class AuthController extends Controller
 {
     use ApiResponse;
 
+    protected AuthService $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     /**
      * Register a new user
      */
     public function register(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'phone' => 'nullable|string|max:20',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
+        $validator = Validator::make($request->all(), AuthRules::register());
 
         if ($validator->fails()) {
             return $this->error('Validation Error', 422, $validator->errors());
         }
 
         try {
-            return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
-                // 1. Create User
-                $user = User::create([
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'phone' => $request->phone,
-                    'password' => $request->password,
-                ]);
+            $user = $this->authService->register($request->all());
 
-                // 2. Assign Role (Standard 'user' role)
-                // We use 'web' guard role, ensure model picks it up. 
-                // Spatie usually uses default guard from config if not specified.
-                $user->assignRole('user');
+            // Generate Token
+            $token = auth('api')->login($user);
 
-                // 3. Create Application
-                $application = \App\Domain\Membership\MembershipApplication::create([
-                    'user_id' => $user->id,
-                    'status' => 'draft',
-                    'current_step' => 'personal_details'
-                ]);
-
-                // 4. Generate Token
-                $token = auth('api')->login($user);
-
-                // 5. Return Success Response
-                return $this->success([
-                    'access_token' => $token,
-                    'token_type' => 'bearer',
-                    'expires_in' => auth('api')->factory()->getTTL() * 60,
-                    'user' => $user,
-                    'application' => $application,
-                ], 'Registration successful');
-            });
+            // Return Success Response
+            return $this->success([
+                'access_token' => $token,
+                'token_type' => 'bearer',
+                'expires_in' => auth('api')->factory()->getTTL() * 60,
+                'user' => $user,
+                'application' => $user->memberships()->where('status', 'draft')->latest()->first() ?? 
+                               MembershipApplication::where('user_id', $user->id)->latest()->first(),
+            ], 'Registration successful');
 
         } catch (\Exception $e) {
             return $this->error('Registration failed: ' . $e->getMessage(), 500);
@@ -77,9 +62,7 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         // 1. Light Validation (Accept email OR phone OR login)
-        $request->validate([
-            'password' => 'required|string',
-        ]);
+        $request->validate(AuthRules::login());
 
         if (!$request->hasAny(['email', 'phone', 'login'])) {
              return $this->error('Please provide email or phone number.', 422);
@@ -90,38 +73,36 @@ class AuthController extends Controller
             ?? $request->input('email') 
             ?? $request->input('phone');
 
-        // 3. Detect Format (Email vs Phone)
-        $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
-
-        // 4. Check if user exists first
-        $userQuery = User::query();
-        if ($isEmail) {
-            $userQuery->where('email', $identifier);
-            $credentials = ['email' => $identifier, 'password' => $request->input('password')];
-        } else {
-            // Minimal Phone Normalization
-            $normalizedPhone = trim(str_replace(' ', '', $identifier));
-            $userQuery->where('phone', $normalizedPhone);
-            $credentials = ['phone' => $normalizedPhone, 'password' => $request->input('password')];
-        }
-
-        $user = $userQuery->first();
+        // 3. Resolve User
+        $user = $this->authService->resolveUser($identifier);
 
         if (! $user) {
             return $this->error('We could not find an account with that email/phone.', 404);
         }
 
-        if (! $token = auth('api')->attempt($credentials)) {
-            return $this->error('Incorrect password. Please try again.', 401);
+        try {
+            // Determine credentials for attempt
+            $credentials = [
+                filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone' => $user->phone ?? $user->email, // Using whatever matched
+                'password' => $request->password
+            ];
+            
+            // If it was phone, ensure we use Normalized one from DB
+            if (!filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+                $credentials = ['phone' => $user->phone, 'password' => $request->password];
+            } else {
+                $credentials = ['email' => $user->email, 'password' => $request->password];
+            }
+
+            $result = $this->authService->login($credentials);
+
+            return $this->respondWithToken($result['token'], $result['user'], $result['application']);
+
+        } catch (\Illuminate\Auth\AuthenticationException $e) {
+            return $this->error($e->getMessage(), 401);
+        } catch (\Exception $e) {
+            return $this->error('Login failed: ' . $e->getMessage(), 500);
         }
-
-        $user = auth('api')->user();
-        $application = \App\Domain\Membership\MembershipApplication::where('user_id', $user->id)
-            ->where('status', '!=', 'rejected')
-            ->latest()
-            ->first();
-
-        return $this->respondWithToken($token, $user, $application);
     }
 
     /**
@@ -130,14 +111,10 @@ class AuthController extends Controller
     public function me(): JsonResponse
     {
         $user = auth('api')->user();
-        $application = \App\Domain\Membership\MembershipApplication::where('user_id', $user->id)
-            ->where('status', '!=', 'rejected')
-            ->latest()
-            ->first();
-
+        
         return $this->success([
             'user' => $user,
-            'application' => $application
+            'application' => $this->authService->getPendingApplication($user)
         ]);
     }
 
@@ -199,6 +176,7 @@ class AuthController extends Controller
     protected function respondWithToken(string $token, $user = null, $application = null): JsonResponse
     {
         $user = $user ?? auth('api')->user();
+        $application = $application ?? $this->authService->getPendingApplication($user);
 
         return $this->success([
             'access_token' => $token,
@@ -206,7 +184,7 @@ class AuthController extends Controller
             'expires_in' => JWTAuth::factory()->getTTL() * 60,
             'user' => $user,
             'application' => $application,
-            'active_subscriptions' => $this->getActiveSubscriptions($user) // [NEW] Sync Data
+            'active_subscriptions' => $this->authService->getActiveSubscriptions($user)
         ]);
     }
 

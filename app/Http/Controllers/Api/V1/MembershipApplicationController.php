@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Domain\Membership\MembershipApplication;
+use App\Models\MembershipApplication;
 use App\Domain\Membership\PaymentService;
 use App\Domain\Membership\TierRecommendationService;
+use App\Services\Membership\MembershipService;
 use App\Http\Controllers\Controller;
 use App\Support\ApiResponse;
+use App\Validation\Membership\MembershipRules;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -15,6 +17,13 @@ use Exception;
 class MembershipApplicationController extends Controller
 {
     use ApiResponse;
+
+    protected MembershipService $membershipService;
+
+    public function __construct(MembershipService $membershipService)
+    {
+        $this->membershipService = $membershipService;
+    }
 
     public function current(Request $request): JsonResponse
     {
@@ -31,35 +40,15 @@ class MembershipApplicationController extends Controller
     {
         $application = $this->getApplicationOr404($id, $request->user());
 
-        $validator = Validator::make($request->all(), [
-            'full_name' => 'required|string|max:255',
-            'date_of_birth' => 'required|date|before:today',
-            'country' => 'required|string|max:100',
-            'city' => 'required|string|max:100',
-        ]);
+        $validator = Validator::make($request->all(), MembershipRules::personalDetails());
 
         if ($validator->fails()) {
             return $this->error('Validation failed: Personal details are incomplete.', 422, $validator->errors());
         }
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($request, $application) {
-            // Update User
-            $user = $request->user();
-            $user->update([
-                'full_name' => $request->full_name,
-                'date_of_birth' => $request->date_of_birth,
-                'country' => $request->country,
-                'city' => $request->city,
-            ]);
+        $application = $this->membershipService->savePersonalDetails($application, $request->user(), $request->all());
 
-            // Update Application
-            $application->update([
-                'personal_details_json' => $request->all(),
-                'current_step' => 'cricket_profile'
-            ]);
-        });
-
-        return $this->success($application->fresh(), 'Personal details saved.');
+        return $this->success($application, 'Personal details saved.');
     }
 
     public function saveCricketProfile(Request $request, $id): JsonResponse
@@ -67,154 +56,73 @@ class MembershipApplicationController extends Controller
         $application = $this->getApplicationOr404($id, $request->user());
 
         // Validate structure first (must be arrays), checking actual values later
-        $validator = Validator::make($request->all(), [
-            'preferred_formats' => 'required|array',
-            'eras' => 'required|array',
-        ]);
+        $validator = Validator::make($request->all(), MembershipRules::cricketProfile());
 
         if ($validator->fails()) {
             return $this->error('Validation failed: Cricket profile data is invalid.', 422, $validator->errors());
         }
 
-        // Map and Cleanse Inputs
-        $formats = \App\Support\MetaOptionMapper::mapArray(
-            $request->preferred_formats,
-            config('ecc_meta.cricket_profile.formats')
-        );
-
-        $eras = \App\Support\MetaOptionMapper::mapArray(
-            $request->eras,
-            config('ecc_meta.cricket_profile.eras')
-        );
-
-        // Optional: Ensure at least one valid value remains? 
-        // For now, if client sends junk, it filters out. 
-        // Strict validation: if count differs from input count? 
-        // Keeping it friendly: accept valid ones.
-        
-        if (empty($formats)) {
-             return $this->error('At least one valid format is required.', 422);
+        try {
+            $application = $this->membershipService->saveCricketProfile($application, $request->all());
+            return $this->success($application, 'Cricket profile saved.');
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 422);
         }
-        if (empty($eras)) {
-             return $this->error('At least one valid era is required.', 422);
-        }
-
-        $application->update([
-            'cricket_profile_json' => [
-                'preferred_formats' => $formats,
-                'eras' => $eras
-            ],
-            'current_step' => 'collector_intent'
-        ]);
-
-        return $this->success($application, 'Cricket profile saved.');
     }
 
     public function saveCollectorIntent(Request $request, $id, TierRecommendationService $recommender): JsonResponse
     {
         $application = $this->getApplicationOr404($id, $request->user());
 
-        $validator = Validator::make($request->all(), [
-            'has_acquired_memorabilia_before' => 'required|boolean',
-            'focus' => 'required|string',
-            'investment_horizon' => 'required|string',
-            'interests' => 'array'
-        ]);
+        $validator = Validator::make($request->all(), MembershipRules::collectorIntent());
 
         if ($validator->fails()) {
             return $this->error('Validation failed: Collector intent data is invalid.', 422, $validator->errors());
         }
 
-        // Map inputs
-        $focus = \App\Support\MetaOptionMapper::map(
-            $request->focus,
-            config('ecc_meta.collector_intent.focus')
-        );
-        
-        $horizon = \App\Support\MetaOptionMapper::map(
-            $request->investment_horizon,
-            config('ecc_meta.collector_intent.investment_horizon')
-        );
+        try {
+            $application = $this->membershipService->saveCollectorIntent($application, $request->all());
 
-        if (!$focus) {
-            return $this->error('Invalid focus option.', 422);
+            // Generate recommendation
+            $tier = $recommender->recommendForApplication($application);
+            
+            $application->update([
+                'recommended_tier_id' => $tier->id,
+                'recommended_at' => now(),
+                'recommended_tier_code' => $tier->code
+            ]);
+
+            return $this->success([
+                'application' => $application,
+                'recommended_tier' => $tier,
+                'all_tiers' => \App\Models\MembershipTier::where('is_active', true)->orderBy('sort_order')->get()
+            ], 'Collector intent saved. Tier recommended.');
+
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 422);
         }
-        if (!$horizon) {
-            return $this->error('Invalid investment horizon option.', 422);
-        }
-
-        $intent = [
-            'has_acquired_memorabilia_before' => $request->has_acquired_memorabilia_before,
-            'focus' => $focus,
-            'investment_horizon' => $horizon,
-            'interests' => $request->interests ?? []
-        ];
-        
-        // Update application first so service can read it
-        $application->update([
-            'collector_intent_json' => $intent,
-            'current_step' => 'tier_selection'
-        ]);
-
-        // Generate recommendation
-        $tier = $recommender->recommendForApplication($application);
-        
-        $application->update([
-            'recommended_tier_id' => $tier->id,
-            'recommended_at' => now(),
-            'recommended_tier_code' => $tier->code // Keep legacy field for now if needed, or remove
-        ]);
-
-        return $this->success([
-            'application' => $application,
-            'recommended_tier' => $tier,
-            'all_tiers' => \App\Models\MembershipTier::where('is_active', true)->orderBy('sort_order')->get()
-        ], 'Collector intent saved. Tier recommended.');
     }
 
     public function selectTier(Request $request, $id): JsonResponse
     {
         $application = $this->getApplicationOr404($id, $request->user());
         
-        $validator = Validator::make($request->all(), [
-            'tier_id' => 'required|integer|exists:membership_tiers,id,is_active,1'
-        ]);
+        $validator = Validator::make($request->all(), MembershipRules::selectTier());
 
         if ($validator->fails()) {
             return $this->error('Validation failed: Invalid tier selection.', 422, $validator->errors());
         }
 
-        $tier = \App\Models\MembershipTier::find($request->tier_id);
-        $isFree = (float) $tier->price <= 0.0;
+        $application = $this->membershipService->selectTier($application, $request->tier_id);
 
-        $updateData = [
-            'selected_tier_id' => $request->tier_id,
-            'membership_tier_id' => $request->tier_id,
-        ];
-
-        if ($isFree) {
-            $updateData['current_step'] = 'submitted'; // Ready for submission (skip payment)
-            $updateData['payment_status'] = 'not_required';
-        } else {
-            $updateData['current_step'] = 'payment';
-            $updateData['payment_status'] = 'unpaid';
-        }
-
-        $application->update($updateData);
-
-        return $this->success($application->load('membershipTier.privileges'), 'Tier selected.');
+        return $this->success($application, 'Tier selected.');
     }
 
     public function confirmPayment(Request $request, $id, PaymentService $paymentService): JsonResponse
     {
         $application = $this->getApplicationOr404($id, $request->user());
 
-        $validator = Validator::make($request->all(), [
-            'method' => 'required|in:card,wallet',
-            // 'amount' => 'required|numeric', // Removed: Server computed
-            'cardholder_name' => 'required_if:method,card',
-            'last4' => 'required_if:method,card',
-        ]);
+        $validator = Validator::make($request->all(), MembershipRules::confirmPayment());
 
         if ($validator->fails()) {
             return $this->error('Validation failed: Payment details are invalid.', 422, $validator->errors());
@@ -269,36 +177,16 @@ class MembershipApplicationController extends Controller
         }
 
         // Get tier
-        $tier = $application->membershipTier;
-        if (!$tier) {
+        if (!$application->membership_tier_id) {
              return $this->error('No membership tier selected.', 400);
         }
 
-        $requiresApproval = $tier->requires_approval;
-        $status = $requiresApproval ? 'pending' : 'active';
-        $approvedAt = $requiresApproval ? null : now();
-        $startedAt = $requiresApproval ? null : now();
-
-        // Create Membership
-        $membership = \App\Models\Membership::create([
-            'user_id' => $application->user_id,
-            'membership_tier_id' => $tier->id,
-            'status' => $status,
-            'source_application_id' => $application->id,
-            'approved_at' => $approvedAt,
-            'started_at' => $startedAt
-        ]);
-
-        $application->update([
-            'status' => 'submitted',
-            'submitted_at' => now(),
-            'current_step' => $requiresApproval ? 'waiting_approval' : 'access_granted'
-        ]);
+        $result = $this->membershipService->submitApplication($application);
 
         return $this->success([
-            'application' => $application,
-            'membership' => $membership,
-            'next_step' => $application->current_step
+            'application' => $result['application'],
+            'membership' => $result['membership'],
+            'next_step' => $result['application']->current_step
         ], 'Application submitted successfully.');
     }
 

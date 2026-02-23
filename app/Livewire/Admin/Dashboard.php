@@ -14,7 +14,16 @@ class Dashboard extends Component
 
     public function mount(AdminDashboardMetricsService $service)
     {
-        $this->loadData($service);
+        try {
+            $this->loadData($service);
+        } catch (\Throwable $e) {
+            dd([
+                'msg' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => collect($e->getTrace())->take(10)
+            ]);
+        }
     }
 
     public function refresh(AdminDashboardMetricsService $service)

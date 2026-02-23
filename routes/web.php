@@ -4,10 +4,28 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Livewire\Admin\Dashboard;
 use App\Http\Middleware\EnsureAdminRole;
+use App\Livewire\Splash\SplashScreen;
+use App\Livewire\Welcome\WelcomePage;
+use App\Livewire\Entry\GatedEntryPage;
+use App\Livewire\User\Auth\UserLoginPage;
+use App\Livewire\Club\ClubPage;
 
-Route::get('/', function () {
-    return view('landing');
+Route::middleware(['auth', 'ensure_registration_complete'])->group(function () {
+    Route::get('/home', \App\Livewire\Pavilion\ExplorePage::class)->name('home');
+    Route::get('/archive', \App\Livewire\Archive\ArchiveProductIndex::class)->name('archive');
+    Route::get('/pavilion/{type}/{slugOrId}', \App\Livewire\Pavilion\ContentDetailPage::class)->name('pavilion.detail');
+    Route::get('/club', \App\Livewire\Club\ClubPage::class)->name('club');
+    Route::get('/settings', \App\Livewire\Settings\SettingsPage::class)->name('settings');
 });
+Route::get('/welcome', WelcomePage::class)->name('welcome');
+Route::get('/gated-entry', GatedEntryPage::class)->name('gated.entry');
+
+Route::get('/user/login', UserLoginPage::class)
+    ->middleware('guest:web')
+    ->name('user.login');
+
+Route::get('/', SplashScreen::class)->name('root');
+Route::get('/splash', SplashScreen::class)->name('splash');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'index'])->name('login');
@@ -16,7 +34,7 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth:web', EnsureAdminRole::class])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/users', \App\Livewire\Admin\Users\UsersIndex::class)->name('users.index');
     Route::get('/admin-users', \App\Livewire\Admin\Users\AdminIndex::class)->name('users.admin');
@@ -89,4 +107,25 @@ Route::middleware(['auth', EnsureAdminRole::class])->prefix('admin')->name('admi
         Route::get('/auctions', \App\Livewire\Admin\Reports\AuctionReport::class)->name('auctions');
         Route::get('/vault', \App\Livewire\Admin\Reports\VaultLedgerReport::class)->name('vault');
     });
+});
+
+// Membership Application Flow (Guest)
+Route::middleware('guest')->group(function () {
+    Route::get('/membership/apply-intro', \App\Livewire\Membership\ApplyIntroPage::class)->name('membership.apply-intro');
+    Route::get('/membership/apply', \App\Livewire\Membership\ApplyPage::class)->name('membership.apply');
+    
+    // Application Wizard (Guest Steps)
+    Route::get('/membership/application/step-1', \App\Livewire\Membership\Application\Step1RegisterAccount::class)->name('membership.application.step1');
+    Route::get('/membership/application/step-2', \App\Livewire\Membership\Application\Step2VerifyOtp::class)->name('membership.application.step2');
+});
+
+// Application Wizard (Member Steps - Requires Auth)
+Route::middleware(['auth'])->group(function() {
+    Route::get('/membership/application/step-3', \App\Livewire\Membership\Application\Step3PersonalDetails::class)->name('membership.application.step3');
+    Route::get('/membership/application/step-4', \App\Livewire\Membership\Application\Step4CricketProfile::class)->name('membership.application.step4');
+    Route::get('/membership/application/step-5', \App\Livewire\Membership\Application\Step5CollectorIntent::class)->name('membership.application.step5');
+    
+    Route::get('/membership/application/step-6', \App\Livewire\Membership\Application\Step6SelectTier::class)->name('membership.application.step6');
+    Route::get('/membership/application/step-7', \App\Livewire\Membership\Application\Step7Payment::class)->name('membership.application.step7');
+    Route::get('/membership/application/step-8', \App\Livewire\Membership\Application\Step8Success::class)->name('membership.application.step8');
 });

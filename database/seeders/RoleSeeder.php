@@ -17,16 +17,28 @@ class RoleSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create Roles (Only Admin + User, NO Tiers)
-        $roles = [
-            'user',
+        // Create Permissions
+        $permissions = [
+            'view_auctions',
+            'bid_auctions',
+            'view_archive',
+            'manage_enquiries',
             'ecc_admin',
             'super_admin',
         ];
 
-        // Ensure roles exist for guard 'web' as requested
-        foreach ($roles as $roleName) {
-            Role::findOrCreate($roleName, 'web');
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
         }
+
+        // Create Roles and Assign Permissions
+        $userRole = Role::firstOrCreate(['name' => 'user']);
+        $userRole->syncPermissions(['view_auctions', 'bid_auctions', 'view_archive']);
+
+        $adminRole = Role::firstOrCreate(['name' => 'ecc_admin']);
+        $adminRole->syncPermissions(['view_auctions', 'bid_auctions', 'view_archive', 'manage_enquiries', 'ecc_admin']);
+
+        $superAdminRole = Role::firstOrCreate(['name' => 'super_admin']);
+        $superAdminRole->syncPermissions(Permission::all());
     }
 }

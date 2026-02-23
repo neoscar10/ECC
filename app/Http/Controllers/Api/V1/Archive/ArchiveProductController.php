@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Archive\ArchiveProductResource;
 use App\Http\Resources\Archive\ArchiveProductListResource;
 use App\Models\Archive\ArchiveProduct;
+use App\Services\Archive\ArchiveProductService;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 
@@ -13,29 +14,28 @@ class ArchiveProductController extends Controller
 {
     use ApiResponse;
 
+    protected ArchiveProductService $archiveProductService;
+
+    public function __construct(ArchiveProductService $archiveProductService)
+    {
+        $this->archiveProductService = $archiveProductService;
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
         $userTier = $user ? $user->currentMembership?->membershipTier : null;
 
-        $query = ArchiveProduct::query()
-            ->with(['category', 'images', 'restrictedMinTier', 'clearViewTiers', 'visibilityTiers']) // Eager load clearViewTiers, visibilityTiers
-            ->where('is_active', true)
-            ->where('quantity', '>', 0) // Filter out-of-stock items
-            ->visibleTo($user, $userTier); // Apply Visibility Scope
-
         if ($request->has('category_id') && !is_numeric($request->category_id)) {
             return $this->error('Invalid category_id. Must be numeric.', 422);
         }
 
-        if ($request->filled('category_id')) {
-            $query->where('archive_category_id', (int) $request->category_id);
-        }
-
-        // Sorting
-        $query->orderBy('sort_order')->orderBy('created_at', 'desc');
-
-        $products = $query->paginate(20);
+        $products = $this->archiveProductService->getProducts(
+            $user, 
+            $userTier, 
+            $request->only(['category_id']),
+            20
+        );
 
         return $this->success(ArchiveProductListResource::collection($products));
     }

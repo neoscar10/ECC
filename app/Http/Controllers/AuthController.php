@@ -29,7 +29,7 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        if (Auth::user()->hasRole(['super_admin', 'ecc_admin'])) {
+        if (Auth::user()->hasAnyRole(['super_admin', 'ecc_admin'])) {
             return redirect()->intended(route('admin.dashboard'));
         }
 

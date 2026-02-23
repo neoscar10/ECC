@@ -40,7 +40,15 @@ class TierRecommendationService
         }
 
         // Horizon Scoring
-        $horizon = $intent['investment_horizon'] ?? '';
+        $horizon = $intent['investment_horizon'] ?? null;
+        if (!$horizon && isset($intent['horizon_value'])) {
+             // Fallback/Map if only value is present
+             $v = (int)$intent['horizon_value'];
+             if ($v >= 80) $horizon = 'Y10_PLUS';
+             elseif ($v >= 40) $horizon = 'Y5_10';
+             else $horizon = 'Y1_5';
+        }
+
         switch ($horizon) {
             case 'Y10_PLUS': $score += 3; break;
             case 'Y5_10':    $score += 2; break;
@@ -61,5 +69,44 @@ class TierRecommendationService
         $tierIndex = min(floor($score / $bucketSize), $tiersCount - 1);
 
         return $tiers[$tierIndex];
+    }
+
+    /**
+     * Get a formatted recommendation for the wizard UI.
+     */
+    public function getRecommendationForWizard(MembershipApplication $application): array
+    {
+        $tier = $this->recommendForApplication($application);
+        $intent = $application->collector_intent_json ?? [];
+        
+        $reasons = [];
+        $focus = $intent['focus'] ?? '';
+        $history = $intent['history'] ?? 'no';
+        $horizon = $intent['horizon_value'] ?? 50;
+
+        if ($focus === 'RARITY') {
+            $reasons[] = 'Your focus on rarity aligns with this tier\'s exclusive access.';
+        } elseif ($focus === 'LEGACY') {
+            $reasons[] = 'Ideal for collectors preserving the legacy of the game.';
+        }
+
+        if ($history === 'yes') {
+            $reasons[] = 'Your previous collection experience qualifies you for advanced benefits.';
+        }
+
+        if ($horizon >= 80) {
+            $reasons[] = 'Strategic benefits designed for your long-term investment horizon.';
+        }
+
+        if (empty($reasons)) {
+            $reasons[] = 'A balanced entry point based on your starting preferences.';
+        }
+
+        return [
+            'tier_id' => $tier->id,
+            'tier_name' => $tier->name,
+            'title' => 'Recommended for you',
+            'reasons' => array_slice($reasons, 0, 2)
+        ];
     }
 }
