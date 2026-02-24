@@ -17,6 +17,7 @@ class ArchiveProductAttachment extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'content' => 'array',
     ];
 
     public function product(): BelongsTo

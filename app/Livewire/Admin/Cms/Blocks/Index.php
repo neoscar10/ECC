@@ -872,13 +872,19 @@ class Index extends Component
     public function delete($id)
     {
         $this->blockId = $id;
-        $this->confirmingDelete = true;
+        $this->dispatch('show-delete-modal');
     }
 
-    public function confirmDelete()
+    public function deleteConfirmed()
     {
-        CmsBlock::findOrFail($this->blockId)->delete();
-        $this->confirmingDelete = false;
+        if ($this->blockId) {
+            $block = CmsBlock::find($this->blockId);
+            if ($block) {
+                $block->delete();
+                session()->flash('success', 'Block deleted successfully.');
+            }
+        }
+        $this->dispatch('hide-delete-modal');
         $this->blockId = null;
     }
 

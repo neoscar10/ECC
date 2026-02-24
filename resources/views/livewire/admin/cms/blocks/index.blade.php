@@ -147,7 +147,7 @@
                                                     <ul class="dropdown-menu dropdown-menu-end">
                                                         <li><a href="javascript:void(0);" class="dropdown-item edit-item-btn" wire:click="edit({{ $block->id }})"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Edit</a></li>
                                                         <li>
-                                                            <a href="javascript:void(0);" class="dropdown-item remove-item-btn" wire:confirm="Are you sure you want to delete this block?" wire:click="delete({{ $block->id }})">
+                                                            <a href="javascript:void(0);" class="dropdown-item remove-item-btn" wire:click="delete({{ $block->id }})">
                                                                 <i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i> Delete
                                                             </a>
                                                         </li>
@@ -284,6 +284,25 @@
         </div>
     </div>
 
+    <!-- Delete Confirm Modal -->
+    <div class="modal fade" id="deleteBlockModal" tabindex="-1" aria-hidden="true" wire:ignore.self>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body p-5 text-center">
+                    <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop" colors="primary:#405189,secondary:#f06548" style="width:90px;height:90px"></lord-icon>
+                    <div class="mt-4 text-center">
+                        <h4 class="fs-semibold">You are about to delete this CMS block?</h4>
+                        <p class="text-muted fs-14 mb-4 pt-1">Deleting this block will permanently remove it from the placement and content database.</p>
+                        <div class="hstack gap-2 justify-content-center remove">
+                            <button class="btn btn-link link-success fw-medium text-decoration-none" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> Close</button>
+                            <button class="btn btn-danger" wire:click="deleteConfirmed" wire:loading.attr="disabled">Yes, Delete It</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Script for Modal Handling & Scoped Styles -->
     <script>
         document.addEventListener('livewire:initialized', () => {
@@ -291,6 +310,10 @@
             Livewire.on('show-create-modal', () => { createModal.show(); });
             Livewire.on('hide-create-modal', () => { createModal.hide(); });
             Livewire.on('refresh-blocks', () => { createModal.hide(); });
+
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteBlockModal'));
+            Livewire.on('show-delete-modal', () => { deleteModal.show(); });
+            Livewire.on('hide-delete-modal', () => { deleteModal.hide(); });
         });
     </script>
     <style>

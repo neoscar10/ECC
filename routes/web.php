@@ -11,8 +11,10 @@ use App\Livewire\User\Auth\UserLoginPage;
 use App\Livewire\Club\ClubPage;
 
 Route::middleware(['auth', 'ensure_registration_complete'])->group(function () {
-    Route::get('/home', \App\Livewire\Pavilion\ExplorePage::class)->name('home');
-    Route::get('/archive', \App\Livewire\Archive\ArchiveProductIndex::class)->name('archive');
+    Route::get('/home', \App\Livewire\Pavilion\HomePage::class)->name('home');
+    Route::get('/content/blocks/{id}', \App\Livewire\Pavilion\ContentBlockDetailPage::class)->name('content.block.detail');
+    Route::get('/archive', \App\Livewire\Archive\ArchiveBrowse::class)->name('archive.index');
+    Route::get('/archive/products/{id}', \App\Livewire\Archive\ArchiveProductShow::class)->name('archive.products.show');
     Route::get('/pavilion/{type}/{slugOrId}', \App\Livewire\Pavilion\ContentDetailPage::class)->name('pavilion.detail');
     Route::get('/club', \App\Livewire\Club\ClubPage::class)->name('club');
     Route::get('/settings', \App\Livewire\Settings\SettingsPage::class)->name('settings');
