@@ -113,7 +113,7 @@ class Index extends Component
             ->withCount('variationGroups')
             ->when($this->search, fn($q) => $q->where('title', 'like', '%'.$this->search.'%'))
             ->when($this->filterCategory, function($q) {
-                $q->whereHas('categories', fn($c) => $c->where('id', $this->filterCategory));
+                $q->whereHas('categories', fn($c) => $c->where('shop_categories.id', (int) $this->filterCategory));
             })
             ->when($this->filterStatus !== '', fn($q) => $q->where('is_active', (bool)$this->filterStatus))
             ->latest()

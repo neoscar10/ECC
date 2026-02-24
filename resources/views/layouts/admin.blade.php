@@ -525,7 +525,11 @@
                         @endphp
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ $isMembershipActive ? 'active' : '' }}" href="#sidebarMembership" data-bs-toggle="collapse" role="button" aria-expanded="{{ $isMembershipActive ? 'true' : 'false' }}" aria-controls="sidebarMembership">
-                                <i class="ri-vip-crown-line"></i> <span data-key="t-membership">Membership</span>
+                                <i class="ri-vip-crown-line"></i>
+                                <span data-key="t-membership">Membership</span>
+                                @if(($pendingMembershipApplicationsCount ?? 0) > 0)
+                                    <span class="badge me-3 bg-warning text-dark ms-auto">{{ $pendingMembershipApplicationsCount }}</span>
+                                @endif
                             </a>
                             <div class="collapse menu-dropdown {{ $isMembershipActive ? 'show' : '' }}" id="sidebarMembership">
                                 <ul class="nav nav-sm flex-column">
@@ -554,7 +558,11 @@
                         @endphp
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ $isArchiveActive ? 'active' : '' }}" href="#sidebarArchive" data-bs-toggle="collapse" role="button" aria-expanded="{{ $isArchiveActive ? 'true' : 'false' }}" aria-controls="sidebarArchive">
-                                <i class="ri-archive-line"></i> <span data-key="t-archive">The Archive</span>
+                                <i class="ri-archive-line"></i>
+                                <span data-key="t-archive">The Archive</span>
+                                @if(($newArchiveEnquiriesCount ?? 0) > 0)
+                                    <span class="badge me-3 bg-danger ms-auto">{{ $newArchiveEnquiriesCount }}</span>
+                                @endif
                             </a>
                             <div class="collapse menu-dropdown {{ $isArchiveActive ? 'show' : '' }}" id="sidebarArchive">
                                 <ul class="nav nav-sm flex-column">
@@ -584,7 +592,11 @@
                         @endphp
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ $isAuctionsActive ? 'active' : '' }}" href="#sidebarAuctions" data-bs-toggle="collapse" role="button" aria-expanded="{{ $isAuctionsActive ? 'true' : 'false' }}" aria-controls="sidebarAuctions">
-                                <i class="ri-auction-line"></i> <span data-key="t-auctions">Auctions</span>
+                                <i class="ri-auction-line"></i>
+                                <span data-key="t-auctions">Auctions</span>
+                                @if(($newAuctionEnquiriesCount ?? 0) > 0)
+                                    <span class="badge rounded-pill bg-danger ms-auto">{{ $newAuctionEnquiriesCount }}</span>
+                                @endif
                             </a>
                             <div class="collapse menu-dropdown {{ $isAuctionsActive ? 'show' : '' }}" id="sidebarAuctions">
                                 <ul class="nav nav-sm flex-column">
