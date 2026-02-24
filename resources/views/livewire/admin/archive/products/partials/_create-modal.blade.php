@@ -96,21 +96,16 @@
                 </form>
             </div>
             <div class="modal-footer">
+                {{-- Always keep ONE cancel button --}}
                 <button type="button" class="btn btn-light" wire:click="closeModal" data-bs-dismiss="modal">Cancel</button>
+                
                 <div class="d-flex gap-2">
+                    {{-- Back button: Step 2+ --}}
                     @if($createStep > 1)
                         <button type="button" class="btn btn-light" wire:click="prevStep">Back</button>
-                    @else
-                        {{-- Only show Cancel if Back is not available? The original code had a second Cancel button here? --}}
-                        {{-- Original Lines: 
-                             @else
-                                 <button type="button" class="btn btn-light" wire:click="closeModal">Cancel</button>
-                             @endif 
-                        --}}
-                        <button type="button" class="btn btn-light" wire:click="closeModal">Cancel</button>
                     @endif
                     
-                    {{-- Save Changes (Edit Mode Only, Steps 1-3) --}}
+                    {{-- Save Changes: Inline save for Edit Mode (Steps 1-3) --}}
                     @if($isEditMode && $createStep < 4)
                          <button type="button" class="btn btn-success" wire:click="updateProduct" wire:loading.attr="disabled" wire:target="updateProduct">
                             <span wire:loading.remove wire:target="updateProduct">Save Changes</span>
@@ -121,6 +116,7 @@
                         </button>
                     @endif
 
+                    {{-- Next Step (1-3) or Submit (4) --}}
                     @if($createStep < 4)
                         <button type="button" class="btn btn-primary" wire:click="nextStep" wire:loading.attr="disabled">
                             Next Step <i class="ri-arrow-right-line align-middle ms-1"></i>
