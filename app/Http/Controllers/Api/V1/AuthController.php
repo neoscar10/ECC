@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\MembershipApplication;
 use App\Support\ApiResponse;
 use App\Services\Auth\AuthService;
 use App\Validation\Auth\AuthRules;
@@ -29,7 +30,10 @@ class AuthController extends Controller
      */
     public function register(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), AuthRules::register());
+        $validator = Validator::make($request->all(), AuthRules::register(), [
+            'email.unique' => 'This email is already registered.',
+            'phone.unique' => 'This phone number is already registered.',
+        ]);
 
         if ($validator->fails()) {
             return $this->error('Validation Error', 422, $validator->errors());
@@ -51,6 +55,18 @@ class AuthController extends Controller
                                MembershipApplication::where('user_id', $user->id)->latest()->first(),
             ], 'Registration successful');
 
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'users_phone_unique')) {
+                return $this->error('Validation Error', 422, [
+                    'phone' => ['This phone number is already registered.']
+                ]);
+            }
+            if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'users_email_unique')) {
+                return $this->error('Validation Error', 422, [
+                    'email' => ['This email is already registered.']
+                ]);
+            }
+            return $this->error('Registration failed: A database error occurred.', 500);
         } catch (\Exception $e) {
             return $this->error('Registration failed: ' . $e->getMessage(), 500);
         }

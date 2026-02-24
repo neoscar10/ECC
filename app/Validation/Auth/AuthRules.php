@@ -9,7 +9,7 @@ class AuthRules
         return [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:20|unique:users,phone',
             'password' => 'required|string|min:6|confirmed',
         ];
     }
