@@ -112,29 +112,35 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-light" wire:click="closeModal" data-bs-dismiss="modal">Cancel</button>
-                
+                {{-- Always keep ONE cancel button --}}
+                <button type="button" class="btn btn-light" wire:click="closeModal" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
                 @if($variationsOnlyMode)
                      <button type="button" class="btn btn-success" wire:click="saveVariationsOnly">
                         <i class="ri-save-line align-bottom me-1"></i> Save Changes
                     </button>
                 @else
                     <div class="d-flex gap-2">
+                        {{-- Show Back from step 2+ only --}}
                         @if($createStep > 1)
-                            <button type="button" class="btn btn-light" wire:click="$set('createStep', {{ $createStep - 1 }})">Back</button>
-                        @endif
-
-                        @if($isEditMode)
-                            <button type="button" class="btn btn-success" wire:click="updateProduct">
-                                <i class="ri-save-line align-bottom me-1"></i> Save Changes
+                            <button type="button" class="btn btn-light" wire:click="prevStep">
+                                Back
                             </button>
                         @endif
 
                         @if($createStep < 5)
-                            <button type="button" class="btn btn-primary" wire:click="$set('createStep', {{ $createStep + 1 }})">Next</button>
+                            <button type="button" class="btn btn-primary" wire:click="nextStep" wire:loading.attr="disabled">
+                                Next Step <i class="ri-arrow-right-line align-middle ms-1"></i>
+                            </button>
                         @else
-                            <button type="submit" form="productForm" class="btn btn-success">
-                                {{ $isEditMode ? 'Update' : 'Create' }}
+                            <button type="submit" form="productForm" class="btn btn-success" wire:loading.attr="disabled">
+                                <span wire:loading.remove>{{ $isEditMode ? 'Update Product' : 'Create Product' }}</span>
+                                <span wire:loading>
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    Saving...
+                                </span>
                             </button>
                         @endif
                     </div>

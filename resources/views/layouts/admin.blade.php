@@ -595,7 +595,7 @@
                                 <i class="ri-auction-line"></i>
                                 <span data-key="t-auctions">Auctions</span>
                                 @if(($newAuctionEnquiriesCount ?? 0) > 0)
-                                    <span class="badge rounded-pill bg-danger ms-auto">{{ $newAuctionEnquiriesCount }}</span>
+                                    <span class="badge me-3 bg-danger ms-auto">{{ $newAuctionEnquiriesCount }}</span>
                                 @endif
                             </a>
                             <div class="collapse menu-dropdown {{ $isAuctionsActive ? 'show' : '' }}" id="sidebarAuctions">

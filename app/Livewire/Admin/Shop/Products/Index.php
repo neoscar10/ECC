@@ -210,6 +210,23 @@ class Index extends Component
         $this->createStep = $step;
     }
 
+    public function nextStep()
+    {
+        if ($this->createStep < 5) {
+            $this->createStep++;
+            if ($this->createStep === 5) {
+                $this->buildReviewData();
+            }
+        }
+    }
+
+    public function prevStep()
+    {
+        if ($this->createStep > 1) {
+            $this->createStep--;
+        }
+    }
+
     public function updatedCreateStep($value)
     {
         if ($value === 5) {
