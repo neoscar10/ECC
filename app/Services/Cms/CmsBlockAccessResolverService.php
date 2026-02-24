@@ -22,14 +22,16 @@ class CmsBlockAccessResolverService
             if ($block->blur_enabled) {
                  if (!$this->hasClearViewAccess($block, $userTier)) {
                       $upgrade = $this->findClearViewUpgrade($block);
+                      $targetTier = data_get($upgrade, 'tier');
+
                       return $this->buildAccessResponse(
                           'blur',
                           'blurred',
-                          ['clear_view_tier_name' => $upgrade['tier']?->name ?? 'Higher Tier'],
+                          ['clear_view_tier_name' => $targetTier?->name ?? 'Higher Tier'],
                           [
                             'type' => 'upgrade_membership',
                             'label' => 'Upgrade for Clear View',
-                            'target_tier' => $upgrade['tier'] ? $this->formatTier($upgrade['tier']) : null,
+                            'target_tier' => $targetTier ? $this->formatTier($targetTier) : null,
                             'deeplink' => '/membership/tiers'
                           ],
                           $userTier,
@@ -54,23 +56,25 @@ class CmsBlockAccessResolverService
         if ($this->checkStandardRestriction($block, $userTier)) {
             // Access Granted via Visibility... check blur
              if ($block->blur_enabled) {
-                 if (!$this->hasClearViewAccess($block, $userTier)) {
-                      // Visible but Blurred
-                      $upgrade = $this->findClearViewUpgrade($block);
-                      return $this->buildAccessResponse(
-                          'blur',
-                          'blurred',
-                          ['clear_view_tier_name' => $upgrade['tier']?->name ?? 'Higher Tier'],
-                          [
-                            'type' => 'upgrade_membership',
-                            'label' => 'Upgrade for Clear View',
-                            'target_tier' => $upgrade['tier'] ? $this->formatTier($upgrade['tier']) : null,
-                            'deeplink' => '/membership/tiers'
-                          ],
-                          $userTier,
-                          'lock'
-                      );
-                 }
+                  if (!$this->hasClearViewAccess($block, $userTier)) {
+                       // Visible but Blurred
+                       $upgrade = $this->findClearViewUpgrade($block);
+                       $targetTier = data_get($upgrade, 'tier');
+
+                       return $this->buildAccessResponse(
+                           'blur',
+                           'blurred',
+                           ['clear_view_tier_name' => $targetTier?->name ?? 'Higher Tier'],
+                           [
+                             'type' => 'upgrade_membership',
+                             'label' => 'Upgrade for Clear View',
+                             'target_tier' => $targetTier ? $this->formatTier($targetTier) : null,
+                             'deeplink' => '/membership/tiers'
+                           ],
+                           $userTier,
+                           'lock'
+                       );
+                  }
              }
              
             return $this->buildOpenAccess('Access Granted.', $userTier);
@@ -90,13 +94,14 @@ class CmsBlockAccessResolverService
         // However, for direct access or if we want to show "Locked" cards in a customized way, we keep this logic.
         
         $upgrade = $this->findBaseRestrictionUpgrade($block);
+        $targetTier = data_get($upgrade, 'tier');
         
         $context = [];
-        if ($upgrade) {
+        if ($targetTier) {
             if ($block->restriction_type === 'private') {
-                 $context['private_tier_name'] = $upgrade['tier']?->name ?? 'Private';
+                 $context['private_tier_name'] = $targetTier->name;
             } else {
-                 $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
+                 $context['required_tier_name'] = $targetTier->name;
             }
         } else {
              $context['required_tier_name'] = 'Membership';
@@ -108,7 +113,7 @@ class CmsBlockAccessResolverService
             [
                 'type' => 'upgrade_membership',
                 'label' => 'Upgrade',
-                'target_tier' => isset($upgrade['tier']) ? $this->formatTier($upgrade['tier']) : null,
+                'target_tier' => $targetTier ? $this->formatTier($targetTier) : null,
                 'deeplink' => '/membership/tiers'
             ],
             $userTier,
@@ -127,12 +132,12 @@ class CmsBlockAccessResolverService
         
         // Hierarchical
         if ($type === 'hierarchical') {
-            $minTierId = $block->restricted_min_tier_id;
+            $minTierId = data_get($block, 'restricted_min_tier_id');
             if (!$minTierId) return true; 
             
             $minTier = $block->restrictedMinTier ?? MembershipTier::find($minTierId);
             if ($minTier) {
-                return $userTier->level >= $minTier->level;
+                return (int)($userTier->level ?? 0) >= (int)($minTier->level ?? 0);
             }
             return false;
         }
@@ -160,11 +165,11 @@ class CmsBlockAccessResolverService
         $strategy = $block->blur_strategy ?? 'hierarchical';
 
         if ($strategy === 'hierarchical') {
-             $minClearId = $block->min_clear_view_tier_id;
+             $minClearId = data_get($block, 'min_clear_view_tier_id');
              if (!$minClearId) return true;
              $minClear = $block->minClearViewTier ?? MembershipTier::find($minClearId);
              
-             return $minClear && $userTier->level >= $minClear->level;
+             return $minClear && (int)($userTier->level ?? 0) >= (int)($minClear->level ?? 0);
         }
         
         // If we added Private/Allowlist strategies to migration, handle them:
@@ -317,12 +322,38 @@ class CmsBlockAccessResolverService
 
     protected function formatTier($tier): array
     {
+        if (!$tier) {
+            return [
+                'id' => null,
+                'name' => 'Restricted',
+                'level' => 0,
+                'price' => '0.00',
+                'currency' => 'INR'
+            ];
+        }
+
         return [
             'id' => $tier->id,
             'name' => $tier->name,
-            'level' => $tier->level,
+            'level' => (int)($tier->level ?? 0),
             'price' => (string) ($tier->price ?? '0.00'),
             'currency' => $tier->currency ?? 'INR'
         ];
+    }
+
+    /**
+     * Safe helper to get restriction keys.
+     */
+    protected function getRestriction(CmsBlock $block, string $key, $default = null)
+    {
+        return data_get($block->restrictions_json ?? [], $key, $default);
+    }
+
+    /**
+     * Safe helper to get content/payload keys.
+     */
+    protected function getPayload(CmsBlock $block, string $key, $default = null)
+    {
+        return data_get($block->payload_json ?? [], $key, $default);
     }
 }
