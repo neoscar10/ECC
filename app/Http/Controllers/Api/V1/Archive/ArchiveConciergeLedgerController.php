@@ -33,7 +33,7 @@ class ArchiveConciergeLedgerController extends Controller
         $paginator = $this->conciergeService->getUserRequests($request->user(), $perPage);
 
         return $this->success(
-            $paginator->items(),
+            \App\Http\Resources\Archive\ConciergeLedgerItemResource::collection($paginator->getCollection()),
             'Concierge ledger fetched successfully.',
             200,
             [
