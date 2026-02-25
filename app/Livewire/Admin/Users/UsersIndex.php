@@ -30,6 +30,33 @@ class UsersIndex extends Component
     public $tierInfo;
     public $applications;
 
+    // --- Create User Wizard Properties ---
+    public $createStep = 1;
+    
+    // Step 1: Essentials
+    public $create_name;
+    public $create_email;
+    public $create_phone;
+    public $create_tier_id;
+    public $password_option = 'auto'; // auto, manual
+    public $create_password;
+    public $create_password_confirmation;
+
+    // Step 2: Application Data (Optional)
+    // Personal Detail
+    public $app_full_name;
+    public $app_dob;
+    public $app_country;
+    public $app_city;
+    // Cricket Profile
+    public $app_preferred_formats = [];
+    public $app_eras = [];
+    // Collector Intent
+    public $app_has_acquired_before = 'no';
+    public $app_focus = 'legacy';
+    public $app_investment_horizon = 5;
+    public $app_interests = [];
+
     protected $paginationTheme = 'bootstrap';
 
     protected $listeners = [
@@ -71,6 +98,137 @@ class UsersIndex extends Component
             'users' => $users,
             'membershipTiers' => MembershipTier::all(),
         ])->layout('layouts.admin');
+    }
+
+    // --- Create User Wizard Methods ---
+
+    public function openCreateUserModal()
+    {
+        $this->resetWizard();
+        $this->dispatch('show-modal', id: 'createUserModal');
+    }
+
+    public function nextStep()
+    {
+        if ($this->createStep === 1) {
+            $this->validateStep1();
+            $this->createStep = 2;
+        }
+    }
+
+    public function prevStep()
+    {
+        if ($this->createStep > 1) {
+            $this->createStep--;
+        }
+    }
+
+    public function storeUser(\App\Services\Admin\AdminUserCreationService $service)
+    {
+        if ($this->createStep === 1) {
+            $this->validateStep1();
+        } else {
+            $this->validateStep2();
+        }
+
+        try {
+            $userData = [
+                'name' => $this->create_name,
+                'email' => $this->create_email,
+                'phone' => $this->create_phone,
+            ];
+
+            $applicationData = [
+                'personal' => array_filter([
+                    'full_name' => $this->app_full_name,
+                    'dob' => $this->app_dob,
+                    'country' => $this->app_country,
+                    'city' => $this->app_city,
+                ]),
+                'cricket' => array_filter([
+                    'preferred_formats' => $this->app_preferred_formats,
+                    'eras' => $this->app_eras,
+                ]),
+                'collector' => array_filter([
+                    'has_acquired_memorabilia_before' => $this->app_has_acquired_before,
+                    'focus' => $this->app_focus,
+                    'investment_horizon' => $this->app_investment_horizon,
+                    'interests' => $this->app_interests,
+                ]),
+            ];
+
+            $manualPassword = $this->password_option === 'manual' ? $this->create_password : null;
+
+            $service->createAdminUser($userData, $this->create_tier_id, $applicationData, $manualPassword);
+
+            session()->flash('success', 'User created successfully and notification sent.');
+            $this->dispatch('close-modal');
+            $this->resetWizard();
+            $this->resetPage();
+
+        } catch (\Exception $e) {
+            $this->addError('create_user_error', 'Error creating user: ' . $e->getMessage());
+        }
+    }
+
+    protected function validateStep1()
+    {
+        $rules = [
+            'create_name' => 'required|string|min:2|max:120',
+            'create_email' => 'required|email|unique:users,email',
+            'create_phone' => 'required|string|unique:users,phone',
+            'create_tier_id' => 'required|exists:membership_tiers,id',
+            'password_option' => 'required|in:auto,manual',
+        ];
+
+        if ($this->password_option === 'manual') {
+            $rules['create_password'] = 'required|string|min:6|confirmed';
+        }
+
+        $this->validate($rules, [], [
+            'create_name' => 'name',
+            'create_email' => 'email',
+            'create_phone' => 'phone',
+            'create_tier_id' => 'membership tier',
+            'create_password' => 'password',
+        ]);
+    }
+
+    protected function validateStep2()
+    {
+        // Step 2 is optional, but if fields are filled, we validate them partially
+        // Using existing rules as reference but making them optional
+        $rules = [];
+        
+        if ($this->app_full_name) $rules['app_full_name'] = 'string|min:3|max:120';
+        if ($this->app_dob) $rules['app_dob'] = 'date|before:today';
+        if ($this->app_country) $rules['app_country'] = 'string|max:80';
+        if ($this->app_city) $rules['app_city'] = 'string|max:80';
+        
+        if (!empty($this->app_preferred_formats)) {
+            $rules['app_preferred_formats'] = 'array';
+            $rules['app_preferred_formats.*'] = 'in:test,odi,t20,leagues';
+        }
+
+        if (!empty($this->app_eras)) {
+            $rules['app_eras'] = 'array';
+            $rules['app_eras.*'] = 'in:golden_age,post_war_50s,west_indies,odi_90s,modern,womens';
+        }
+
+        // etc.
+        $this->validate($rules);
+    }
+
+    protected function resetWizard()
+    {
+        $this->reset([
+            'createStep', 'create_name', 'create_email', 'create_phone', 'create_tier_id',
+            'password_option', 'create_password', 'create_password_confirmation',
+            'app_full_name', 'app_dob', 'app_country', 'app_city',
+            'app_preferred_formats', 'app_eras',
+            'app_has_acquired_before', 'app_focus', 'app_investment_horizon', 'app_interests'
+        ]);
+        $this->resetValidation();
     }
     
     public function updatedMembershipFilter()

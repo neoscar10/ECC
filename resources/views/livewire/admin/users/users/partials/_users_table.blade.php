@@ -17,6 +17,11 @@
                     </select>
                 </div>
             </div>
+            <div class="col-sm-auto ms-auto">
+                <button type="button" class="btn btn-primary add-btn" wire:click="openCreateUserModal">
+                    <i class="ri-add-line align-bottom me-1"></i> Add User
+                </button>
+            </div>
         </div>
     </div>
 
