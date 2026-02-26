@@ -216,7 +216,9 @@ class UsersIndex extends Component
         }
 
         // etc.
-        $this->validate($rules);
+        if (! empty($rules)) {
+            $this->validate($rules);
+        }
     }
 
     protected function resetWizard()
