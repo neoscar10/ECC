@@ -17,9 +17,15 @@
                     </select>
                 </div>
             </div>
-            <div class="col-sm-auto ms-auto">
-                <button type="button" class="btn btn-primary add-btn" wire:click="openCreateUserModal">
-                    <i class="ri-add-line align-bottom me-1"></i> Add User
+            <div class="col-sm-auto ms-auto d-flex gap-2">
+                <button type="button" class="btn btn-soft-info" wire:click="openTierCodesModal" wire:loading.attr="disabled">
+                    <i class="ri-price-tag-3-line align-bottom me-1"></i> View Tier Codes
+                </button>
+                <button type="button" class="btn btn-soft-primary" wire:click="downloadTemplate" wire:loading.attr="disabled">
+                    <i class="ri-download-2-line align-bottom me-1"></i> Download Template
+                </button>
+                <button type="button" class="btn btn-primary add-btn" wire:click="openCreateModeModal">
+                    <i class="ri-add-line align-bottom me-1"></i> Create User
                 </button>
             </div>
         </div>

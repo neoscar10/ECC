@@ -96,31 +96,8 @@
 
                                             @if($password_option === 'auto')
                                             <!-- Auto-generate UI -->
-                                            <div x-data="{ 
-                                                    pwType: 'password',
-                                                    tempPass: '••••••••••••••••', 
-                                                    generate() { 
-                                                        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*';
-                                                        let result = '';
-                                                        for(let i=0; i<16; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
-                                                        this.tempPass = result; 
-                                                        this.pwType = 'text';
-                                                    },
-                                                    copy() {
-                                                        const valToCopy = this.tempPass === '••••••••••••••••' ? 'System will auto-generate securely' : this.tempPass;
-                                                        navigator.clipboard.writeText(valToCopy);
-                                                        alert('Password copied to clipboard');
-                                                    }
-                                                }">
-                                                <div class="input-group mb-2">
-                                                    <span class="input-group-text bg-light"><i class="ri-lock-password-line"></i></span>
-                                                    <input x-bind:type="pwType" class="form-control bg-light text-muted" x-model="tempPass" readonly>
-                                                    <button class="btn btn-outline-secondary bg-light" type="button" x-on:click="pwType = pwType === 'password' ? 'text' : 'password'" title="Toggle visibility"><i class="ri-eye-line" x-bind:class="{ 'ri-eye-off-line': pwType === 'text', 'ri-eye-line': pwType === 'password' }"></i></button>
-                                                    <button class="btn btn-outline-secondary bg-light" type="button" x-on:click="copy()" title="Copy password"><i class="ri-clipboard-line"></i></button>
-                                                    <button class="btn btn-outline-secondary bg-light" type="button" x-on:click="generate()" title="Regenerate secure password"><i class="ri-refresh-line"></i></button>
-                                                </div>
                                                 <small class="text-muted"><i class="ri-mail-send-line align-middle me-1"></i> The password will be automatically generated and emailed to the user.</small>
-                                            </div>
+                                            
                                             @else
                                             <!-- Manual UI -->
                                             <div class="row g-3" x-data="{ 

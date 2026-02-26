@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Users;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 use App\Models\User;
 use App\Models\MembershipTier;
 use Livewire\Attributes\Title;
@@ -11,7 +12,7 @@ use Livewire\Attributes\Title;
 #[Title('User Management')]
 class UsersIndex extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
 
     public $search = '';
     public $sortField = 'created_at';
@@ -57,6 +58,11 @@ class UsersIndex extends Component
     public $app_investment_horizon = 5;
     public $app_interests = [];
 
+    // --- Bulk Import Properties ---
+    public $bulkUploadFile;
+    public $bulkPreview = [];
+    public $bulkResults = null;
+
     protected $paginationTheme = 'bootstrap';
 
     protected $listeners = [
@@ -101,6 +107,27 @@ class UsersIndex extends Component
     }
 
     // --- Create User Wizard Methods ---
+
+    public function openCreateModeModal()
+    {
+        $this->dispatch('show-modal', id: 'createModeModal');
+    }
+
+    public function openTierCodesModal()
+    {
+        $this->dispatch('show-modal', id: 'tierCodesModal');
+    }
+
+    public function selectCreateMode($mode)
+    {
+        $this->dispatch('close-modal');
+        if ($mode === 'single') {
+            $this->openCreateUserModal();
+        } else if ($mode === 'bulk') {
+            $this->resetBulkUpload();
+            $this->dispatch('show-modal', id: 'bulkUploadModal');
+        }
+    }
 
     public function openCreateUserModal()
     {
@@ -310,5 +337,153 @@ class UsersIndex extends Component
             $this->sortDirection = 'asc';
         }
         $this->sortField = $field;
+    }
+
+    // --- Bulk Import Methods ---
+    
+    public function resetBulkUpload()
+    {
+        $this->reset(['bulkUploadFile', 'bulkPreview', 'bulkResults']);
+    }
+
+    public function downloadTemplate()
+    {
+        $headers = [
+            'full_name', 'email', 'phone', 'membership_tier_code', 
+            'dob', 'country', 'city', 'state',
+            'preferred_formats', 'eras', 'has_acquired_memorabilia_before', 
+            'focus', 'investment_horizon', 'interests', 'postal_code'
+        ];
+
+        $filename = 'ecc_users_import_template.csv';
+        $handle = fopen('php://temp', 'w+');
+        fputcsv($handle, $headers);
+        
+        // Add sample row (India-based)
+        fputcsv($handle, [
+            'Aryan Sharma', 'aryan@example.com', '+919876543210', 'PAVILION',
+            '1985-06-15', 'India', 'Mumbai', 'Maharashtra',
+            'test,odi', 'modern', 'no', 'legacy', '5', 'bats,balls', '400001'
+        ]);
+
+        rewind($handle);
+        $content = stream_get_contents($handle);
+        fclose($handle);
+
+        return response()->streamDownload(function () use ($content) {
+            echo $content;
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+        ]);
+    }
+
+    public function updatedBulkUploadFile()
+    {
+        $this->validate([
+            'bulkUploadFile' => 'required|file|mimes:csv,txt|max:10240', // 10MB max
+        ]);
+
+        $this->previewImport();
+    }
+
+    public function previewImport()
+    {
+        if (!$this->bulkUploadFile) return;
+
+        $path = $this->bulkUploadFile->getRealPath();
+        $handle = fopen($path, 'r');
+        
+        $headers = fgetcsv($handle);
+        if (!$headers) return;
+        
+        // Normalize headers
+        $headers = array_map(function($h) { return trim(strtolower($h)); }, $headers);
+        
+        $preview = [];
+        $rowCount = 0;
+        
+        while (($row = fgetcsv($handle)) !== false) {
+            $rowCount++;
+            if (count($preview) < 5) {
+                // Map row to headers
+                $mappedRow = [];
+                foreach ($headers as $index => $header) {
+                    $mappedRow[$header] = $row[$index] ?? null;
+                }
+                $preview[] = $mappedRow;
+            }
+        }
+        fclose($handle);
+
+        $this->bulkPreview = [
+            'total_rows' => $rowCount,
+            'headers' => $headers,
+            'rows' => $preview
+        ];
+    }
+    
+    public function processImport(\App\Services\Admin\AdminUserBulkImportService $importService)
+    {
+        $this->validate([
+            'bulkUploadFile' => 'required|file|mimes:csv,txt|max:10240',
+        ]);
+
+        $path = $this->bulkUploadFile->getRealPath();
+        
+        try {
+            $results = $importService->importCsv($path);
+            $this->bulkResults = $results;
+            
+            $this->dispatch('operation-success', 'Import completed successfully.');
+            
+            $this->resetPage();
+        } catch (\Exception $e) {
+            session()->flash('error', 'Import failed: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadErrorReport()
+    {
+        if (empty($this->bulkResults['failed_rows'])) return;
+
+        $failedRows = $this->bulkResults['failed_rows'];
+        $headers = ['Row Number', 'Error Type', 'Error Message'];
+        $dataKeys = [];
+        
+        foreach ($failedRows as $row) {
+            if (isset($row['data']) && is_array($row['data'])) {
+                foreach (array_keys($row['data']) as $key) {
+                    if (!in_array($key, $dataKeys)) $dataKeys[] = $key;
+                }
+            }
+        }
+        
+        $headers = array_merge($headers, $dataKeys);
+        $filename = 'import_error_report_' . date('Y_m_d_His') . '.csv';
+        
+        $handle = fopen('php://temp', 'w+');
+        fputcsv($handle, $headers);
+        
+        foreach ($failedRows as $row) {
+            $csvRow = [
+                $row['row_number'],
+                $row['type'],
+                $row['error']
+            ];
+            foreach ($dataKeys as $key) {
+                $csvRow[] = $row['data'][$key] ?? '';
+            }
+            fputcsv($handle, $csvRow);
+        }
+
+        rewind($handle);
+        $content = stream_get_contents($handle);
+        fclose($handle);
+
+        return response()->streamDownload(function () use ($content) {
+            echo $content;
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+        ]);
     }
 }
