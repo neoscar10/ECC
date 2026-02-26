@@ -42,6 +42,7 @@ class UsersIndex extends Component
     public $password_option = 'auto'; // auto, manual
     public $create_password;
     public $create_password_confirmation;
+    public $create_expires_at;
 
     // Step 2: Application Data (Optional)
     // Personal Detail
@@ -186,7 +187,7 @@ class UsersIndex extends Component
 
             $manualPassword = $this->password_option === 'manual' ? $this->create_password : null;
 
-            $service->createAdminUser($userData, $this->create_tier_id, $applicationData, $manualPassword);
+            $service->createAdminUser($userData, $this->create_tier_id, $applicationData, $manualPassword, $this->create_expires_at);
 
             session()->flash('success', 'User created successfully and notification sent.');
             $this->dispatch('close-modal');
@@ -205,6 +206,7 @@ class UsersIndex extends Component
             'create_email' => 'required|email|unique:users,email',
             'create_phone' => 'required|string|unique:users,phone',
             'create_tier_id' => 'required|exists:membership_tiers,id',
+            'create_expires_at' => 'nullable|date',
             'password_option' => 'required|in:auto,manual',
         ];
 
@@ -217,6 +219,7 @@ class UsersIndex extends Component
             'create_email' => 'email',
             'create_phone' => 'phone',
             'create_tier_id' => 'membership tier',
+            'create_expires_at' => 'membership expiry date',
             'create_password' => 'password',
         ]);
     }
@@ -251,7 +254,7 @@ class UsersIndex extends Component
     protected function resetWizard()
     {
         $this->reset([
-            'createStep', 'create_name', 'create_email', 'create_phone', 'create_tier_id',
+            'createStep', 'create_name', 'create_email', 'create_phone', 'create_tier_id', 'create_expires_at',
             'password_option', 'create_password', 'create_password_confirmation',
             'app_full_name', 'app_dob', 'app_country', 'app_city',
             'app_preferred_formats', 'app_eras',
@@ -349,7 +352,7 @@ class UsersIndex extends Component
     public function downloadTemplate()
     {
         $headers = [
-            'full_name', 'email', 'phone', 'membership_tier_code', 
+            'full_name', 'email', 'phone', 'membership_tier_code', 'membership_expiry_date',
             'dob', 'country', 'city', 'state',
             'preferred_formats', 'eras', 'has_acquired_memorabilia_before', 
             'focus', 'investment_horizon', 'interests', 'postal_code'
@@ -361,7 +364,7 @@ class UsersIndex extends Component
         
         // Add sample row (India-based)
         fputcsv($handle, [
-            'Aryan Sharma', 'aryan@example.com', '+919876543210', 'PAVILION',
+            'Aryan Sharma', 'aryan@example.com', '+919876543210', 'PAVILION', '2030-12-31',
             '1985-06-15', 'India', 'Mumbai', 'Maharashtra',
             'test,odi', 'modern', 'no', 'legacy', '5', 'bats,balls', '400001'
         ]);

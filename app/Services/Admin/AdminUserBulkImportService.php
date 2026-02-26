@@ -98,6 +98,7 @@ class AdminUserBulkImportService
             'email' => 'required|email',
             'phone' => 'required|string',
             'membership_tier_code' => 'required|string',
+            'membership_expiry_date' => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
@@ -154,8 +155,9 @@ class AdminUserBulkImportService
         ];
 
         // Use a transaction per row
-        DB::transaction(function () use ($userData, $tierId, $applicationData, $manualPassword) {
-            $this->creationService->createAdminUser($userData, $tierId, $applicationData, $manualPassword);
+        $expiresAt = $data['membership_expiry_date'] ?? null;
+        DB::transaction(function () use ($userData, $tierId, $applicationData, $manualPassword, $expiresAt) {
+            $this->creationService->createAdminUser($userData, $tierId, $applicationData, $manualPassword, $expiresAt);
         });
     }
 

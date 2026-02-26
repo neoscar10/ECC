@@ -66,9 +66,9 @@ class UserBulkImportTest extends TestCase
     {
         $this->actingAs($this->adminUser);
         
-        $csvContent = "full_name,email,phone,membership_tier_code\n";
-        $csvContent .= "Test User One,testone@example.com,+919876543201,{$this->tier->code}\n";
-        $csvContent .= "Test User Two,testtwo@example.com,+919876543202,{$this->tier->code}\n";
+        $csvContent = "full_name,email,phone,membership_tier_code,membership_expiry_date\n";
+        $csvContent .= "Test User One,testone@example.com,+919876543201,{$this->tier->code},\n";
+        $csvContent .= "Test User Two,testtwo@example.com,+919876543202,{$this->tier->code},2030-12-31\n";
 
         $file = UploadedFile::fake()->createWithContent('import.csv', $csvContent);
 
@@ -98,9 +98,9 @@ class UserBulkImportTest extends TestCase
         // Pre-create a user to cause a duplicate error
         User::factory()->create(['email' => 'duplicate@example.com']);
         
-        $csvContent = "full_name,email,phone,membership_tier_code\n";
-        $csvContent .= "Duplicate User,duplicate@example.com,+919876543203,{$this->tier->code}\n"; // Should skip
-        $csvContent .= "Valid User,valid@example.com,+919876543204,{$this->tier->code}\n"; // Should create
+        $csvContent = "full_name,email,phone,membership_tier_code,membership_expiry_date\n";
+        $csvContent .= "Duplicate User,duplicate@example.com,+919876543203,{$this->tier->code},\n"; // Should skip
+        $csvContent .= "Valid User,valid@example.com,+919876543204,{$this->tier->code},\n"; // Should create
 
         $file = UploadedFile::fake()->createWithContent('import.csv', $csvContent);
 
@@ -119,9 +119,9 @@ class UserBulkImportTest extends TestCase
     {
         $this->actingAs($this->adminUser);
         
-        $csvContent = "full_name,email,phone,membership_tier_code\n";
+        $csvContent = "full_name,email,phone,membership_tier_code,membership_expiry_date\n";
         // Missing email
-        $csvContent .= "Test User One,,+919876543201,{$this->tier->code}\n";
+        $csvContent .= "Test User One,,+919876543201,{$this->tier->code},\n";
 
         $file = UploadedFile::fake()->createWithContent('import.csv', $csvContent);
 
@@ -138,8 +138,8 @@ class UserBulkImportTest extends TestCase
         $this->actingAs($this->adminUser);
         
         // This simulates an admin uploading an older template that still had password headers
-        $csvContent = "full_name,email,phone,membership_tier_code,password_mode,password\n";
-        $csvContent .= "Legacy User,legacy@example.com,+919876543209,{$this->tier->code},manual,password123\n";
+        $csvContent = "full_name,email,phone,membership_tier_code,membership_expiry_date,password_mode,password\n";
+        $csvContent .= "Legacy User,legacy@example.com,+919876543209,{$this->tier->code},,manual,password123\n";
 
         $file = UploadedFile::fake()->createWithContent('import.csv', $csvContent);
 

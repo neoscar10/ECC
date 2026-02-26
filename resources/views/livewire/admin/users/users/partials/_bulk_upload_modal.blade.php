@@ -56,7 +56,7 @@
                             <h6 class="alert-heading fw-medium mb-1">Use the provided template to avoid import errors.</h6>
                             <ul class="mb-0 ps-3">
                                 <li>Do not rename column headers.</li>
-                                <li>Keep required columns filled.</li>
+                                <li>Keep required columns filled. (full_name, email, phone, membership_tier_code)</li>
                                 <li><code>membership_tier_code</code> must correspond to an active tier code.</li>
                                 <li><strong>Passwords are automatically generated for all imported users and emailed to them.</strong></li>
                             </ul>

@@ -76,6 +76,15 @@
                                         @error('create_tier_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Membership Expiry Date</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ri-calendar-event-line"></i></span>
+                                        <input type="date" class="form-control @error('create_expires_at') is-invalid @enderror" wire:model.defer="create_expires_at">
+                                        @error('create_expires_at') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                                    </div>
+                                    <small class="text-muted">Leave empty for "never"</small>
+                                </div>
                                 
                                 <div class="col-12 mt-4">
                                     <div class="card border border-light shadow-none mb-0">

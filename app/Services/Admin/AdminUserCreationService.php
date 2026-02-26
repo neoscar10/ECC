@@ -18,9 +18,9 @@ class AdminUserCreationService
     /**
      * Create a new user with membership and optional application data.
      */
-    public function createAdminUser(array $userData, int $tierId, array $applicationData = [], ?string $manualPassword = null)
+    public function createAdminUser(array $userData, int $tierId, array $applicationData = [], ?string $manualPassword = null, ?string $expiresAt = null)
     {
-        return DB::transaction(function () use ($userData, $tierId, $applicationData, $manualPassword) {
+        return DB::transaction(function () use ($userData, $tierId, $applicationData, $manualPassword, $expiresAt) {
             $password = $manualPassword ?: Str::random(12);
 
             // 1. Create User
@@ -43,6 +43,7 @@ class AdminUserCreationService
                 'status' => 'active',
                 'approved_at' => now(),
                 'started_at' => now(),
+                'expires_at' => $expiresAt ? \Carbon\Carbon::parse($expiresAt) : null,
             ]);
 
             // 3. Optional Membership Application Data
