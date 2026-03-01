@@ -1,22 +1,4 @@
-<div class="mobile-preview-device border rounded-4 bg-white shadow-sm overflow-hidden" style="width: 320px; height: 600px; margin: 0 auto; position: sticky; top: 20px;">
-    <!-- Status Bar -->
-    <div class="status-bar bg-dark text-white px-3 py-1 d-flex justify-content-between align-items-center fs-10">
-        <span>9:41</span>
-        <div class="d-flex gap-1">
-            <i class="ri-signal-wifi-fill"></i>
-            <i class="ri-battery-fill"></i>
-        </div>
-    </div>
 
-    <!-- App Header -->
-    <div class="app-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
-        <i class="ri-menu-2-line"></i>
-        <span class="fw-bold">Executive Club Cricket</span>
-        <i class="ri-notification-3-line"></i>
-    </div>
-
-    <!-- Content Area -->
-    <div class="preview-content p-3 bg-light h-100 overflow-auto">
         <!-- Placement Context Label -->
         <small class="text-uppercase text-muted fs-10 mb-2 d-block text-center">{{ $placement ?? 'Placement' }}</small>
 
@@ -163,5 +145,3 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>

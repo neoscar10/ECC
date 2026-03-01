@@ -15,6 +15,23 @@ class CmsBlockAccessResolverService
     public function resolve(CmsBlock $block, ?User $user): array
     {
         $userTier = $user?->currentMembership?->membershipTier;
+        return $this->resolveInternal($block, $userTier);
+    }
+
+    /**
+     * Resolve the access object for a CMS block using a specific tier (for preview).
+     */
+    public function resolveForTier(CmsBlock $block, ?int $tierId): array
+    {
+        $tier = $tierId ? MembershipTier::find($tierId) : null;
+        return $this->resolveInternal($block, $tier);
+    }
+
+    /**
+     * Internal generic resolver logic.
+     */
+    protected function resolveInternal(CmsBlock $block, ?MembershipTier $userTier): array
+    {
 
         // 1. Check Standard Restrictions (Hierarchy, Private, Allowlist)
         if ($block->restriction_mode === 'public') {
@@ -42,7 +59,7 @@ class CmsBlockAccessResolverService
             return $this->buildOpenAccess('Block is public.', $userTier);
         }
         
-        if (!$user) {
+        if (!$userTier && $block->restriction_mode !== 'public') {
              return $this->buildLockedAccess(
                  'block_restricted',
                  ['required_tier_name' => 'Member'],

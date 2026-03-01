@@ -4,7 +4,14 @@
     $id = $item['id'] ?? null;
     $title = $item['title'] ?? ($item['name'] ?? 'Untitled');
     $image = $item['image_url'] ?? ($item['image'] ?? null);
-    $price = $item['price'] ?? null;
+    $price = $item['price_label'] ?? ($item['price'] ?? null);
+    
+    // Access Handling
+    $access = $item['access'] ?? null;
+    $viewMode = $access['view_mode'] ?? 'clear';
+    $isLocked = $viewMode === 'blocked';
+    $isBlurred = $viewMode === 'blur';
+    $icon = $access['message']['icon'] ?? 'lock';
     
     // Determine Target Link
     $link = '#';
@@ -22,10 +29,24 @@
         {{-- Image with fixed 4:5 ratio --}}
         <div class="cms-card-media position-relative" style="padding-top: 125%; background: #080808; overflow: hidden;">
             @if($image)
-                <img src="{{ $image }}" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover" alt="{{ $title }}" style="object-position: center;">
+                <img src="{{ $image }}" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover" alt="{{ $title }}" style="object-position: center; {{ $isBlurred ? 'filter: blur(12px); transform: scale(1.1);' : '' }}">
             @else
                 <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center text-white-50">
                     <span class="material-symbols-outlined fs-1">image</span>
+                </div>
+            @endif
+
+            @if($isLocked || $isBlurred)
+                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0,0,0,0.5);">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1);">
+                        @if($icon === 'time-lock')
+                            <i class="ri-time-line fs-5 text-white"></i>
+                        @elseif($icon === 'diamond')
+                            <i class="ri-vip-diamond-fill fs-5" style="color: var(--ecc-gold, #d4af37);"></i>
+                        @else
+                            <i class="ri-lock-fill fs-5 text-white"></i>
+                        @endif
+                    </div>
                 </div>
             @endif
         </div>

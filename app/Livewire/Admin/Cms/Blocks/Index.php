@@ -23,7 +23,7 @@ class Index extends Component
     public $search = '';
     public $filterType = '';
     public $filterStatus = '';
-    public $filterPlacement = '';
+
 
     // Data for dropdowns
     public $membershipTiers = [];
@@ -36,7 +36,7 @@ class Index extends Component
 
     // --- Form Fields ---
     public $title;
-    public $placement = ''; // home, explore, profile, announcements
+    public $placement = 'explore'; // Fixed to explore
     public $type = 'card'; // card, banner, slider, text
     public $isActive = true;
     public $sortOrder = 0; // Auto-managed, but kept in state if needed
@@ -52,6 +52,15 @@ class Index extends Component
     public $existingContentImage; // url string
     public $hasDetailPage = false;
     public $contentMarkdown;
+    // Target Fields (for Banner/Card)
+    public $hasTarget = false;
+    public $targetKind = null; // category, item
+    public $targetSource = null; // shop, archive, auctions
+    public $targetId = null;
+    public $targetLabel = null;
+    public $targetSearch = '';
+    public $targetSearchResults = [];
+    public array $browseResults = [];
     
     // Slider Config Fields
     public $sliderMode = 'category'; // category, manual, images
@@ -90,11 +99,15 @@ class Index extends Component
     // Helpers
     public $computedVisibilityTierIds = [];
 
-    // Wizard State
     public $createStep = 1; 
+
+    // Preview
+    public $previewTierId = null; // null = Guest
+    public string $previewScopeId = '';
 
     public function mount()
     {
+        $this->placement = 'explore';
         $this->membershipTiers = MembershipTier::where('is_active', true)->orderBy('sort_order')->get();
         // Load options if source pre-set
         if ($this->sliderSource) {
@@ -112,9 +125,7 @@ class Index extends Component
         if ($this->filterType) {
             $query->where('type', $this->filterType);
         }
-        if ($this->filterPlacement) {
-            $query->where('placement', $this->filterPlacement);
-        }
+
         if ($this->filterStatus === 'active') {
             $query->where('is_active', true);
         } elseif ($this->filterStatus === 'inactive') {
@@ -163,6 +174,305 @@ class Index extends Component
         }
     }
 
+    public function updatedPreviewTierId()
+    {
+        $this->dispatch('cms-preview-updated', scopeId: $this->previewScopeId);
+    }
+
+    public function updated($property)
+    {
+        // Re-init swiper if we are on step 4 and any state changes
+        if ($this->createStep == 4) {
+            $this->dispatch('cms-preview-updated', scopeId: $this->previewScopeId);
+        }
+    }
+
+    public function updatedHasTarget($value)
+    {
+        if ($value) {
+            $this->hasDetailPage = false;
+            $this->contentMarkdown = null;
+            
+            if (empty($this->targetKind)) {
+                $this->targetKind = 'category';
+            }
+            if (empty($this->targetSource)) {
+                $this->targetSource = 'shop';
+            }
+            
+            $this->loadBrowseResults();
+        }
+    }
+
+    public function updatedHasDetailPage($value)
+    {
+        if ($value) {
+            $this->hasTarget = false;
+            $this->clearTargetState();
+        }
+    }
+
+    public function updatedTargetKind()
+    {
+        $this->targetId = null;
+        $this->targetLabel = null;
+        $this->targetSearch = '';
+        $this->targetSearchResults = [];
+        $this->loadBrowseResults();
+    }
+
+    public function updatedTargetSource()
+    {
+        $this->targetId = null;
+        $this->targetLabel = null;
+        $this->targetSearch = '';
+        $this->targetSearchResults = [];
+        $this->loadBrowseResults();
+    }
+
+    public function updatedTargetSearch()
+    {
+        if (strlen($this->targetSearch) < 2) {
+            $this->targetSearchResults = [];
+            $this->loadBrowseResults();
+            return;
+        }
+
+        $query = $this->targetSearch;
+        $results = [];
+
+        if ($this->targetKind === 'category') {
+            if ($this->targetSource === 'shop') {
+                $categories = \App\Models\Shop\ShopCategory::where('name', 'like', "%{$query}%")->limit(10)->get();
+                foreach ($categories as $cat) {
+                     $results[] = [
+                         'id' => $cat->id,
+                         'label' => strip_tags($cat->name),
+                         'image' => null,
+                         'meta' => 'Shop Category'
+                     ];
+                }
+            } elseif ($this->targetSource === 'archive') {
+                $categories = \App\Models\Archive\ArchiveCategory::where('title', 'like', "%{$query}%")->limit(10)->get();
+                foreach ($categories as $cat) {
+                     $results[] = [
+                         'id' => $cat->id,
+                         'label' => $cat->title,
+                         'image' => null,
+                         'meta' => 'Archive Category'
+                     ];
+                }
+            }
+        } elseif ($this->targetKind === 'item') {
+            if ($this->targetSource === 'shop') {
+                $products = \App\Models\Shop\ShopProduct::with('images')->where('title', 'like', "%{$query}%")
+                            ->orWhere('sku', 'like', "%{$query}%")->limit(10)->get();
+                foreach ($products as $prod) {
+                     $img = $prod->images->first()?->path ? \Illuminate\Support\Facades\Storage::url($prod->images->first()->path) : null;
+                     $results[] = [
+                         'id' => $prod->id,
+                         'label' => $prod->title . ' (' . ($prod->sku ?? '') . ')',
+                         'image' => $img,
+                         'meta' => $prod->price > 0 ? 'INR ' . number_format($prod->price) : 'SKU: ' . ($prod->sku ?? 'N/A')
+                     ];
+                }
+            } elseif ($this->targetSource === 'archive') {
+                $products = \App\Models\Archive\ArchiveProduct::with('images')->where('title', 'like', "%{$query}%")
+                            ->orWhere('code', 'like', "%{$query}%")->limit(10)->get();
+                foreach ($products as $prod) {
+                     $img = $prod->images->first()?->image_path ? \Illuminate\Support\Facades\Storage::url($prod->images->first()->image_path) : null;
+                     $results[] = [
+                         'id' => $prod->id,
+                         'label' => $prod->title,
+                         'image' => $img,
+                         'meta' => 'Code: ' . ($prod->code ?? $prod->sku ?? 'N/A')
+                     ];
+                }
+            } elseif ($this->targetSource === 'auctions') {
+                $lots = \App\Models\Auctions\AuctionLot::with('images')->where('title', 'like', "%{$query}%")
+                            ->orWhere('lot_no', 'like', "%{$query}%")->limit(10)->get();
+                foreach ($lots as $lot) {
+                     $price = $lot->current_highest_bid > 0 ? $lot->current_highest_bid : $lot->starting_price;
+                     $img = $lot->images->first()?->path ? \Illuminate\Support\Facades\Storage::url($lot->images->first()->path) : null;
+                     $results[] = [
+                         'id' => $lot->id,
+                         'label' => 'Lot ' . $lot->lot_no . ' - ' . $lot->title,
+                         'image' => $img,
+                         'meta' => 'INR ' . number_format((float)$price)
+                     ];
+                }
+            }
+        }
+
+        $this->targetSearchResults = $results;
+    }
+
+    public function loadBrowseResults()
+    {
+        $this->browseResults = [];
+
+        if (!$this->hasTarget || !$this->targetKind || !$this->targetSource) {
+            return;
+        }
+
+        if ($this->targetKind === 'category') {
+            if ($this->targetSource === 'shop') {
+                $categories = \App\Models\Shop\ShopCategory::orderBy('name', 'asc')->limit(12)->get();
+                foreach ($categories as $cat) {
+                    $this->browseResults[] = [
+                        'id' => $cat->id,
+                        'label' => strip_tags($cat->name),
+                        'image' => null,
+                        'meta' => 'Shop Category'
+                    ];
+                }
+            } elseif ($this->targetSource === 'archive') {
+                $categories = \App\Models\Archive\ArchiveCategory::orderBy('title', 'asc')->limit(12)->get();
+                foreach ($categories as $cat) {
+                    $this->browseResults[] = [
+                        'id' => $cat->id,
+                        'label' => $cat->title,
+                        'image' => null,
+                        'meta' => 'Archive Category'
+                    ];
+                }
+            }
+        } elseif ($this->targetKind === 'item') {
+            if ($this->targetSource === 'shop') {
+                $products = \App\Models\Shop\ShopProduct::with('images')->orderBy('created_at', 'desc')->limit(12)->get();
+                foreach ($products as $prod) {
+                    $img = $prod->images->first()?->path ? \Illuminate\Support\Facades\Storage::url($prod->images->first()->path) : null;
+                    $this->browseResults[] = [
+                        'id' => $prod->id,
+                        'label' => $prod->title,
+                        'image' => $img,
+                        'meta' => $prod->price > 0 ? 'INR ' . number_format($prod->price) : 'SKU: ' . ($prod->sku ?? 'N/A')
+                    ];
+                }
+            } elseif ($this->targetSource === 'archive') {
+                $products = \App\Models\Archive\ArchiveProduct::with('images')->orderBy('created_at', 'desc')->limit(12)->get();
+                foreach ($products as $prod) {
+                    $img = $prod->images->first()?->image_path ? \Illuminate\Support\Facades\Storage::url($prod->images->first()->image_path) : null;
+                    $this->browseResults[] = [
+                        'id' => $prod->id,
+                        'label' => $prod->title,
+                        'image' => $img, 
+                        'meta' => 'Code: ' . ($prod->code ?? $prod->sku ?? 'N/A')
+                    ];
+                }
+            } elseif ($this->targetSource === 'auctions') {
+                $lots = \App\Models\Auctions\AuctionLot::with('images')->orderBy('created_at', 'desc')->limit(12)->get();
+                foreach ($lots as $lot) {
+                    $price = $lot->current_highest_bid > 0 ? $lot->current_highest_bid : $lot->starting_price;
+                    $img = $lot->images->first()?->path ? \Illuminate\Support\Facades\Storage::url($lot->images->first()->path) : null;
+                    $this->browseResults[] = [
+                        'id' => $lot->id,
+                        'label' => $lot->title,
+                        'image' => $img,
+                        'meta' => 'Lot ' . $lot->lot_no . ' • INR ' . number_format((float)$price)
+                    ];
+                }
+            }
+        }
+    }
+
+    public function selectTarget($id, $label)
+    {
+        $this->targetId = (int) $id;
+        $this->targetLabel = $label;
+        $this->targetSearch = '';
+        $this->targetSearchResults = [];
+    }
+
+    public function clearTargetState()
+    {
+        $this->targetKind = null;
+        $this->targetSource = null;
+        $this->targetId = null;
+        $this->targetLabel = null;
+        $this->targetSearch = '';
+        $this->targetSearchResults = [];
+    }
+
+    public function getResolvedPreviewProperty()
+    {
+        // 1. Build an in-memory block from current form state
+        $imageUrl = $this->existingContentImage;
+        if ($this->contentImage) {
+            try {
+                $imageUrl = $this->contentImage->temporaryUrl();
+            } catch (\Exception $e) {
+                // Ignore if not fully uploaded
+            }
+        }
+
+        $block = new CmsBlock([
+            'title' => $this->title ?? 'Draft Block',
+            'placement' => 'explore',
+            'type' => $this->type ?? 'card',
+            'restriction_mode' => $this->restrictionMode,
+            'restriction_type' => $this->restrictionMode === 'public' ? 'hierarchical' : ($this->restrictionType ?: 'hierarchical'),
+            'restricted_min_tier_id' => $this->restrictedMinTierId,
+            'restricted_private_tier_id' => $this->restrictedPrivateTierId,
+            'blur_enabled' => $this->blurEnabled,
+            'blur_strategy' => $this->restrictionMode === 'public' ? 'hierarchical' : ($this->restrictionType ?: 'hierarchical'),
+            'min_clear_view_tier_id' => $this->restrictedMinTierId,
+        ]);
+
+        // Mock relations for memory arrays
+        if ($this->restrictionMode === 'restricted') {
+             $block->setRelation('visibilityTiers', MembershipTier::whereIn('id', $this->selectedVisibilityTiers)->get());
+             if ($this->blurEnabled && $this->restrictionType === 'random') {
+                 $block->setRelation('clearViewTiers', MembershipTier::whereIn('id', $this->selectedRandomTiers)->get());
+             }
+        }
+
+        $block->content = [
+            'title' => $this->contentTitle,
+            'subtitle' => $this->contentSubtitle,
+            'body' => $this->contentBody,
+            'badge' => $this->contentBadge,
+            'cta_text' => $this->contentCtaText,
+            'has_detail_page' => $this->hasDetailPage,
+            'has_target' => $this->hasTarget,
+            'image_url' => $imageUrl,
+        ];
+        
+        if ($this->hasTarget) {
+            $block->content = array_merge($block->content, [
+                'target' => [
+                    'kind' => $this->targetKind,
+                    'source' => $this->targetSource,
+                    'id' => (int) $this->targetId,
+                    'label' => $this->targetLabel ?: null,
+                ]
+            ]);
+        }
+
+        $typeConfig = ['text_position' => $this->textPosition];
+        if ($this->type === 'slider') {
+            $typeConfig['mode'] = $this->sliderMode;
+            $typeConfig['source'] = $this->sliderSource;
+            if ($this->sliderMode === 'category') {
+                $typeConfig['category_id'] = $this->sliderCategoryId;
+                $typeConfig['limit'] = $this->sliderLimit;
+                if ($this->sliderSource === 'auctions') {
+                     $typeConfig['items'] = $this->selectedSliderItems;
+                     $typeConfig['lot_ids'] = collect($this->selectedSliderItems)->pluck('id')->toArray();
+                }
+            } elseif ($this->sliderMode === 'manual') {
+                $typeConfig['items'] = $this->selectedSliderItems;
+            } elseif ($this->sliderMode === 'images') {
+                $typeConfig['slides'] = $this->sliderImages;
+            }
+        }
+        $block->type_config = $typeConfig;
+
+        // 2. Pass virtual block to the MobileResolver
+        $resolver = app(\App\Services\Cms\ContentBlockMobileResolver::class);
+        return $resolver->resolveForTier($block, $this->previewTierId ? (int)$this->previewTierId : null);
+    }
+
     public function getBuilderSummaryProperty()
     {
         $summary = [];
@@ -190,6 +500,9 @@ class Index extends Component
         if ($this->hasDetailPage) {
             $summary['Detail Page'] = 'Enabled';
             $summary['CTA'] = $this->contentCtaText;
+        } elseif ($this->hasTarget) {
+            $summary['Target'] = ucfirst($this->targetKind) . ' (' . ucfirst($this->targetSource) . ')';
+            $summary['CTA'] = $this->contentCtaText ?: 'Open';
         }
 
         return $summary;
@@ -280,6 +593,14 @@ class Index extends Component
              $this->textPosition = null; // Not applicable
         } else {
              $this->textPosition = 'below';
+        }
+        
+        // Reset Target specifically on type change if not banner/card
+        if ($value !== 'banner' && $value !== 'card') {
+            $this->hasTarget = false;
+            $this->clearTargetState();
+            $this->hasDetailPage = false;
+            $this->contentMarkdown = null;
         }
     }
 
@@ -550,6 +871,19 @@ class Index extends Component
                 $rules['contentMarkdown'] = 'required|string';
             }
 
+            if ($this->type === 'banner' || $this->type === 'card') {
+                if ($this->hasTarget && $this->hasDetailPage) {
+                    $this->addError('target_conflict', 'A block cannot have both a Target and a Detail Page. Choose one.');
+                    return;
+                }
+                
+                if ($this->hasTarget) {
+                    $rules['targetKind'] = 'required|in:category,item';
+                    $rules['targetSource'] = 'required|string';
+                    $rules['targetId'] = 'required|integer';
+                }
+            }
+
             if ($this->type === 'banner' || $this->type === 'card' || ($this->type === 'slider' && $this->sliderMode !== 'category')) {
                  if ($this->type === 'banner' && !$this->existingContentImage) {
                      $rules['contentImage'] = 'required|image|mimes:jpeg,png|max:10240';
@@ -596,6 +930,9 @@ class Index extends Component
         if ($this->createStep < 5) {
             $this->createStep++;
         }
+        if ($this->createStep == 4) {
+            $this->dispatch('cms-preview-step-changed', step: 4, scopeId: $this->previewScopeId);
+        }
     }
 
     public function prevStep()
@@ -610,6 +947,9 @@ class Index extends Component
         // Allow navigation if in Edit Mode OR if going backward
         if ($this->isEditMode || $step < $this->createStep) {
             $this->createStep = $step;
+            if ($step == 4) {
+                $this->dispatch('cms-preview-step-changed', step: 4, scopeId: $this->previewScopeId);
+            }
         }
     }
 
@@ -620,6 +960,8 @@ class Index extends Component
         $this->resetForm();
         $this->isEditMode = false;
         $this->createStep = 1;
+        $this->previewTierId = null;
+        $this->previewScopeId = 'cmsPrev_' . \Illuminate\Support\Str::uuid()->toString();
         $this->showCreateModal = true;
         $this->dispatch('show-create-modal');
     }
@@ -629,11 +971,12 @@ class Index extends Component
         $this->resetForm();
         $this->isEditMode = true;
         $this->blockId = $id;
+        $this->previewScopeId = 'cmsPrev_' . \Illuminate\Support\Str::uuid()->toString();
 
         $block = CmsBlock::with(['visibilityTiers', 'clearViewTiers'])->findOrFail($id);
 
         $this->title = $block->title;
-        $this->placement = $block->placement;
+        $this->placement = 'explore';
         $this->type = $block->type;
         $this->isActive = $block->is_active;
         $this->sortOrder = $block->sort_order;
@@ -648,6 +991,12 @@ class Index extends Component
         $this->hasDetailPage = $content['has_detail_page'] ?? false;
         $this->contentMarkdown = $content['detail_markdown'] ?? '';
         $this->existingContentImage = $content['image_url'] ?? null;
+        
+        $this->hasTarget = (bool) data_get($content, 'has_target', false);
+        $this->targetKind = data_get($content, 'target.kind');
+        $this->targetSource = data_get($content, 'target.source');
+        $this->targetId = data_get($content, 'target.id');
+        $this->targetLabel = data_get($content, 'target.label');
         
         // Type Config (Slider)
         $typeConfig = $block->type_config ?? [];
@@ -701,6 +1050,7 @@ class Index extends Component
         $this->computeEligibleBlurTiers();
         
         $this->createStep = 1;
+        $this->previewTierId = null;
         $this->showCreateModal = true;
         $this->dispatch('show-create-modal');
     }
@@ -726,9 +1076,21 @@ class Index extends Component
             'badge' => $this->contentBadge,
             'cta_text' => $this->contentCtaText,
             'has_detail_page' => $this->hasDetailPage,
-            'detail_markdown' => $this->contentMarkdown,
+            'has_target' => $this->hasTarget,
+            'detail_markdown' => $this->hasDetailPage ? $this->contentMarkdown : null,
             'image_url' => $imageUrl,
         ];
+        
+        if ($this->hasTarget) {
+            $contentPayload['target'] = [
+                'kind' => $this->targetKind,
+                'source' => $this->targetSource,
+                'id' => (int) $this->targetId,
+                'label' => $this->targetLabel ?: null,
+            ];
+            $contentPayload['has_detail_page'] = false;
+            $contentPayload['detail_markdown'] = null;
+        }
         
         // Prune fields for Slider Category Mode
         if ($this->type === 'slider' && $this->sliderMode === 'category') {
@@ -787,7 +1149,7 @@ class Index extends Component
 
             $data = [
                 'title' => $this->title,
-                'placement' => $this->placement,
+                'placement' => 'explore',
                 'type' => $this->type,
                 'content' => $contentPayload,
                 'type_config' => $typeConfigPayload,
@@ -898,7 +1260,7 @@ class Index extends Component
     public function resetForm()
     {
         $this->title = '';
-        $this->placement = '';
+        $this->placement = 'explore';
         $this->type = 'card';
         $this->contentTitle = '';
         $this->contentSubtitle = '';
@@ -909,6 +1271,9 @@ class Index extends Component
         $this->contentMarkdown = '';
         $this->contentImage = null;
         $this->existingContentImage = null;
+        
+        $this->hasTarget = false;
+        $this->clearTargetState();
         
         $this->sliderMode = 'category';
         $this->sliderSource = '';

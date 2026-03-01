@@ -36,9 +36,9 @@ class AuctionAccessResolverService
      * Resolve the access object for an auction lot.
      * Mirrors ArchiveAccessResolver::resolveProductAccess
      */
-    public function resolve(AuctionLot $lot, ?User $user): array
+    public function resolve(AuctionLot $lot, ?User $user, ?MembershipTier $userTier = null): array
     {
-        $userTier = $user?->currentMembership?->membershipTier;
+        $userTier = $userTier ?? $user?->currentMembership?->membershipTier;
         
         // 1. Check Live Status First (Auctions: status != upcoming?)
         // Archive uses go_live_at. Auctions use starts_at and status.

@@ -77,7 +77,12 @@
                             
                             <div class="mb-3">
                                 <label class="form-label">Image</label>
-                                <input type="file" class="form-control mb-2" wire:model="contentImage" accept="image/png,image/jpeg">
+                                <input type="file" class="form-control mb-1" wire:model="contentImage" accept="image/png,image/jpeg">
+                                @if($type === 'banner')
+                                    <div class="form-text text-muted mb-2">Recommended: 1080 &times; 1350</div>
+                                @else
+                                    <div class="form-text text-muted mb-2">Recommended: 1080 &times; 1080</div>
+                                @endif
                                 @if($contentImage)
                                      <img src="{{ $contentImage->temporaryUrl() }}" class="img-fluid rounded border" style="max-height: 200px;">
                                 @elseif($existingContentImage)

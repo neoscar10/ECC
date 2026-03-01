@@ -10,6 +10,7 @@
                     <span wire:loading.remove wire:target="newImages">Add Images</span>
                     <span wire:loading wire:target="newImages">Processing...</span>
                     <input type="file" wire:model="newImages" multiple accept="image/png,image/jpeg" class="opacity-0 position-absolute start-0 top-0 h-100 w-100 cursor-pointer">
+                    <div class="form-text text-muted mt-2">Recommended: 1080 &times; 1080</div>
                 </label>
             </div>
             @error('newImages.*') <span class="text-danger text-sm d-block mt-2">{{ $message }}</span> @enderror

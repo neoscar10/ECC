@@ -149,6 +149,7 @@
                                                             <input type="file" class="position-absolute top-0 start-0 opacity-0 w-100 h-100 cursor-pointer" 
                                                                 wire:model="variationGroups.{{ $gIndex }}.values.{{ $vIndex }}.presentation_image" accept="image/png,image/jpeg">
                                                         </div>
+                                                        <div class="form-text text-muted small mt-1 text-center">Rec: 1080 x 1080</div>
                                                     </td>
                                                 @endif
                                                 

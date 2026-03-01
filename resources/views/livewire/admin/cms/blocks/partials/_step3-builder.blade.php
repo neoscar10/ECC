@@ -77,7 +77,12 @@
                      @if($type !== 'slider')
                          <div class="mb-4">
                              <label class="form-label">Main Image</label>
-                             <input type="file" class="form-control mb-2" wire:model.live="contentImage" accept="image/png,image/jpeg">
+                             <input type="file" class="form-control mb-1" wire:model.live="contentImage" accept="image/png,image/jpeg">
+                             @if($type === 'banner')
+                                 <div class="form-text text-muted mb-2">Recommended: 1080 &times; 1350</div>
+                             @else
+                                 <div class="form-text text-muted mb-2">Recommended: 1080 &times; 1080</div>
+                             @endif
                              @if($existingContentImage)
                                  <div class="d-flex align-items-center gap-2">
                                      <img src="{{ $existingContentImage }}" height="40" class="rounded">
@@ -261,6 +266,7 @@
                                      <input type="file" class="form-control" wire:model="newSlideImage" accept="image/png,image/jpeg">
                                      <button type="button" class="btn btn-secondary" wire:click="addSlide">Add</button>
                                  </div>
+                                 <div class="form-text text-muted">Recommended: 1080 &times; 1080</div>
                                  <div wire:loading wire:target="newSlideImage" class="text-muted fs-12 mt-1">Uploading...</div>
                              </div>
 
@@ -288,21 +294,165 @@
                     @endif
                 @endif
                 
-                <!-- Detail Page Toggle -->
+                <!-- Connectivity Toggles -->
                 @if(!($type === 'slider' && $sliderMode === 'category'))
                 <hr class="border-dashed my-4">
-                <div class="form-check form-switch form-switch-md mb-3">
-                     <input class="form-check-input" type="checkbox" role="switch" id="detailPageSwitch" wire:model.live="hasDetailPage">
-                     <label class="form-check-label fw-bold" for="detailPageSwitch">Has Detail Page?</label>
+                
+                <div class="row g-3 align-items-center mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Has Detail Page?</label>
+                    <div class="form-check form-switch form-switch-lg">
+                      <input class="form-check-input" type="checkbox" wire:model.live="hasDetailPage" id="hasDetailPage">
+                      <label class="form-check-label" for="hasDetailPage">Enable a CMS detail page</label>
+                    </div>
+                  </div>
+
+                  @if($type === 'banner' || $type === 'card')
+                  <div class="col-md-6">
+                    <label class="form-label">Has Target?</label>
+                    <div class="form-check form-switch form-switch-lg">
+                      <input class="form-check-input" type="checkbox" wire:model.live="hasTarget" id="hasTarget">
+                      <label class="form-check-label" for="hasTarget">Link to a category or item</label>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <small class="text-muted">Choose either Detail Page or Target — not both.</small>
+                    @error('target_conflict') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                  </div>
+                  @endif
                 </div>
 
-                @if($hasDetailPage)
-                    <div class="row g-3">
-                         <div class="col-md-6">
-                             <label class="form-label">Button Text <span class="text-danger">*</span></label>
-                             <input type="text" class="form-control" wire:model.live="contentCtaText" placeholder="e.g. Read More">
-                             @error('contentCtaText') <span class="text-danger small">{{ $message }}</span> @enderror
+                @if($hasTarget && ($type === 'banner' || $type === 'card'))
+                  <div class="card border mt-3 bg-light">
+                    <div class="card-body">
+                      <div class="row g-3">
+                        <div class="col-md-6">
+                          <label class="form-label">Target Type</label>
+                          <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" id="targetKindCategory" value="category" wire:model.live="targetKind">
+                            <label class="btn btn-outline-primary" for="targetKindCategory">Category</label>
+
+                            <input type="radio" class="btn-check" id="targetKindItem" value="item" wire:model.live="targetKind">
+                            <label class="btn btn-outline-primary" for="targetKindItem">Item</label>
+                          </div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <label class="form-label">Source</label>
+                          <select class="form-select" wire:model.live="targetSource">
+                            <option value="">Select source...</option>
+                            @if($targetKind === 'category')
+                              <option value="shop">Shop</option>
+                              <option value="archive">Archive</option>
+                            @else
+                              <option value="shop">Shop</option>
+                              <option value="archive">Archive</option>
+                              <option value="auctions">Auctions</option>
+                            @endif
+                          </select>
+                        </div>
+
+                        <div class="col-12">
+                          <label class="form-label">Select Target</label>
+                          <style>
+                          .target-card:hover {
+                              border-color: var(--vz-primary) !important;
+                              background-color: rgba(0,0,0,0.02);
+                              transition: all 0.2s ease;
+                          }
+                          </style>
+                          
+                          <div class="input-group">
+                            <span class="input-group-text"><i class="ri-search-line"></i></span>
+                            <input type="text" class="form-control" placeholder="Search..." wire:model.live.debounce.350ms="targetSearch">
+                          </div>
+
+                          @if(empty($targetSearch) && !empty($browseResults) && empty($targetId))
+                            <div class="browse-section mt-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-semibold">Browse {{ ucfirst($targetKind) }}s</span>
+                                    <small class="text-muted">Showing latest</small>
+                                </div>
+                          
+                                <div class="row g-2" style="max-height: 280px; overflow-y: auto; overflow-x: hidden;">
+                                    @foreach($browseResults as $row)
+                                        <div class="col-6 col-md-4">
+                                            <div class="target-card border rounded p-2 cursor-pointer h-100 hover-shadow"
+                                                 wire:click="selectTarget({{ $row['id'] }}, '{{ addslashes($row['label']) }}')">
+                                                <div class="d-flex gap-2 align-items-center h-100">
+                                                    <img src="{{ $row['image'] ?? 'https://placehold.co/40x40/f3f3f9/adb5bd?text=img' }}" 
+                                                         class="rounded"
+                                                         style="width:40px;height:40px;object-fit:cover;">
+                                                    <div class="flex-grow-1" style="min-width: 0;">
+                                                        <div class="fw-medium text-truncate" style="font-size: 0.85rem;" title="{{ $row['label'] }}">{{ $row['label'] }}</div>
+                                                        <small class="text-muted d-block text-truncate" style="font-size: 0.75rem;">{{ $row['meta'] }}</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                          @endif
+
+                          @if(!empty($targetSearch) && empty($targetId))
+                            <div class="search-results mt-3">
+                                @if(empty($targetSearchResults))
+                                    <div class="text-muted small">No results found for "{{ $targetSearch }}".</div>
+                                @else
+                                    <div class="row g-2" style="max-height: 280px; overflow-y: auto; overflow-x: hidden;">
+                                        @foreach($targetSearchResults as $row)
+                                            <div class="col-6 col-md-4">
+                                                <div class="target-card border rounded p-2 cursor-pointer h-100 hover-shadow"
+                                                     wire:click="selectTarget({{ $row['id'] }}, '{{ addslashes($row['label']) }}')">
+                                                    <div class="d-flex gap-2 align-items-center h-100">
+                                                        <img src="{{ $row['image'] ?? 'https://placehold.co/40x40/f3f3f9/adb5bd?text=img' }}" 
+                                                             class="rounded"
+                                                             style="width:40px;height:40px;object-fit:cover;">
+                                                        <div class="flex-grow-1" style="min-width: 0;">
+                                                            <div class="fw-medium text-truncate" style="font-size: 0.85rem;" title="{{ $row['label'] }}">{{ $row['label'] }}</div>
+                                                            <small class="text-muted d-block text-truncate" style="font-size: 0.75rem;">{{ $row['meta'] }}</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                          @endif
+
+                          @if($targetId)
+                            <div class="d-flex align-items-center justify-content-between border rounded p-2 mt-2 bg-white">
+                              <div>
+                                <div class="fw-semibold">{{ $targetLabel }}</div>
+                                <small class="text-muted">Selected target</small>
+                              </div>
+                              <button type="button" class="btn btn-sm btn-ghost-danger" wire:click="clearTargetState">
+                                <i class="ri-close-line"></i>
+                              </button>
+                            </div>
+                          @endif
+
+                          @error('targetId') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                @endif
+
+                @if($hasDetailPage || $hasTarget)
+                    <div class="row g-3 mt-1 mb-3">
+                         <div class="col-12">
+                              <label class="form-label">Button Text <span class="text-danger">*</span></label>
+                              <input type="text" class="form-control" wire:model.live="contentCtaText" placeholder="e.g. Read More, Shop Now">
+                              @error('contentCtaText') <span class="text-danger small">{{ $message }}</span> @enderror
                          </div>
+                    </div>
+                @endif
+
+                @if($hasDetailPage)
+                    <div class="row g-3 mt-2">
                          <div class="col-12">
                              <label class="form-label">Detail Content (Markdown) <span class="text-danger">*</span></label>
                              <x-ui.markdown-editor wire:model.lazy="contentMarkdown" :value="$contentMarkdown" id="blockMarkdown" height="300" />
@@ -324,7 +474,10 @@
                     <span class="badge bg-white text-dark border">Phone</span>
                 </div>
                 <div class="card-body bg-light d-flex justify-content-center p-3">
-                    @include('livewire.admin.cms.blocks.partials._mobile-preview')
+                    @include('livewire.admin.cms.blocks.partials._phone_preview', [
+                        'previewMode' => 'builder',
+                        'previewScopeId' => $previewScopeId
+                    ])
                 </div>
             </div>
         </div>

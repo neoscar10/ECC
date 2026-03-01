@@ -38,11 +38,11 @@ class CmsBlockTest extends TestCase
         
         MembershipTier::forceCreate(['name' => 'T1', 'code' => 't1', 'price' => 0, 'is_active' => true, 'sort_order' => 1, 'level' => 1]);
 
-        Livewire::actingAs($admin)
+        $livewire = Livewire::actingAs($admin)
             ->test(Index::class)
             ->set('createStep', 1)
             ->set('title', 'Test Block')
-            ->set('placement', 'home')
+            ->set('placement', 'home-hero')
             ->set('type', 'card')
             ->set('isActive', true)
             ->call('nextStep')
@@ -55,12 +55,17 @@ class CmsBlockTest extends TestCase
             ->call('nextStep')
             ->set('createStep', 4)
             ->set('restrictionMode', 'public')
+            ->set('blurEnabled', false)
             ->call('nextStep')
             ->call('store');
+            
+        if ($livewire->errors()->isNotEmpty()) {
+            file_put_contents('err.json', json_encode($livewire->errors()->toArray(), JSON_PRETTY_PRINT));
+        }
 
         $this->assertDatabaseHas('cms_blocks', [
             'title' => 'Test Block',
-            'placement' => 'home',
+            'placement' => 'home-hero',
             'type' => 'card',
         ]);
     }
@@ -70,13 +75,13 @@ class CmsBlockTest extends TestCase
         $admin = $this->createAdmin();
         MembershipTier::forceCreate(['name' => 'T1', 'code' => 't1', 'price' => 0, 'is_active' => true, 'sort_order' => 1, 'level' => 1]);
         
-        CmsBlock::create(['title' => 'B1', 'placement' => 'home', 'type' => 'card', 'sort_order' => 1]);
-        CmsBlock::create(['title' => 'B2', 'placement' => 'home', 'type' => 'card', 'sort_order' => 2]);
+        CmsBlock::create(['title' => 'B1', 'placement' => 'home-hero', 'type' => 'card', 'sort_order' => 1]);
+        CmsBlock::create(['title' => 'B2', 'placement' => 'home-hero', 'type' => 'card', 'sort_order' => 2]);
 
         Livewire::actingAs($admin)
             ->test(Index::class)
             ->set('title', 'B3')
-            ->set('placement', 'home')
+            ->set('placement', 'home-hero')
             ->set('type', 'card')
             ->set('createStep', 1)
             ->call('nextStep')
@@ -87,6 +92,7 @@ class CmsBlockTest extends TestCase
             ->call('nextStep')
             ->set('createStep', 4)
             ->set('restrictionMode', 'public')
+            ->set('blurEnabled', false)
             ->call('nextStep')
             ->call('store');
 
@@ -104,7 +110,7 @@ class CmsBlockTest extends TestCase
         Livewire::actingAs($admin)
             ->test(Index::class)
             ->set('title', 'Slider Cat')
-            ->set('placement', 'home')
+            ->set('placement', 'home-hero')
             ->set('type', 'slider')
             ->set('sliderMode', 'category')
             ->set('createStep', 2)
@@ -116,6 +122,7 @@ class CmsBlockTest extends TestCase
             ->call('nextStep')
             ->set('createStep', 4)
             ->set('restrictionMode', 'public')
+            ->set('blurEnabled', false)
             ->call('nextStep')
             ->call('store');
 
@@ -134,7 +141,7 @@ class CmsBlockTest extends TestCase
         Livewire::actingAs($admin)
             ->test(Index::class)
             ->set('title', 'Slider Manual')
-            ->set('placement', 'home')
+            ->set('placement', 'home-hero')
             ->set('createStep', 1)
             ->call('nextStep')
             ->set('createStep', 2)
@@ -148,6 +155,7 @@ class CmsBlockTest extends TestCase
             ->call('nextStep') 
             ->set('createStep', 4)
             ->set('restrictionMode', 'public')
+            ->set('blurEnabled', false)
             ->call('nextStep')
             ->call('store');
 

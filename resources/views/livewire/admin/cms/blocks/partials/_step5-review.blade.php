@@ -63,7 +63,11 @@
          <h5 class="card-title mb-3">Final Preview</h5>
          <div class="border rounded bg-light p-3 d-flex justify-content-center">
              <div style="transform: scale(0.85); transform-origin: top center;">
-                 @include('livewire.admin.cms.blocks.partials._mobile-preview')
+                 @include('livewire.admin.cms.blocks.partials._phone_preview', [
+                     'previewMode' => 'access-step',
+                     'block' => $this->resolvedPreview,
+                     'previewScopeId' => 'step5-final'
+                 ])
              </div>
          </div>
     </div>

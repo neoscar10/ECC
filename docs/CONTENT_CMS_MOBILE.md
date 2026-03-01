@@ -64,6 +64,13 @@ Fetches the ordered list of blocks for a specific screen/placement. Returns reso
   },
   "text_position": "below", // below, overlay (use for UI layout hint)
   "has_detail_page": false,
+  "has_target": true, // present and true if link is configured as Target
+  "target": { // ONLY if has_target == true
+    "kind": "item", // category, item
+    "source": "auctions", // shop, archive, auctions
+    "id": 55,
+    "label": "Lot 55 - Signed Bat"
+  },
   "detail_endpoint": null, // If present, tap opens this API (or separate screen)
   "slider": { // ONLY if type == slider
     "mode": "category",

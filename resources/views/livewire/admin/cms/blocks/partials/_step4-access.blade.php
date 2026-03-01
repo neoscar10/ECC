@@ -1,6 +1,6 @@
-<div class="row g-4">
+<div class="row g-3">
     <!-- Visibility Settings -->
-    <div class="col-lg-6">
+    <div class="col-12 col-lg-4">
         <h6 class="fw-semibold mb-3">Visibility</h6>
         <div class="card bg-light border p-3 h-100">
             <div class="mb-3">
@@ -45,7 +45,7 @@
     </div>
 
     <!-- Blur / Clear View -->
-    <div class="col-lg-6">
+    <div class="col-12 col-lg-4">
         <h6 class="fw-semibold mb-3">Blur / Clear View</h6>
         <div class="card bg-light border p-3 h-100">
              <div class="mb-3">
@@ -129,6 +129,31 @@
                     </div>
                 @endif
             @endif
+        </div>
+    </div>
+
+    <!-- Live Tier Preview Panel -->
+    <div class="col-12 col-lg-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+             <h6 class="fw-semibold mb-0">Live Tier Preview</h6>
+             <div style="width: 180px;">
+                 <select class="form-select form-select-sm" wire:model.live="previewTierId">
+                     <option value="">Preview as: Guest</option>
+                     <optgroup label="Members">
+                         @foreach($membershipTiers as $tier)
+                             <option value="{{ $tier->id }}">Preview as: {{ $tier->name }}</option>
+                         @endforeach
+                     </optgroup>
+                 </select>
+             </div>
+        </div>
+        
+        <div id="preview-container" class="d-flex justify-content-center" style="transform: scale(0.95); transform-origin: top center;">
+             @include('livewire.admin.cms.blocks.partials._phone_preview', [
+                 'previewMode' => 'access-step',
+                 'block' => $this->resolvedPreview,
+                 'previewScopeId' => $previewScopeId
+             ])
         </div>
     </div>
 </div>

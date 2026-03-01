@@ -69,6 +69,7 @@
                     <div class="mb-3">
                         <label class="form-label">Upload Template File (CSV)</label>
                         <input type="file" class="form-control" wire:model.live="bulkUploadFile" accept=".csv,.txt">
+                        <div class="form-text text-muted">Recommended: CSV or TXT format</div>
                         @error('bulkUploadFile') <span class="text-danger mt-1 fs-12">{{ $message }}</span> @enderror
                         <div wire:loading wire:target="bulkUploadFile" class="text-primary mt-2">
                             <i class="mdi mdi-loading mdi-spin me-1"></i> Parsing file...

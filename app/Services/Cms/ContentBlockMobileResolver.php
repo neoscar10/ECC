@@ -21,18 +21,33 @@ class ContentBlockMobileResolver
     }
 
     /**
+     * Resolve a CMS Block into a Mobile-friendly DTO array using a specific tier (for preview).
+     */
+    public function resolveForTier(CmsBlock $block, ?int $tierId, bool $includeItems = true, int $itemLimit = 10, bool $includeDetail = false): array
+    {
+        $access = $this->resolveAccessForTier($block, $tierId);
+        $tier = $tierId ? \App\Models\MembershipTier::find($tierId) : null;
+        return $this->buildBlockStructure($block, $access, $includeItems, $itemLimit, $includeDetail, null, $tier);
+    }
+
+    /**
      * Resolve a CMS Block into a Mobile-friendly DTO array.
      */
     public function resolve(CmsBlock $block, ?User $user, bool $includeItems = true, int $itemLimit = 10, bool $includeDetail = false): array
     {
-        // 1. Resolve Access State
         $access = $this->resolveAccess($block, $user);
+        $tier = $user?->currentMembership?->membershipTier;
+        return $this->buildBlockStructure($block, $access, $includeItems, $itemLimit, $includeDetail, $user, $tier);
+    }
+
+    protected function buildBlockStructure(CmsBlock $block, array $access, bool $includeItems, int $itemLimit, bool $includeDetail, ?User $user = null, ?\App\Models\MembershipTier $userTier = null): array
+    {
         $isClear = ($access['view_mode'] === 'clear');
         $content = $block->content ?? [];
 
-        // 2. Base Block Structure
+        // Base Block Structure
         $mobileBlock = [
-            'id' => $block->id,
+            'id' => $block->id ?? uniqid(), // Handle in-memory blocks without IDs
             'placement' => $block->placement ?? 'home',
             'type' => $block->type, // banner, slider, card, text
             'sort_order' => $block->sort_order,
@@ -62,6 +77,14 @@ class ContentBlockMobileResolver
             // Access State
             'access' => $access,
         ];
+        
+        // Target Routing
+        if (isset($content['has_target']) && $content['has_target']) {
+            $mobileBlock['has_target'] = true;
+            if ($isClear && isset($content['target'])) {
+                $mobileBlock['target'] = $content['target'];
+            }
+        }
 
         // 3. Body Text (Only if clear)
         if ($isClear) {
@@ -75,7 +98,7 @@ class ContentBlockMobileResolver
 
         // 4. Slider Resolution
         if ($block->type === 'slider') {
-            $mobileBlock['slider'] = $this->resolveSliderData($block, $includeItems, $itemLimit);
+            $mobileBlock['slider'] = $this->resolveSliderData($block, $includeItems, $itemLimit, $user, $userTier);
             
             // If slider mode is 'images', populate media.slides
             if (($block->type_config['mode'] ?? '') === 'images') {
@@ -89,6 +112,17 @@ class ContentBlockMobileResolver
     protected function resolveAccess(CmsBlock $block, ?User $user): array
     {
         $access = $this->accessResolver->resolve($block, $user);
+        return $this->formatAccessOutput($access);
+    }
+
+    protected function resolveAccessForTier(CmsBlock $block, ?int $tierId): array
+    {
+        $access = $this->accessResolver->resolveForTier($block, $tierId);
+        return $this->formatAccessOutput($access);
+    }
+
+    protected function formatAccessOutput(array $access): array
+    {
 
         // Normalize Icon
         $access['message']['icon'] = AccessIconNormalizer::normalize(
@@ -120,7 +154,7 @@ class ContentBlockMobileResolver
         return Storage::url($url);
     }
 
-    protected function resolveSliderData(CmsBlock $block, bool $includeItems, int $limit): array
+    protected function resolveSliderData(CmsBlock $block, bool $includeItems, int $limit, ?User $user = null, ?\App\Models\MembershipTier $userTier = null): array
     {
         $config = $block->type_config ?? [];
         $mode = $config['mode'] ?? 'category';
@@ -141,11 +175,11 @@ class ContentBlockMobileResolver
              $sliderData['items'] = $this->resolveStaticSlides($config['slides'] ?? []);
         } elseif ($mode === 'category') {
              if ($source === 'shop') {
-                 $sliderData['items'] = $this->resolveShopItems($config['category_id'] ?? null, $sliderData['item_limit']);
+                 $sliderData['items'] = $this->resolveShopItems($config['category_id'] ?? null, $sliderData['item_limit'], $user, $userTier);
              } elseif ($source === 'archive') {
-                 $sliderData['items'] = $this->resolveArchiveItems($config['category_id'] ?? null, $sliderData['item_limit']);
+                 $sliderData['items'] = $this->resolveArchiveItems($config['category_id'] ?? null, $sliderData['item_limit'], $user, $userTier);
              } elseif ($source === 'auctions') {
-                 $sliderData['items'] = $this->resolveAuctionLots($config['items'] ?? []); 
+                 $sliderData['items'] = $this->resolveAuctionLots($config['items'] ?? [], $user, $userTier); 
              }
         } elseif ($mode === 'manual') {
              // Manual items not fully supported in requested scope, returning empty or could implement via IDs
@@ -169,7 +203,7 @@ class ContentBlockMobileResolver
         })->toArray();
     }
 
-    protected function resolveShopItems(?int $categoryId, int $limit): array
+    protected function resolveShopItems(?int $categoryId, int $limit, ?User $user = null, ?\App\Models\MembershipTier $userTier = null): array
     {
         if (!$categoryId) return [];
 
@@ -189,21 +223,29 @@ class ContentBlockMobileResolver
                     'currency' => $product->currency ?? 'INR',
                     'amount' => (float) $product->base_price,
                 ],
+                // Open access for Shop logic
+                'access' => [
+                    'view_mode' => 'clear',
+                    'message' => ['icon' => null],
+                ],
                 'status' => 'active', 
                 'detail_endpoint' => "/api/v1/shop/products/{$product->id}",
             ];
         })->toArray();
     }
 
-    protected function resolveArchiveItems(?int $categoryId, int $limit): array
+    protected function resolveArchiveItems(?int $categoryId, int $limit, ?User $user = null, ?\App\Models\MembershipTier $userTier = null): array
     {
         if (!$categoryId) return [];
 
         $query = ArchiveProduct::where('archive_category_id', $categoryId)
+            ->visibleTo($user, $userTier)
             ->with(['images'])
             ->take($limit);
 
-        return $query->get()->map(function($product) {
+        $accessResolver = app(\App\Services\Archive\ArchiveAccessResolver::class);
+
+        return $query->get()->map(function($product) use ($accessResolver, $user, $userTier) {
             $min = $product->price_min_amount;
             $max = $product->price_max_amount;
             
@@ -216,6 +258,12 @@ class ContentBlockMobileResolver
                  $label = 'From INR ' . number_format($min);
             }
 
+            $access = $accessResolver->resolveProductAccess($product, $user, $userTier);
+            $access['message']['icon'] = AccessIconNormalizer::normalize(
+                $access['reason'] ?? null, 
+                $access['view_mode'] ?? 'blocked'
+            );
+
             return [
                 'kind' => 'archive_item',
                 'id' => $product->id,
@@ -227,23 +275,32 @@ class ContentBlockMobileResolver
                     'range_min' => $min,
                     'range_max' => $max,
                 ],
+                'access' => $access,
                 'status' => null,
                 'detail_endpoint' => "/api/v1/archive/products/{$product->id}",
             ];
         })->toArray();
     }
 
-    protected function resolveAuctionLots(array $lotItems): array
+    protected function resolveAuctionLots(array $lotItems, ?User $user = null, ?\App\Models\MembershipTier $userTier = null): array
     {
         $ids = collect($lotItems)->pluck('id')->filter()->toArray();
         if (empty($ids)) return [];
 
         $lots = AuctionLot::whereIn('id', $ids)->with(['images'])->get();
         $ordered = collect($ids)->map(fn($id) => $lots->firstWhere('id', $id))->filter();
+        
+        $accessResolver = app(\App\Services\Auctions\AuctionAccessResolverService::class);
 
-        return $ordered->map(function($lot) {
+        return $ordered->map(function($lot) use ($accessResolver, $user, $userTier) {
             $price = $lot->current_highest_bid > 0 ? $lot->current_highest_bid : $lot->starting_price;
             
+            $access = $accessResolver->resolve($lot, $user, $userTier);
+            $access['message']['icon'] = AccessIconNormalizer::normalize(
+                $access['reason'] ?? null, 
+                $access['view_mode'] ?? 'blocked'
+            );
+
             return [
                 'kind' => 'auction_lot',
                 'id' => $lot->id,
@@ -255,6 +312,7 @@ class ContentBlockMobileResolver
                     'current_bid' => (float) $lot->current_highest_bid,
                     'starting_price' => (float) $lot->starting_price,
                 ],
+                'access' => $access,
                 'status' => $lot->status, // live, upcoming, ended
                 'detail_endpoint' => "/api/v1/auctions/{$lot->id}",
             ];

@@ -165,9 +165,8 @@
                         <div class="dropzone p-4 border-dashed text-center rounded" 
                              style="cursor: pointer; position: relative;">
                              {{-- Fix #1: Bind to single-level property --}}
-                             <input type="file" wire:model="activeGalleryUploads" multiple accept="image/png,image/jpeg"
-                                class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
-                                style="cursor: pointer;">
+                             <input type="file" wire:model="activeGalleryUploads" multiple accept="image/png,image/jpeg" class="opacity-0 position-absolute start-0 top-0 h-100 w-100 cursor-pointer">
+                             <div class="form-text text-muted mt-2 text-center">Recommended: 1080 &times; 1080</div>
                              <div class="text-muted">
                                 <i class="ri-upload-cloud-2-line fs-24"></i>
                                 <p class="mb-0 mt-2">Click or Drop images here</p>

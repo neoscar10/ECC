@@ -47,16 +47,7 @@
                                     <i class="ri-search-line search-icon"></i>
                                 </div>
                             </div>
-                            <div class="col-md-auto">
-                                <div>
-                                    <select class="form-control" wire:model.live="filterPlacement" style="min-width: 140px;">
-                                        <option value="">All Placements</option>
-                                        @foreach(config('cms.placements') as $key => $label)
-                                            <option value="{{ $key }}">{{ $label }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
+
                             <div class="col-md-auto">
                                 <div>
                                     <select class="form-control" wire:model.live="filterType" style="min-width: 120px;">
@@ -86,7 +77,7 @@
                                 <thead class="table-light text-muted">
                                     <tr>
                                         <th scope="col" style="width: 50px;"></th>
-                                        <th class="sort" data-sort="placement">Placement</th>
+
                                         <th class="sort" data-sort="block">Block</th>
                                         <th class="sort" data-sort="type">Type</th>
                                         <th class="sort" data-sort="visibility">Visibility</th>
@@ -94,7 +85,7 @@
                                         <th class="sort" data-sort="action">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody class="list form-check-all" wire:ignore x-data x-init="
+                                <tbody class="list form-check-all" x-data x-init="
                                     new Sortable($el, {
                                         animation: 150,
                                         handle: '.handle',
@@ -110,7 +101,7 @@
                                             <td class="text-center handle" style="cursor: move;">
                                                 <i class="ri-drag-move-2-line fs-18 text-muted"></i>
                                             </td>
-                                            <td><span class="badge bg-light text-dark text-uppercase">{{ $block->placement }}</span></td>
+
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     @if(isset($block->content['image_url']))
@@ -157,7 +148,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="text-center">No blocks found.</td>
+                                            <td colspan="6" class="text-center">No blocks found.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -305,16 +296,31 @@
 
     <!-- Script for Modal Handling & Scoped Styles -->
     <script>
-        document.addEventListener('livewire:initialized', () => {
-            var createModal = new bootstrap.Modal(document.getElementById('createBlockModal'));
-            Livewire.on('show-create-modal', () => { createModal.show(); });
-            Livewire.on('hide-create-modal', () => { createModal.hide(); });
-            Livewire.on('refresh-blocks', () => { createModal.hide(); });
+        function setupCmsModals() {
+            var createModalEl = document.getElementById('createBlockModal');
+            if (createModalEl && !createModalEl.dataset.modalSetup) {
+                var createModal = new bootstrap.Modal(createModalEl);
+                Livewire.on('show-create-modal', () => { createModal.show(); });
+                Livewire.on('hide-create-modal', () => { createModal.hide(); });
+                Livewire.on('refresh-blocks', () => { createModal.hide(); });
+                createModalEl.dataset.modalSetup = '1';
+            }
 
-            var deleteModal = new bootstrap.Modal(document.getElementById('deleteBlockModal'));
-            Livewire.on('show-delete-modal', () => { deleteModal.show(); });
-            Livewire.on('hide-delete-modal', () => { deleteModal.hide(); });
-        });
+            var deleteModalEl = document.getElementById('deleteBlockModal');
+            if (deleteModalEl && !deleteModalEl.dataset.modalSetup) {
+                var deleteModal = new bootstrap.Modal(deleteModalEl);
+                Livewire.on('show-delete-modal', () => { deleteModal.show(); });
+                Livewire.on('hide-delete-modal', () => { deleteModal.hide(); });
+                deleteModalEl.dataset.modalSetup = '1';
+            }
+        }
+
+        if (window.Livewire) {
+            setupCmsModals();
+        } else {
+            document.addEventListener('livewire:init', setupCmsModals);
+            document.addEventListener('livewire:initialized', setupCmsModals); // fallback for older scripts
+        }
     </script>
     <style>
     /* Scoped Stepper Styles (Cloned from Auction/Archive) */
