@@ -128,7 +128,7 @@ class UserCreationTest extends TestCase
         $this->assertDatabaseHas('membership_applications', [
             'user_id' => $user->id,
             'selected_tier_id' => $this->tier->id,
-            'status' => 'submitted'
+            'status' => 'approved'
         ]);
 
         $app = MembershipApplication::where('user_id', $user->id)->first();

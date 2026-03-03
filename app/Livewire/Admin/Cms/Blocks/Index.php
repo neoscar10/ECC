@@ -268,12 +268,12 @@ class Index extends Component
                 $products = \App\Models\Shop\ShopProduct::with('images')->where('title', 'like', "%{$query}%")
                             ->orWhere('sku', 'like', "%{$query}%")->limit(10)->get();
                 foreach ($products as $prod) {
-                     $img = $prod->images->first()?->path ? \Illuminate\Support\Facades\Storage::url($prod->images->first()->path) : null;
+                     $img = $prod->images->first()?->image_path ? \Illuminate\Support\Facades\Storage::url($prod->images->first()->image_path) : null;
                      $results[] = [
                          'id' => $prod->id,
-                         'label' => $prod->title . ' (' . ($prod->sku ?? '') . ')',
+                         'label' => $prod->title,
                          'image' => $img,
-                         'meta' => $prod->price > 0 ? 'INR ' . number_format($prod->price) : 'SKU: ' . ($prod->sku ?? 'N/A')
+                         'meta' => $prod->price > 0 ? 'INR ' . number_format($prod->price) : null
                      ];
                 }
             } elseif ($this->targetSource === 'archive') {
@@ -285,7 +285,7 @@ class Index extends Component
                          'id' => $prod->id,
                          'label' => $prod->title,
                          'image' => $img,
-                         'meta' => 'Code: ' . ($prod->code ?? $prod->sku ?? 'N/A')
+                         'meta' => null
                      ];
                 }
             } elseif ($this->targetSource === 'auctions') {
@@ -341,12 +341,12 @@ class Index extends Component
             if ($this->targetSource === 'shop') {
                 $products = \App\Models\Shop\ShopProduct::with('images')->orderBy('created_at', 'desc')->limit(12)->get();
                 foreach ($products as $prod) {
-                    $img = $prod->images->first()?->path ? \Illuminate\Support\Facades\Storage::url($prod->images->first()->path) : null;
+                    $img = $prod->images->first()?->image_path ? \Illuminate\Support\Facades\Storage::url($prod->images->first()->image_path) : null;
                     $this->browseResults[] = [
                         'id' => $prod->id,
                         'label' => $prod->title,
                         'image' => $img,
-                        'meta' => $prod->price > 0 ? 'INR ' . number_format($prod->price) : 'SKU: ' . ($prod->sku ?? 'N/A')
+                        'meta' => $prod->price > 0 ? 'INR ' . number_format($prod->price) : null
                     ];
                 }
             } elseif ($this->targetSource === 'archive') {
@@ -357,7 +357,7 @@ class Index extends Component
                         'id' => $prod->id,
                         'label' => $prod->title,
                         'image' => $img, 
-                        'meta' => 'Code: ' . ($prod->code ?? $prod->sku ?? 'N/A')
+                        'meta' => null
                     ];
                 }
             } elseif ($this->targetSource === 'auctions') {

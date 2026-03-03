@@ -56,9 +56,10 @@ class AdminUserCreationService
                     'personal_details_json' => $mappedData['personal'] ?? [],
                     'cricket_profile_json' => $mappedData['cricket'] ?? [],
                     'collector_intent_json' => $mappedData['collector'] ?? [],
-                    'status' => 'submitted',
+                    'status' => 'approved',
                     'submitted_at' => now(),
                     'reviewed_at' => now(),
+                    'reviewed_by' => auth()->id() ?? null,
                     'current_step' => 'access_granted'
                 ]);
             }
