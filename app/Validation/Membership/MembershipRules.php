@@ -18,7 +18,7 @@ class MembershipRules
     {
         return [
             'full_name' => 'required|string|min:3|max:120',
-            'dob' => 'required|date|before:today',
+            'date_of_birth' => 'required|date|before:today',
             'country' => 'required|string|max:80',
             'city' => 'required|string|max:80',
         ];
