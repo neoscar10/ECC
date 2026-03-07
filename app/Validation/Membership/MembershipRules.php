@@ -27,19 +27,20 @@ class MembershipRules
     public static function cricketProfile(): array
     {
         return [
-            'formats' => 'array|min:1',
-            'formats.*' => 'in:test,odi,t20,leagues',
+            'preferred_formats' => 'array|min:1',
+            'preferred_formats.*' => 'in:TEST,ODI,T20,LEAGUES',
             'eras' => 'array',
-            'eras.*' => 'in:golden_age,post_war_50s,west_indies,odi_90s,modern,womens',
+            'eras.*' => 'in:GOLDEN_AGE_1890_1914,POST_WAR_50S,WEST_INDIES_DOMINANCE,ODI_90S_ERA,MODERN_ERA,WOMENS_CRICKET',
         ];
     }
 
     public static function collectorIntent(): array
     {
         return [
-            'history' => 'required|in:yes,no',
-            'focus' => 'required|in:legacy,rarity,value',
-            'horizon' => 'required|integer|min:1|max:100',
+            'has_acquired_memorabilia_before' => 'required|boolean',
+            'focus' => 'required|in:LEGACY,RARITY,VALUE',
+            'investment_horizon' => 'required|in:Y1_5,Y5_10,Y10_PLUS',
+            'interests' => 'nullable|array',
         ];
     }
 
