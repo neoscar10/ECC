@@ -766,6 +766,7 @@
     @include('admin.reports.partials._charts_js')
     @stack('scripts')
 @livewireScripts
+@include('layouts.partials._overlay_cleanup')
 </body>
 
 

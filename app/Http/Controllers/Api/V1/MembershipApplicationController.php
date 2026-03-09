@@ -177,7 +177,7 @@ class MembershipApplicationController extends Controller
         }
 
         // Get tier
-        if (!$application->membership_tier_id) {
+        if (!$application->selected_tier_id) {
              return $this->error('No membership tier selected.', 400);
         }
 

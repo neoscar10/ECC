@@ -44,8 +44,9 @@ class ContentBlockDetailPage extends Component
     public function render()
     {
         return view('livewire.pavilion.content-block-detail', [
-            'title' => $this->block['title'] ?? 'Content Detail',
             'activeNav' => 'explore',
+        ])->layout('layouts.user.app', [
+            'title' => $this->block['title'] ?? 'Content Detail',
         ]);
     }
 }

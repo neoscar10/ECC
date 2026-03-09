@@ -10,7 +10,7 @@ class SettingsPage extends Component
 {
     public function render()
     {
-        return view('livewire.settings.settings-page', [
+        return view('livewire.settings.settings-page')->layout('layouts.user.app', [
             'title' => 'Settings',
             'activeNav' => 'settings',
         ]);

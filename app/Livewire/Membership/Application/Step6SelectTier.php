@@ -5,6 +5,7 @@ namespace App\Livewire\Membership\Application;
 use App\Services\Membership\ApplicationWizardService;
 use App\Services\Membership\MembershipService;
 use App\Domain\Membership\TierRecommendationService;
+use App\Models\MembershipApplication;
 use App\Models\MembershipTier;
 use App\Validation\Membership\MembershipRules;
 use Livewire\Component;

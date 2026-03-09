@@ -13,6 +13,8 @@ class AuctionBidPlacedPersonal implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public bool $afterCommit = true;
+
     public $bid;
     public $viewerUserId;
 

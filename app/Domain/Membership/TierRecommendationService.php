@@ -3,6 +3,7 @@
 namespace App\Domain\Membership;
 
 use App\Models\MembershipTier;
+use App\Models\MembershipApplication;
 
 class TierRecommendationService
 {
@@ -81,8 +82,8 @@ class TierRecommendationService
         
         $reasons = [];
         $focus = $intent['focus'] ?? '';
-        $history = $intent['history'] ?? 'no';
-        $horizon = $intent['horizon_value'] ?? 50;
+        $hasHistory = !empty($intent['has_acquired_memorabilia_before']);
+        $horizon = $intent['investment_horizon'] ?? null;
 
         if ($focus === 'RARITY') {
             $reasons[] = 'Your focus on rarity aligns with this tier\'s exclusive access.';
@@ -90,11 +91,11 @@ class TierRecommendationService
             $reasons[] = 'Ideal for collectors preserving the legacy of the game.';
         }
 
-        if ($history === 'yes') {
+        if ($hasHistory) {
             $reasons[] = 'Your previous collection experience qualifies you for advanced benefits.';
         }
 
-        if ($horizon >= 80) {
+        if ($horizon === 'Y10_PLUS' || (isset($intent['horizon_value']) && (int)$intent['horizon_value'] >= 80)) {
             $reasons[] = 'Strategic benefits designed for your long-term investment horizon.';
         }
 

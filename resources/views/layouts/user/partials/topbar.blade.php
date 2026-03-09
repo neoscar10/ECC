@@ -19,8 +19,17 @@
 
     {{-- Center: Title --}}
     <div class="flex-grow-1 text-center">
-        <div class="fw-bold" style="letter-spacing:.2px;">
-            {{ $title }}
+        @php
+            $displayTitle = trim($title);
+            if (strtolower($displayTitle) === 'home') {
+                $displayTitle = 'Explore'; // Normalize Home to Explore per user example
+            }
+            if (!empty($displayTitle) && !str_starts_with(strtolower($displayTitle), 'the ')) {
+                $displayTitle = 'The ' . $displayTitle;
+            }
+        @endphp
+        <div class="fw-bold" style="letter-spacing:.5px; font-size: 18px;">
+            {{ $displayTitle }}
         </div>
     </div>
 

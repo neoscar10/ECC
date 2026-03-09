@@ -143,30 +143,47 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        @if($isPreviewStep4)
-            // Deferred to EccCmsPreviewSwiper in Livewire modal
-        @else
-            new Swiper('.{{ $uniqueId }}', {
-                slidesPerView: 1.1,
-                spaceBetween: 12,
-                loop: true,
-                autoplay: {
-                    delay: 4000,
-                    disableOnInteraction: false,
-                    pauseOnMouseEnter: true,
-                },
-                navigation: {
-                    nextEl: '.{{ $uniqueId }}-next',
-                    prevEl: '.{{ $uniqueId }}-prev',
-                },
-                breakpoints: {
-                    768: { slidesPerView: 2, spaceBetween: 16 },
-                    992: { slidesPerView: 3, spaceBetween: 24 }
+    (function() {
+        const initCmsSlider_{{ str_replace('-', '_', $uniqueId) }} = function() {
+            @if($isPreviewStep4)
+                // Deferred to EccCmsPreviewSwiper in Livewire modal
+            @else
+                const container = document.querySelector('.{{ $uniqueId }}');
+                if (container && !container.classList.contains('swiper-initialized')) {
+                    new Swiper('.{{ $uniqueId }}', {
+                        slidesPerView: 1.1,
+                        spaceBetween: 12,
+                        loop: true,
+                        observer: true,
+                        observeParents: true,
+                        autoplay: {
+                            delay: 4000,
+                            disableOnInteraction: false,
+                            pauseOnMouseEnter: true,
+                        },
+                        navigation: {
+                            nextEl: '.{{ $uniqueId }}-next',
+                            prevEl: '.{{ $uniqueId }}-prev',
+                        },
+                        breakpoints: {
+                            768: { slidesPerView: 2, spaceBetween: 16 },
+                            992: { slidesPerView: 3, spaceBetween: 24 }
+                        }
+                    });
                 }
-            });
-        @endif
-    });
+            @endif
+        };
+
+        // Standard load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCmsSlider_{{ str_replace('-', '_', $uniqueId) }});
+        } else {
+            initCmsSlider_{{ str_replace('-', '_', $uniqueId) }}();
+        }
+
+        // Livewire v3 SPA Navigation support
+        document.addEventListener('livewire:navigated', initCmsSlider_{{ str_replace('-', '_', $uniqueId) }});
+    })();
 </script>
 @endpush
 

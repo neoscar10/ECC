@@ -21,8 +21,9 @@ class ContentDetailPage extends Component
     public function render()
     {
         return view('livewire.pavilion.content-detail-page', [
-            'title' => $this->vm['title'] ?? 'The Pavilion',
             'activeNav' => 'explore',
+        ])->layout('layouts.user.app', [
+            'title' => $this->vm['title'] ?? 'Explore',
         ]);
     }
 }

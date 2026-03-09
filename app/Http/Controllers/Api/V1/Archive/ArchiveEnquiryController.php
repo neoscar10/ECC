@@ -12,7 +12,7 @@ class ArchiveEnquiryController extends Controller
 {
     use ApiResponse;
 
-    public function store(Request $request)
+    public function store(Request $request, \App\Services\Archive\ArchiveEnquiryService $service)
     {
         $request->validate([
             'archive_product_id' => 'required|exists:archive_products,id',
@@ -21,21 +21,11 @@ class ArchiveEnquiryController extends Controller
 
         $user = $request->user();
 
-        $enquiry = ArchiveProductEnquiry::create([
-            'user_id' => $user->id,
-            'archive_product_id' => $request->archive_product_id,
-            'message' => $request->message,
-            'contact_email' => $user->email,
-            'contact_phone' => $user->phone ?? null,
-            'contact_name' => $user->name,
-            'status' => 'new',
-        ]);
-
-        // Optional: Log or Notify
-        // Mail::to(config('app.admin_email'))->send(new EnquiryReceived($enquiry));
-        if ($email = env('ARCHIVE_ENQUIRY_NOTIFY_EMAIL')) {
-             Log::info("Enquiry received for product #{$request->archive_product_id}. Notification would go to $email");
-        }
+        $enquiry = $service->createEnquiry(
+            $user,
+            $request->archive_product_id,
+            $request->message
+        );
 
         return $this->success([
             'id' => $enquiry->id,

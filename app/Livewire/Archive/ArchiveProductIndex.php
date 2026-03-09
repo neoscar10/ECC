@@ -39,8 +39,9 @@ class ArchiveProductIndex extends Component
 
         return view('livewire.archive.archive-product-index', [
             'products' => $products,
+        ])->layout('layouts.user.app', [
             'activeNav' => 'archive',
-            'title' => 'The Archive',
+            'title' => 'Archive',
         ]);
     }
 }

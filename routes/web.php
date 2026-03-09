@@ -18,6 +18,8 @@ Route::middleware(['auth', 'ensure_registration_complete'])->group(function () {
     Route::get('/pavilion/{type}/{slugOrId}', \App\Livewire\Pavilion\ContentDetailPage::class)->name('pavilion.detail');
     Route::get('/club', \App\Livewire\Club\ClubPage::class)->name('club');
     Route::get('/settings', \App\Livewire\Settings\SettingsPage::class)->name('settings');
+    Route::get('/auctions', \App\Livewire\Auctions\Index::class)->name('auctions.index');
+    Route::get('/auctions/{lot}', \App\Livewire\Auctions\Show::class)->name('auctions.show');
 });
 Route::get('/welcome', WelcomePage::class)->name('welcome');
 Route::get('/gated-entry', GatedEntryPage::class)->name('gated.entry');
@@ -62,9 +64,6 @@ Route::middleware(['auth:web', EnsureAdminRole::class])->prefix('admin')->name('
         Route::get('/', \App\Livewire\Admin\Auctions\Lots\Index::class)->name('index'); // Keeping 'index' as name for backward compat if needed? 
         // Request said: "Fix it to lots index route." and used 'admin.auctions.lots.index' in breadcrumb.
         // So I should name it 'lots.index' ?
-        // But if I change 'admin.auctions.index' to 'admin.auctions.lots.index', I break existing links unless I update them.
-        // The Prompt Breadcrumb: <li class="breadcrumb-item"><a href="{{ route('admin.auctions.lots.index') }}">Auction Lots</a></li>
-        // So I should define 'lots.index'.
         
         // Enquiries (New)
         Route::get('/enquiries', \App\Livewire\Admin\Auctions\Enquiries\Index::class)->name('enquiries');
@@ -130,4 +129,8 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/membership/application/step-6', \App\Livewire\Membership\Application\Step6SelectTier::class)->name('membership.application.step6');
     Route::get('/membership/application/step-7', \App\Livewire\Membership\Application\Step7Payment::class)->name('membership.application.step7');
     Route::get('/membership/application/step-8', \App\Livewire\Membership\Application\Step8Success::class)->name('membership.application.step8');
+
+    // Upgrade Flow (Member Steps - Requires Auth)
+    Route::get('/membership/upgrade/payment', \App\Livewire\Membership\Upgrade\Payment::class)->name('membership.upgrade.payment');
+    Route::get('/membership/upgrade/success', \App\Livewire\Membership\Upgrade\Success::class)->name('membership.upgrade.success');
 });

@@ -3,6 +3,7 @@
 namespace App\Domain\Membership;
 
 use Exception;
+use App\Models\MembershipApplication;
 
 class PaymentService
 {

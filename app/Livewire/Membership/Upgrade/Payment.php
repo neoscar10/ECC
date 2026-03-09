@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Livewire\Membership\Application;
+namespace App\Livewire\Membership\Upgrade;
 
 use App\Services\Membership\ApplicationWizardService;
-use App\Services\Membership\MembershipService;
+use App\Services\Membership\MembershipUpgradeService;
 use App\Domain\Membership\PaymentService;
 use App\Models\MembershipApplication;
 use App\Validation\Membership\MembershipRules;
@@ -12,7 +12,7 @@ use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
 
 #[Layout('layouts.user.blank')]
-class Step7Payment extends Component
+class Payment extends Component
 {
     public string $method = 'card';
     public string $card_number = '';
@@ -22,6 +22,7 @@ class Step7Payment extends Component
     public bool $save_card = false;
 
     public string $tierName = '';
+    public int $tierId = 0;
     public float $amount = 0.0;
     public string $amountFormatted = '';
     public string $amountFormattedPlain = '';
@@ -31,24 +32,26 @@ class Step7Payment extends Component
     {
         $draft = $wiz->getDraft();
         
+        // We evaluate the draft solely as the secure transport payload for the target tier
         if (!$draft || !($draft instanceof MembershipApplication)) {
-            $this->redirect(route('membership.application.step1'));
+            $this->redirect('/');
             return;
         }
 
         $tier = $draft->membershipTier;
         if (!$tier) {
-            $this->redirect(route('membership.application.step6'));
+            $this->redirect('/');
             return;
         }
 
+        $this->tierId = $tier->id;
         $this->tierName = $tier->name;
         $this->amount = (float)$tier->price;
         $this->amountFormatted = 'INR ' . number_format($this->amount);
         $this->amountFormattedPlain = 'INR ' . number_format($this->amount);
     }
 
-    public function submit(PaymentService $paymentSvc, MembershipService $membershipSvc, ApplicationWizardService $wiz)
+    public function submit(PaymentService $paymentSvc, MembershipUpgradeService $upgradeSvc, ApplicationWizardService $wiz)
     {
         $this->errorMessage = null;
 
@@ -68,23 +71,25 @@ class Step7Payment extends Component
         try {
             $draft = $wiz->getDraft();
             
-            // Prepare data for service (excluding raw card data as per service security rule)
+            // Re-evaluating the payment logic using the draft context strictly
             $paymentData = [
                 'amount' => $this->amount,
                 'method' => $this->method,
                 'cardholder_name' => $this->cardholder_name,
                 'last4' => substr(str_replace(' ', '', $this->card_number), -4),
-                'brand' => 'Visa', // Dummy
+                'brand' => 'Visa', 
                 'currency' => 'INR'
             ];
 
-            // 1. Process Payment
+            // 1. Process Payment to the Draft precisely to bypass Application logic
             $paymentSvc->processTestPayment($draft, $paymentData);
 
-            // 2. Submit Application (per API pattern)
-            $membershipSvc->submitApplication($draft);
+            // 2. Perform the actual Membership Upgrade via the dedicated service cleanly
+            $upgradeSvc->upgradeUserMembership(Auth::user(), $this->tierId);
 
-            return redirect()->route('membership.application.step8');
+            // Navigate to upgrade completed confirmation cleanly
+            return redirect()->route('membership.upgrade.success');
+
         } catch (\Exception $e) {
             $this->errorMessage = $e->getMessage();
         }
@@ -92,6 +97,6 @@ class Step7Payment extends Component
 
     public function render()
     {
-        return view('livewire.membership.application.step7-payment');
+        return view('livewire.membership.upgrade.payment');
     }
 }

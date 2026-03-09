@@ -22,12 +22,12 @@
         <!-- Upload Input -->
         <div class="input-group">
             <input type="file" class="form-control" multiple wire:model="newImages" id="mainImageInput" accept="image/png,image/jpeg">
-            <div class="form-text text-muted">Recommended: 1080 &times; 1080</div>
+            
             <label class="input-group-text" for="mainImageInput">Upload</label>
         </div>
         <div class="d-flex align-items-center mt-1">
              <i class="ri-upload-cloud-2-line text-muted me-1"></i>
-             <span class="text-muted fs-11">Max 10MB per file.</span>
+             <span class="text-muted fs-11">Max 10MB per file. <span class="text-muted fs-11">Recommended: 1080 &times; 1080</span></span>
         </div>
         @error('newImages') <span class="text-danger text-sm d-block mt-1">{{ $message }}</span> @enderror
 

@@ -24,9 +24,11 @@ class MembershipTierController extends Controller
 
     public function show($id)
     {
-        $tier = Models\MembershipTier::with(['privileges', 'features'])
-            ->where('is_active', true)
-            ->findOrFail($id);
+        $tier = app(\App\Services\Membership\MembershipTierResolver::class)->getTierWithDetails($id);
+        
+        if (!$tier) {
+            abort(404, 'Membership Tier not found.');
+        }
             
         return $this->success($tier);
     }

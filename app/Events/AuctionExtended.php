@@ -13,6 +13,8 @@ class AuctionExtended implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public bool $afterCommit = true;
+
     public $lot;
     public $newEndsAt;
     public $reason;

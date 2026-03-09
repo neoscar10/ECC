@@ -27,7 +27,7 @@
   $isOn = fn($k) => $active === $k;
 @endphp
 
-<div class="ecc-app-nav-wrapper fixed-bottom d-flex justify-content-center w-100 pb-2">
+<div class="ecc-app-nav-wrapper fixed-bottom d-flex d-md-none justify-content-center w-100 pb-2">
   <nav class="ecc-app-nav">
     <div class="ecc-app-nav__container">
       <div class="row g-0 text-center flex-nowrap overflow-auto hide-scrollbar">
@@ -67,12 +67,6 @@
         min-width: 320px;
         max-width: min(760px, calc(100% - 24px));
         margin: 0 auto;
-      }
-
-      @media (min-width: 768px) {
-        .ecc-app-nav {
-          margin-left: calc(var(--ecc-sidebar-w) / 2); /* offset for sidebar to stay centered to content */
-        }
       }
 
       .ecc-app-nav__container {
@@ -136,19 +130,5 @@
 
       .hide-scrollbar::-webkit-scrollbar { display: none; }
       .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-
-      /* Center bottom nav within the right/content column (md+) */
-      @media (min-width: 768px) {
-        .ecc-app-nav-wrapper{
-          width: calc(100% - var(--ecc-sidebar-w)) !important;  /* ignore sidebar space */
-          margin-left: var(--ecc-sidebar-w) !important;          /* start after sidebar */
-          justify-content: center !important;
-        }
-        /* remove the old half-sidebar hack if you have it */
-        .ecc-app-nav{
-          margin-left: 0 !important;
-        }
-      }
     </style>
  

@@ -64,9 +64,10 @@
           $href = route('archive.products.show', ['id' => $id]);
         @endphp
 
-        <div class="col-6 col-md-4 col-lg-3">
+        <div class="col-6 col-md-4 col-lg-3" wire:key="archive-product-{{ $id }}">
           <div class="ecc-card-wrap h-100">
-            <div class="ecc-card-media">
+             <div class="ecc-card-media @if(!$canView || $isBlurred) cursor-pointer @endif"
+                 @if(!$canView || $isBlurred) wire:click.prevent="openAccessModal({{ $id }})" @endif>
               @if($image)
                 <div class="ecc-card-bg" style="background-image:url('{{ $image }}');"></div>
               @else
@@ -115,8 +116,8 @@
             @if($canView && !$isBlurred)
               <a href="{{ $href }}" class="stretched-link" aria-label="Open {{ $title }}"></a>
             @else
-              {{-- For blurred/locked, we might want to show detail too or just a prompt --}}
-               <a href="{{ $href }}" class="stretched-link" aria-label="View info for {{ $title }}"></a>
+              {{-- For blurred/locked, prevent navigation and open the premium modal --}}
+               <button type="button" class="stretched-link bg-transparent border-0 p-0 m-0 w-100 h-100 position-absolute top-0 start-0" aria-label="Unlock Access for {{ $title }}" wire:click.prevent="openAccessModal({{ $id }})"></button>
             @endif
           </div>
         </div>
@@ -128,6 +129,9 @@
       {{ $products->links() }}
     </div>
   </div>
+
+  {{-- Premium Access Upgrade Modal --}}
+  @include('components.shared.premium-access-modal')
 </div>
 
 @push('styles')

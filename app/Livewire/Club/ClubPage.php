@@ -18,8 +18,8 @@ class ClubPage extends Component
 
     public function render()
     {
-        return view('livewire.club.club-page', [
-            'title' => 'The Club',
+        return view('livewire.club.club-page')->layout('layouts.user.app', [
+            'title' => 'Club',
             'activeNav' => 'club',
         ]);
     }

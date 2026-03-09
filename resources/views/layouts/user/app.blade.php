@@ -39,10 +39,16 @@
             @media (min-width: 768px) {
                 .ecc-sidebar-aside {
                     width: var(--ecc-sidebar-w);
-                    position: sticky;
-                    top: 0;
-                    height: 100vh;
+                    position: fixed;
+                    left: 0;
+                    top: 70px;
+                    height: calc(100vh - 70px);
                     overflow-y: auto;
+                    z-index: 20;
+                }
+                .ecc-content {
+                    margin-left: var(--ecc-sidebar-w);
+                    width: calc(100% - var(--ecc-sidebar-w));
                 }
             }
         </style>
@@ -88,9 +94,11 @@
                 </div>
             </div>
 
-            @include('layouts.user.partials.app-bottom-nav', [
-                'active' => $activeNav ?? null
-            ])
+            @if(empty($hideBottomNav))
+                @include('layouts.user.partials.app-bottom-nav', [
+                    'active' => $activeNav ?? null
+                ])
+            @endif
         </div>
 
     {{-- Bootstrap JS --}}
@@ -98,5 +106,6 @@
 
     @livewireScripts
     @stack('scripts')
+    @include('layouts.partials._overlay_cleanup')
 </body>
 </html>

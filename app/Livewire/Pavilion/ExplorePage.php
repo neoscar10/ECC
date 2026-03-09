@@ -20,8 +20,9 @@ class ExplorePage extends Component
     public function render()
     {
         return view('livewire.pavilion.explore-page', [
-            'title' => $this->vm['title'] ?? 'The Pavilion',
             'joinClubUrl' => $this->vm['joinClubUrl'] ?? null,
+        ])->layout('layouts.user.app', [
+            'title' => $this->vm['title'] ?? 'Explore',
             'activeNav' => 'explore',
         ]);
     }

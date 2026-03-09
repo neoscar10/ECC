@@ -9,9 +9,23 @@
     // Access Handling
     $access = $item['access'] ?? null;
     $viewMode = $access['view_mode'] ?? 'clear';
+    $isNavigable = ($viewMode === 'clear');
     $isLocked = $viewMode === 'blocked';
     $isBlurred = $viewMode === 'blur';
     $icon = $access['message']['icon'] ?? 'lock';
+    $lockTitle = $access['message']['title'] ?? 'Restricted View';
+    $lockHint = $access['message']['body'] ?? 'Membership Required';
+
+    // Modal Navigation payload
+    $targetTierId = null;
+    if (!empty($access['actions'])) {
+        foreach ($access['actions'] as $action) {
+            if (in_array($action['type'], ['upgrade_membership', 'purchase_membership']) && !empty($action['target_tier']['id'])) {
+                $targetTierId = $action['target_tier']['id'];
+                break;
+            }
+        }
+    }
     
     // Determine Target Link
     $link = '#';
@@ -24,7 +38,11 @@
     }
 @endphp
 
+@if($isNavigable)
 <a href="{{ $link }}" class="cms-item-card d-block text-decoration-none h-100">
+@else
+<div role="button" tabindex="0" wire:click.prevent="openAccessModal({{ $targetTierId ?? 'null' }}, {{ json_encode($title) }}, {{ json_encode($icon) }})" class="cms-item-card d-block text-decoration-none h-100 text-start w-100 bg-transparent border-0 p-0 m-0" style="cursor: pointer; outline: none;">
+@endif
     <div class="card h-100 border-0 overflow-hidden rounded-4 text-white" style="background: #111; border: 1px solid rgba(212,175,55,0.18) !important; border-radius: 18px !important;">
         {{-- Image with fixed 4:5 ratio --}}
         <div class="cms-card-media position-relative" style="padding-top: 125%; background: #080808; overflow: hidden;">
@@ -37,16 +55,17 @@
             @endif
 
             @if($isLocked || $isBlurred)
-                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0,0,0,0.5);">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1);">
-                        @if($icon === 'time-lock')
-                            <i class="ri-time-line fs-5 text-white"></i>
-                        @elseif($icon === 'diamond')
-                            <i class="ri-vip-diamond-fill fs-5" style="color: var(--ecc-gold, #d4af37);"></i>
-                        @else
-                            <i class="ri-lock-fill fs-5 text-white"></i>
-                        @endif
-                    </div>
+                <div class="ecc-cms-lock-overlay">
+                  <div class="ecc-cms-lock-icon">
+                    <span class="material-symbols-outlined">
+                      @if($icon === 'time-lock') lock_clock
+                      @elseif($icon === 'diamond') diamond
+                      @else lock
+                      @endif
+                    </span>
+                  </div>
+                  <div class="ecc-cms-lock-title text-uppercase">{{ $lockTitle }}</div>
+                  <div class="ecc-cms-lock-hint">{{ $lockHint }}</div>
                 </div>
             @endif
         </div>
@@ -59,7 +78,11 @@
             @endif
         </div>
     </div>
+@if($isNavigable)
 </a>
+@else
+</div>
+@endif
 
 <style>
     .truncate-2 {
@@ -74,5 +97,38 @@
         box-shadow: 0 10px 30px rgba(212,175,55,0.2) !important;
         border-color: rgba(212,175,55,0.4) !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .ecc-cms-lock-overlay {
+        position: absolute; inset: 0;
+        z-index: 15;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 15px;
+        background: rgba(0,0,0,0.4);
+    }
+    .ecc-cms-lock-icon {
+        width: 48px; height: 48px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 12px;
+        color: #D4AF37;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+    .ecc-cms-lock-title {
+        color: #fceec5;
+        font-weight: 800;
+        font-size: 11px;
+        letter-spacing: 0.05em;
+    }
+    .ecc-cms-lock-hint {
+        color: #cbbc90;
+        margin-top: 5px;
+        font-size: 10px;
+        font-weight: 600;
     }
 </style>

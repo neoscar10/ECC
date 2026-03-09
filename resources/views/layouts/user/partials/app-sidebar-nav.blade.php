@@ -13,6 +13,20 @@
     ['key'=>'settings','label'=>'Settings','icon'=>'settings',   'href'=>url('/settings')],
   ];
 
+  $path = trim(request()->path(), '/');
+
+  $keyFromPath = match (true) {
+    $path === '' || str_starts_with($path, 'home')                        => 'explore',
+    str_starts_with($path, 'archive')                                     => 'archive',
+    str_starts_with($path, 'auctions')                                    => 'auctions',
+    str_starts_with($path, 'club')                                        => 'club',
+    str_starts_with($path, 'store') || str_starts_with($path, 'shop')     => 'shop',
+    str_starts_with($path, 'settings')                                    => 'settings',
+    default                                                               => null,
+  };
+
+  $active = $active ?? $keyFromPath;
+
   $isOn = fn($k) => $active === $k;
 @endphp
 

@@ -203,26 +203,28 @@
     @endforeach
 
 
-    {{-- Final Non-Sticky Enquire Section --}}
-    <div class="ecc-ad__enquire-section mt-5 pt-4 border-top border-secondary border-opacity-10">
-      <div class="d-flex align-items-center gap-3">
-        <div class="flex-grow-1">
-          <div class="ecc-ad__est-l">{{ $estimateLabel }}</div>
-          <div class="ecc-ad__est-v">{{ $estimate ?: '—' }}</div>
-        </div>
-
-        <button type="button"
-                class="ecc-ad__enq btn"
-                @if(!$enquireEnabled) disabled @endif>
-          <span class="material-symbols-outlined">mail</span>
-          Enquire Privately
-        </button>
-      </div>
-    </div>
+    {{-- Blank space so sticky footer doesn't overlap --}}
+    <div style="height: 100px;"></div>
   </main>
 
-  {{-- Reuse existing bottom nav component --}}
-  @include('layouts.user.partials.app-bottom-nav', ['active' => 'archive'])
+  {{-- Sticky Enquire Section --}}
+  <div class="ecc-ad__sticky-bar fixed-bottom z-3 p-3 p-md-4 border-top border-secondary border-opacity-10">
+    <div class="d-flex align-items-center gap-3 w-100" style="max-width: var(--ecc-page-max, 1100px); margin: 0 auto;">
+      <div class="flex-grow-1">
+        <div class="ecc-ad__est-l">{{ $estimateLabel }}</div>
+        <div class="ecc-ad__est-v">{{ $estimate ?: '—' }}</div>
+      </div>
+
+      <button type="button"
+              class="ecc-ad__enq btn"
+              data-bs-toggle="modal"
+              data-bs-target="#enquireModal"
+              @if(!$enquireEnabled) disabled @endif>
+        <span class="material-symbols-outlined">mail</span>
+        Enquire Privately
+      </button>
+    </div>
+  </div>
 
   {{-- Simple Zoom / Gallery overlay --}}
   <div class="ecc-ad__modal" id="eccZoom" hidden>
@@ -232,6 +234,46 @@
         <span class="material-symbols-outlined">close</span>
       </button>
       <div class="ecc-ad__modal-img" id="eccZoomImg" style="background-image:url('{{ $hero }}');"></div>
+    </div>
+  </div>
+
+  {{-- Enquire Modal --}}
+  <div class="modal fade" id="enquireModal" tabindex="-1" aria-labelledby="enquireModalLabel" aria-hidden="true" wire:ignore.self>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="background:#1a160d; border:1px solid rgba(242,185,13,.30); border-radius:16px;">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title ecc-ad__title fs-4" id="enquireModalLabel" style="font-family:'Newsreader',serif; margin:0;">Enquire Privately</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body pt-2">
+          @if($enquirySuccess)
+             <div class="alert alert-success d-flex align-items-center gap-2" style="background:rgba(25,135,84,0.1); border-color:rgba(25,135,84,0.3); color:#d1e7dd; border-radius:12px;">
+                <span class="material-symbols-outlined">check_circle</span>
+                Your private enquiry has been successfully sent to the admin.
+             </div>
+             <div class="text-end mt-4">
+               <button type="button" class="ecc-ad__lock-btn" data-bs-dismiss="modal">Close</button>
+             </div>
+          @else
+              <p class="ecc-ad__lock-sub text-start mb-4" style="font-size:14px; margin-top:0;">send a private enquiry to the admin, You will be contacted directly using your registered details</p>
+              
+              <form wire:submit.prevent="submitEnquiry">
+                <div class="mb-4">
+                   <textarea wire:model="enquiryMessage" class="form-control ecc-ad__textarea" rows="3" placeholder="Add an optional message..." style="background:rgba(26,22,13,0.5); border:1px solid rgba(242,185,13,0.2); color:#f1ecc9; border-radius:12px; box-shadow:none;"></textarea>
+                   @error('enquiryMessage') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                </div>
+                
+                <div class="text-end">
+                   <button type="submit" class="ecc-ad__enq w-100 w-md-auto d-inline-flex ms-auto">
+                      <span class="material-symbols-outlined" wire:loading.remove wire:target="submitEnquiry">send</span>
+                      <span class="spinner-border spinner-border-sm" wire:loading wire:target="submitEnquiry" role="status" aria-hidden="true"></span>
+                      Send Enquiry
+                   </button>
+                </div>
+              </form>
+          @endif
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -260,7 +302,7 @@
     color:#f2b90d; font-size:12px; font-weight:700; letter-spacing:.04em; border: 0;
   }
 
-  .ecc-ad__main{ margin-top:-24px; position:relative; z-index:5; }
+  .ecc-ad__main{ margin-top:-24px; position:relative; z-index:5; padding-bottom: 20px; }
   .ecc-ad__kicker{ color:#f2b90d; font-size:11px; font-weight:800; letter-spacing:.20em; }
   .ecc-ad__kline{ height:1px; width:40px; background:rgba(242,185,13,.40); }
   .ecc-ad__title{ color:#f2b90d; font-size:34px; font-weight:700; line-height:1.1; margin: 10px 0; font-family:"Newsreader",serif; }
@@ -313,6 +355,14 @@
     background:#f2b90d; color:#1a160d !important; font-weight:900; letter-spacing:.06em;
     display:flex; align-items:center; justify-content:center; gap:8px;
     box-shadow:0 10px 24px rgba(242,185,13,.2);
+    transition: background-color 0.2s ease;
+  }
+  .ecc-ad__enq:hover{
+    background:#ffd340; color:#1a160d !important;
+  }
+  
+  .ecc-ad__textarea::placeholder {
+    color: rgba(241, 236, 201, 0.65) !important;
   }
 
   .ecc-ad__modal[hidden]{ display:none !important; }
@@ -322,6 +372,19 @@
   .ecc-ad__modal-img{ height:80vh; background-size:contain; background-position:center; background-repeat: no-repeat; }
   .ecc-ad__modal-x{ position:absolute; top:15px; right:15px; width:44px; height:44px; border-radius:50%; background:rgba(0,0,0,0.5); color:#fff; border:0; display:flex; align-items:center; justify-content:center; }
   .hide-scrollbar::-webkit-scrollbar{ display:none; }
+
+  .ecc-ad__sticky-bar {
+    background: rgba(12,12,12,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.45);
+  }
+  @media (min-width: 768px) {
+    .ecc-ad__sticky-bar {
+      width: calc(100% - var(--ecc-sidebar-w));
+      margin-left: var(--ecc-sidebar-w);
+    }
+  }
 </style>
 @endpush
 

@@ -23,6 +23,8 @@
     
     {{-- Safety Spacer for Bottom Nav --}}
     <div class="cms-bottom-nav-spacer d-lg-none" style="height: 120px;"></div>
+
+    @include('components.shared.premium-access-modal')
 </div>
 
 @push('styles')
