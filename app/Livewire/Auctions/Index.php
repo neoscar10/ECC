@@ -13,6 +13,10 @@ class Index extends Component
     public $activeTab = 'live'; // 'live', 'upcoming', 'past'
     public $perPage = 20;
 
+    // Premium Modal State
+    public bool $showAccessModal = false;
+    public ?array $modalData = null;
+
     protected $queryString = [
         'activeTab' => ['except' => 'live', 'as' => 'tab'],
     ];
@@ -36,6 +40,78 @@ class Index extends Component
     public function loadMore()
     {
         $this->perPage += 20;
+    }
+
+    public function openAccessModal(int $lotId, AuctionAccessResolverService $resolver, \App\Services\Membership\MembershipTierResolver $tierResolver)
+    {
+        $user = Auth::user();
+        $tier = $tierResolver->resolveForUser($user);
+        
+        $lot = AuctionLot::with(['restrictedMinTier', 'restrictedPrivateTier', 'clearViewTiers', 'visibilityTiers'])->find($lotId);
+        if (!$lot) return;
+
+        $access = $resolver->resolve($lot, $user, $tier);
+
+        // Find the target tier from the access actions
+        $targetTierId = null;
+        if (!empty($access['actions'])) {
+            foreach ($access['actions'] as $action) {
+                if ($action['type'] === 'upgrade_membership' && !empty($action['target_tier']['id'])) {
+                    $targetTierId = $action['target_tier']['id'];
+                    break;
+                }
+            }
+        }
+
+        if (!$targetTierId) {
+            return redirect('/membership/apply-intro');
+        }
+
+        $targetTierModel = $tierResolver->getTierWithDetails($targetTierId);
+        
+        if (!$targetTierModel) {
+            return redirect('/membership/apply-intro');
+        }
+
+        $this->modalData = [
+            'tier_id' => $targetTierModel->id,
+            'tier_name' => $targetTierModel->name,
+            'price_formatted' => $targetTierModel->price > 0 ? 'INR ' . number_format($targetTierModel->price) : 'Free',
+            'duration_label' => 'Year',
+            'icon' => \App\Support\Archive\AccessIconNormalizer::normalize($access['reason'] ?? null, $access['view_mode'] ?? 'blocked'),
+            'privileges' => $targetTierModel->privileges->toArray(),
+            'features' => $targetTierModel->features->toArray(),
+            'product_title' => $lot->title,
+        ];
+
+        $this->showAccessModal = true;
+    }
+
+    public function closeAccessModal(): void
+    {
+        $this->showAccessModal = false;
+        $this->modalData = null;
+    }
+
+    public function proceedToSubscribe(\App\Services\Membership\ApplicationWizardService $wiz)
+    {
+        if (!Auth::check()) {
+            return redirect('/membership/apply-intro');
+        }
+
+        if (!$this->modalData || empty($this->modalData['tier_id'])) {
+            return redirect(route('membership.application.step1'));
+        }
+
+        $draft = $wiz->getOrCreateDraft();
+        
+        if ($draft instanceof \App\Models\MembershipApplication) {
+            $draft->update([
+                'selected_tier_id' => $this->modalData['tier_id']
+            ]);
+        }
+
+        return redirect()->route('membership.upgrade.payment');
     }
 
     public function render(AuctionAccessResolverService $accessResolver)
@@ -66,8 +142,12 @@ class Index extends Component
         $formattedLots = $lotsData->map(function ($lot) use ($user, $userTier, $accessResolver) {
             $access = $accessResolver->resolve($lot, $user, $userTier);
             
-            // Replicate 'view_mode' logic for details/pricing
+            // Replicate Archive 'view_mode' logic
+            $canView = ($access['view_mode'] === 'clear' || $access['view_mode'] === 'blur');
+            $isBlurred = ($access['view_mode'] === 'blur');
             $isClear = $access['view_mode'] === 'clear';
+            
+            $icon = \App\Support\Archive\AccessIconNormalizer::normalize($access['reason'] ?? null, $access['view_mode'] ?? 'blocked');
             
             $now = Carbon::now();
             $closesInHuman = null;
@@ -111,6 +191,11 @@ class Index extends Component
                 'details_url' => route('auctions.show', $lot->id),
                 'bid_url' => route('auctions.show', $lot->id),
                 'is_hot' => ($lot->bids()->count() > 5), // Arbitrary logic for 'hot' badge since it varies by business rule
+                'can_view' => $canView,
+                'is_blurred' => $isBlurred,
+                'lock_type' => $icon ?? 'lock',
+                'lock_title' => $access['message']['title'] ?? 'Restricted View',
+                'lock_hint' => $access['message']['body'] ?? 'Membership Required',
             ];
         });
 

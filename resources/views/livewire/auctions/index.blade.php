@@ -218,6 +218,51 @@
                 backdrop-filter: blur(6px);
             }
 
+            .ecc-blur {
+                position: absolute; inset: 0;
+                backdrop-filter: blur(8px);
+                background: rgba(35, 30, 16, 0.3);
+                z-index: 12;
+            }
+
+            .ecc-lock-overlay {
+                position: absolute; inset: 0;
+                z-index: 15;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 15px;
+            }
+
+            .ecc-lock-icon {
+                width: 48px; height: 48px;
+                border-radius: 50%;
+                background: rgba(0, 0, 0, 0.8);
+                border: 1px solid rgba(242, 185, 13, 0.3);
+                display: flex; align-items: center; justify-content: center;
+                margin-bottom: 12px;
+                color: #f2b90d;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            }
+
+            .ecc-lock-title {
+                color: #f5ebd0;
+                font-weight: 800;
+                font-size: 11px;
+                letter-spacing: 0.05em;
+            }
+
+            .ecc-lock-hint {
+                color: #cbbc90;
+                margin-top: 5px;
+                font-size: 10px;
+                font-weight: 600;
+            }
+
+            .cursor-pointer { cursor: pointer !important; }
+
             .ecc-featured-body {
                 position: relative;
                 margin-top: -5.2rem;
@@ -528,11 +573,18 @@
 
                     $formattedCurrentBid = $currentBid ?: (isset($lot->current_bid) ? '₹' . number_format((float) $lot->current_bid) : (isset($lot['current_bid']) ? '₹' . number_format((float) $lot['current_bid']) : null));
                     $formattedStartingBid = $startingBid ?: (isset($lot->starting_price) ? '₹' . number_format((float) $lot->starting_price) : (isset($lot['starting_price']) ? '₹' . number_format((float) $lot['starting_price']) : null));
+
+                    // Access / Restriction
+                    $canView = $lot->can_view ?? $lot['can_view'] ?? true;
+                    $isBlurred = $lot->is_blurred ?? $lot['is_blurred'] ?? false;
+                    $lockType = $lot->lock_type ?? $lot['lock_type'] ?? 'lock';
+                    $lockTitle = $lot->lock_title ?? $lot['lock_title'] ?? 'Restricted View';
+                    $lockHint = $lot->lock_hint ?? $lot['lock_hint'] ?? 'Membership Required';
                 @endphp
 
                 @if($isFeatured)
                     <article class="ecc-auction-card featured">
-                        <div class="ecc-card-image-wrap">
+                        <div class="ecc-card-image-wrap @if(!$canView || $isBlurred) cursor-pointer @endif" @if(!$canView || $isBlurred) wire:click.prevent="openAccessModal({{ $lot['id'] ?? $lot->id }})" @endif>
                             @if($image)
                                 <img src="{{ $image }}" alt="{{ $title }}" class="ecc-card-image ecc-featured-image">
                             @else
@@ -544,6 +596,25 @@
                             <div class="ecc-featured-gradient"></div>
 
                             <span class="ecc-star-badge">Star Lot</span>
+
+                            @if(!$canView || $isBlurred)
+                              <div class="ecc-lock-overlay">
+                                <div class="ecc-lock-icon">
+                                  <span class="material-symbols-outlined">
+                                    @if($lockType === 'time-lock') lock_clock
+                                    @elseif($lockType === 'diamond') diamond
+                                    @else lock
+                                    @endif
+                                  </span>
+                                </div>
+                                <div class="ecc-lock-title text-uppercase">{{ $lockTitle }}</div>
+                                <div class="ecc-lock-hint">{{ $lockHint }}</div>
+                              </div>
+                            @endif
+
+                            @if($isBlurred || !$canView)
+                              <div class="ecc-blur"></div>
+                            @endif
                         </div>
 
                         <div class="ecc-featured-body">
@@ -583,17 +654,19 @@
                             </div>
 
                             <div class="ecc-card-footer-space">
-                                @if($isLive)
-                                    <a href="{{ $bidUrl }}" class="btn ecc-btn-primary-lux">Place Bid</a>
+                                @if(!$canView || $isBlurred)
+                                    <button type="button" class="btn ecc-btn-primary-lux w-100" wire:click.prevent="openAccessModal({{ $lot['id'] ?? $lot->id }})">Unlock Access</button>
+                                @elseif($isLive)
+                                    <a href="{{ $bidUrl }}" class="btn ecc-btn-primary-lux w-100">Place Bid</a>
                                 @else
-                                    <a href="{{ $detailsUrl }}" class="btn ecc-btn-outline-lux">View Details</a>
+                                    <a href="{{ $detailsUrl }}" class="btn ecc-btn-outline-lux w-100">View Details</a>
                                 @endif
                             </div>
                         </div>
                     </article>
                 @else
                     <article class="ecc-auction-card">
-                        <div class="ecc-card-image-wrap">
+                        <div class="ecc-card-image-wrap @if(!$canView || $isBlurred) cursor-pointer @endif" @if(!$canView || $isBlurred) wire:click.prevent="openAccessModal({{ $lot['id'] ?? $lot->id }})" @endif>
                             @if($image)
                                 <img src="{{ $image }}" alt="{{ $title }}" class="ecc-card-image ecc-regular-image">
                             @else
@@ -607,6 +680,25 @@
                                     <i class="mdi mdi-diamond-stone"></i>
                                     {{ $lot->access_badge_label ?? $lot['access_badge_label'] ?? 'Platinum Access Only' }}
                                 </span>
+                            @endif
+
+                            @if(!$canView || $isBlurred)
+                              <div class="ecc-lock-overlay">
+                                <div class="ecc-lock-icon">
+                                  <span class="material-symbols-outlined">
+                                    @if($lockType === 'time-lock') lock_clock
+                                    @elseif($lockType === 'diamond') diamond
+                                    @else lock
+                                    @endif
+                                  </span>
+                                </div>
+                                <div class="ecc-lock-title text-uppercase">{{ $lockTitle }}</div>
+                                <div class="ecc-lock-hint">{{ $lockHint }}</div>
+                              </div>
+                            @endif
+
+                            @if($isBlurred || !$canView)
+                              <div class="ecc-blur"></div>
                             @endif
                         </div>
 
@@ -634,10 +726,12 @@
                             </div>
 
                             <div class="ecc-card-footer-space">
-                                @if($isLive)
-                                    <a href="{{ $bidUrl }}" class="btn ecc-btn-primary-lux">Place Bid</a>
+                                @if(!$canView || $isBlurred)
+                                    <button type="button" class="btn ecc-btn-primary-lux w-100" wire:click.prevent="openAccessModal({{ $lot['id'] ?? $lot->id }})">Unlock Access</button>
+                                @elseif($isLive)
+                                    <a href="{{ $bidUrl }}" class="btn ecc-btn-primary-lux w-100">Place Bid</a>
                                 @else
-                                    <a href="{{ $detailsUrl }}" class="btn ecc-btn-outline-lux">View Details</a>
+                                    <a href="{{ $detailsUrl }}" class="btn ecc-btn-outline-lux w-100">View Details</a>
                                 @endif
                             </div>
                         </div>
@@ -671,5 +765,8 @@
         </div>
 
         <div class="ecc-bottom-nav-spacer"></div>
+
+        {{-- Premium Access Upgrade Modal --}}
+        @include('components.shared.premium-access-modal')
     </div>
 </div>
