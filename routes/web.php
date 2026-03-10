@@ -20,6 +20,10 @@ Route::middleware(['auth', 'ensure_registration_complete'])->group(function () {
     Route::get('/settings', \App\Livewire\Settings\SettingsPage::class)->name('settings');
     Route::get('/auctions', \App\Livewire\Auctions\Index::class)->name('auctions.index');
     Route::get('/auctions/{lot}', \App\Livewire\Auctions\Show::class)->name('auctions.show');
+    
+    // Store
+    Route::get('/shop', \App\Livewire\Shop\Index::class)->name('shop.index');
+    Route::get('/shop/{slug}', \App\Livewire\Shop\Show::class)->name('shop.show');
 });
 Route::get('/welcome', WelcomePage::class)->name('welcome');
 Route::get('/gated-entry', GatedEntryPage::class)->name('gated.entry');

@@ -3,7 +3,7 @@
 
     $items = [
         ['key' => 'home',   'label' => 'Home',   'icon' => 'home',                'href' => route('home')],
-        ['key' => 'store',  'label' => 'Store',  'icon' => 'storefront',          'href' => url('/store')],
+        ['key' => 'store',  'label' => 'Store',  'icon' => 'storefront',          'href' => route('shop.index')],
         ['key' => 'events', 'label' => 'Events', 'icon' => 'confirmation_number', 'href' => url('/events')],
         ['key' => 'profile','label' => 'Profile','icon' => 'person',              'href' => url('/profile')],
     ];
@@ -13,7 +13,7 @@
 
         return match($k){
             'home' => request()->is('home*'),
-            'store' => request()->is('store*'),
+            'store' => request()->is('shop*'),
             'events' => request()->is('events*'),
             'profile' => request()->is('profile*'),
         };
