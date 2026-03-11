@@ -41,11 +41,9 @@ class Index extends Component
         // Similar to ShopCategoryController->filters() / index()
         $categories = ShopCategory::active()->roots()->orderBy('sort_order')->orderBy('name')->get();
 
-        // 2. New Arrivals (Top 4-5 items latest)
-        $newArrivals = $productService->getProducts(
-            ['sort' => 'newest'],
-            4
-        )->items();
+        $newArrivalsPaginator = $productService->getProducts(['sort' => 'newest'], 4);
+        $newArrivalsPaginator->getCollection()->loadMissing('variationGroups.values');
+        $newArrivals = $newArrivalsPaginator->items();
 
         // 3. Grid Products (Applying active filters)
         $filters = [
@@ -58,6 +56,7 @@ class Index extends Component
         }
 
         $products = $productService->getProducts($filters, 16);
+        $products->getCollection()->loadMissing('variationGroups.values');
 
         // 4. Cart Count
         $cartCount = 0;
@@ -98,6 +97,9 @@ class Index extends Component
             'products' => collect($products->items())->map($mapProduct),
             'paginator' => $products,
             'cartCount' => $cartCount,
-        ])->layout('layouts.user.app', ['title' => 'Club Store']);
+        ])->layout('layouts.user.app', [
+            'title' => 'Club Store',
+            'cartCount' => $cartCount
+        ]);
     }
 }

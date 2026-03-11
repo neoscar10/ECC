@@ -450,12 +450,7 @@
 
                 <h1 class="ecc-store-title">Club Store</h1>
 
-                <button type="button" class="ecc-store-icon-btn" aria-label="Cart">
-                    <i class="mdi mdi-cart-outline fs-4"></i>
-                    @if(($cartCount ?? 0) > 0)
-                        <span class="ecc-cart-badge">{{ $cartCount }}</span>
-                    @endif
-                </button>
+                <div style="width: 42px;"></div>
             </div>
         </div>
 
@@ -543,9 +538,7 @@
                                 <h3 class="ecc-product-title">{{ $title }}</h3>
                                 <span class="ecc-price">{{ $priceDisplay }}</span>
                             </div>
-                            @if($subtitle)
-                                <p class="ecc-product-subtitle">{{ $subtitle }}</p>
-                            @endif
+
                         </div>
                     </article>
                 @empty
@@ -603,9 +596,7 @@
                                 <a href="{{ $detailsUrl }}" class="text-decoration-none">
                                     <h3 class="ecc-product-title-sm">{{ $title }}</h3>
                                 </a>
-                                @if($subtitle)
-                                    <p class="ecc-product-subtitle-sm">{{ Str::limit($subtitle, 35) }}</p>
-                                @endif
+
                             </div>
 
                             <div class="ecc-product-meta">
