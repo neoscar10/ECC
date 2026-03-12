@@ -204,6 +204,6 @@ class Index extends Component
             'totalLots' => $totalLots,
             'visibleLotsCount' => $formattedLots->count(),
             'hasMoreLots' => $totalLots > $this->perPage,
-        ])->layout('layouts.user.app', ['title' => 'Auctions']);
+        ])->layout('layouts.web-app', ['title' => 'Auctions']);
     }
 }

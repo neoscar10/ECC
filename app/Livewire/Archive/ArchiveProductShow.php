@@ -47,7 +47,7 @@ class ArchiveProductShow extends Component
         return view('livewire.archive.archive-product-show', [
             'activeNav' => 'archive'
         ])
-        ->layout('layouts.user.app', [
+        ->layout('layouts.web-app', [
             'hideBottomNav' => true,
             'title' => $this->detail['title'] ?? 'Archive Detail'
         ]);

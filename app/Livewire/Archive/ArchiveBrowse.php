@@ -14,7 +14,7 @@ use App\Models\Archive\ArchiveProduct;
 use App\Services\Archive\ArchiveAccessResolver;
 use App\Services\Membership\ApplicationWizardService;
 
-#[Layout('layouts.user.app')]
+#[Layout('layouts.web-app')]
 class ArchiveBrowse extends Component
 {
     use WithPagination;
@@ -149,7 +149,7 @@ class ArchiveBrowse extends Component
         return view('livewire.archive.archive-browse', [
             'products' => $products,
             'tabs' => $tabs,
-        ])->layout('layouts.user.app', [
+        ])->layout('layouts.web-app', [
             'title' => 'Archive',
             'activeNav' => 'archive'
         ]);

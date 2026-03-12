@@ -384,8 +384,10 @@ class Show extends Component
             'hero_image_url' => $this->lot->image_url,
             'status_label' => $statusLabel,
             'rarity_label' => $accessState['is_star_lot'] ?? false ? 'Star Lot' : null,
+            'gallery_images' => $this->lot->images->pluck('url')->filter()->values()->toArray(),
             'current_bid_display' => $this->formatCurrency($this->lot->current_highest_bid),
             'time_remaining_display' => $timeRemaining,
+            'ends_at_iso' => $this->lot->ends_at ? $this->lot->ends_at->toIso8601String() : '',
             'ends_at_display' => $this->lot->ends_at ? $this->lot->ends_at->format('M j, g:i A') : '',
             'provenance_badges' => [], 
             'attachments' => $this->getAttachmentsPrepared($resolver, $user, $tier),
@@ -398,7 +400,8 @@ class Show extends Component
 
         return view('livewire.auctions.show', [
             'lotPrepared' => (object)$viewData
-        ])->layout('layouts.user.app'); 
+        ])->layout('layouts.web-app')
+          ->title($viewData['title'] ?? 'Auction Detail'); 
         // Note: setting hideBottomNav=true if the component itself implements the dark variant of the nav naturally.
     }
 }

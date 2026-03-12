@@ -1,772 +1,349 @@
+@php
+  $liveAuctionItems = collect($lots ?? [])->filter(fn($l) => $l['is_star_lot'] ?? false);
+  $listingItems = collect($lots ?? []);
+  $isLiveTab = ($activeTab ?? 'live') === 'live';
+  $isUpcomingTab = ($activeTab ?? 'live') === 'upcoming';
+@endphp
+
 <div class="ecc-auctions-page">
-    @push('styles')
-        <style>
-            .ecc-auctions-page {
-                background:
-                    radial-gradient(circle at top, rgba(242, 185, 13, 0.10), transparent 28%),
-                    linear-gradient(180deg, #231e10 0%, #1d180d 100%);
-                min-height: 100vh;
-                color: #cbbc90;
-            }
-
-            .ecc-auctions-shell {
-                width: 100%;
-                max-width: 920px;
-                margin: 0 auto;
-                padding-bottom: 120px;
-            }
-
-            .ecc-sticky-header {
-                position: sticky;
-                top: 0;
-                z-index: 1040;
-                background: rgba(35, 30, 16, 0.96);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                border-bottom: 1px solid rgba(73, 63, 34, 0.55);
-            }
-
-            .ecc-sticky-tabs {
-                position: sticky;
-                top: 73px;
-                z-index: 1035;
-                background: rgba(35, 30, 16, 0.95);
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
-                border-bottom: 1px solid rgba(73, 63, 34, 0.45);
-            }
-
-            @media (min-width: 992px) {
-                .ecc-sticky-tabs {
-                    top: 77px;
-                }
-            }
-
-            .ecc-icon-btn {
-                width: 48px;
-                height: 48px;
-                border-radius: 50%;
-                border: 1px solid rgba(242, 185, 13, 0.10);
-                background: rgba(73, 63, 34, 0.22);
-                color: #f2b90d;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                transition: all 0.2s ease;
-                text-decoration: none;
-                box-shadow: none;
-            }
-
-            .ecc-icon-btn:hover {
-                background: rgba(73, 63, 34, 0.42);
-                color: #ffd04a;
-            }
-
-            .ecc-page-title {
-                color: #f2b90d;
-                font-weight: 700;
-                font-size: 1.45rem;
-                line-height: 1.2;
-                letter-spacing: -0.02em;
-                margin: 0;
-                text-align: center;
-                font-family: "Newsreader", Georgia, serif;
-            }
-
-            .ecc-tabs-wrap {
-                background: #493f22;
-                border-radius: 0.8rem;
-                padding: 0.3rem;
-            }
-
-            .ecc-auction-tab {
-                border: 0 !important;
-                border-radius: 0.65rem !important;
-                background: transparent !important;
-                color: #cbbc90 !important;
-                font-size: 0.95rem;
-                font-weight: 600;
-                padding: 0.7rem 0.75rem;
-                line-height: 1.1;
-                white-space: nowrap;
-                box-shadow: none !important;
-            }
-
-            .ecc-auction-tab.active,
-            .ecc-auction-tab:active,
-            .ecc-auction-tab:focus,
-            .ecc-auction-tab:hover.active {
-                background: #231e10 !important;
-                color: #f2b90d !important;
-            }
-
-            .ecc-auction-tab:hover {
-                color: #f2b90d !important;
-            }
-
-            .ecc-cards-stack {
-                padding: 1rem;
-                display: flex;
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-
-            @media (min-width: 768px) {
-                .ecc-cards-stack {
-                    padding: 1.25rem 1.25rem 1.5rem;
-                    gap: 1.75rem;
-                }
-            }
-
-            @media (min-width: 992px) {
-                .ecc-cards-stack {
-                    display: grid;
-                    grid-template-columns: repeat(2, 1fr);
-                    padding-left: 1.5rem;
-                    padding-right: 1.5rem;
-                    gap: 1.75rem;
-                }
-            }
-
-            .ecc-auction-card {
-                background: #2d2616;
-                border: 1px solid rgba(73, 63, 34, 0.75);
-                border-radius: 1rem;
-                overflow: hidden;
-                box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
-                color: #cbbc90;
-            }
-
-            .ecc-auction-card.featured {
-                border-color: rgba(242, 185, 13, 0.28);
-                box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
-            }
-
-            .ecc-card-image-wrap {
-                position: relative;
-                overflow: hidden;
-                background: #1f1a0f;
-            }
-
-            .ecc-card-image {
-                width: 100%;
-                display: block;
-                object-fit: cover;
-                background: #1f1a0f;
-            }
-
-            .ecc-featured-image {
-                aspect-ratio: 4 / 3;
-                min-height: 260px;
-            }
-
-            .ecc-regular-image {
-                aspect-ratio: 16 / 10;
-                min-height: 220px;
-            }
-
-            @media (min-width: 768px) {
-                .ecc-featured-image {
-                    min-height: 360px;
-                }
-
-                .ecc-regular-image {
-                    min-height: 300px;
-                }
-            }
-
-            .ecc-featured-gradient {
-                position: absolute;
-                inset: 0;
-                background: linear-gradient(to top, rgba(45, 38, 22, 0.97) 12%, rgba(45, 38, 22, 0.20) 58%, rgba(45, 38, 22, 0.04) 100%);
-            }
-
-            .ecc-star-badge {
-                position: absolute;
-                top: 0.9rem;
-                right: 0.9rem;
-                z-index: 2;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                padding: 0.5rem 0.95rem;
-                border-radius: 999px;
-                background: #f2b90d;
-                color: #231e10;
-                font-weight: 800;
-                font-size: 0.8rem;
-                text-transform: uppercase;
-                letter-spacing: 0.06em;
-                box-shadow: 0 8px 18px rgba(242, 185, 13, 0.24);
-            }
-
-            .ecc-access-badge {
-                position: absolute;
-                left: 0.75rem;
-                bottom: 0.75rem;
-                z-index: 2;
-                display: inline-flex;
-                align-items: center;
-                gap: 0.35rem;
-                padding: 0.42rem 0.7rem;
-                border-radius: 0.5rem;
-                font-size: 0.78rem;
-                font-weight: 500;
-                color: #f2b90d;
-                border: 1px solid rgba(242, 185, 13, 0.4);
-                background: rgba(36, 29, 15, 0.78);
-                backdrop-filter: blur(6px);
-            }
-
-            .ecc-blur {
-                position: absolute; inset: 0;
-                backdrop-filter: blur(8px);
-                background: rgba(35, 30, 16, 0.3);
-                z-index: 12;
-            }
-
-            .ecc-lock-overlay {
-                position: absolute; inset: 0;
-                z-index: 15;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                padding: 15px;
-            }
-
-            .ecc-lock-icon {
-                width: 48px; height: 48px;
-                border-radius: 50%;
-                background: rgba(0, 0, 0, 0.8);
-                border: 1px solid rgba(242, 185, 13, 0.3);
-                display: flex; align-items: center; justify-content: center;
-                margin-bottom: 12px;
-                color: #f2b90d;
-                box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-            }
-
-            .ecc-lock-title {
-                color: #f5ebd0;
-                font-weight: 800;
-                font-size: 11px;
-                letter-spacing: 0.05em;
-            }
-
-            .ecc-lock-hint {
-                color: #cbbc90;
-                margin-top: 5px;
-                font-size: 10px;
-                font-weight: 600;
-            }
-
-            .cursor-pointer { cursor: pointer !important; }
-
-            .ecc-featured-body {
-                position: relative;
-                margin-top: -5.2rem;
-                z-index: 3;
-                padding: 1.25rem;
-            }
-
-            @media (min-width: 768px) {
-                .ecc-featured-body {
-                    margin-top: -6rem;
-                    padding: 1.5rem;
-                }
-            }
-
-            .ecc-card-body {
-                padding: 1rem 1rem 1.1rem;
-            }
-
-            @media (min-width: 768px) {
-                .ecc-card-body {
-                    padding: 1.2rem 1.2rem 1.3rem;
-                }
-            }
-
-            .ecc-lot-meta {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                flex-wrap: wrap;
-                margin-bottom: 0.55rem;
-                font-size: 0.92rem;
-            }
-
-            .ecc-lot-number {
-                color: #cbbc90;
-                font-size: 0.96rem;
-                font-weight: 500;
-                text-transform: uppercase;
-                letter-spacing: 0.04em;
-            }
-
-            .ecc-dot {
-                width: 4px;
-                height: 4px;
-                border-radius: 50%;
-                background: #cbbc90;
-                opacity: 0.85;
-            }
-
-            .ecc-hot-badge {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.25rem;
-                padding: 0.15rem 0.42rem;
-                border-radius: 0.35rem;
-                color: #f2b90d;
-                background: rgba(242, 185, 13, 0.10);
-                border: 1px solid rgba(242, 185, 13, 0.18);
-                font-size: 0.76rem;
-                font-weight: 500;
-            }
-
-            .ecc-lot-title {
-                color: #f2b90d;
-                font-family: "Newsreader", Georgia, serif;
-                font-weight: 700;
-                line-height: 1.06;
-                letter-spacing: -0.025em;
-                margin: 0;
-                text-wrap: balance;
-            }
-
-            .ecc-lot-title.featured {
-                font-size: clamp(2rem, 4vw, 3rem);
-            }
-
-            .ecc-lot-title.regular {
-                font-size: clamp(1.6rem, 2.4vw, 2.15rem);
-            }
-
-            .ecc-divider {
-                border: 0;
-                height: 1px;
-                background: rgba(73, 63, 34, 0.72);
-                margin: 1rem 0 0.95rem;
-            }
-
-            .ecc-stats-row {
-                display: flex;
-                align-items: flex-end;
-                justify-content: space-between;
-                gap: 1rem;
-            }
-
-            .ecc-stat-label {
-                color: #cbbc90;
-                font-size: 0.83rem;
-                text-transform: uppercase;
-                letter-spacing: 0.08em;
-                margin-bottom: 0.28rem;
-            }
-
-            .ecc-stat-value {
-                color: #f2b90d;
-                font-weight: 800;
-                font-size: 1.05rem;
-                line-height: 1.15;
-            }
-
-            .ecc-stat-value.featured {
-                font-size: 1.85rem;
-            }
-
-            .ecc-stat-value.subtle {
-                color: #f5ebd0;
-                font-weight: 600;
-            }
-
-            .ecc-time-wrap {
-                text-align: right;
-            }
-
-            .ecc-time-row {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.28rem;
-                color: #f5ebd0;
-                font-size: 1rem;
-                font-weight: 500;
-            }
-
-            .ecc-time-icon {
-                color: #f2b90d;
-            }
-
-            .ecc-btn-primary-lux {
-                border: 0;
-                border-radius: 0.75rem;
-                background: #f2b90d;
-                color: #231e10;
-                font-weight: 800;
-                text-transform: uppercase;
-                letter-spacing: 0.06em;
-                padding: 0.88rem 1rem;
-                width: 100%;
-                box-shadow: 0 0 18px rgba(242, 185, 13, 0.15);
-            }
-
-            .ecc-btn-primary-lux:hover,
-            .ecc-btn-primary-lux:focus {
-                background: #ffcb28;
-                color: #231e10;
-            }
-
-            .ecc-btn-outline-lux {
-                border-radius: 0.75rem;
-                border: 1px solid rgba(242, 185, 13, 0.42);
-                color: #f2b90d;
-                background: transparent;
-                width: 100%;
-                font-weight: 600;
-                padding: 0.82rem 1rem;
-            }
-
-            .ecc-btn-outline-lux:hover,
-            .ecc-btn-outline-lux:focus {
-                color: #f2b90d;
-                background: rgba(242, 185, 13, 0.06);
-                border-color: rgba(242, 185, 13, 0.6);
-            }
-
-            .ecc-card-footer-space {
-                margin-top: 1rem;
-            }
-
-            .ecc-results-footer {
-                text-align: center;
-                padding: 2rem 1rem 2.5rem;
-            }
-
-            .ecc-results-footer .results-icon {
-                color: rgba(242, 185, 13, 0.22);
-                font-size: 2.3rem;
-                margin-bottom: 0.35rem;
-            }
-
-            .ecc-results-text {
-                color: #d7cba2;
-                font-style: italic;
-                font-size: 1rem;
-                margin-bottom: 0.5rem;
-            }
-
-            .ecc-results-link {
-                color: #f2b90d;
-                text-decoration: underline;
-                text-underline-offset: 4px;
-                font-weight: 600;
-                background: none;
-                border: 0;
-            }
-
-            .ecc-results-link:hover {
-                color: #ffd04a;
-            }
-
-            .ecc-empty-state {
-                padding: 3rem 1rem 4rem;
-                text-align: center;
-                color: #d7cba2;
-            }
-
-            .ecc-empty-state .mdi {
-                color: rgba(242, 185, 13, 0.25);
-                font-size: 2.4rem;
-                display: inline-block;
-                margin-bottom: 0.5rem;
-            }
-
-            .ecc-bottom-nav-spacer {
-                height: 6.2rem;
-            }
-
-            @media (min-width: 992px) {
-                .ecc-bottom-nav-spacer {
-                    height: 6.8rem;
-                }
-            }
-        </style>
-    @endpush
-
-    <div class="ecc-auctions-shell">
-        <div class="ecc-sticky-header">
-            <div class="px-3 px-md-4 py-3 py-md-3">
-                <div class="d-flex align-items-center justify-content-between gap-2">
-                    <button
-                        type="button"
-                        class="ecc-icon-btn"
-                        @if(method_exists($this, 'openMenu')) wire:click="openMenu" @endif
-                        aria-label="Open menu"
-                    >
-                        <i class="mdi mdi-menu fs-3"></i>
-                    </button>
-
-                    <h1 class="ecc-page-title flex-grow-1">Current Auctions</h1>
-
-                    <button
-                        type="button"
-                        class="ecc-icon-btn"
-                        @if(method_exists($this, 'openSearch')) wire:click="openSearch" @endif
-                        aria-label="Search auctions"
-                    >
-                        <i class="mdi mdi-magnify fs-4"></i>
-                    </button>
-                </div>
+    {{-- SECTION 1: LIVE AUCTIONS (Using Star Lots for Rail) --}}
+    @if($liveAuctionItems->count() > 0)
+    <section class="mb-5 mb-lg-6 pt-2">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+            <h1 class="luxe-section-title">
+                <span class="luxe-section-title-bar"></span>
+                <span>{{ $isLiveTab ? 'Live Bidding Highlights' : ($isUpcomingTab ? 'Upcoming Highlights' : 'Featured Lots') }}</span>
+            </h1>
+
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="luxe-round-control" id="liveAuctionPrev" aria-label="Previous live auctions">
+                    <i class="mdi mdi-chevron-left fs-5"></i>
+                </button>
+                <button type="button" class="luxe-round-control" id="liveAuctionNext" aria-label="Next live auctions">
+                    <i class="mdi mdi-chevron-right fs-5"></i>
+                </button>
             </div>
         </div>
 
-        <div class="ecc-sticky-tabs">
-            <div class="px-3 px-md-4 py-3">
-                <div class="ecc-tabs-wrap">
-                    <div class="nav nav-pills nav-fill gap-1" role="tablist" aria-label="Auction filters">
-                        <button
-                            type="button"
-                            class="nav-link ecc-auction-tab {{ ($activeTab ?? 'live') === 'live' ? 'active' : '' }}"
-                            wire:click="setTab('live')"
-                        >
-                            Live Bidding
-                        </button>
-
-                        <button
-                            type="button"
-                            class="nav-link ecc-auction-tab {{ ($activeTab ?? 'live') === 'upcoming' ? 'active' : '' }}"
-                            wire:click="setTab('upcoming')"
-                        >
-                            Upcoming
-                        </button>
-
-                        <button
-                            type="button"
-                            class="nav-link ecc-auction-tab {{ ($activeTab ?? 'live') === 'past' ? 'active' : '' }}"
-                            wire:click="setTab('past')"
-                        >
-                            Past Results
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="ecc-cards-stack">
-            @forelse(($lots ?? []) as $lot)
+        <div class="luxe-scroll-rail" id="liveAuctionRail">
+            @foreach($liveAuctionItems as $lot)
                 @php
-                    $isFeatured = (bool) ($lot->is_star_lot ?? $lot['is_star_lot'] ?? false);
-                    $hasPremiumBadge = (bool) ($lot->requires_premium_access ?? $lot['requires_premium_access'] ?? false);
-                    $isLive = (($activeTab ?? 'live') === 'live');
-                    $isUpcoming = (($activeTab ?? 'live') === 'upcoming');
-                    $lotNo = $lot->lot_number ?? $lot['lot_number'] ?? $lot->lot_no ?? $lot['lot_no'] ?? null;
-                    $title = $lot->title ?? $lot['title'] ?? 'Untitled Lot';
-                    $image = $lot->image_url ?? $lot['image_url'] ?? $lot->image ?? $lot['image'] ?? $lot->primary_image_url ?? $lot['primary_image_url'] ?? null;
-                    $currentBid = $lot->current_bid_display ?? $lot['current_bid_display'] ?? null;
-                    $startingBid = $lot->starting_price_display ?? $lot['starting_price_display'] ?? null;
-                    $closesIn = $lot->closes_in_human ?? $lot['closes_in_human'] ?? $lot->time_remaining_human ?? $lot['time_remaining_human'] ?? null;
-                    $opensIn = $lot->opens_in_human ?? $lot['opens_in_human'] ?? null;
-                    $showHot = (bool) ($lot->is_hot ?? $lot['is_hot'] ?? $isFeatured);
-                    $detailsUrl = $lot->details_url ?? $lot['details_url'] ?? (isset($lot->id) ? route('auctions.lots.show', $lot->id) : (isset($lot['id']) ? route('auctions.lots.show', $lot['id']) : '#'));
-                    $bidUrl = $lot->bid_url ?? $lot['bid_url'] ?? $detailsUrl;
+                    $canView = $lot['can_view'] ?? true;
+                    $isBlurred = $lot['is_blurred'] ?? false;
+                    $lockType = $lot['lock_type'] ?? 'lock';
+                    $lockTitle = $lot['lock_title'] ?? 'Restricted View';
+                    $lockHint = $lot['lock_hint'] ?? 'Membership Required';
 
-                    $formattedCurrentBid = $currentBid ?: (isset($lot->current_bid) ? '₹' . number_format((float) $lot->current_bid) : (isset($lot['current_bid']) ? '₹' . number_format((float) $lot['current_bid']) : null));
-                    $formattedStartingBid = $startingBid ?: (isset($lot->starting_price) ? '₹' . number_format((float) $lot->starting_price) : (isset($lot['starting_price']) ? '₹' . number_format((float) $lot['starting_price']) : null));
+                    $lotNo = $lot['lot_number'] ?? $lot['lot_no'] ?? null;
+                    $title = $lot['title'] ?? 'Untitled Lot';
+                    $image = $lot['image_url'] ?? null;
+                    $currentBid = $lot['current_bid'] ?? null;
+                    $startingBid = $lot['starting_price'] ?? null;
+                    $closesIn = $lot['closes_in_human'] ?? null;
+                    $opensIn = $lot['opens_in_human'] ?? null;
+                    $detailsUrl = $lot['details_url'] ?? '#';
+                    $bidUrl = $lot['bid_url'] ?? $detailsUrl;
 
-                    // Access / Restriction
-                    $canView = $lot->can_view ?? $lot['can_view'] ?? true;
-                    $isBlurred = $lot->is_blurred ?? $lot['is_blurred'] ?? false;
-                    $lockType = $lot->lock_type ?? $lot['lock_type'] ?? 'lock';
-                    $lockTitle = $lot->lock_title ?? $lot['lock_title'] ?? 'Restricted View';
-                    $lockHint = $lot->lock_hint ?? $lot['lock_hint'] ?? 'Membership Required';
+                    $formattedCurrentBid = isset($currentBid) ? '₹' . number_format((float) $currentBid) : '—';
+                    $formattedStartingBid = isset($startingBid) ? '₹' . number_format((float) $startingBid) : '—';
                 @endphp
 
-                @if($isFeatured)
-                    <article class="ecc-auction-card featured">
-                        <div class="ecc-card-image-wrap @if(!$canView || $isBlurred) cursor-pointer @endif" @if(!$canView || $isBlurred) wire:click.prevent="openAccessModal({{ $lot['id'] ?? $lot->id }})" @endif>
-                            @if($image)
-                                <img src="{{ $image }}" alt="{{ $title }}" class="ecc-card-image ecc-featured-image">
-                            @else
-                                <div class="ecc-card-image ecc-featured-image d-flex align-items-center justify-content-center text-center px-4">
-                                    <span class="text-muted">No image available</span>
-                                </div>
-                            @endif
+                <div class="luxe-hero-card">
+                    <div class="luxe-hero-media @if(!$canView || $isBlurred) cursor-pointer @endif" @if(!$canView || $isBlurred) wire:click.prevent="openAccessModal({{ $lot['id'] }})" @endif>
+                        @if($image)
+                            <img src="{{ $image }}" alt="{{ $title }}">
+                        @else
+                            <div class="d-flex w-100 h-100 align-items-center justify-content-center bg-dark text-muted">
+                                No image
+                            </div>
+                        @endif
 
-                            <div class="ecc-featured-gradient"></div>
+                        @if($isLiveTab)
+                            <div class="luxe-live-pill">
+                                <span class="luxe-live-pill-dot"></span>
+                                <span>LIVE</span>
+                            </div>
+                        @endif
 
-                            <span class="ecc-star-badge">Star Lot</span>
+                        @if($lotNo)
+                            <div class="luxe-lot-badge">
+                                LOT #{{ $lotNo }}
+                            </div>
+                        @endif
 
-                            @if(!$canView || $isBlurred)
-                              <div class="ecc-lock-overlay">
+                        {{-- Blurred State Elements --}}
+                        @if(!$canView || $isBlurred)
+                            <div class="ecc-lock-overlay">
                                 <div class="ecc-lock-icon">
-                                  <span class="material-symbols-outlined">
-                                    @if($lockType === 'time-lock') lock_clock
-                                    @elseif($lockType === 'diamond') diamond
-                                    @else lock
-                                    @endif
-                                  </span>
-                                </div>
-                                <div class="ecc-lock-title text-uppercase">{{ $lockTitle }}</div>
-                                <div class="ecc-lock-hint">{{ $lockHint }}</div>
-                              </div>
-                            @endif
-
-                            @if($isBlurred || !$canView)
-                              <div class="ecc-blur"></div>
-                            @endif
-                        </div>
-
-                        <div class="ecc-featured-body">
-                            <div class="ecc-lot-meta">
-                                @if($lotNo)
-                                    <span class="ecc-lot-number">Lot #{{ $lotNo }}</span>
-                                @endif
-
-                                @if($showHot)
-                                    <span class="ecc-dot"></span>
-                                    <span class="ecc-hot-badge">
-                                        <i class="mdi mdi-fire"></i>
-                                        Hot
+                                    <span class="material-symbols-outlined">
+                                        @if($lockType === 'time-lock') lock_clock
+                                        @elseif($lockType === 'diamond') diamond
+                                        @else lock
+                                        @endif
                                     </span>
-                                @endif
-                            </div>
-
-                            <h2 class="ecc-lot-title featured">{{ $title }}</h2>
-
-                            <hr class="ecc-divider">
-
-                            <div class="ecc-stats-row">
-                                <div>
-                                    <div class="ecc-stat-label">{{ $isUpcoming ? 'Starting' : 'Current Bid' }}</div>
-                                    <div class="ecc-stat-value featured">
-                                        {{ $isUpcoming ? ($formattedStartingBid ?? '₹0') : ($formattedCurrentBid ?? '₹0') }}
-                                    </div>
-                                </div>
-
-                                <div class="ecc-time-wrap">
-                                    <div class="ecc-stat-label">{{ $isUpcoming ? 'Opens in' : 'Closes in' }}</div>
-                                    <div class="ecc-time-row">
-                                        <i class="mdi mdi-timer-outline ecc-time-icon"></i>
-                                        <span>{{ $isUpcoming ? ($opensIn ?? '--') : ($closesIn ?? '--') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="ecc-card-footer-space">
-                                @if(!$canView || $isBlurred)
-                                    <button type="button" class="btn ecc-btn-primary-lux w-100" wire:click.prevent="openAccessModal({{ $lot['id'] ?? $lot->id }})">Unlock Access</button>
-                                @elseif($isLive)
-                                    <a href="{{ $bidUrl }}" class="btn ecc-btn-primary-lux w-100">Place Bid</a>
-                                @else
-                                    <a href="{{ $detailsUrl }}" class="btn ecc-btn-outline-lux w-100">View Details</a>
-                                @endif
-                            </div>
-                        </div>
-                    </article>
-                @else
-                    <article class="ecc-auction-card">
-                        <div class="ecc-card-image-wrap @if(!$canView || $isBlurred) cursor-pointer @endif" @if(!$canView || $isBlurred) wire:click.prevent="openAccessModal({{ $lot['id'] ?? $lot->id }})" @endif>
-                            @if($image)
-                                <img src="{{ $image }}" alt="{{ $title }}" class="ecc-card-image ecc-regular-image">
-                            @else
-                                <div class="ecc-card-image ecc-regular-image d-flex align-items-center justify-content-center text-center px-4">
-                                    <span class="text-muted">No image available</span>
-                                </div>
-                            @endif
-
-                            @if($hasPremiumBadge)
-                                <span class="ecc-access-badge">
-                                    <i class="mdi mdi-diamond-stone"></i>
-                                    {{ $lot->access_badge_label ?? $lot['access_badge_label'] ?? 'Platinum Access Only' }}
-                                </span>
-                            @endif
-
-                            @if(!$canView || $isBlurred)
-                              <div class="ecc-lock-overlay">
-                                <div class="ecc-lock-icon">
-                                  <span class="material-symbols-outlined">
-                                    @if($lockType === 'time-lock') lock_clock
-                                    @elseif($lockType === 'diamond') diamond
-                                    @else lock
-                                    @endif
-                                  </span>
                                 </div>
                                 <div class="ecc-lock-title text-uppercase">{{ $lockTitle }}</div>
                                 <div class="ecc-lock-hint">{{ $lockHint }}</div>
-                              </div>
-                            @endif
-
-                            @if($isBlurred || !$canView)
-                              <div class="ecc-blur"></div>
-                            @endif
-                        </div>
-
-                        <div class="ecc-card-body">
-                            @if($lotNo)
-                                <div class="ecc-lot-number mb-1">Lot #{{ $lotNo }}</div>
-                            @endif
-
-                            <h3 class="ecc-lot-title regular">{{ $title }}</h3>
-
-                            <div class="row g-3 mt-1 align-items-end">
-                                <div class="col-6">
-                                    <div class="ecc-stat-label">{{ $isUpcoming ? 'Starting' : 'Current Bid' }}</div>
-                                    <div class="ecc-stat-value subtle">
-                                        {{ $isUpcoming ? ($formattedStartingBid ?? '₹0') : ($formattedCurrentBid ?? '₹0') }}
-                                    </div>
-                                </div>
-
-                                <div class="col-6 text-end">
-                                    <div class="ecc-stat-label">{{ $isUpcoming ? 'Opens in' : 'Closes in' }}</div>
-                                    <div class="ecc-stat-value subtle fw-normal">
-                                        {{ $isUpcoming ? ($opensIn ?? '--') : ($closesIn ?? '--') }}
-                                    </div>
-                                </div>
                             </div>
+                        @endif
 
-                            <div class="ecc-card-footer-space">
-                                @if(!$canView || $isBlurred)
-                                    <button type="button" class="btn ecc-btn-primary-lux w-100" wire:click.prevent="openAccessModal({{ $lot['id'] ?? $lot->id }})">Unlock Access</button>
-                                @elseif($isLive)
-                                    <a href="{{ $bidUrl }}" class="btn ecc-btn-primary-lux w-100">Place Bid</a>
-                                @else
-                                    <a href="{{ $detailsUrl }}" class="btn ecc-btn-outline-lux w-100">View Details</a>
-                                @endif
-                            </div>
-                        </div>
-                    </article>
-                @endif
-            @empty
-                <div class="ecc-empty-state">
-                    <i class="mdi mdi-gavel"></i>
-                    <div class="fs-5 fw-semibold mb-2 text-warning">No auctions found</div>
-                    <div class="text-light-emphasis">There are no lots available under this section right now.</div>
-                </div>
-            @endforelse
-
-            @if(!empty($lots))
-                <div class="ecc-results-footer">
-                    <div class="results-icon">
-                        <i class="mdi mdi-gavel"></i>
+                        @if($isBlurred || !$canView)
+                            <div class="ecc-blur"></div>
+                        @endif
                     </div>
 
-                    <div class="ecc-results-text">
-                        Showing {{ $visibleLotsCount ?? (is_countable($lots ?? null) ? count($lots) : 0) }} of {{ $totalLots ?? (is_countable($lots ?? null) ? count($lots) : 0) }} lots available.
-                    </div>
+                    <div class="luxe-hero-body">
+                        <h3 class="luxe-hero-title text-truncate">{{ $title }}</h3>
 
-                    @if(($hasMoreLots ?? false) === true)
-                        <button type="button" class="ecc-results-link" wire:click="loadMore">
-                            Load More Catalog
-                        </button>
-                    @endif
+                        <div class="row align-items-end g-3">
+                            <div class="col">
+                                <div class="luxe-label">{{ $isUpcomingTab ? 'Starting' : 'Current Bid' }}</div>
+                                <div class="luxe-price">{{ $isUpcomingTab ? $formattedStartingBid : $formattedCurrentBid }}</div>
+                            </div>
+
+                            <div class="col-auto text-end">
+                                <div class="luxe-label">{{ $isUpcomingTab ? 'Opens in' : 'Closes in' }}</div>
+                                <div class="luxe-time">{{ $isUpcomingTab ? ($opensIn ?? '--') : ($closesIn ?? '--') }}</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            @if(!$canView || $isBlurred)
+                                <button type="button" class="luxe-gold-btn w-100 border-0" wire:click.prevent="openAccessModal({{ $lot['id'] }})">
+                                    <i class="mdi mdi-lock-open-variant-outline fs-5"></i>
+                                    <span>UNLOCK ACCESS</span>
+                                </button>
+                            @elseif($isLiveTab)
+                                <a href="{{ $bidUrl }}" class="luxe-gold-btn w-100">
+                                    <i class="mdi mdi-gavel fs-5"></i>
+                                    <span>PLACE BID</span>
+                                </a>
+                            @else
+                                <a href="{{ $detailsUrl }}" class="luxe-gold-outline-btn w-100">
+                                    <i class="mdi mdi-magnify fs-5"></i>
+                                    <span>VIEW DETAILS</span>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
                 </div>
-            @endif
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    {{-- SECTION 2: EXPLORE COLLECTIONS --}}
+    <section>
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 gap-lg-4 mb-4 mb-lg-5 pt-3">
+            <h2 class="luxe-subsection-title">
+                <span class="luxe-subsection-title-bar"></span>
+                <span>Explore Catalog</span>
+            </h2>
+
+            <div class="luxe-chip-row align-items-center">
+                <span class="text-secondary small text-uppercase fw-bold me-2 tracking-widest">Filter by:</span>
+                <button type="button"
+                    class="luxe-chip {{ ($activeTab ?? 'live') === 'live' ? 'active' : '' }}"
+                    wire:click="setTab('live')"
+                >
+                    Live Bidding
+                </button>
+
+                <button type="button"
+                    class="luxe-chip {{ ($activeTab ?? 'live') === 'upcoming' ? 'active' : '' }}"
+                    wire:click="setTab('upcoming')"
+                >
+                    Upcoming
+                </button>
+
+                <button type="button"
+                    class="luxe-chip {{ ($activeTab ?? 'live') === 'past' ? 'active' : '' }}"
+                    wire:click="setTab('past')"
+                >
+                    Past Results
+                </button>
+            </div>
         </div>
 
-        <div class="ecc-bottom-nav-spacer"></div>
+        @if($listingItems->count() > 0)
+            <div class="row g-4">
+                @foreach($listingItems as $lot)
+                    @php
+                        $canView = $lot['can_view'] ?? true;
+                        $isBlurred = $lot['is_blurred'] ?? false;
+                        $lockType = $lot['lock_type'] ?? 'lock';
+                        $lockTitle = $lot['lock_title'] ?? 'Restricted View';
+                        $lockHint = $lot['lock_hint'] ?? 'Membership Required';
 
-        {{-- Premium Access Upgrade Modal --}}
-        @include('components.shared.premium-access-modal')
-    </div>
+                        $lotNo = $lot['lot_number'] ?? $lot['lot_no'] ?? null;
+                        $title = $lot['title'] ?? 'Untitled Lot';
+                        
+                        // To keep grid text concise, we'll try to guess subtitle or keep empty
+                        $subtitle = 'Auction Item';
+                        $image = $lot['image_url'] ?? null;
+                        $currentBid = $lot['current_bid'] ?? null;
+                        $startingBid = $lot['starting_price'] ?? null;
+                        $closesIn = $lot['closes_in_human'] ?? null;
+                        $opensIn = $lot['opens_in_human'] ?? null;
+                        $detailsUrl = $lot['details_url'] ?? '#';
+                        $bidUrl = $lot['bid_url'] ?? $detailsUrl;
+
+                        $formattedCurrentBid = isset($currentBid) ? '₹' . number_format((float) $currentBid) : '—';
+                        $formattedStartingBid = isset($startingBid) ? '₹' . number_format((float) $startingBid) : '—';
+                        
+                        $isFeatured = $lot['is_star_lot'] ?? false;
+                        $showHot = $lot['is_hot'] ?? $isFeatured;
+                        $hasPremiumBadge = $lot['requires_premium_access'] ?? false;
+                    @endphp
+
+                    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                        <div class="luxe-grid-card h-100 d-flex flex-column">
+                            <div class="luxe-grid-media @if(!$canView || $isBlurred) cursor-pointer @endif" @if(!$canView || $isBlurred) wire:click.prevent="openAccessModal({{ $lot['id'] }})" @endif @if($canView && !$isBlurred && $detailsUrl !== '#') onclick="window.location.href='{{ $detailsUrl }}'" @endif>
+                                @if($image)
+                                    <img src="{{ $image }}" alt="{{ $title }}">
+                                @else
+                                    <div class="d-flex w-100 h-100 align-items-center justify-content-center bg-dark text-muted">
+                                        No image
+                                    </div>
+                                @endif
+
+                                @if($lotNo)
+                                    <div class="luxe-lot-badge" style="left: 12px; right: auto; bottom: auto; top: 12px; padding: .32rem .55rem; font-size: .62rem;">
+                                        LOT #{{ $lotNo }}
+                                    </div>
+                                @endif
+                                
+                                @if($hasPremiumBadge)
+                                    <span class="luxe-live-pill" style="left: 12px; right: auto; bottom: 12px; top: auto; background: rgba(0,0,0,0.7); font-size: 0.65rem; border: 1px solid rgba(212,175,55,0.4); color: #f2b90d; backdrop-filter: blur(8px);">
+                                        <i class="mdi mdi-diamond-stone"></i> {{ $lot['access_badge_label'] ?? 'Platinum Access' }}
+                                    </span>
+                                @endif
+
+                                <button type="button" class="luxe-fav-btn" aria-label="Favorite">
+                                    <i class="mdi mdi-heart-outline"></i>
+                                </button>
+                                
+                                {{-- Blurred State Elements --}}
+                                @if(!$canView || $isBlurred)
+                                    <div class="ecc-lock-overlay">
+                                        <div class="ecc-lock-icon" style="width:36px; height:36px;">
+                                            <span class="material-symbols-outlined" style="font-size: 16px;">
+                                                @if($lockType === 'time-lock') lock_clock
+                                                @elseif($lockType === 'diamond') diamond
+                                                @else lock
+                                                @endif
+                                            </span>
+                                        </div>
+                                        <div class="ecc-lock-title text-uppercase" style="font-size: 9px;">{{ $lockTitle }}</div>
+                                    </div>
+                                @endif
+
+                                @if($isBlurred || !$canView)
+                                    <div class="ecc-blur"></div>
+                                @endif
+                            </div>
+
+                            <div class="luxe-grid-body d-flex flex-column flex-grow-1">
+                                <h3 class="luxe-grid-title text-truncate">{{ $title }}</h3>
+                                
+                                <div class="luxe-grid-meta mt-auto">
+                                    <div>
+                                        <div class="luxe-label">{{ $isUpcomingTab ? 'Starting' : 'Current Bid' }}</div>
+                                        <div class="fw-bold" style="color: var(--luxe-gold);">
+                                            {{ $isUpcomingTab ? $formattedStartingBid : $formattedCurrentBid }}
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="luxe-label">{{ $isUpcomingTab ? 'Opens in' : 'Time Left' }}</div>
+                                        <div class="small fw-semibold text-white">
+                                            {{ $isUpcomingTab ? ($opensIn ?? '--') : ($closesIn ?? '--') }}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    @if(!$canView || $isBlurred)
+                                        <button type="button" class="luxe-gold-outline-btn w-100 py-2 fs-6" style="height: 42px;" wire:click.prevent="openAccessModal({{ $lot['id'] }})">
+                                            UNLOCK
+                                        </button>
+                                    @elseif($isLiveTab)
+                                        <a href="{{ $bidUrl }}" class="luxe-gold-btn w-100 py-2 fs-6" style="height: 42px;">
+                                            BID NOW
+                                        </a>
+                                    @else
+                                        <a href="{{ $detailsUrl }}" class="luxe-gold-outline-btn w-100 py-2 fs-6" style="height: 42px;">
+                                            DETAILS
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="text-center mt-5 pt-2">
+                <div class="mb-4 text-muted small text-uppercase tracking-widest fw-bold">
+                    Showing {{ $visibleLotsCount ?? (is_countable($lots ?? null) ? count($lots) : 0) }} of {{ $totalLots ?? (is_countable($lots ?? null) ? count($lots) : 0) }} lots
+                </div>
+
+                @if(($hasMoreLots ?? false) === true)
+                    <button type="button" class="luxe-gold-outline-btn" wire:click="loadMore">
+                        <span>LOAD MORE AUCTIONS</span>
+                        <i class="mdi mdi-chevron-down ms-2"></i>
+                    </button>
+                @endif
+            </div>
+        @else
+            <div class="luxe-empty-state">
+                <i class="mdi mdi-gavel fs-1 mb-3" style="color: rgba(212,175,55,0.4)"></i>
+                <div class="fs-5 fw-semibold mb-2">No items found</div>
+                <div class="text-light-emphasis small">There are no lots available under this section right now.</div>
+            </div>
+        @endif
+    </section>
+
+    {{-- Premium Access Upgrade Modal --}}
+    @include('components.shared.premium-access-modal')
 </div>
+
+@push('scripts')
+<script>
+    (function () {
+        function initLuxeRail() {
+            const rail = document.getElementById('liveAuctionRail');
+            const prev = document.getElementById('liveAuctionPrev');
+            const next = document.getElementById('liveAuctionNext');
+
+            if (!rail || !prev || !next) return;
+            
+            // Remove old listeners to avoid duplicates on Livewire refresh
+            const newPrev = prev.cloneNode(true);
+            const newNext = next.cloneNode(true);
+            prev.parentNode.replaceChild(newPrev, prev);
+            next.parentNode.replaceChild(newNext, next);
+
+            const scrollAmount = 420;
+
+            newPrev.addEventListener('click', function () {
+                rail.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            });
+
+            newNext.addEventListener('click', function () {
+                rail.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initLuxeRail);
+        document.addEventListener('livewire:navigated', initLuxeRail);
+        document.addEventListener('livewire:navigating', () => { /* optional cleanup */ });
+        
+        // Handle Livewire V3 DOM updates
+        if (typeof Livewire !== 'undefined') {
+            Livewire.hook('morph.updated', ({ el, component }) => {
+                initLuxeRail();
+            });
+        }
+    })();
+</script>
+@endpush
