@@ -2,7 +2,7 @@
     $title = $title ?? '';
     $backUrl = $backUrl ?? null;
     $cartCount = $cartCount ?? null;
-    $cartUrl = $cartUrl ?? url('/cart');
+    $cartUrl = $cartUrl ?? route('shop.cart');
 @endphp
 
 <div class="d-flex align-items-center justify-content-between py-2" style="height:56px;">

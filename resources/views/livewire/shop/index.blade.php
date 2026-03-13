@@ -1,629 +1,1184 @@
-<div class="ecc-club-store-page">
+<div class="shop-page">
     @push('styles')
-        <style>
-            .ecc-club-store-page {
-                background:
-                    radial-gradient(circle at top, rgba(242, 185, 13, 0.08), transparent 26%),
-                    linear-gradient(180deg, #221e10 0%, #1d190d 100%);
-                min-height: 100%;
-                color: #fff;
+    <style>
+        .shop-page {
+            padding-top: .25rem;
+            padding-bottom: 1.5rem;
+        }
+
+        .shop-layout {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        .shop-sidebar {
+            width: 290px;
+            flex: 0 0 290px;
+        }
+
+        .shop-sidebar-inner {
+            position: sticky;
+            top: 96px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .shop-filter-block-title {
+            color: var(--luxe-text-soft);
+            font-size: .72rem;
+            font-weight: 900;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .shop-category-list,
+        .shop-tag-list {
+            display: flex;
+            flex-direction: column;
+            gap: .85rem;
+        }
+
+        .shop-filter-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            color: rgba(245,240,231,.92);
+            text-decoration: none;
+            font-size: .96rem;
+            font-weight: 600;
+            transition: .2s ease;
+            background: none;
+            border: none;
+            padding: 0;
+            width: 100%;
+        }
+
+        .shop-filter-link:hover {
+            color: var(--luxe-gold);
+        }
+
+        .shop-filter-link.active {
+            color: var(--luxe-gold);
+            font-weight: 800;
+        }
+
+        .shop-filter-count {
+            color: var(--luxe-text-soft);
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        .shop-range-wrap {
+            padding-right: .2rem;
+        }
+
+        .shop-range-track {
+            position: relative;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.10);
+            margin: 1rem 0 .75rem;
+        }
+
+        .shop-range-active {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            border-radius: 999px;
+            background: var(--luxe-gold);
+        }
+
+        .shop-range-thumb-visual {
+            position: absolute;
+            top: 50%;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--luxe-gold);
+            border: 2px solid #110f09;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 4px rgba(212,175,55,.08);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .shop-range-labels {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            color: var(--luxe-text-soft);
+            font-size: .75rem;
+            font-weight: 700;
+            margin-top: .75rem;
+        }
+
+        .shop-range-inputs {
+            position: relative;
+            height: 20px;
+            margin-top: -14px;
+        }
+
+        .shop-range-native {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 20px;
+            background: transparent;
+            pointer-events: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .shop-range-native::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: transparent;
+            border: 0;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .shop-range-native::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: transparent;
+            border: 0;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .shop-range-native::-webkit-slider-runnable-track {
+            height: 4px;
+            background: transparent;
+        }
+
+        .shop-range-native::-moz-range-track {
+            height: 4px;
+            background: transparent;
+        }
+
+        .shop-range-native.min-range {
+            z-index: 2;
+        }
+
+        .shop-range-native.max-range {
+            z-index: 1;
+        }
+
+        .shop-pill-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: .55rem;
+        }
+
+        .shop-pill-btn {
+            min-height: 40px;
+            border-radius: 10px;
+            border: 1px solid rgba(212,175,55,.14);
+            background: rgba(255,255,255,.02);
+            color: rgba(245,240,231,.92);
+            font-size: .78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            transition: .2s ease;
+        }
+
+        .shop-pill-btn:hover {
+            border-color: rgba(212,175,55,.34);
+            color: var(--luxe-gold);
+        }
+
+        .shop-pill-btn.active {
+            border-color: var(--luxe-gold);
+            background: rgba(212,175,55,.12);
+            color: var(--luxe-gold);
+        }
+
+        .shop-checkbox-list {
+            display: flex;
+            flex-direction: column;
+            gap: .9rem;
+        }
+
+        .shop-checkbox {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            color: rgba(245,240,231,.92);
+            font-size: .92rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .shop-checkbox-input {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 1px solid rgba(212,175,55,.20);
+            background: rgba(255,255,255,.03);
+            accent-color: var(--luxe-gold);
+        }
+
+        .shop-main {
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .shop-featured-banner {
+            position: relative;
+            min-height: 380px;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(212,175,55,.14);
+            background:
+                radial-gradient(circle at top left, rgba(212,175,55,.12), transparent 55%),
+                linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
+                #110f09;
+            box-shadow: 0 22px 48px rgba(0,0,0,.28);
+            margin-bottom: 2rem;
+        }
+
+        .shop-featured-banner-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: .45;
+            mix-blend-mode: screen;
+            transition: transform .8s ease;
+        }
+
+        .shop-featured-banner:hover .shop-featured-banner-image {
+            transform: scale(1.03);
+        }
+
+        .shop-featured-banner-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(11,9,4,.96) 0%, rgba(11,9,4,.72) 48%, rgba(11,9,4,.12) 100%);
+        }
+
+        .shop-featured-banner-content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2.5rem;
+            max-width: 680px;
+        }
+
+        .shop-featured-kicker {
+            color: var(--luxe-gold);
+            font-size: .78rem;
+            font-weight: 900;
+            letter-spacing: .24em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .shop-featured-title {
+            color: #fff;
+            font-size: clamp(2.5rem, 4.4vw, 5rem);
+            line-height: .95;
+            font-weight: 900;
+            letter-spacing: -.06em;
+            margin: 0 0 1.25rem;
+        }
+
+        .shop-featured-text {
+            color: var(--luxe-text-soft);
+            font-size: 1.08rem;
+            line-height: 1.8;
+            max-width: 560px;
+            margin-bottom: 1.6rem;
+        }
+
+        .shop-featured-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 54px;
+            padding: .95rem 1.5rem;
+            border-radius: 999px;
+            background: var(--luxe-gold);
+            color: #111;
+            font-size: .82rem;
+            font-weight: 900;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 0;
+            transition: .2s ease;
+        }
+
+        .shop-featured-btn:hover {
+            filter: brightness(1.05);
+            color: #111;
+        }
+
+        .shop-products-head {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .shop-products-title {
+            color: #fff;
+            font-size: 2.15rem;
+            line-height: 1.1;
+            font-weight: 900;
+            letter-spacing: -.03em;
+            margin: 0;
+        }
+
+        .shop-products-subtitle {
+            color: var(--luxe-text-soft);
+            font-size: .92rem;
+            margin-top: .35rem;
+        }
+
+        .shop-sort-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: .8rem;
+            color: var(--luxe-text-soft);
+            font-size: .78rem;
+            font-weight: 900;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+        }
+
+        .shop-sort-inline .form-select {
+            min-width: 190px;
+            border: 0;
+            background-color: transparent;
+            color: #fff;
+            font-size: .95rem;
+            font-weight: 800;
+            box-shadow: none;
+            padding-right: 2rem;
+        }
+
+        .shop-sort-inline .form-select option {
+            color: #111;
+        }
+
+        .shop-grid {
+            margin-bottom: 2.5rem;
+        }
+
+        .shop-card {
+            position: relative;
+            height: 100%;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid transparent;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
+                rgba(35,31,23,.90);
+            box-shadow: 0 16px 34px rgba(0,0,0,.22);
+            transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+        }
+
+        .shop-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(212,175,55,.18);
+            box-shadow: 0 22px 44px rgba(0,0,0,.32);
+        }
+
+        .shop-card-media {
+            position: relative;
+            aspect-ratio: 4 / 5;
+            overflow: hidden;
+            background: rgba(255,255,255,.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .shop-card-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform .7s ease;
+        }
+
+        .shop-card:hover .shop-card-media img {
+            transform: scale(1.08);
+        }
+
+        .shop-card-body {
+            padding: 1.2rem 1rem 1rem;
+        }
+
+        .shop-card-head {
+            display: flex;
+            justify-content: space-between;
+            gap: .85rem;
+            align-items: start;
+            margin-bottom: .85rem;
+        }
+
+        .shop-card-title {
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -.02em;
+            margin: 0;
+        }
+
+        .shop-card-subtitle {
+            color: var(--luxe-text-soft);
+            font-size: .7rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            margin-top: .35rem;
+        }
+
+        .shop-card-price {
+            color: var(--luxe-gold);
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -.03em;
+            white-space: nowrap;
+        }
+
+        .shop-card-actions {
+            display: flex;
+            gap: .55rem;
+        }
+
+        .shop-card-view-btn {
+            flex: 1 1 auto;
+            min-height: 44px;
+            border-radius: 10px;
+            border: 0;
+            background: #3d392f;
+            color: #fff;
+            font-size: .72rem;
+            font-weight: 900;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            text-decoration: none;
+            transition: .2s ease;
+        }
+
+        .shop-card-view-btn:hover {
+            background: var(--luxe-gold);
+            color: #111;
+        }
+
+        .shop-card-cart-btn {
+            flex: 1;
+            min-height: 44px;
+            border-radius: 10px;
+            border: 0;
+            background: var(--luxe-gold);
+            color: #111;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            transition: .2s ease;
+            font-size: .72rem;
+            font-weight: 900;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .shop-card-cart-btn:hover {
+            filter: brightness(1.05);
+            color: #111;
+        }
+
+        .shop-card-cart-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--luxe-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9px;
+            color: #111;
+            z-index: 5;
+        }
+
+        .shop-card-cart-loading .spinner-border {
+            margin: 0 !important;
+        }
+
+        .shop-card-badge {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            z-index: 3;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 28px;
+            padding: .4rem .8rem;
+            border-radius: 999px;
+            background: var(--luxe-gold);
+            color: #111;
+            font-size: .62rem;
+            font-weight: 900;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            box-shadow: 0 10px 18px rgba(212,175,55,.18);
+        }
+
+        .shop-pagination-wrap {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.25rem;
+        }
+
+        .shop-pagination {
+            display: inline-flex;
+            align-items: center;
+            gap: .9rem;
+        }
+
+        .shop-pagination-arrow,
+        .shop-pagination-page {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(212,175,55,.14);
+            background: transparent;
+            color: rgba(245,240,231,.92);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            text-decoration: none;
+            transition: .2s ease;
+        }
+
+        .shop-pagination-page.active {
+            background: var(--luxe-gold);
+            border-color: var(--luxe-gold);
+            color: #111;
+        }
+
+        .shop-pagination-arrow:hover,
+        .shop-pagination-page:hover {
+            border-color: rgba(212,175,55,.38);
+            color: var(--luxe-gold);
+        }
+
+        .shop-pagination-page.active:hover {
+            color: #111;
+        }
+
+        .shop-mobile-filter-trigger {
+            display: none;
+            width: 100%;
+            min-height: 46px;
+            border-radius: 12px;
+            border: 1px solid rgba(212,175,55,.16);
+            background: rgba(255,255,255,.03);
+            color: #fff;
+            font-size: .82rem;
+            font-weight: 900;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .shop-filter-mobile-card {
+            border-radius: 18px;
+            border: 1px solid rgba(212,175,55,.14);
+            background:
+                linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
+                rgba(16,13,7,.95);
+        }
+
+        @media (max-width: 1199.98px) {
+            .shop-layout {
+                gap: 1.5rem;
             }
 
-            .ecc-store-shell {
-                width: 100%;
-                max-width: 1180px;
-                margin: 0 auto;
-                padding: 0 1rem 5.5rem;
+            .shop-sidebar {
+                width: 260px;
+                flex-basis: 260px;
             }
+        }
 
-            @media (min-width: 768px) {
-                .ecc-store-shell {
-                    padding-left: 1.25rem;
-                    padding-right: 1.25rem;
-                    padding-bottom: 2rem;
-                }
-            }
-
-            .ecc-store-topbar {
-                position: sticky;
-                top: 0;
-                z-index: 40;
-                background: rgba(34, 30, 16, 0.94);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                border-bottom: 1px solid rgba(255,255,255,0.05);
-                margin: 0 -1rem;
-                padding: 1rem 1rem 0.75rem;
-            }
-
-            @media (min-width: 768px) {
-                .ecc-store-topbar {
-                    margin-left: -1.25rem;
-                    margin-right: -1.25rem;
-                    padding-left: 1.25rem;
-                    padding-right: 1.25rem;
-                }
-            }
-
-            .ecc-store-topbar-inner {
-                max-width: 1180px;
-                margin: 0 auto;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 0.75rem;
-            }
-
-            .ecc-store-icon-btn {
-                width: 42px;
-                height: 42px;
-                border-radius: 999px;
-                border: 0;
-                background: transparent;
-                color: #fff;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                transition: all .2s ease;
-            }
-
-            .ecc-store-icon-btn:hover {
-                background: rgba(255,255,255,0.08);
-            }
-
-            .ecc-store-title {
-                margin: 0;
-                font-size: 1.15rem;
-                font-weight: 700;
-                color: #fff;
-                text-align: center;
-                flex: 1;
-            }
-
-            .ecc-cart-badge {
-                position: absolute;
-                top: 2px;
-                right: 2px;
-                min-width: 18px;
-                height: 18px;
-                border-radius: 999px;
-                background: #f2b90d;
-                color: #000;
-                font-size: 0.65rem;
-                font-weight: 800;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                padding: 0 4px;
-            }
-
-            .ecc-store-search-wrap {
-                position: sticky;
-                top: 60px;
-                z-index: 35;
-                background: #221e10;
-                padding: 1rem 0 0.9rem;
-            }
-
-            .ecc-store-search {
-                display: flex;
-                align-items: center;
-                width: 100%;
-                border-radius: 0.95rem;
-                background: #493f22;
-                box-shadow: inset 0 1px 2px rgba(0,0,0,0.18);
-                overflow: hidden;
-            }
-
-            .ecc-store-search-icon,
-            .ecc-store-search-action {
-                width: 48px;
-                height: 48px;
-                flex: 0 0 48px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                color: #f2b90d;
-                border: 0;
-                background: transparent;
-            }
-
-            .ecc-store-search-input {
-                flex: 1;
-                height: 48px;
-                border: 0;
-                background: transparent;
-                color: #fff;
-                font-size: 1rem;
-                outline: none;
-                box-shadow: none;
-            }
-
-            .ecc-store-search-input::placeholder {
-                color: #cbbc90;
-            }
-
-            .ecc-store-chip-row {
-                display: flex;
-                gap: 0.75rem;
-                overflow-x: auto;
-                padding: 0 0 1rem;
-                scrollbar-width: none;
-            }
-
-            .ecc-store-chip-row::-webkit-scrollbar {
-                display: none;
-            }
-
-            .ecc-store-chip {
-                height: 2.35rem;
-                flex: 0 0 auto;
-                display: inline-flex;
-                align-items: center;
-                gap: 0.45rem;
-                border-radius: 0.7rem;
-                border: 1px solid rgba(255,255,255,0.05);
-                background: #493f22;
-                color: #fff;
-                padding: 0 1rem;
-                font-size: 0.92rem;
-                font-weight: 500;
-            }
-
-            .ecc-store-chip.active {
-                background: #f2b90d;
-                color: #000;
-                border-color: #f2b90d;
-                font-weight: 700;
-                box-shadow: 0 10px 22px rgba(242,185,13,0.12);
-            }
-
-            .ecc-store-section-head {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 1rem;
-                margin-bottom: 0.9rem;
-            }
-
-            .ecc-store-section-title {
-                margin: 0;
-                font-size: 1.35rem;
-                font-weight: 700;
-                color: #fff;
-            }
-
-            .ecc-store-link {
-                color: #f2b90d;
-                font-size: 0.75rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.08em;
-                text-decoration: none;
-            }
-
-            .ecc-featured-row {
-                display: flex;
-                gap: 1rem;
-                overflow-x: auto;
-                padding-bottom: 0.35rem;
-                scrollbar-width: none;
-            }
-
-            .ecc-featured-row::-webkit-scrollbar {
-                display: none;
-            }
-
-            .ecc-feature-card {
-                width: 17rem;
-                flex: 0 0 auto;
-                display: flex;
-                flex-direction: column;
-                gap: 0.8rem;
-                background: #2d281a;
-                border-radius: 1rem;
-                padding: 0.85rem;
-                box-shadow: 0 12px 26px rgba(0,0,0,0.20);
-            }
-
-            @media (min-width: 992px) {
-                .ecc-feature-card {
-                    width: 19rem;
-                }
-            }
-
-            .ecc-feature-image-wrap {
-                position: relative;
-                width: 100%;
-                aspect-ratio: 4 / 3;
-                border-radius: 0.8rem;
-                overflow: hidden;
-                background: #1a1a1a;
-            }
-
-            .ecc-feature-image {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
+        @media (max-width: 991.98px) {
+            .shop-layout {
                 display: block;
             }
 
-            .ecc-badge {
-                position: absolute;
-                top: 0.6rem;
-                left: 0.6rem;
-                border-radius: 0.35rem;
-                padding: 0.22rem 0.5rem;
-                font-size: 0.62rem;
-                font-weight: 800;
-                letter-spacing: 0.06em;
-                text-transform: uppercase;
+            .shop-sidebar {
+                display: none;
             }
 
-            .ecc-badge-new {
-                background: #f2b90d;
-                color: #000;
-            }
-
-            .ecc-badge-sale {
-                background: #dc3545;
-                color: #fff;
-            }
-
-            .ecc-product-title {
-                font-size: 1rem;
-                font-weight: 600;
-                color: #fff;
-                margin: 0;
-                line-height: 1.3;
-            }
-
-            .ecc-product-subtitle {
-                font-size: 0.8rem;
-                color: #cbbc90;
-                margin: 0;
-            }
-
-            .ecc-price {
-                font-size: 1rem;
-                font-weight: 800;
-                color: #f2b90d;
-            }
-
-            .ecc-price-old {
-                font-size: 0.8rem;
-                color: rgba(255,255,255,0.35);
-                text-decoration: line-through;
-            }
-
-            .ecc-grid-wrap {
-                margin-top: 1.75rem;
-            }
-
-            .ecc-product-grid {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 1rem;
-            }
-
-            @media (min-width: 768px) {
-                .ecc-product-grid {
-                    grid-template-columns: repeat(3, minmax(0, 1fr));
-                }
-            }
-
-            @media (min-width: 1200px) {
-                .ecc-product-grid {
-                    grid-template-columns: repeat(4, minmax(0, 1fr));
-                }
-            }
-
-            .ecc-product-card {
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                border-radius: 1rem;
-                background: #2d281a;
-                height: 100%;
-            }
-
-            .ecc-product-image-wrap {
-                position: relative;
-                aspect-ratio: 1 / 1;
-                overflow: hidden;
-                background: #1a1a1a;
-            }
-
-            .ecc-product-image {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                display: block;
-                transition: transform .3s ease;
-            }
-
-            .ecc-product-card:hover .ecc-product-image {
-                transform: scale(1.04);
-            }
-
-            .ecc-product-action {
-                position: absolute;
-                right: 0.65rem;
-                bottom: 0.65rem;
-                width: 34px;
-                height: 34px;
-                border-radius: 999px;
-                border: 0;
-                background: rgba(255,255,255,0.12);
-                color: #fff;
+            .shop-mobile-filter-trigger {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
-                transition: all .2s ease;
+                gap: .6rem;
             }
 
-            .ecc-product-action:hover {
-                background: #f2b90d;
-                color: #000;
+            .shop-featured-banner {
+                min-height: 300px;
             }
 
-            .ecc-product-body {
-                padding: 0.85rem;
-                display: flex;
+            .shop-featured-banner-content {
+                padding: 1.6rem;
+                max-width: 100%;
+            }
+
+            .shop-featured-title {
+                font-size: clamp(2rem, 8vw, 3rem);
+            }
+
+            .shop-products-head {
                 flex-direction: column;
-                gap: 0.5rem;
-                flex: 1;
+                align-items: start;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .shop-featured-banner {
+                min-height: 260px;
             }
 
-            .ecc-product-title-sm {
-                margin: 0;
-                font-size: 0.96rem;
-                font-weight: 600;
-                color: #fff;
-                line-height: 1.3;
+            .shop-featured-text {
+                font-size: .95rem;
+                line-height: 1.7;
             }
 
-            .ecc-product-subtitle-sm {
-                margin: 0;
-                font-size: 0.8rem;
-                color: #cbbc90;
+            .shop-card-body {
+                padding: 1rem;
             }
 
-            .ecc-product-meta {
-                margin-top: auto;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 0.5rem;
+            .shop-card-title {
+                font-size: 1.05rem;
             }
 
-            .ecc-rating {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.2rem;
-                color: #f2b90d;
-                font-size: 0.78rem;
+            .shop-card-price {
+                font-size: 1.2rem;
             }
 
-            .ecc-rating .value {
-                color: rgba(255,255,255,0.72);
+            .shop-pagination {
+                gap: .55rem;
             }
 
-            .ecc-soldout {
-                opacity: 0.75;
+            .shop-pagination-arrow,
+            .shop-pagination-page {
+                width: 40px;
+                height: 40px;
             }
-
-            .ecc-soldout .ecc-product-image {
-                filter: grayscale(1);
-                opacity: 0.5;
-            }
-
-            .ecc-soldout-badge {
-                position: absolute;
-                inset: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .ecc-soldout-badge span {
-                border-radius: 0.45rem;
-                padding: 0.35rem 0.7rem;
-                font-size: 0.75rem;
-                font-weight: 700;
-                color: #fff;
-                background: rgba(0,0,0,0.60);
-                border: 1px solid rgba(255,255,255,0.18);
-            }
-        </style>
+        }
+    </style>
     @endpush
 
-    <div class="ecc-store-shell">
-        <div class="ecc-store-topbar">
-            <div class="ecc-store-topbar-inner">
-                <button type="button" class="ecc-store-icon-btn" aria-label="Go back" onclick="history.back()">
-                    <i class="mdi mdi-arrow-left fs-5"></i>
-                </button>
+    @php
+        /**
+         * Banner content fallbacks mappings
+         */
+        $featuredBannerTitle = 'PERFORMANCE. HERITAGE. MATCHDAY ESSENTIALS.';
+        $featuredBannerText = 'Discover premium cricket gear, apparel, and accessories selected for players and collectors who value craftsmanship, comfort, and performance.';
+        $featuredBannerKicker = 'Curated Club Store';
+        $featuredBannerImage = null; // Update if a specific project banner image exists
+        $featuredBannerUrl = 'javascript:void(0)';
+    @endphp
 
-                <h1 class="ecc-store-title">Club Store</h1>
+    <button
+        class="shop-mobile-filter-trigger"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#shopFiltersCanvas"
+        aria-controls="shopFiltersCanvas"
+    >
+        <i class="mdi mdi-filter-variant"></i>
+        <span>Filters & Sort</span>
+    </button>
 
-                <div style="width: 42px;"></div>
-            </div>
-        </div>
+    <div class="shop-layout">
+        {{-- DESKTOP SIDEBAR --}}
+        <aside class="shop-sidebar">
+            <div class="shop-sidebar-inner">
+                {{-- CATEGORIES --}}
+                <section>
+                    <div class="shop-filter-block-title">Categories</div>
 
-        <div class="ecc-store-search-wrap">
-            <div class="ecc-store-search mb-3">
-                <button type="button" class="ecc-store-search-icon" aria-label="Search">
-                    <i class="mdi mdi-magnify fs-5"></i>
-                </button>
+                    <div class="shop-category-list">
+                        <button
+                            type="button"
+                            wire:click="$set('activeCategoryId', null)"
+                            class="shop-filter-link {{ empty($activeCategoryId) ? 'active' : '' }}"
+                        >
+                            <span>All Collections</span>
+                        </button>
 
-                <input
-                    type="text"
-                    class="ecc-store-search-input"
-                    placeholder="Search equipment, jerseys..."
-                    wire:model.live.debounce.400ms="search"
-                >
+                        @foreach($categories as $category)
+                            @php
+                                $categoryId = $category->id;
+                                $categoryName = $category->name;
+                                $categoryCount = tap($category->products_count, fn($c) => $c); // Fallback evaluation
+                                $categoryActive = (string) $activeCategoryId === (string) $categoryId;
+                            @endphp
 
-                <button type="button" class="ecc-store-search-action" aria-label="Filter">
-                    <i class="mdi mdi-tune-variant fs-5"></i>
-                </button>
-            </div>
+                            <button
+                                type="button"
+                                wire:click="$set('activeCategoryId', '{{ $categoryId }}')"
+                                class="shop-filter-link {{ $categoryActive ? 'active' : '' }}"
+                            >
+                                <span>{{ $categoryName }}</span>
+                                @if(!is_null($categoryCount))
+                                    <span class="shop-filter-count">{{ $categoryCount }}</span>
+                                @endif
+                            </button>
+                        @endforeach
+                    </div>
+                </section>
 
-            <div class="ecc-store-chip-row">
-                <button
-                    type="button"
-                    class="ecc-store-chip {{ empty($activeCategoryId) ? 'active' : '' }}"
-                    wire:click="$set('activeCategoryId', null)"
-                >
-                    <i class="mdi mdi-view-grid-outline"></i>
-                    <span>All</span>
-                </button>
+                {{-- PRICE RANGE --}}
+                <section>
+                    <div class="shop-filter-block-title">Price Range</div>
 
-                @foreach(($categories ?? []) as $category)
-                    <button
-                        type="button"
-                        class="ecc-store-chip {{ (string)($activeCategoryId ?? '') === (string)($category->id ?? $category['id'] ?? '') ? 'active' : '' }}"
-                        wire:click="$set('activeCategoryId', '{{ $category->id ?? $category['id'] ?? '' }}')"
-                    >
-                        <i class="mdi mdi-tag-outline"></i>
-                        <span>{{ $category->name ?? $category['name'] ?? 'Category' }}</span>
-                    </button>
+                    <div class="shop-range-wrap">
+                        @php
+                            $absoluteMin = (int) ($absoluteMinPrice ?? 0);
+                            $absoluteMax = (int) ($absoluteMaxPrice ?? 1500);
+                            $selectedMin = (int) ($minPrice ?? $absoluteMin);
+                            $selectedMax = (int) ($maxPrice ?? $absoluteMax);
+
+                            $rangeSpan = max(1, $absoluteMax - $absoluteMin);
+                            $leftPercent = (($selectedMin - $absoluteMin) / $rangeSpan) * 100;
+                            $rightPercent = (($selectedMax - $absoluteMin) / $rangeSpan) * 100;
+                        @endphp
+
+                        <div class="shop-range-track">
+                            <div
+                                class="shop-range-active"
+                                style="left: {{ max(0, min(100, $leftPercent)) }}%; width: {{ max(0, min(100, $rightPercent - $leftPercent)) }}%;"
+                            ></div>
+
+                            <span
+                                class="shop-range-thumb-visual"
+                                style="left: {{ max(0, min(100, $leftPercent)) }}%;"
+                            ></span>
+
+                            <span
+                                class="shop-range-thumb-visual"
+                                style="left: {{ max(0, min(100, $rightPercent)) }}%;"
+                            ></span>
+                        </div>
+
+                        <div class="shop-range-inputs">
+                            <input
+                                type="range"
+                                min="{{ $absoluteMinPrice ?? 0 }}"
+                                max="{{ $absoluteMaxPrice ?? 1500 }}"
+                                step="1"
+                                wire:model.live="minPrice"
+                                class="shop-range-native min-range"
+                            >
+
+                            <input
+                                type="range"
+                                min="{{ $absoluteMinPrice ?? 0 }}"
+                                max="{{ $absoluteMaxPrice ?? 1500 }}"
+                                step="1"
+                                wire:model.live="maxPrice"
+                                class="shop-range-native max-range"
+                            >
+                        </div>
+
+                        <div class="shop-range-labels">
+                            <span>{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMin) }}</span>
+                            <span>{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMax) }}{{ ($absoluteMax === $selectedMax) ? '+' : '' }}</span>
+                        </div>
+                    </div>
+                </section>
+
+                {{-- TAG GROUPS / TAGS --}}
+                @foreach($tagGroups as $group)
+                    @php
+                        $groupName = $group->name;
+                        $groupSlug = $group->slug;
+                        $groupTags = $group->tags;
+
+                        // Identify groups to render as pills vs checkboxes
+                        $renderAsPills = in_array($groupSlug, ['size', 'sizes']) || ($group->type ?? null) === 'pill';
+                    @endphp
+
+                    @if($groupTags->isNotEmpty())
+                        <section>
+                            <div class="shop-filter-block-title">{{ $groupName }}</div>
+
+                            @if($renderAsPills)
+                                <div class="shop-pill-grid">
+                                    @foreach($groupTags as $tag)
+                                        @php
+                                            $tagId = $tag->id;
+                                            $tagName = $tag->name;
+                                            $isSelected = in_array($tagId, $tags);
+                                        @endphp
+
+                                        <button
+                                            type="button"
+                                            wire:click="toggleTag('{{ $tagId }}')"
+                                            class="btn shop-pill-btn {{ $isSelected ? 'active' : '' }}"
+                                        >
+                                            {{ $tagName }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="shop-checkbox-list">
+                                    @foreach($groupTags as $tag)
+                                        @php
+                                            $tagId = $tag->id;
+                                            $tagName = $tag->name;
+                                            $isSelected = in_array($tagId, $tags);
+                                        @endphp
+
+                                        <label class="shop-checkbox">
+                                            <input
+                                                class="shop-checkbox-input"
+                                                type="checkbox"
+                                                wire:click="toggleTag('{{ $tagId }}')"
+                                                @checked($isSelected)
+                                            >
+                                            <span>{{ $tagName }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </section>
+                    @endif
                 @endforeach
             </div>
-        </div>
+        </aside>
 
-        <section class="mb-4">
-            <div class="ecc-store-section-head">
-                <h2 class="ecc-store-section-title">New Arrivals</h2>
-                <a href="{{ route('shop.index', ['sort' => 'newest']) }}" class="ecc-store-link">View All</a>
+        {{-- MOBILE FILTER OFFCANVAS --}}
+        <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="shopFiltersCanvas" aria-labelledby="shopFiltersCanvasLabel" wire:ignore.self>
+            <div class="offcanvas-header border-bottom border-secondary-subtle">
+                <h5 class="offcanvas-title" id="shopFiltersCanvasLabel">Shop Filters</h5>
+                <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
+            <div class="offcanvas-body">
+                <div class="shop-filter-mobile-card p-3">
+                    <div class="d-flex flex-column gap-4">
+                        <section>
+                            <div class="shop-filter-block-title">Categories</div>
 
-            <div class="ecc-featured-row">
-                @forelse(($newArrivals ?? []) as $product)
-                    @php
-                        $image = $product['image_url'] ?? null;
-                        $title = $product['name'] ?? 'Product';
-                        $subtitle = $product['short_description'] ?? '';
-                        $priceDisplay = $product['price_display'] ?? '';
-                        $oldPriceDisplay = $product['old_price_display'] ?? null;
-                        $isNew = (bool)($product['is_new'] ?? false);
-                        $isSale = (bool)($product['is_on_sale'] ?? false);
-                        $detailsUrl = $product['details_url'] ?? '#';
-                    @endphp
+                            <div class="shop-category-list">
+                                <button
+                                    type="button"
+                                    wire:click="$set('activeCategoryId', null)"
+                                    class="shop-filter-link {{ empty($activeCategoryId) ? 'active' : '' }}"
+                                >
+                                    <span>All Collections</span>
+                                </button>
 
-                    <article class="ecc-feature-card">
-                        <a href="{{ $detailsUrl }}" class="text-decoration-none">
-                            <div class="ecc-feature-image-wrap">
-                                @if($image)
-                                    <img src="{{ $image }}" alt="{{ $title }}" class="ecc-feature-image">
-                                @else
-                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
-                                        <i class="mdi mdi-image-outline fs-1"></i>
-                                    </div>
-                                @endif
+                                @foreach($categories as $category)
+                                    @php
+                                        $categoryId = $category->id;
+                                        $categoryName = $category->name;
+                                        $categoryCount = tap($category->products_count, fn($c) => $c);
+                                        $categoryActive = (string) $activeCategoryId === (string) $categoryId;
+                                    @endphp
 
-                                @if($isNew)
-                                    <span class="ecc-badge ecc-badge-new">New</span>
-                                @elseif($isSale)
-                                    <span class="ecc-badge ecc-badge-sale">Sale</span>
-                                @endif
-                            </div>
-                        </a>
-
-                        <div class="px-1">
-                            <div class="d-flex justify-content-between align-items-start gap-2">
-                                <h3 class="ecc-product-title">{{ $title }}</h3>
-                                <span class="ecc-price">{{ $priceDisplay }}</span>
-                            </div>
-
-                        </div>
-                    </article>
-                @empty
-                    <div class="text-light-emphasis">No new arrivals available.</div>
-                @endforelse
-            </div>
-        </section>
-
-        <section class="ecc-grid-wrap">
-            <h2 class="ecc-store-section-title mb-3">All Equipment</h2>
-
-            <div class="ecc-product-grid">
-                @forelse(($products ?? []) as $product)
-                    @php
-                        $image = $product['image_url'] ?? null;
-                        $title = $product['name'] ?? 'Product';
-                        $subtitle = $product['short_description'] ?? '';
-                        $priceDisplay = $product['price_display'] ?? '';
-                        $oldPriceDisplay = $product['old_price_display'] ?? null;
-                        $isSoldOut = (bool)($product['is_sold_out'] ?? false);
-                        $isSale = (bool)($product['is_on_sale'] ?? false);
-                        $rating = $product['rating'] ?? null;
-                        $detailsUrl = $product['details_url'] ?? '#';
-                    @endphp
-
-                    <article class="ecc-product-card {{ $isSoldOut ? 'ecc-soldout' : '' }}">
-                        <a href="{{ $detailsUrl }}" class="text-decoration-none">
-                            <div class="ecc-product-image-wrap">
-                                @if($image)
-                                    <img src="{{ $image }}" alt="{{ $title }}" class="ecc-product-image">
-                                @else
-                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
-                                        <i class="mdi mdi-image-outline fs-1"></i>
-                                    </div>
-                                @endif
-
-                                @if($isSale)
-                                    <span class="ecc-badge ecc-badge-sale">Sale</span>
-                                @endif
-
-                                @if($isSoldOut)
-                                    <div class="ecc-soldout-badge">
-                                        <span>Sold Out</span>
-                                    </div>
-                                @else
-                                    <button type="button" class="ecc-product-action" aria-label="Add to cart">
-                                        <i class="mdi mdi-plus fs-6"></i>
+                                    <button
+                                        type="button"
+                                        wire:click="$set('activeCategoryId', '{{ $categoryId }}')"
+                                        class="shop-filter-link {{ $categoryActive ? 'active' : '' }}"
+                                    >
+                                        <span>{{ $categoryName }}</span>
+                                        @if(!is_null($categoryCount))
+                                            <span class="shop-filter-count">{{ $categoryCount }}</span>
+                                        @endif
                                     </button>
-                                @endif
+                                @endforeach
                             </div>
-                        </a>
+                        </section>
 
-                        <div class="ecc-product-body">
-                            <div>
-                                <a href="{{ $detailsUrl }}" class="text-decoration-none">
-                                    <h3 class="ecc-product-title-sm">{{ $title }}</h3>
-                                </a>
+                        {{-- PRICE RANGE --}}
+                        <section>
+                            <div class="shop-filter-block-title">Price Range</div>
 
-                            </div>
+                            <div class="shop-range-wrap">
+                                @php
+                                    $absoluteMin = (int) ($absoluteMinPrice ?? 0);
+                                    $absoluteMax = (int) ($absoluteMaxPrice ?? 1500);
+                                    $selectedMin = (int) ($minPrice ?? $absoluteMin);
+                                    $selectedMax = (int) ($maxPrice ?? $absoluteMax);
 
-                            <div class="ecc-product-meta">
-                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <span class="ecc-price">{{ $priceDisplay }}</span>
-                                    @if($oldPriceDisplay)
-                                        <span class="ecc-price-old">{{ $oldPriceDisplay }}</span>
-                                    @endif
+                                    $rangeSpan = max(1, $absoluteMax - $absoluteMin);
+                                    $leftPercent = (($selectedMin - $absoluteMin) / $rangeSpan) * 100;
+                                    $rightPercent = (($selectedMax - $absoluteMin) / $rangeSpan) * 100;
+                                @endphp
+
+                                <div class="shop-range-track">
+                                    <div
+                                        class="shop-range-active"
+                                        style="left: {{ max(0, min(100, $leftPercent)) }}%; width: {{ max(0, min(100, $rightPercent - $leftPercent)) }}%;"
+                                    ></div>
+
+                                    <span
+                                        class="shop-range-thumb-visual"
+                                        style="left: {{ max(0, min(100, $leftPercent)) }}%;"
+                                    ></span>
+
+                                    <span
+                                        class="shop-range-thumb-visual"
+                                        style="left: {{ max(0, min(100, $rightPercent)) }}%;"
+                                    ></span>
                                 </div>
 
-                                @if($rating)
-                                    <span class="ecc-rating">
-                                        <i class="mdi mdi-star"></i>
-                                        <span class="value">{{ $rating }}</span>
-                                    </span>
-                                @endif
+                                <div class="shop-range-inputs">
+                                    <input
+                                        type="range"
+                                        min="{{ $absoluteMinPrice ?? 0 }}"
+                                        max="{{ $absoluteMaxPrice ?? 1500 }}"
+                                        step="1"
+                                        wire:model.live="minPrice"
+                                        class="shop-range-native min-range"
+                                    >
+
+                                    <input
+                                        type="range"
+                                        min="{{ $absoluteMinPrice ?? 0 }}"
+                                        max="{{ $absoluteMaxPrice ?? 1500 }}"
+                                        step="1"
+                                        wire:model.live="maxPrice"
+                                        class="shop-range-native max-range"
+                                    >
+                                </div>
+
+                                <div class="shop-range-labels">
+                                    <span>{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMin) }}</span>
+                                    <span>{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMax) }}{{ ($absoluteMax === $selectedMax) ? '+' : '' }}</span>
+                                </div>
                             </div>
-                        </div>
-                    </article>
-                @empty
-                    <div class="text-light-emphasis">No products available.</div>
-                @endforelse
+                        </section>
+
+                        @foreach($tagGroups as $group)
+                            @php
+                                $groupName = $group->name;
+                                $groupSlug = $group->slug;
+                                $groupTags = $group->tags;
+                                $renderAsPills = in_array($groupSlug, ['size', 'sizes']) || ($group->type ?? null) === 'pill';
+                            @endphp
+
+                            @if($groupTags->isNotEmpty())
+                                <section>
+                                    <div class="shop-filter-block-title">{{ $groupName }}</div>
+
+                                    @if($renderAsPills)
+                                        <div class="shop-pill-grid">
+                                            @foreach($groupTags as $tag)
+                                                @php
+                                                    $tagId = $tag->id;
+                                                    $tagName = $tag->name;
+                                                    $isSelected = in_array($tagId, $tags);
+                                                @endphp
+
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleTag('{{ $tagId }}')"
+                                                    class="btn shop-pill-btn {{ $isSelected ? 'active' : '' }}"
+                                                >
+                                                    {{ $tagName }}
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div class="shop-checkbox-list">
+                                            @foreach($groupTags as $tag)
+                                                @php
+                                                    $tagId = $tag->id;
+                                                    $tagName = $tag->name;
+                                                    $isSelected = in_array($tagId, $tags);
+                                                @endphp
+
+                                                <label class="shop-checkbox">
+                                                    <input
+                                                        class="shop-checkbox-input"
+                                                        type="checkbox"
+                                                        wire:click="toggleTag('{{ $tagId }}')"
+                                                        @checked($isSelected)
+                                                    >
+                                                    <span>{{ $tagName }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </section>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
             </div>
-        </section>
-        
-        <div class="mt-4">
-            {{ $paginator->links() ?? '' }}
+        </div>
+
+        {{-- MAIN CONTENT --}}
+        <div class="shop-main">
+            {{-- FEATURED BANNER --}}
+            <section class="shop-featured-banner">
+                @if(!empty($featuredBannerImage))
+                    <img
+                        src="{{ $featuredBannerImage }}"
+                        alt="{{ $featuredBannerTitle }}"
+                        class="shop-featured-banner-image"
+                    >
+                @endif
+
+                <div class="shop-featured-banner-overlay"></div>
+
+                <div class="shop-featured-banner-content">
+                    <div class="shop-featured-kicker">{{ $featuredBannerKicker }}</div>
+                    <h2 class="shop-featured-title">{{ $featuredBannerTitle }}</h2>
+                    <p class="shop-featured-text">{{ $featuredBannerText }}</p>
+
+                    <div>
+                        <a href="{{ $featuredBannerUrl }}" class="shop-featured-btn">
+                            Discover the Series
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            {{-- PRODUCTS HEAD --}}
+            <section>
+                <div class="shop-products-head">
+                    <div>
+                        <h2 class="shop-products-title">Shop Equipment</h2>
+                        <div class="shop-products-subtitle">Latest additions to our collection</div>
+                    </div>
+
+                    <div class="shop-sort-inline">
+                        <span>Sort By:</span>
+
+                        <select wire:model.live="sort" class="form-select">
+                            <option value="newest">Newest First</option>
+                            <option value="price_desc">Price: High to Low</option>
+                            <option value="price_asc">Price: Low to High</option>
+                            <option value="title_asc">Name: A to Z</option>
+                            <option value="title_desc">Name: Z to A</option>
+                        </select>
+                    </div>
+                </div>
+
+                {{-- PRODUCT GRID --}}
+                @if(collect($products->items())->count())
+                    <div class="shop-grid">
+                        <div class="row g-4">
+                            @foreach($products->items() as $product)
+                                @php
+                                    $productTitle = $product->title;
+                                    $productSubtitle = $product->categories->first()->name ?? '';
+                                    $productPrice = '₹' . number_format((float)$product->base_price, 2);
+
+                                    $img = collect($product->images)->first();
+                                    $productImage = $img ? url('storage/' . $img->image_path) : 'https://placehold.co/800x1000/17130b/d4af37?text=No+Image';
+
+                                    $productUrl = route('shop.show', $product->slug);
+
+                                    $isNew = $product->created_at ? $product->created_at->diffInDays(now()) < 14 : false;
+                                    $badgeLabel = $isNew ? 'New' : null;
+                                    $isSoldOut = $product->computed_stock <= 0;
+                                @endphp
+
+                                <div class="col-12 col-sm-6 col-lg-4">
+                                    <article class="shop-card position-relative {{ $isSoldOut ? 'opacity-75' : '' }}">
+                                        <a href="{{ $productUrl }}" class="stretched-link"></a>
+                                        <div class="shop-card-media">
+                                            @if($productImage)
+                                                <img src="{{ $productImage }}" alt="{{ $productTitle }}">
+                                            @else
+                                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
+                                                    <i class="mdi mdi-image-outline fs-1"></i>
+                                                </div>
+                                            @endif
+
+                                            @if($isSoldOut)
+                                                <div class="shop-card-badge bg-dark text-white border border-secondary">Sold Out</div>
+                                            @elseif(!empty($badgeLabel))
+                                                <div class="shop-card-badge">{{ $badgeLabel }}</div>
+                                            @endif
+                                        </div>
+
+                                        <div class="shop-card-body">
+                                            <div class="shop-card-head">
+                                                <div>
+                                                    <h3 class="shop-card-title">{{ $productTitle }}</h3>
+                                                    @if(!empty($productSubtitle))
+                                                        <div class="shop-card-subtitle">{{ $productSubtitle }}</div>
+                                                    @endif
+                                                </div>
+
+                                                <div class="shop-card-price">{{ $productPrice }}</div>
+                                            </div>
+
+                                            <div class="shop-card-actions position-relative z-2">
+                                                <button
+                                                    type="button"
+                                                    class="shop-card-cart-btn position-relative"
+                                                    wire:click.stop="addToCart({{ $product->id }})"
+                                                    wire:loading.attr="disabled"
+                                                    wire:target="addToCart({{ $product->id }})"
+                                                    @disabled($isSoldOut)
+                                                >
+                                                    <span wire:loading.remove wire:target="addToCart({{ $product->id }})">
+                                                        <i class="mdi mdi-shopping-outline"></i>
+                                                        <span>Add to Cart</span>
+                                                    </span>
+
+                                                    <div wire:loading.flex wire:target="addToCart({{ $product->id }})" class="shop-card-cart-loading">
+                                                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </article>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- PAGINATION --}}
+                    <div class="shop-pagination-wrap">
+                        <div class="w-100 d-flex justify-content-center">
+                            {{ $products->links() }}
+                        </div>
+                    </div>
+                @else
+                    <div class="archive-empty-state text-light-emphasis text-center py-5">
+                        No products found for the selected filters.
+                    </div>
+                @endif
+            </section>
         </div>
     </div>
 </div>

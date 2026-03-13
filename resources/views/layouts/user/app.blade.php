@@ -67,7 +67,7 @@
                         'title' => $title ?? null,
                         'backUrl' => $backUrl ?? null,
                         'cartCount' => $cartCount ?? null,
-                        'cartUrl' => $cartUrl ?? url('/cart'),
+                        'cartUrl' => $cartUrl ?? route('shop.cart'),
                     ])
                 </div>
             </header>

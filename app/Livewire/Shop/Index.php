@@ -5,15 +5,17 @@ namespace App\Livewire\Shop;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Shop\ShopCategory;
+use App\Models\Shop\ShopTagGroup;
+use App\Models\Shop\ShopProduct;
 use App\Services\Shop\ShopProductService;
 use App\Services\Shop\CartService;
 use Livewire\Attributes\Url;
+use Exception;
 
 class Index extends Component
 {
     use WithPagination;
 
-    // We can use standard bootstrap simple pagination layout if configured
     protected $paginationTheme = 'bootstrap';
 
     #[Url(except: '')]
@@ -25,6 +27,31 @@ class Index extends Component
     #[Url(except: 'newest')]
     public $sort = 'newest';
 
+    #[Url(except: [])]
+    public $tags = []; // Flat array of tag IDs for URL simplicity
+
+    #[Url(except: null)]
+    public $minPrice = null;
+
+    #[Url(except: null)]
+    public $maxPrice = null;
+
+    public ?int $absoluteMinPrice = null;
+    public ?int $absoluteMaxPrice = null;
+
+    public function mount()
+    {
+        $this->absoluteMinPrice = (int) (ShopProduct::query()->active()->min('base_price') ?? 0);
+        $this->absoluteMaxPrice = (int) (ShopProduct::query()->active()->max('base_price') ?? 0);
+
+        if ($this->minPrice !== null) {
+            $this->minPrice = max($this->absoluteMinPrice, min((int) $this->minPrice, $this->absoluteMaxPrice));
+        }
+        if ($this->maxPrice !== null) {
+            $this->maxPrice = max($this->absoluteMinPrice, min((int) $this->maxPrice, $this->absoluteMaxPrice));
+        }
+    }
+
     public function updatingSearch()
     {
         $this->resetPage();
@@ -35,15 +62,92 @@ class Index extends Component
         $this->resetPage();
     }
 
+    public function updatingSort()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedMinPrice($value): void
+    {
+        $value = (int) $value;
+
+        $absoluteMin = (int) ($this->absoluteMinPrice ?? 0);
+        $absoluteMax = (int) ($this->absoluteMaxPrice ?? $value);
+
+        $value = max($absoluteMin, min($value, $absoluteMax));
+        $this->minPrice = min($value, (int) ($this->maxPrice ?? $absoluteMax));
+
+        $this->resetPage();
+    }
+
+    public function updatedMaxPrice($value): void
+    {
+        $value = (int) $value;
+
+        $absoluteMin = (int) ($this->absoluteMinPrice ?? 0);
+        $absoluteMax = (int) ($this->absoluteMaxPrice ?? $value);
+
+        $value = min($absoluteMax, max($value, $absoluteMin));
+        $this->maxPrice = max($value, (int) ($this->minPrice ?? $absoluteMin));
+
+        $this->resetPage();
+    }
+
+    public function toggleTag($tagId)
+    {
+        $tagId = (int)$tagId;
+        if (in_array($tagId, $this->tags)) {
+            $this->tags = array_values(array_diff($this->tags, [$tagId]));
+        } else {
+            $this->tags[] = $tagId;
+        }
+        $this->resetPage();
+    }
+
+    public function addToCart(CartService $cartService, $productId)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        try {
+            $cart = $cartService->addItem(
+                user: auth()->user(),
+                productId: $productId,
+                quantity: 1,
+                variationValueIds: [] // Assuming base product add, requires specific UI for variations typically
+            );
+
+            $cartCount = $cart->items()->sum('quantity');
+            $this->dispatch('refresh-cart-badge', count: $cartCount);
+            
+            session()->flash('success', 'Added to cart successfully.');
+        } catch (Exception $e) {
+            session()->flash('error', $e->getMessage());
+        }
+    }
+
     public function render(ShopProductService $productService, CartService $cartService)
     {
-        // 1. Categories (Tree mapping simplified for Chips)
-        // Similar to ShopCategoryController->filters() / index()
+        // 1. Categories
         $categories = ShopCategory::active()->roots()->orderBy('sort_order')->orderBy('name')->get();
 
-        $newArrivalsPaginator = $productService->getProducts(['sort' => 'newest'], 4);
-        $newArrivalsPaginator->getCollection()->loadMissing('variationGroups.values');
-        $newArrivals = $newArrivalsPaginator->items();
+        // 2. Tag Groups
+        $tagGroups = ShopTagGroup::active()->with(['tags' => function ($q) {
+            $q->active()->orderBy('sort_order', 'asc');
+        }])->orderBy('sort_order', 'asc')->get();
+
+        // Prepare tags for format needed by getProducts, which expects ['group_slug' => [id1, id2]]
+        $groupedTags = [];
+        if (!empty($this->tags)) {
+            foreach ($tagGroups as $group) {
+                // Find any selected tags that belong to this group
+                $groupSelectedTags = $group->tags->whereIn('id', $this->tags)->pluck('id')->toArray();
+                if (!empty($groupSelectedTags)) {
+                    $groupedTags[$group->slug] = $groupSelectedTags;
+                }
+            }
+        }
 
         // 3. Grid Products (Applying active filters)
         $filters = [
@@ -55,8 +159,20 @@ class Index extends Component
             $filters['category_ids'] = [$this->activeCategoryId];
         }
 
+        if (!empty($groupedTags)) {
+            $filters['tags'] = $groupedTags;
+        }
+
+        if ($this->minPrice !== null && $this->minPrice !== '') {
+            $filters['price_min'] = (float)$this->minPrice;
+        }
+
+        if ($this->maxPrice !== null && $this->maxPrice !== '') {
+            $filters['price_max'] = (float)$this->maxPrice;
+        }
+
         $products = $productService->getProducts($filters, 16);
-        $products->getCollection()->loadMissing('variationGroups.values');
+        $products->getCollection()->loadMissing(['variationGroups.values', 'categories', 'tags']);
 
         // 4. Cart Count
         $cartCount = 0;
@@ -65,39 +181,12 @@ class Index extends Component
             $cartCount = $cart->items()->sum('quantity');
         }
 
-        // Map derived fields for Blade rendering to avoid messy Blade logic
-        // As requested by PART 5 - PRODUCT / CATEGORY DATA REQUIREMENTS
-        $mapProduct = function($p) {
-            $img = $p->images->first();
-            
-            // Replicate pricing checks
-            $priceDisplay = '₹' . number_format((float)$p->base_price, 2);
-            $oldPriceDisplay = null;
-            // No current `compare_at_price` mapping locally, but keeping pattern
-            
-            return [
-                'id' => $p->id,
-                'name' => $p->title,
-                'slug' => $p->slug,
-                'short_description' => $p->description ?? '',
-                'image_url' => $img ? url('storage/' . $img->image_path) : null,
-                'price_display' => $priceDisplay,
-                'old_price_display' => $oldPriceDisplay,
-                'is_new' => $p->created_at ? $p->created_at->diffInDays(now()) < 14 : false, // Arbitrary new flag mimicking service pattern
-                'is_on_sale' => false,
-                'is_sold_out' => $p->computed_stock <= 0,
-                'rating' => null, // No ratings in model yet
-                'details_url' => route('shop.show', $p->slug)
-            ];
-        };
-
         return view('livewire.shop.index', [
             'categories' => $categories,
-            'newArrivals' => collect($newArrivals)->map($mapProduct),
-            'products' => collect($products->items())->map($mapProduct),
-            'paginator' => $products,
+            'tagGroups' => $tagGroups,
+            'products' => $products,
             'cartCount' => $cartCount,
-        ])->layout('layouts.user.app', [
+        ])->layout('layouts.web-app', [
             'title' => 'Club Store',
             'cartCount' => $cartCount
         ]);

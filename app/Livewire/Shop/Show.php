@@ -216,7 +216,7 @@ class Show extends Component
         return view('livewire.shop.show', [
             'displayPrice' => $this->product->currency ?? 'INR',
             'featureBullets' => [], 
-        ])->layout('layouts.user.app', [
+        ])->layout('layouts.web-app', [
             'title' => $this->product->title ?? 'Club Store',
             'cartCount' => $this->cartCount
         ]);

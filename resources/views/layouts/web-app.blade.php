@@ -737,7 +737,7 @@
 
       $isOn = fn($k) => $active === $k;
       $cartCount = $cartCount ?? 0;
-      $cartUrl = url('/cart');
+      $cartUrl = route('shop.cart');
     @endphp
     <div class="luxe-page-shell">
         <header class="luxe-header">
