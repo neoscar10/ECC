@@ -14,116 +14,62 @@
     $scopeId = $previewScopeId ?? $uniqueId;
 @endphp
 
-<div class="cms-slider-block cms-fade-in" style="margin-bottom: 120px;">
+@php
+    $exploreAllUrl = $this->getExploreAllUrl($block);
+@endphp
+
+<div class="cms-slider-block cms-fade-in" style="margin-bottom: 60px;">
     {{-- Header --}}
-    <x-cms.partials.section-heading 
-        :title="$content['title']" 
-        :subtitle="$content['subtitle']" 
-        :badge="$content['badge_text']" 
-        class="px-2 mb-4"
-    />
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-2 mb-3 px-2">
+        <div>
+            @if(!empty($content['badge_text']))
+                <div class="ecc-hero-badge mb-2" style="transform: scale(0.8); transform-origin: left;">
+                    <i class="mdi mdi-star-four-points text-gold"></i>
+                    <span>{{ $content['badge_text'] }}</span>
+                </div>
+            @endif
+            <h2 class="ecc-block-title">
+                {{ $content['title'] }}
+            </h2>
+
+            @if(!empty($content['subtitle']))
+                <p class="ecc-block-subtitle mb-0">{{ $content['subtitle'] }}</p>
+            @endif
+        </div>
+
+        @if($exploreAllUrl)
+            <a href="{{ $exploreAllUrl }}" class="ecc-inline-link mb-lg-1">
+                Explore All
+                <i class="mdi mdi-chevron-right"></i>
+            </a>
+        @endif
+    </div>
 
     <x-cms.partials.access-gate :access="$access">
         @if($isPreviewStep4)
-            @php $carouselId = 'cmsPreviewCarousel_' . ($content['id'] ?? uniqid()); @endphp
-
-            <div class="cms-slider-outer position-relative px-2">
-                <div id="{{ $carouselId }}"
-                     class="carousel slide"
-                     data-bs-ride="carousel"
-                     data-bs-interval="1200"
-                     data-bs-touch="true"
-                     data-bs-pause="false">
-                    <div class="carousel-inner">
-                        @if($mode === 'images')
-                            @foreach($slides as $i => $slide)
-                                <div class="carousel-item {{ $i === 0 ? 'active' : '' }}">
-                                    <div class="cms-image-slide rounded-4 overflow-hidden position-relative shadow-sm" style="border-radius: 20px !important; border: 1px solid rgba(212,175,55,0.1);">
-                                        <div class="cms-slide-media" style="aspect-ratio: 16 / 9; overflow: hidden;">
-                                            <img src="{{ $slide['image_url'] }}" class="w-100 h-100 object-fit-cover" alt="{{ $slide['title'] ?? '' }}" style="object-position: center top;">
-                                        </div>
-                                        @if(!empty($slide['title']) || !empty($slide['subtitle']))
-                                            <div class="position-absolute bottom-0 start-0 w-100 p-3 pt-5"
-                                                 style="background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);">
-                                                <h6 class="fw-bold mb-1" style="color: var(--ecc-gold, #D4AF37); font-size: 15px;">{{ $slide['title'] }}</h6>
-                                                <p class="text-white small mb-0" style="opacity: 0.8;">{{ $slide['subtitle'] }}</p>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
-                        @else
-                            @foreach($items as $i => $item)
-                                <div class="carousel-item {{ $i === 0 ? 'active' : '' }}">
-                                    <div class="px-1">
-                                        <x-cms.partials.item-card :item="$item" :source="$source" />
-                                    </div>
-                                </div>
-                            @endforeach
-                        @endif
+            {{-- Simplified Preview Grid for Access Step --}}
+            <div class="row g-3 px-2">
+                @foreach(collect($items)->take(3) as $item)
+                    <div class="col-4">
+                         <x-cms.partials.item-card :item="$item" :source="$source" :isEditorial="$mode === 'manual'" />
                     </div>
-
-                    <!-- Controls: always visible in preview -->
-                    <button class="carousel-control-prev" type="button" data-bs-target="#{{ $carouselId }}" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#{{ $carouselId }}" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
-                </div>
+                @endforeach
             </div>
-
-            <style>
-                /* Make bootstrap control buttons match ECC gold theme */
-                .cms-slider-block .carousel-control-prev,
-                .cms-slider-block .carousel-control-next {
-                    width: 44px;
-                    height: 44px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    background: rgba(11, 11, 11, 0.8);
-                    border-radius: 50%;
-                    border: 1px solid rgba(212,175,55,0.3);
-                    box-shadow: 0 0 15px rgba(212,175,55,0.15);
-                    opacity: 1;
-                }
-                .cms-slider-block .carousel-control-prev { left: 8px; }
-                .cms-slider-block .carousel-control-next { right: 8px; }
-                .cms-slider-block .carousel-control-prev-icon,
-                .cms-slider-block .carousel-control-next-icon {
-                    filter: brightness(0) saturate(100%) invert(77%) sepia(35%) saturate(498%) hue-rotate(7deg) brightness(92%) contrast(91%);
-                }
-            </style>
         @else
-            <div class="cms-slider-outer position-relative px-md-4 ecc-cms-preview-swiper-wrap" 
-                 data-preview-scope="{{ $previewScopeId ?? 'default' }}"
-                 data-preview-swiper-wrap="1">
-                <div class="swiper ecc-cms-preview-swiper {{ $uniqueId }} px-2" 
-                     data-preview-swiper="{{ $scopeId }}" 
-                     data-preview-scope="{{ $previewScopeId ?? 'default' }}"
-                     wire:ignore>
+            <div class="cms-slider-outer position-relative px-md-2">
+                {{-- Shared Swiper Container for both Manual and Category modes --}}
+                <div class="swiper ecc-cms-preview-swiper {{ $uniqueId }} px-2" wire:ignore>
                     <div class="swiper-wrapper">
-                        @if($mode === 'images')
-                            {{-- Image Slides --}}
-                            @foreach($slides as $slide)
+                        @if($mode === 'manual' || $mode === 'images')
+                            {{-- Editorial / Manual Items --}}
+                            @php $manualItems = $mode === 'images' ? $slides : $items; @endphp
+                            @foreach($manualItems as $item)
                                 <div class="swiper-slide h-auto">
-                                    <div class="cms-image-slide rounded-4 overflow-hidden position-relative shadow-sm" style="border-radius: 20px !important; border: 1px solid rgba(212,175,55,0.1);">
-                                        <div class="cms-slide-media" style="aspect-ratio: 16 / 9; overflow: hidden;">
-                                            <img src="{{ $slide['image_url'] }}" class="w-100 h-100 object-fit-cover" alt="{{ $slide['title'] ?? '' }}" style="object-position: center top;">
-                                        </div>
-                                        @if(!empty($slide['title']) || !empty($slide['subtitle']))
-                                            <div class="position-absolute bottom-0 start-0 w-100 p-3 pt-5" style="background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);">
-                                                <h6 class="fw-bold mb-1" style="color: var(--ecc-gold, #D4AF37); font-size: 15px;">{{ $slide['title'] }}</h6>
-                                                <p class="text-white small mb-0" style="opacity: 0.8;">{{ $slide['subtitle'] }}</p>
-                                            </div>
-                                        @endif
-                                    </div>
+                                    <x-cms.partials.item-card :item="$item" :source="$source" :isEditorial="true" />
                                 </div>
                             @endforeach
                         @else
-                            {{-- Item Slides (Shop/Archive/Auctions) --}}
+                            {{-- Category Items --}}
                             @foreach($items as $item)
                                 <div class="swiper-slide h-auto">
                                     <x-cms.partials.item-card :item="$item" :source="$source" />
@@ -132,8 +78,7 @@
                         @endif
                     </div>
                 </div>
-                
-                {{-- Premium Gold Navigation - Positioned Outside --}}
+                {{-- Navigation --}}
                 <div class="swiper-button-next {{ $uniqueId }}-next d-none d-lg-flex"></div>
                 <div class="swiper-button-prev {{ $uniqueId }}-prev d-none d-lg-flex"></div>
             </div>
@@ -151,8 +96,8 @@
                 const container = document.querySelector('.{{ $uniqueId }}');
                 if (container && !container.classList.contains('swiper-initialized')) {
                     new Swiper('.{{ $uniqueId }}', {
-                        slidesPerView: 1.1,
-                        spaceBetween: 12,
+                        slidesPerView: 1.5,
+                        spaceBetween: 8,
                         loop: true,
                         observer: true,
                         observeParents: true,
@@ -166,8 +111,8 @@
                             prevEl: '.{{ $uniqueId }}-prev',
                         },
                         breakpoints: {
-                            768: { slidesPerView: 2, spaceBetween: 16 },
-                            992: { slidesPerView: 3, spaceBetween: 24 }
+                            768: { slidesPerView: 2.5, spaceBetween: 12 },
+                            1200: { slidesPerView: 4.2, spaceBetween: 16 }
                         }
                     });
                 }

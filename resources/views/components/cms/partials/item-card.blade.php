@@ -38,50 +38,112 @@
     }
 @endphp
 
-@if($isNavigable)
-<a href="{{ $link }}" class="cms-item-card d-block text-decoration-none h-100">
-@else
-<div role="button" tabindex="0" wire:click.prevent="openAccessModal({{ $targetTierId ?? 'null' }}, {{ json_encode($title) }}, {{ json_encode($icon) }})" class="cms-item-card d-block text-decoration-none h-100 text-start w-100 bg-transparent border-0 p-0 m-0" style="cursor: pointer; outline: none;">
-@endif
-    <div class="card h-100 border-0 overflow-hidden rounded-4 text-white" style="background: #111; border: 1px solid rgba(212,175,55,0.18) !important; border-radius: 18px !important;">
-        {{-- Image with fixed 4:5 ratio --}}
-        <div class="cms-card-media position-relative" style="padding-top: 125%; background: #080808; overflow: hidden;">
-            @if($image)
-                <img src="{{ $image }}" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover" alt="{{ $title }}" style="object-position: center; {{ $isBlurred ? 'filter: blur(12px); transform: scale(1.1);' : '' }}">
-            @else
-                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center text-white-50">
-                    <span class="material-symbols-outlined fs-1">image</span>
-                </div>
-            @endif
+@php
+    $isEditorial = $isEditorial ?? false;
+@endphp
 
-            @if($isLocked || $isBlurred)
-                <div class="ecc-cms-lock-overlay">
-                  <div class="ecc-cms-lock-icon">
+@if($isEditorial)
+    {{-- Editorial Card Design (Test Cricket Icons style) --}}
+    @if($isNavigable)
+    <a href="{{ $link }}" class="ecc-editorial-card d-block text-decoration-none h-100 overflow-hidden position-relative">
+    @else
+    <div role="button" tabindex="0" wire:click.prevent="openAccessModal({{ $targetTierId ?? 'null' }}, {{ json_encode($title) }}, {{ json_encode($icon) }})" class="ecc-editorial-card d-block h-100 overflow-hidden position-relative" style="cursor: pointer;">
+    @endif
+        <img src="{{ $image }}" alt="{{ $title }}" class="w-100 h-100 object-fit-cover">
+        
+        <div class="ecc-editorial-overlay"></div>
+
+        <div class="ecc-editorial-content p-3">
+            <h3 class="ecc-editorial-title mb-1" style="font-size: 1.5rem;">{{ $title }}</h3>
+            @if($price)
+                <div class="ecc-editorial-meta" style="font-size: 0.8rem;">{{ $price }}</div>
+            @endif
+        </div>
+
+        @if($isLocked || $isBlurred)
+            <div class="ecc-cms-lock-overlay">
+                <div class="ecc-cms-lock-icon">
                     <span class="material-symbols-outlined">
                       @if($icon === 'time-lock') lock_clock
                       @elseif($icon === 'diamond') diamond
                       @else lock
                       @endif
                     </span>
-                  </div>
-                  <div class="ecc-cms-lock-title text-uppercase">{{ $lockTitle }}</div>
-                  <div class="ecc-cms-lock-hint">{{ $lockHint }}</div>
                 </div>
-            @endif
-        </div>
-        
-        {{-- Content --}}
-        <div class="card-body p-3">
-            <h6 class="text-white fw-bold truncate-2 mb-1" style="font-size: 13px; line-height: 1.4; height: 2.8em; min-height: 2.8em;">{{ $title }}</h6>
-            @if($price)
-                <div class="fw-bold" style="color: var(--ecc-gold, #D4AF37); font-size: 14px;">{{ $price }}</div>
-            @endif
-        </div>
+            </div>
+        @endif
+    @if($isNavigable)
+    </a>
+    @else
     </div>
-@if($isNavigable)
-</a>
+    @endif
+
 @else
-</div>
+    {{-- Auction Card Design (Signed by Legends style) --}}
+    <article class="ecc-auction-card h-100">
+        @if($isNavigable)
+        <a href="{{ $link }}" class="text-decoration-none d-block h-100">
+        @else
+        <div role="button" tabindex="0" wire:click.prevent="openAccessModal({{ $targetTierId ?? 'null' }}, {{ json_encode($title) }}, {{ json_encode($icon) }})" class="text-decoration-none d-block h-100 text-start w-100 bg-transparent border-0 p-0 m-0" style="cursor: pointer;">
+        @endif
+            <div class="ecc-auction-card-media position-relative">
+                <img src="{{ $image }}" 
+                     alt="{{ $title }}" 
+                     class="w-100 h-100 object-fit-cover {{ $isBlurred ? 'blur-md' : '' }}">
+
+                @if($item['badge_text'] ?? ($item['badge'] ?? null))
+                    <span class="ecc-card-badge">{{ $item['badge_text'] ?? $item['badge'] }}</span>
+                @endif
+
+                <div class="ecc-card-media-overlay"></div>
+
+                <div class="ecc-card-bottom-meta">
+                    @if(!empty($item['countdown_label']) || !empty($item['status']))
+                        <div class="ecc-countdown">
+                            <span class="mdi mdi-clock-outline"></span>
+                            <span>{{ $item['countdown_label'] ?? strtoupper($item['status']) }}</span>
+                        </div>
+                    @endif
+
+                    <span class="ecc-card-action-icon">
+                        <i class="mdi {{ $source === 'auctions' ? 'mdi-gavel' : ($source === 'shop' ? 'mdi-cart-outline' : 'mdi-eye-outline') }}"></i>
+                    </span>
+                </div>
+
+                @if($isLocked || $isBlurred)
+                    <div class="ecc-cms-lock-overlay">
+                        <div class="ecc-cms-lock-icon">
+                            <span class="material-symbols-outlined">
+                              @if($icon === 'time-lock') lock_clock
+                              @elseif($icon === 'diamond') diamond
+                              @else lock
+                              @endif
+                            </span>
+                        </div>
+                        <div class="ecc-cms-lock-title text-uppercase">{{ $lockTitle }}</div>
+                        <div class="ecc-cms-lock-hint">{{ $lockHint }}</div>
+                    </div>
+                @endif
+            </div>
+
+            <div class="pt-2 pb-1">
+                <h3 class="ecc-card-title truncate-1">{{ $title }}</h3>
+
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                    <span class="ecc-card-meta-label">
+                        {{ $source === 'auctions' ? 'Current Bid' : ($source === 'shop' ? 'Club Store' : 'The Archive') }}
+                    </span>
+                    @if($price)
+                        <span class="ecc-card-meta-value">{{ $price }}</span>
+                    @endif
+                </div>
+            </div>
+        @if($isNavigable)
+        </a>
+        @else
+        </div>
+        @endif
+    </article>
 @endif
 
 <style>
@@ -110,25 +172,25 @@
         background: rgba(0,0,0,0.4);
     }
     .ecc-cms-lock-icon {
-        width: 48px; height: 48px;
+        width: 32px; height: 32px;
         border-radius: 50%;
         background: rgba(0, 0, 0, 0.8);
         border: 1px solid rgba(212, 175, 55, 0.3);
         display: flex; align-items: center; justify-content: center;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
         color: #D4AF37;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
     .ecc-cms-lock-title {
         color: #fceec5;
         font-weight: 800;
-        font-size: 11px;
+        font-size: 9px;
         letter-spacing: 0.05em;
     }
     .ecc-cms-lock-hint {
         color: #cbbc90;
-        margin-top: 5px;
-        font-size: 10px;
+        margin-top: 3px;
+        font-size: 8px;
         font-weight: 600;
     }
 </style>

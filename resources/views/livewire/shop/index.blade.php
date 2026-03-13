@@ -9,29 +9,56 @@
         .shop-layout {
             display: flex;
             gap: 2rem;
-            align-items: flex-start;
+            align-items: stretch;
         }
 
         .shop-sidebar {
-            width: 290px;
-            flex: 0 0 290px;
+            width: 310px;
+            flex: 0 0 310px;
         }
 
         .shop-sidebar-inner {
             position: sticky;
-            top: 96px;
+            top: 100px; /* Offset for header */
             display: flex;
             flex-direction: column;
-            gap: 2rem;
+            gap: 0;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(212, 175, 55, 0.12);
+            border-radius: 20px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 12px 34px rgba(0,0,0,0.18);
+        }
+
+        .shop-filter-section {
+            padding: 1.75rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+        }
+
+        .shop-filter-section:last-child {
+            border-bottom: 0;
         }
 
         .shop-filter-block-title {
-            color: var(--luxe-text-soft);
-            font-size: .72rem;
+            color: var(--luxe-gold);
+            font-size: .78rem;
             font-weight: 900;
-            letter-spacing: .16em;
+            letter-spacing: .18em;
             text-transform: uppercase;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .shop-filter-block-title::before {
+            content: '';
+            width: 3px;
+            height: 12px;
+            background: var(--luxe-gold);
+            border-radius: 999px;
+            display: inline-block;
         }
 
         .shop-category-list,
@@ -726,7 +753,7 @@
         <aside class="shop-sidebar">
             <div class="shop-sidebar-inner">
                 {{-- CATEGORIES --}}
-                <section>
+                <div class="shop-filter-section">
                     <div class="shop-filter-block-title">Categories</div>
 
                     <div class="shop-category-list">
@@ -742,7 +769,7 @@
                             @php
                                 $categoryId = $category->id;
                                 $categoryName = $category->name;
-                                $categoryCount = tap($category->products_count, fn($c) => $c); // Fallback evaluation
+                                $categoryCount = tap($category->products_count, fn($c) => $c);
                                 $categoryActive = (string) $activeCategoryId === (string) $categoryId;
                             @endphp
 
@@ -758,10 +785,10 @@
                             </button>
                         @endforeach
                     </div>
-                </section>
+                </div>
 
                 {{-- PRICE RANGE --}}
-                <section>
+                <div class="shop-filter-section">
                     <div class="shop-filter-block-title">Price Range</div>
 
                     <div class="shop-range-wrap">
@@ -818,7 +845,7 @@
                             <span>{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMax) }}{{ ($absoluteMax === $selectedMax) ? '+' : '' }}</span>
                         </div>
                     </div>
-                </section>
+                </div>
 
                 {{-- TAG GROUPS / TAGS --}}
                 @foreach($tagGroups as $group)
@@ -832,7 +859,7 @@
                     @endphp
 
                     @if($groupTags->isNotEmpty())
-                        <section>
+                        <div class="shop-filter-section">
                             <div class="shop-filter-block-title">{{ $groupName }}</div>
 
                             @if($renderAsPills)
@@ -874,7 +901,7 @@
                                     @endforeach
                                 </div>
                             @endif
-                        </section>
+                        </div>
                     @endif
                 @endforeach
             </div>

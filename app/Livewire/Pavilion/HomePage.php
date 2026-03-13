@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.user.app')]
+#[Layout('layouts.web-app')]
 class HomePage extends Component
 {
     public array $homeHeroBlocks = [];
@@ -57,6 +57,29 @@ class HomePage extends Component
         $this->modalData = null;
     }
 
+    public function getExploreAllUrl(array $block): ?string
+    {
+        $config = $block['type_config'] ?? [];
+        $source = $config['source'] ?? 'shop';
+        $categoryId = $config['category_id'] ?? null;
+
+        if (!$categoryId) {
+            return match($source) {
+                'shop' => route('shop.index'),
+                'archive' => route('archive.index'),
+                'auctions' => route('auctions.index'),
+                default => null
+            };
+        }
+
+        return match($source) {
+            'shop' => route('shop.index', ['activeCategoryId' => $categoryId]),
+            'archive' => route('archive.index') . '?activeTab=' . $categoryId,
+            'auctions' => route('auctions.index'), // Auctions typically don't filter by CMS category on landing in current structure
+            default => null
+        };
+    }
+
     public function proceedToSubscribe(\App\Services\Membership\ApplicationWizardService $wiz)
     {
         if (!auth('web')->check()) {
@@ -80,8 +103,8 @@ class HomePage extends Component
 
     public function render()
     {
-        return view('livewire.pavilion.home-page')->layout('layouts.user.app', [
-            'title' => 'Home',
+        return view('livewire.pavilion.home-page')->layout('layouts.web-app', [
+            'title' => 'Explore',
             'activeNav' => 'explore', // Keep active nav as explore to match bottom nav
         ]);
     }

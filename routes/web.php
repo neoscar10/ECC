@@ -24,6 +24,10 @@ Route::middleware(['auth', 'ensure_registration_complete'])->group(function () {
     // Store
     Route::get('/shop', \App\Livewire\Shop\Index::class)->name('shop.index');
     Route::get('/cart', \App\Livewire\Shop\CartPage::class)->name('shop.cart');
+    Route::get('/checkout', \App\Livewire\Shop\CheckoutPage::class)->name('shop.checkout');
+    Route::get('/orders', \App\Livewire\Shop\OrderListPage::class)->name('shop.orders');
+    Route::get('/order-details/{orderId}', \App\Livewire\Shop\OrderDetailsPage::class)->name('shop.order-details');
+    Route::get('/order-success/{orderId}', \App\Livewire\Shop\OrderSuccessPage::class)->name('shop.order-success');
     Route::get('/shop/{slug}', \App\Livewire\Shop\Show::class)->name('shop.show');
 });
 Route::get('/welcome', WelcomePage::class)->name('welcome');

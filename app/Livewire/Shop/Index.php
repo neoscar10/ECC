@@ -174,21 +174,12 @@ class Index extends Component
         $products = $productService->getProducts($filters, 16);
         $products->getCollection()->loadMissing(['variationGroups.values', 'categories', 'tags']);
 
-        // 4. Cart Count
-        $cartCount = 0;
-        if (auth()->check()) {
-            $cart = $cartService->getCart(auth()->user());
-            $cartCount = $cart->items()->sum('quantity');
-        }
-
         return view('livewire.shop.index', [
             'categories' => $categories,
             'tagGroups' => $tagGroups,
             'products' => $products,
-            'cartCount' => $cartCount,
         ])->layout('layouts.web-app', [
             'title' => 'Club Store',
-            'cartCount' => $cartCount
         ]);
     }
 }

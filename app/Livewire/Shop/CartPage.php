@@ -123,17 +123,18 @@ class CartPage extends Component
 
     public function proceedToCheckout()
     {
-        // For now, redirect to checkout if it exists, or just a placeholder
-        // Usually would go to route('shop.checkout')
-        return redirect()->route('shop.index'); // Placeholder until checkout page is built
+        if (empty($this->cartItems)) {
+            return;
+        }
+
+        return redirect()->route('shop.checkout');
     }
 
     public function render()
     {
         return view('livewire.shop.cart')
             ->layout('layouts.web-app', [
-                'title' => 'My Cart',
-                'cartCount' => $this->cartCount
+                'title' => 'My Cart'
             ]);
     }
 }

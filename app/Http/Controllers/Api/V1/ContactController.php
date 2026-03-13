@@ -56,7 +56,7 @@ class ContactController extends Controller
     /**
      * Submit a new contact enquiry.
      */
-    public function store(Request $request)
+    public function store(Request $request, \App\Services\Common\ContactEnquiryService $service)
     {
         $validator = Validator::make($request->all(), [
             'subject' => 'required|string|in:membership_upgrade,dining_reservations,general_feedback,other',
@@ -67,17 +67,7 @@ class ContactController extends Controller
             return $this->error('Validation Error', 422, $validator->errors());
         }
 
-        $user = $request->user();
-
-        $enquiry = ContactEnquiry::create([
-            'user_id' => $user->id,
-            'contact_name' => $user->name,
-            'contact_email' => $user->email,
-            'contact_phone' => $user->phone ?? null,
-            'subject' => $request->subject,
-            'message' => $request->message,
-            'status' => 'new',
-        ]);
+        $enquiry = $service->submit($request->user(), $request->only(['subject', 'message']));
 
         // Optional: Dispatch notification here
 

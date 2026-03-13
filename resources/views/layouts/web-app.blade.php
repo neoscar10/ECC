@@ -713,6 +713,16 @@
             font-size: 10px;
             font-weight: 600;
         }
+
+        .luxe-logout-simple {
+            font-size: 0.9rem;
+            transition: color 0.2s ease;
+        }
+
+        .luxe-logout-simple:hover {
+            color: var(--luxe-gold) !important;
+            text-decoration: underline !important;
+        }
     </style>
 
     @livewireStyles
@@ -724,15 +734,19 @@
       if (request()->is('auctions*')) { $active = 'auctions'; }
       elseif (request()->is('archive*')) { $active = 'archive'; }
       elseif (request()->is('club*')) { $active = 'club'; }
+      elseif (request()->is('orders*')) { $active = 'orders'; }
+      elseif (request()->is('settings*')) { $active = 'settings'; }
       elseif (request()->is('shop*') || request()->is('products*')) { $active = 'shop'; }
       elseif (request()->is('home*')) { $active = 'explore'; }
 
       $mainItems = [
-        ['key'=>'explore','label'=>'Explore','icon'=>'explore',      'href'=>url('/home')],
-        ['key'=>'archive','label'=>'Archive','icon'=>'inventory_2',  'href'=>url('/archive')],
-        ['key'=>'auctions','label'=>'Auctions','icon'=>'gavel',      'href'=>url('/auctions')],
-        ['key'=>'club',    'label'=>'Club',   'icon'=>'shield_person', 'href'=>url('/club')],
-        ['key'=>'shop',    'label'=>'Shop',   'icon'=>'storefront',    'href'=>route('shop.index')],
+        ['key'=>'explore', 'label'=>'Explore',  'icon'=>'explore',          'href'=>url('/home')],
+        ['key'=>'archive', 'label'=>'Archive',  'icon'=>'inventory_2',      'href'=>url('/archive')],
+        ['key'=>'auctions','label'=>'Auctions', 'icon'=>'gavel',            'href'=>url('/auctions')],
+        ['key'=>'club',    'label'=>'Club',     'icon'=>'shield_person',    'href'=>url('/club')],
+        ['key'=>'shop',    'label'=>'Shop',     'icon'=>'storefront',       'href'=>route('shop.index')],
+        ['key'=>'orders',  'label'=>'Orders',   'icon'=>'receipt_long',     'href'=>route('shop.orders')],
+        // ['key'=>'settings','label'=>'Settings', 'icon'=>'settings',         'href'=>route('settings')],
       ];
 
       $isOn = fn($k) => $active === $k;
@@ -751,20 +765,7 @@
                             <span>ECC</span>
                         </a>
 
-                        <div class="d-none d-lg-block flex-grow-1" style="max-width: 430px;">
-                            <form class="luxe-search" method="GET" action="{{ url()->current() }}">
-                                <span class="luxe-search-icon">
-                                    <i class="mdi mdi-magnify fs-5"></i>
-                                </span>
-                                <input
-                                    type="text"
-                                    name="search"
-                                    value="{{ request('search') }}"
-                                    class="form-control"
-                                    placeholder="Search luxury items..."
-                                >
-                            </form>
-                        </div>
+                        {{-- Search removed as per requirement --}}
                     </div>
 
                     <div class="d-none d-lg-flex align-items-center gap-3">
@@ -775,13 +776,18 @@
                                     <span>{{ $it['label'] }}</span>
                                 </a>
                             @endforeach
+
+                            @auth
+                                <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="border-0 bg-transparent p-0 ms-3 text-white-50 text-decoration-none luxe-logout-simple" title="Logout">
+                                        Logout
+                                    </button>
+                                </form>
+                            @endauth
                         </nav>
 
                         <div class="d-flex align-items-center gap-2">
-                            <a href="javascript:void(0)" class="luxe-icon-btn d-none d-lg-inline-flex" aria-label="Favorites">
-                                <i class="mdi mdi-heart-outline fs-5"></i>
-                            </a>
-
                             <a href="{{ $cartUrl }}" class="luxe-icon-btn" aria-label="Cart"
                                x-data="{ count: {{ (int)($cartCount ?? 0) }} }"
                                @refresh-cart-badge.window="count = $event.detail.count">
@@ -804,8 +810,9 @@
                                         @endif
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" style="background: rgba(23, 19, 11, 0.95); border: 1px solid rgba(212, 175, 55, 0.18);">
-                                        <li><a class="dropdown-item" href="{{ url('/settings') }}">Settings</a></li>
-                                        <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+                                        <li><a class="dropdown-item" href="{{ route('shop.orders') }}">My Orders</a></li>
+                                        <!-- <li><a class="dropdown-item" href="{{ url('/settings') }}">Settings</a></li>
+                                        <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li> -->
                                         <li>
                                             <form action="{{ route('logout') }}" method="POST">
                                                 @csrf
@@ -841,18 +848,7 @@
 
                 <div class="collapse d-lg-none" id="luxeMobileNav">
                     <div class="pt-3">
-                        <form class="luxe-search mb-3" method="GET" action="{{ url()->current() }}">
-                            <span class="luxe-search-icon">
-                                <i class="mdi mdi-magnify fs-5"></i>
-                            </span>
-                            <input
-                                type="text"
-                                name="search"
-                                value="{{ request('search') }}"
-                                class="form-control"
-                                placeholder="Search luxury items..."
-                            >
-                        </form>
+                        {{-- Mobile Search removed as per requirement --}}
 
                         <div class="luxe-mobile-nav">
                             @foreach($mainItems as $it)
@@ -861,6 +857,15 @@
                                     <span>{{ $it['label'] }}</span>
                                 </a>
                             @endforeach
+
+                            @auth
+                                <form action="{{ route('logout') }}" method="POST" class="d-block mt-3">
+                                    @csrf
+                                    <button type="submit" class="border-0 bg-transparent p-0 text-danger-subtitle text-decoration-none fw-bold luxe-logout-simple">
+                                        Logout
+                                    </button>
+                                </form>
+                            @endauth
                         </div>
                     </div>
                 </div>

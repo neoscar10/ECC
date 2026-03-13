@@ -90,7 +90,7 @@ class CheckoutService
     /**
      * Place an order.
      */
-    public function placeOrder(User $user, array $data): ShopOrder
+    public function placeOrder(User $user, array $data, ?array $paymentDetails = null): ShopOrder
     {
         $shippingAddress = UserAddress::where('user_id', $user->id)
             ->where('id', $data['shipping_address_id'])
@@ -104,7 +104,9 @@ class CheckoutService
             $billingAddress = $shippingAddress;
         }
 
-        return DB::transaction(function () use ($user, $shippingAddress, $billingAddress, $data) {
+        $isPaid = !empty($paymentDetails);
+
+        return DB::transaction(function () use ($user, $shippingAddress, $billingAddress, $data, $paymentDetails, $isPaid) {
             $cart = $this->cartService->getCart($user);
             $cart->load(['items.product', 'items.variationValues']);
 
@@ -130,10 +132,6 @@ class CheckoutService
                         throw new Exception("Product not found or unavailable.", 404);
                     }
                     
-                    // Allow null stock_qty to mean unlimited? User prompt says "enforce tracked stock for simple products"
-                    // Assume strict enforcement based on prompt.
-                    // If stock_qty is null, we treat as 0 or error? Let's treat valid stock_qty as required.
-                    
                     $currentStock = (int) $product->stock_qty;
                     
                     if ($currentStock < $item->quantity) {
@@ -144,20 +142,17 @@ class CheckoutService
                     
                 } else {
                     // Variant Product Logic
-                    // Sort IDs to prevent deadlocks if locking multiple
                     sort($variationIds); 
                     
                     $lockedVariations = ShopProductVariationValue::whereIn('id', $variationIds)
                         ->lockForUpdate()
                         ->get();
                     
-                    // Re-validate stock for EACH variation value
                     foreach ($lockedVariations as $val) {
                         if ($val->stock_qty < $item->quantity) {
                              throw new Exception("Insufficient stock for {$val->caption}. Requested: {$item->quantity}, Available: {$val->stock_qty}", 409);
                         }
                         
-                        // Deduct
                         $val->decrement('stock_qty', $item->quantity);
                     }
                 }
@@ -173,7 +168,7 @@ class CheckoutService
                     'unit_price' => $item->unit_price,
                     'line_total' => $lineTotal,
                     'selection_signature' => $item->selection_signature,
-                    'variation_value_ids' => $variationIds, // Temp storage for pivot creation
+                    'variation_value_ids' => $variationIds,
                 ];
             }
 
@@ -181,18 +176,20 @@ class CheckoutService
             $order = ShopOrder::create([
                 'user_id' => $user->id,
                 'order_number' => $orderNumber,
-                'status' => 'pending_payment',
-                'payment_status' => 'unpaid',
+                'status' => $isPaid ? 'paid' : 'pending_payment',
+                'payment_status' => $isPaid ? 'paid' : 'unpaid',
                 'currency' => $currency,
                 'subtotal' => $subtotal,
                 'shipping_fee' => 0,
                 'tax_amount' => 0,
                 'discount_amount' => 0,
-                'total_amount' => $subtotal, // +0+0-0
+                'total_amount' => $subtotal,
                 'shipping_address_snapshot' => $shippingAddress->toArray(),
                 'billing_address_snapshot' => $billingAddress->toArray(),
                 'notes' => $data['notes'] ?? null,
                 'placed_at' => now(),
+                'paid_at' => $isPaid ? now() : null,
+                'meta_json' => $isPaid ? ['payment_details' => $paymentDetails] : null,
             ]);
 
             // 3. Create Items & Pivots
@@ -211,7 +208,6 @@ class CheckoutService
             }
 
             // 4. Clear Cart
-            // We use clearCart from service, but ensure we don't double-transaction (nested is fine in Laravel)
             $this->cartService->clearCart($user);
 
             return $order->load('items.variationValues');

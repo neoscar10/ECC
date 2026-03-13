@@ -76,15 +76,31 @@ class ClubPageService
             ];
         })->toArray();
 
+        // 5. Presentation Helpers
+        $stats = [
+            ['label' => 'Active Requests', 'value' => count($concierge)],
+            ['label' => 'Auction Dossier', 'value' => count($dossier)],
+            ['label' => 'Member Tier', 'value' => $tier ? $tier->name : 'N/A'],
+        ];
+
         return [
-            'header' => $header,
+            'header' => array_merge($header, [
+                'member_since' => $user->created_at->format('M Y'),
+                'is_verified' => (bool)$user->is_verified,
+            ]),
             'privileges' => $privileges,
             'concierge' => $concierge,
             'auction_dossier' => $dossier,
+            'tier_headline' => $tier ? strtoupper($tier->name) . ' PRIVILEGES' : 'ECC PRIVILEGES',
+            'tier_quote' => $tier->description ?? 'Experience the pinnacle of luxury and exclusivity with Executive Cricket Club.',
+            'club_stats' => $stats,
             'urls' => [
-                'settings' => url('/settings'),
-                'back_fallback' => url('/home'),
-                'privileges_all' => null, // TBD
+                'settings' => route('settings'),
+                'back_fallback' => route('home'),
+                'privileges_all' => null, // TBD route
+                'contact_concierge' => '#', // TBD route or livewire action
+                'new_concierge' => '#',
+                'auction_history' => route('auctions.index'),
             ],
         ];
     }

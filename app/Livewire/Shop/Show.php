@@ -15,7 +15,6 @@ class Show extends Component
     
     // UI State
     public $quantity = 1;
-    public $cartCount = 0;
     
     // Dynamic Variant State
     public $selectedVariationValues = []; // keyed by group_id -> value_id
@@ -30,7 +29,6 @@ class Show extends Component
     {
         $this->slug = $slug;
         $this->loadProduct();
-        $this->initializeCart();
     }
 
     protected function loadProduct()
@@ -61,15 +59,6 @@ class Show extends Component
         }
 
         $this->recomputeDynamicState();
-    }
-
-    protected function initializeCart()
-    {
-        if (Auth::check()) {
-            $cartService = app(CartService::class);
-            $cart = $cartService->getCart(Auth::user());
-            $this->cartCount = $cart->items()->sum('quantity');
-        }
     }
 
     public function selectVariationValue($groupId, $valueId)
@@ -200,9 +189,8 @@ class Show extends Component
                 variationValueIds: $variationValueIds
             );
             
-            $this->cartCount = $cart->items()->sum('quantity');
             $this->dispatch('itemAddedToCart');
-            $this->dispatch('refresh-cart-badge', count: $this->cartCount);
+            $this->dispatch('refresh-cart-badge', count: $cart->items()->sum('quantity'));
             
             session()->flash('success', 'Added to cart successfully.');
 
@@ -218,7 +206,6 @@ class Show extends Component
             'featureBullets' => [], 
         ])->layout('layouts.web-app', [
             'title' => $this->product->title ?? 'Club Store',
-            'cartCount' => $this->cartCount
         ]);
     }
 }

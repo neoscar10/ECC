@@ -23,5 +23,8 @@ class AppServiceProvider extends ServiceProvider
         
         // Share counts with admin sidebar
         \Illuminate\Support\Facades\View::composer('layouts.admin', \App\View\Composers\AdminSidebarComposer::class);
+
+        // Share cart count with web header
+        \Illuminate\Support\Facades\View::composer('layouts.web-app', \App\Http\View\Composers\WebLayoutComposer::class);
     }
 }
