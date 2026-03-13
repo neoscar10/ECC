@@ -261,102 +261,69 @@
             flex: 1 1 auto;
         }
 
-        .shop-featured-banner {
-            position: relative;
-            min-height: 380px;
-            border-radius: 24px;
-            overflow: hidden;
-            border: 1px solid rgba(212,175,55,.14);
-            background:
-                radial-gradient(circle at top left, rgba(212,175,55,.12), transparent 55%),
-                linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
-                #110f09;
-            box-shadow: 0 22px 48px rgba(0,0,0,.28);
-            margin-bottom: 2rem;
-        }
+    .ecc-shop-search-block {
+        background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
+        border: 1px solid rgba(212,175,55,.14);
+        border-radius: 1.25rem;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 12px 30px rgba(0,0,0,.14);
+        margin-bottom: 2rem;
+    }
 
-        .shop-featured-banner-image {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: .45;
-            mix-blend-mode: screen;
-            transition: transform .8s ease;
-        }
+    .ecc-shop-search-inner {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
 
-        .shop-featured-banner:hover .shop-featured-banner-image {
-            transform: scale(1.03);
-        }
+    .ecc-shop-search-icon {
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+        border-radius: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(212,175,55,.10);
+        color: #d4af37;
+        font-size: 1.3rem;
+    }
 
-        .shop-featured-banner-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, rgba(11,9,4,.96) 0%, rgba(11,9,4,.72) 48%, rgba(11,9,4,.12) 100%);
-        }
+    .ecc-shop-search-label {
+        color: #d4af37;
+        font-size: .72rem;
+        font-weight: 900;
+        letter-spacing: .22em;
+        text-transform: uppercase;
+    }
 
-        .shop-featured-banner-content {
-            position: relative;
-            z-index: 2;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 2.5rem;
-            max-width: 680px;
-        }
+    .ecc-shop-search-input {
+        min-height: 52px;
+        border-radius: 1rem;
+        background: rgba(255,255,255,.04);
+        border: 1px solid rgba(212,175,55,.12);
+        color: #f5efe1;
+        box-shadow: none !important;
+    }
 
-        .shop-featured-kicker {
-            color: var(--luxe-gold);
-            font-size: .78rem;
-            font-weight: 900;
-            letter-spacing: .24em;
-            text-transform: uppercase;
-            margin-bottom: 1rem;
-        }
+    .ecc-shop-search-input:focus {
+        background: rgba(255,255,255,.06);
+        border-color: rgba(212,175,55,.42);
+        color: #fff;
+    }
 
-        .shop-featured-title {
-            color: #fff;
-            font-size: clamp(2.5rem, 4.4vw, 5rem);
-            line-height: .95;
-            font-weight: 900;
-            letter-spacing: -.06em;
-            margin: 0 0 1.25rem;
-        }
+    .ecc-shop-search-input::placeholder {
+        color: rgba(245,239,225,.38);
+    }
 
-        .shop-featured-text {
-            color: var(--luxe-text-soft);
-            font-size: 1.08rem;
-            line-height: 1.8;
-            max-width: 560px;
-            margin-bottom: 1.6rem;
-        }
+    .ecc-shop-search-helper {
+        color: rgba(245,239,225,.52);
+        font-size: .82rem;
+        line-height: 1.6;
+        padding-left: calc(52px + 1rem);
+    }
 
-        .shop-featured-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 54px;
-            padding: .95rem 1.5rem;
-            border-radius: 999px;
-            background: var(--luxe-gold);
-            color: #111;
-            font-size: .82rem;
-            font-weight: 900;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-            text-decoration: none;
-            border: 0;
-            transition: .2s ease;
-        }
-
-        .shop-featured-btn:hover {
-            filter: brightness(1.05);
-            color: #111;
-        }
-
-        .shop-products-head {
+    .shop-products-head {
             display: flex;
             align-items: end;
             justify-content: space-between;
@@ -672,17 +639,16 @@
                 gap: .6rem;
             }
 
-            .shop-featured-banner {
-                min-height: 300px;
+            .ecc-shop-search-block {
+                padding: 1rem;
             }
 
-            .shop-featured-banner-content {
-                padding: 1.6rem;
-                max-width: 100%;
+            .ecc-shop-search-inner {
+                align-items: flex-start;
             }
 
-            .shop-featured-title {
-                font-size: clamp(2rem, 8vw, 3rem);
+            .ecc-shop-search-helper {
+                padding-left: 0;
             }
 
             .shop-products-head {
@@ -727,14 +693,7 @@
     @endpush
 
     @php
-        /**
-         * Banner content fallbacks mappings
-         */
-        $featuredBannerTitle = 'PERFORMANCE. HERITAGE. MATCHDAY ESSENTIALS.';
-        $featuredBannerText = 'Discover premium cricket gear, apparel, and accessories selected for players and collectors who value craftsmanship, comfort, and performance.';
-        $featuredBannerKicker = 'Curated Club Store';
-        $featuredBannerImage = null; // Update if a specific project banner image exists
-        $featuredBannerUrl = 'javascript:void(0)';
+        // Shop search and filters are already wired to the existing Livewire Index component logic
     @endphp
 
     <button
@@ -1071,30 +1030,26 @@
 
         {{-- MAIN CONTENT --}}
         <div class="shop-main">
-            {{-- FEATURED BANNER --}}
-            <section class="shop-featured-banner">
-                @if(!empty($featuredBannerImage))
-                    <img
-                        src="{{ $featuredBannerImage }}"
-                        alt="{{ $featuredBannerTitle }}"
-                        class="shop-featured-banner-image"
-                    >
-                @endif
+            {{-- PREMIUM SEARCH BLOCK --}}
+            <div class="ecc-shop-search-block mb-4 mb-lg-5">
+                <div class="ecc-shop-search-inner">
+                    <div class="ecc-shop-search-icon">
+                        <i class="mdi mdi-magnify"></i>
+                    </div>
 
-                <div class="shop-featured-banner-overlay"></div>
-
-                <div class="shop-featured-banner-content">
-                    <div class="shop-featured-kicker">{{ $featuredBannerKicker }}</div>
-                    <h2 class="shop-featured-title">{{ $featuredBannerTitle }}</h2>
-                    <p class="shop-featured-text">{{ $featuredBannerText }}</p>
-
-                    <div>
-                        <a href="{{ $featuredBannerUrl }}" class="shop-featured-btn">
-                            Discover the Series
-                        </a>
+                    <div class="flex-grow-1">
+                        <label class="ecc-shop-search-label d-block mb-2">SEARCH PRODUCTS</label>
+                        <input type="text"
+                               class="form-control ecc-shop-search-input"
+                               placeholder="Search premium cricket gear, apparel, and accessories..."
+                               wire:model.live.debounce.400ms="search">
                     </div>
                 </div>
-            </section>
+
+                <div class="ecc-shop-search-helper mt-2">
+                    Find products instantly while keeping your current filters applied.
+                </div>
+            </div>
 
             {{-- PRODUCTS HEAD --}}
             <section>
