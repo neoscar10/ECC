@@ -15,7 +15,7 @@
 @endphp
 
 @php
-    $exploreAllUrl = $this->getExploreAllUrl($block);
+    $exploreAllUrl = ($this instanceof \App\Livewire\Pavilion\HomePage) ? $this->getExploreAllUrl($block) : null;
 @endphp
 
 <div class="cms-slider-block cms-fade-in" style="margin-bottom: 60px;">
@@ -51,7 +51,7 @@
             <div class="row g-3 px-2">
                 @foreach(collect($items)->take(3) as $item)
                     <div class="col-4">
-                         <x-cms.partials.item-card :item="$item" :source="$source" :isEditorial="$mode === 'manual'" />
+                         <x-cms.partials.item-card :item="$item" :source="$source" :isEditorial="$mode === 'manual'" :previewMode="$previewMode" />
                     </div>
                 @endforeach
             </div>
@@ -65,14 +65,14 @@
                             @php $manualItems = $mode === 'images' ? $slides : $items; @endphp
                             @foreach($manualItems as $item)
                                 <div class="swiper-slide h-auto">
-                                    <x-cms.partials.item-card :item="$item" :source="$source" :isEditorial="true" />
+                                    <x-cms.partials.item-card :item="$item" :source="$source" :isEditorial="true" :previewMode="$previewMode" />
                                 </div>
                             @endforeach
                         @else
                             {{-- Category Items --}}
                             @foreach($items as $item)
                                 <div class="swiper-slide h-auto">
-                                    <x-cms.partials.item-card :item="$item" :source="$source" />
+                                    <x-cms.partials.item-card :item="$item" :source="$source" :previewMode="$previewMode" />
                                 </div>
                             @endforeach
                         @endif

@@ -1,4 +1,4 @@
-@props(['item', 'source' => 'shop'])
+@props(['item', 'source' => 'shop', 'isEditorial' => false, 'previewMode' => null])
 
 @php
     $id = $item['id'] ?? null;
@@ -40,6 +40,7 @@
 
 @php
     $isEditorial = $isEditorial ?? false;
+    $isPreview = ($previewMode === 'access-step');
 @endphp
 
 @if($isEditorial)
@@ -192,5 +193,140 @@
         margin-top: 3px;
         font-size: 8px;
         font-weight: 600;
+    }
+
+    /* Shared Card Styles migrated from Home Page */
+    .ecc-auction-card {
+        transition: transform .3s ease;
+    }
+
+    .ecc-auction-card-media {
+        aspect-ratio: {{ $isPreview ? '4/5' : '1/1' }};
+        border-radius: 1rem;
+        overflow: hidden;
+        border: 1px solid rgba(212,175,55,.12);
+        background: #1a140b;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .ecc-card-badge {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        z-index: 10;
+        padding: .25rem .5rem;
+        border-radius: .4rem;
+        background: rgba(17,13,7,.85);
+        backdrop-filter: blur(8px);
+        color: #d4af37;
+        font-size: .55rem;
+        font-weight: 900;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        border: 1px solid rgba(212,175,55,.2);
+    }
+
+    .ecc-card-media-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(17,13,7,0.9) 0%, rgba(17,13,7,0) 45%);
+        z-index: 1;
+    }
+
+    .ecc-card-bottom-meta {
+        position: absolute;
+        left: 0.75rem;
+        right: 0.75rem;
+        bottom: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        z-index: 2;
+    }
+
+    .ecc-countdown {
+        color: #fff;
+        font-size: .7rem;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        background: rgba(0,0,0,0.3);
+        padding: .2rem .4rem;
+        border-radius: .35rem;
+    }
+
+    .ecc-card-action-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: .7rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #d4af37;
+        color: #17120a;
+        font-size: 1rem;
+        box-shadow: 0 6px 20px rgba(212,175,55,.25);
+        transition: .2s ease;
+    }
+
+    .ecc-card-title {
+        color: #fff;
+        font-size: {{ $isPreview ? '1.15rem' : '0.95rem' }};
+        font-weight: 800;
+        margin-bottom: .2rem;
+    }
+
+    .ecc-card-meta-label {
+        color: rgba(245,239,225,.4);
+        font-size: .75rem;
+        font-weight: 600;
+    }
+
+    .ecc-card-meta-value {
+        color: #d4af37;
+        font-weight: 800;
+        font-size: .85rem;
+    }
+
+    .ecc-editorial-card {
+        aspect-ratio: {{ $isPreview ? '16/9' : '1/1' }};
+        border-radius: 1.15rem;
+        border: 1px solid rgba(212,175,55,.1);
+        background: #1a140b;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .ecc-editorial-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(13,9,5,0.95) 0%, rgba(13,9,5,0.7) 35%, rgba(13,9,5,0.2) 100%);
+        z-index: 1;
+    }
+
+    .ecc-editorial-content {
+        position: absolute;
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+        z-index: 2;
+    }
+
+    .ecc-editorial-title {
+        color: #fff;
+        font-size: {{ $isPreview ? '1.8rem' : '1.15rem' }};
+        line-height: 1.1;
+        font-style: italic;
+        font-weight: 900;
+        margin-bottom: .15rem;
+        letter-spacing: -.01em;
+    }
+
+    .ecc-editorial-meta {
+        color: #d4af37;
+        font-weight: 800;
+        font-size: {{ $isPreview ? '0.9rem' : '0.75rem' }};
+        text-transform: uppercase;
+        letter-spacing: .08em;
     }
 </style>
