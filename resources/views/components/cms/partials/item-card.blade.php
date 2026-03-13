@@ -50,7 +50,7 @@
     @else
     <div role="button" tabindex="0" wire:click.prevent="openAccessModal({{ $targetTierId ?? 'null' }}, {{ json_encode($title) }}, {{ json_encode($icon) }})" class="ecc-editorial-card d-block h-100 overflow-hidden position-relative" style="cursor: pointer;">
     @endif
-        <img src="{{ $image }}" alt="{{ $title }}" class="w-100 h-100 object-fit-cover">
+        <img src="{{ $image }}" alt="{{ $title }}" class="w-100 h-100 object-fit-cover {{ $isBlurred ? 'ecc-blur-content' : '' }}">
         
         <div class="ecc-editorial-overlay"></div>
 
@@ -90,7 +90,7 @@
             <div class="ecc-auction-card-media position-relative">
                 <img src="{{ $image }}" 
                      alt="{{ $title }}" 
-                     class="w-100 h-100 object-fit-cover {{ $isBlurred ? 'blur-md' : '' }}">
+                     class="w-100 h-100 object-fit-cover {{ $isBlurred ? 'ecc-blur-content' : '' }}">
 
                 @if($item['badge_text'] ?? ($item['badge'] ?? null))
                     <span class="ecc-card-badge">{{ $item['badge_text'] ?? $item['badge'] }}</span>
@@ -154,6 +154,11 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
+    .ecc-blur-content {
+        filter: blur(15px);
+        transform: scale(1.05); /* Slight scale to hide edges */
+    }
+
     .cms-item-card:hover .card {
         background: #181818 !important;
         transform: translateY(-4px);
