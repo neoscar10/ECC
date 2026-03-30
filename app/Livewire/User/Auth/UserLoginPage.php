@@ -32,11 +32,11 @@ class UserLoginPage extends Component
             if ($user instanceof User) {
                 $nextRoute = $resumeService->nextRouteForUser($user);
                 if ($nextRoute) {
-                    $this->redirect($nextRoute, navigate: true);
+                    $this->redirect($nextRoute, navigate: false);
                     return;
                 }
             }
-            $this->redirect(Route::has('home') ? route('home') : url('/home'), navigate: true);
+            $this->redirect(Route::has('home') ? route('home') : url('/home'), navigate: false);
         }
     }
 
@@ -109,7 +109,7 @@ class UserLoginPage extends Component
 
         $nextRoute = $resumeService->nextRouteForUser($user);
 
-        $this->redirect($nextRoute ?: (Route::has('home') ? route('home') : url('/home')), navigate: true);
+        $this->redirect($nextRoute ?: (Route::has('home') ? route('home') : url('/home')), navigate: false);
     }
 
     public function cancelAdminRedirect(): void
@@ -166,7 +166,7 @@ class UserLoginPage extends Component
             : url('/admin');
 
         $this->dispatch('ecc-admin-modal-close');
-        $this->redirect($to, navigate: true);
+        $this->redirect($to, navigate: false);
     }
 
     private function resolveUserByIdentity(string $identity): ?User
