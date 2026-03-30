@@ -13,8 +13,9 @@
         .shop-detail-gallery-stage {
             position: relative;
             flex: 1;
-            min-height: 400px;
-            max-height: 600px;
+            min-height: 520px;
+            height: clamp(520px, 60vh, 680px);
+            max-height: 680px;
             border-radius: 22px;
             overflow: hidden;
             border: 1px solid rgba(212,175,55,.14);
@@ -663,8 +664,9 @@
             }
 
             .shop-detail-gallery-stage {
-                min-height: 420px;
-                max-height: 550px;
+                min-height: 460px;
+                height: auto;
+                max-height: 580px;
             }
 
             .shop-detail-size-grid {
@@ -674,8 +676,9 @@
 
         @media (max-width: 767.98px) {
             .shop-detail-gallery-stage {
-                min-height: 340px;
-                max-height: 450px;
+                min-height: 360px;
+                height: auto;
+                max-height: 460px;
             }
 
             .shop-detail-thumb-rail {
