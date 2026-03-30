@@ -103,10 +103,18 @@
 
         .shop-detail-thumb-rail {
             display: flex;
-            flex-direction: row;
-            gap: .75rem;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+
+        .shop-detail-thumb-rail-mobile {
+            display: flex;
+            gap: .85rem;
             overflow-x: auto;
-            padding: .25rem;
+            padding: 1rem 0;
             scrollbar-width: none;
         }
 
@@ -116,21 +124,16 @@
 
         .shop-detail-thumb {
             position: relative;
-            flex: 0 0 70px;
-            width: 70px;
-            aspect-ratio: 1 / 1;
-            border-radius: 12px;
+            border-radius: 18px;
             overflow: hidden;
-            border: 1px solid rgba(212,175,55,.12);
-            background: rgba(35,31,23,.88);
+            border: 1px solid rgba(212,175,55,.14);
+            background: #120f08;
+            aspect-ratio: 1 / 1;
             padding: 0;
-            transition: .25s ease;
-        }
-
-        .shop-detail-thumb:hover,
-        .shop-detail-thumb.active {
-            border: 2px solid var(--luxe-gold);
-            box-shadow: 0 0 12px rgba(212,175,55,.2);
+            transition: .2s ease;
+            box-shadow: 0 12px 24px rgba(0,0,0,.16);
+            width: 100%;
+            flex: 0 0 auto;
         }
 
         .shop-detail-thumb img {
@@ -139,16 +142,18 @@
             object-fit: cover;
             display: block;
             transition: .25s ease;
-        }
-
-        .shop-detail-thumb:not(.active) img {
-            opacity: .65;
+            opacity: .74;
         }
 
         .shop-detail-thumb:hover img,
         .shop-detail-thumb.active img {
             opacity: 1;
-            transform: scale(1.05);
+            transform: scale(1.03);
+        }
+
+        .shop-detail-thumb.active {
+            border-color: var(--luxe-gold);
+            box-shadow: 0 0 0 2px rgba(212,175,55,.12);
         }
 
         .shop-detail-thumb-placeholder {
@@ -160,12 +165,59 @@
             font-size: 1.4rem;
         }
 
-        .shop-detail-editorial {
+        .shop-detail-sidebar {
             position: sticky;
             top: 100px;
             display: flex;
             flex-direction: column;
-            gap: 1.35rem;
+            gap: 1.15rem;
+        }
+
+        .shop-detail-side-card,
+        .shop-detail-cert-card {
+            border-radius: 22px;
+            border: 1px solid rgba(212,175,55,.14);
+            background:
+                linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
+                rgba(16,13,7,.78);
+            box-shadow: 0 18px 36px rgba(0,0,0,.22);
+            padding: 1.5rem;
+        }
+
+        .shop-detail-side-kicker {
+            color: var(--luxe-text-soft);
+            font-size: .7rem;
+            font-weight: 900;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            margin-bottom: .8rem;
+        }
+
+        .shop-detail-cert-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: .35rem;
+        }
+
+        .shop-detail-cert-card i {
+            color: var(--luxe-gold);
+            font-size: 1.4rem;
+        }
+
+        .shop-detail-cert-title {
+            color: #fff;
+            font-size: .8rem;
+            font-weight: 900;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .shop-detail-cert-subtitle {
+            color: var(--luxe-text-soft);
+            font-size: .7rem;
+            line-height: 1.5;
         }
 
         .shop-detail-kicker {
@@ -207,9 +259,10 @@
 
         .shop-detail-price {
             color: var(--luxe-gold);
-            font-size: 2.4rem;
+            font-size: clamp(1.8rem, 3vw, 2.8rem);
             font-weight: 900;
-            letter-spacing: -.04em;
+            letter-spacing: -.02em;
+            line-height: 1.1;
         }
 
         .shop-detail-stock-pill {
@@ -439,11 +492,24 @@
 
         .shop-detail-story-title {
             color: #fff;
-            font-size: .9rem;
+            font-size: 1.5rem;
             font-weight: 900;
-            letter-spacing: .16em;
+            letter-spacing: -.03em;
+            margin: 0 0 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .85rem;
             text-transform: uppercase;
-            margin-bottom: .85rem;
+        }
+
+        .shop-detail-story-title::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 24px;
+            border-radius: 999px;
+            background: var(--luxe-gold);
+            flex: 0 0 auto;
         }
 
         .shop-detail-story,
@@ -617,7 +683,8 @@
             }
 
             .shop-detail-thumb {
-                flex: 0 0 calc(25% - .45rem);
+                flex: 0 0 auto;
+                width: 100%;
             }
 
             .shop-detail-price-row {
@@ -667,18 +734,19 @@
 
             .shop-detail-thumb-rail {
                 flex-direction: column;
-                flex: 0 0 140px;
-                max-height: 600px;
+                flex: 0 0 auto;
+                max-height: 450px;
                 overflow-y: auto;
                 overflow-x: hidden;
-                padding: 0 .2rem 0 0;
+                padding: 0 .4rem 0 0;
             }
 
             .shop-detail-thumb {
-                flex: 0 0 140px;
-                width: 140px;
+                flex: 0 0 auto;
+                width: 100%;
+                aspect-ratio: 1 / 1;
                 margin-bottom: .65rem;
-                border-radius: 18px;
+                border-radius: 12px;
             }
         }
     </style>
@@ -720,180 +788,221 @@
     @endphp
 
     <div class="shop-detail-main">
-        <div class="row g-4 align-items-start">
-            {{-- LEFT: GALLERY --}}
-            <div class="col-lg-8">
-                <div class="shop-detail-gallery-container">
-                    <div class="shop-detail-gallery-stage">
-                        @if(!empty($mainImage))
-                            <img
-                                src="{{ $mainImage }}"
-                                alt="{{ $title }}"
-                                id="shopDetailMainImage"
-                            >
-                        @else
-                            <img
-                                src="https://placehold.co/1000x1200/17130b/d4af37?text=Product"
-                                alt="{{ $title }}"
-                                id="shopDetailMainImage"
-                            >
-                        @endif
+        <div class="row g-4 mb-5">
+            {{-- LEFT: GALLERY STAGE (9/12) --}}
+            <div class="col-lg-9">
+                <div class="shop-detail-gallery-stage">
+                    @if(!empty($mainImage))
+                        <img
+                            src="{{ $mainImage }}"
+                            alt="{{ $title }}"
+                            id="shopDetailMainImage"
+                        >
+                    @else
+                        <img
+                            src="https://placehold.co/1000x1200/17130b/d4af37?text=Product"
+                            alt="{{ $title }}"
+                            id="shopDetailMainImage"
+                        >
+                    @endif
 
-                        @if(!empty($badge))
-                            <div class="shop-detail-stage-badge">{{ $badge }}</div>
-                        @endif
+                    @if(!empty($badge))
+                        <div class="shop-detail-stage-badge">{{ $badge }}</div>
+                    @endif
 
-                        @if($galleryItems->count() > 1)
-                            <button type="button" class="shop-detail-stage-control prev" wire:click="selectMedia({{ ($selectedMediaIndex - 1 + $galleryItems->count()) % $galleryItems->count() }})" aria-label="Previous image">
-                                <i class="mdi mdi-chevron-left"></i>
-                            </button>
-
-                            <button type="button" class="shop-detail-stage-control next" wire:click="selectMedia({{ ($selectedMediaIndex + 1) % $galleryItems->count() }})" aria-label="Next image">
-                                <i class="mdi mdi-chevron-right"></i>
-                            </button>
-                        @endif
-
-                        <button type="button" class="shop-detail-stage-control zoom" id="shopDetailZoomBtn" aria-label="Zoom image">
-                            <i class="mdi mdi-magnify-plus-outline"></i>
+                    @if($galleryItems->count() > 1)
+                        <button type="button" class="shop-detail-stage-control prev" wire:click="selectMedia({{ ($selectedMediaIndex - 1 + $galleryItems->count()) % $galleryItems->count() }})" aria-label="Previous image">
+                            <i class="mdi mdi-chevron-left"></i>
                         </button>
-                    </div>
 
-                    <div class="shop-detail-thumb-rail" id="shopDetailThumbGrid">
-                        @if($galleryItems->count())
-                            @foreach($galleryItems as $index => $media)
-                                @php
-                                    $thumbUrl = $media['thumb_url'] ?? $media['url'] ?? null;
-                                    $fullUrl = $media['url'] ?? null;
-                                @endphp
+                        <button type="button" class="shop-detail-stage-control next" wire:click="selectMedia({{ ($selectedMediaIndex + 1) % $galleryItems->count() }})" aria-label="Next image">
+                            <i class="mdi mdi-chevron-right"></i>
+                        </button>
+                    @endif
 
-                                <button
-                                    type="button"
-                                    class="shop-detail-thumb {{ (int)$selectedMediaIndex === (int)$index ? 'active' : '' }}"
-                                    wire:click="selectMedia({{ $index }})"
-                                    aria-label="View image {{ $index + 1 }}"
-                                >
-                                    <img src="{{ $thumbUrl ?: $fullUrl }}" alt="{{ $title }} thumbnail {{ $index + 1 }}">
-                                </button>
-                            @endforeach
-                        @else
-                            <div class="shop-detail-thumb"></div>
-                            <div class="shop-detail-thumb"></div>
-                            <div class="shop-detail-thumb"></div>
-                            <div class="shop-detail-thumb shop-detail-thumb-placeholder">
-                                <i class="mdi mdi-play-circle-outline"></i>
-                            </div>
-                        @endif
-                    </div>
+                    <button type="button" class="shop-detail-stage-control zoom" id="shopDetailZoomBtn" aria-label="Zoom image">
+                        <i class="mdi mdi-magnify-plus-outline"></i>
+                    </button>
                 </div>
             </div>
 
-            {{-- RIGHT: EDITORIAL PANEL --}}
-            <div class="col-lg-4">
-                <div class="shop-detail-editorial">
-                    <header>
+            {{-- RIGHT: THUMBNAILS (3/12) --}}
+            <div class="col-lg-3 d-none d-lg-block">
+                <div class="shop-detail-thumb-rail scroll-luxury" id="shopDetailThumbGrid">
+                    @if($galleryItems->count())
+                        @foreach($galleryItems as $index => $media)
+                            @php
+                                $thumbUrl = $media['thumb_url'] ?? $media['url'] ?? null;
+                                $fullUrl = $media['url'] ?? null;
+                            @endphp
+
+                            <button
+                                type="button"
+                                class="shop-detail-thumb {{ (int)$selectedMediaIndex === (int)$index ? 'active' : '' }}"
+                                wire:click="selectMedia({{ $index }})"
+                                aria-label="View image {{ $index + 1 }}"
+                            >
+                                <img src="{{ $thumbUrl ?: $fullUrl }}" alt="{{ $title }} thumbnail {{ $index + 1 }}">
+                            </button>
+                        @endforeach
+                    @endif
+                </div>
+            </div>
+
+            {{-- MOBILE THUMBS (Hidden on Desktop) --}}
+            <div class="col-12 d-lg-none">
+                <div class="shop-detail-thumb-rail-mobile scroll-luxury">
+                    @foreach($galleryItems as $index => $media)
+                        <button
+                            type="button"
+                            class="shop-detail-thumb {{ (int)$selectedMediaIndex === (int)$index ? 'active' : '' }}"
+                            wire:click="selectMedia({{ $index }})"
+                        >
+                            <img src="{{ $media['thumb_url'] ?? $media['url'] }}" alt="thumb">
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        {{-- MAIN CONTENT GRID (9/3 Split) --}}
+        <div class="row g-4 g-xl-5 mt-4">
+            {{-- LEFT: PRODUCT CONTENT (9/12) --}}
+            <div class="col-lg-9">
+                <div class="shop-detail-info-block">
+                    <header class="mb-3">
                         @if(!empty($badge))
-                            <div class="shop-detail-kicker mb-3">
+                            <div class="shop-detail-kicker mb-2">
                                 <i class="mdi mdi-star-four-points-outline"></i>
                                 <span>{{ $badge }}</span>
                             </div>
                         @endif
 
                         <h1 class="shop-detail-title">{{ $title }}</h1>
-
-                        <div class="shop-detail-price-row mt-4">
-                            <div class="shop-detail-price-block">
-                                <div class="shop-detail-price">{{ $price }}</div>
-                                <div class="shop-detail-stock-pill {{ $inStock ? '' : 'text-danger border-danger-subtle bg-danger-subtle' }}">
-                                    {{ $stockLabel }}
-                                </div>
-                            </div>
-
-                            <div class="shop-detail-rating">
-                                <span class="shop-detail-rating-stars">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <i class="mdi {{ $i <= round((float)$ratingValue) ? 'mdi-star' : 'mdi-star-outline' }}"></i>
-                                    @endfor
-                                </span>
-                                <span>({{ $reviewCount }} Reviews)</span>
-                            </div>
-                        </div>
                     </header>
 
-                    <div class="shop-detail-divider"></div>
+                    <div class="shop-detail-price-row mb-4">
+                        <div class="shop-detail-price-block">
+                            <div class="shop-detail-price">{{ $price }}</div>
+                            <div class="shop-detail-stock-pill {{ $inStock ? '' : 'text-danger border-danger-subtle bg-danger-subtle' }}">
+                                {{ $stockLabel }}
+                            </div>
+                        </div>
 
-                    {{-- VARIATION GROUPS --}}
-                    @foreach(($variationGroups ?? []) as $group)
-                        @php
-                            $groupId = $group['id'];
-                            $groupName = $group['name'] ?? 'Option';
-                            $presentation = $group['presentation_type'] ?? 'text';
-                            $values = $group['values'] ?? [];
-                            $selectedValueId = $selectedVariationValues[$groupId] ?? null;
-                        @endphp
+                        <div class="shop-detail-rating">
+                            <span class="shop-detail-rating-stars">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <i class="mdi {{ $i <= round((float)$ratingValue) ? 'mdi-star' : 'mdi-star-outline' }}"></i>
+                                @endfor
+                            </span>
+                            <span>({{ $reviewCount }} Reviews)</span>
+                        </div>
+                    </div>
 
-                        <section>
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <div class="shop-detail-field-label">{{ $groupName }}</div>
+                    <div class="shop-detail-divider mb-4" style="background: linear-gradient(90deg, rgba(212,175,55,.18), transparent); height: 1px;"></div>
 
-                                @if(strtolower($group['slug'] ?? '') === 'size')
-                                    <button type="button" class="btn p-0 border-0 bg-transparent shop-detail-inline-link">
-                                        Size Guide
-                                    </button>
-                                @endif
+                    {{-- VARIATION GROUPS / SPECIFICATIONS --}}
+                    @if(count($variationGroups ?? []))
+                        <div class="shop-detail-spec-section mb-5">
+                            <div class="shop-detail-story-title mb-4">
+                                <span style="color: var(--luxe-gold); margin-right: .5rem;">|</span>Specifications
                             </div>
 
-                            @if($presentation === 'color')
-                                <div class="shop-detail-swatches">
-                                    @foreach($values as $value)
-                                        @php
-                                            $valueId = $value['id'];
-                                            $label = $value['caption'] ?? 'Option';
-                                            $stock = (int)($value['stock_qty'] ?? 0);
-                                            $disabled = $stock <= 0;
-                                            $isActive = (string)$selectedValueId === (string)$valueId;
-                                            $colorHex = $value['color_hex'] ?? '#ffffff';
-                                        @endphp
-                                        <button
-                                            type="button"
-                                            class="shop-detail-swatch {{ $isActive ? 'active' : '' }}"
-                                            style="background-color: transparent;"
-                                            title="{{ $label }}{{ $disabled ? ' (Out of stock)' : '' }}"
-                                            wire:click="selectVariationValue({{ $groupId }}, {{ $valueId }})"
-                                            @if($disabled) disabled @endif
-                                        >
-                                            <span class="shop-detail-swatch-core" style="background-color: {{ $colorHex }};"></span>
-                                        </button>
-                                    @endforeach
-                                </div>
-                            @else
-                                <div class="shop-detail-size-grid">
-                                    @foreach($values as $value)
-                                        @php
-                                            $valueId = $value['id'];
-                                            $label = $value['caption'] ?? 'Option';
-                                            $stock = (int)($value['stock_qty'] ?? 0);
-                                            $disabled = $stock <= 0;
-                                            $isActive = (string)$selectedValueId === (string)$valueId;
-                                        @endphp
+                            <div class="row g-4 leading-relaxed">
+                                @foreach($variationGroups as $group)
+                                    @php
+                                        $groupId = $group['id'];
+                                        $groupName = $group['name'] ?? 'Option';
+                                        $presentation = $group['presentation_type'] ?? 'text';
+                                        $values = $group['values'] ?? [];
+                                        $selectedValueId = $selectedVariationValues[$groupId] ?? null;
+                                    @endphp
 
-                                        <button
-                                            type="button"
-                                            class="shop-detail-size-btn {{ $isActive ? 'active' : '' }} {{ $disabled ? 'disabled' : '' }}"
-                                            wire:click="selectVariationValue({{ $groupId }}, {{ $valueId }})"
-                                            @disabled($disabled)
-                                        >
-                                            {{ $label }}
-                                        </button>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </section>
-                    @endforeach
+                                    <div class="col-md-6">
+                                        <section>
+                                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                                <div class="shop-detail-field-label text-white-50 opacity-75 small uppercase font-bold">{{ $groupName }}</div>
 
-                    {{-- PURCHASE CARD --}}
-                    <section class="shop-detail-purchase-card">
-                        <div class="shop-detail-purchase-row">
-                            <div class="shop-detail-qty">
+                                                @if(strtolower($group['slug'] ?? '') === 'size')
+                                                    <button type="button" class="btn p-0 border-0 bg-transparent shop-detail-inline-link">
+                                                        Size Guide
+                                                    </button>
+                                                @endif
+                                            </div>
+
+                                            @if($presentation === 'color')
+                                                <div class="shop-detail-swatches">
+                                                    @foreach($values as $value)
+                                                        @php
+                                                            $valueId = $value['id'];
+                                                            $label = $value['caption'] ?? 'Option';
+                                                            $stock = (int)($value['stock_qty'] ?? 0);
+                                                            $disabled = $stock <= 0;
+                                                            $isActive = (string)$selectedValueId === (string)$valueId;
+                                                            $colorHex = $value['color_hex'] ?? '#ffffff';
+                                                        @endphp
+                                                        <button
+                                                            type="button"
+                                                            class="shop-detail-swatch {{ $isActive ? 'active' : '' }}"
+                                                            style="background-color: transparent;"
+                                                            title="{{ $label }}{{ $disabled ? ' (Out of stock)' : '' }}"
+                                                            wire:click="selectVariationValue({{ $groupId }}, {{ $valueId }})"
+                                                            @if($disabled) disabled @endif
+                                                        >
+                                                            <span class="shop-detail-swatch-core" style="background-color: {{ $colorHex }};"></span>
+                                                        </button>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <div class="shop-detail-size-grid">
+                                                    @foreach($values as $value)
+                                                        @php
+                                                            $valueId = $value['id'];
+                                                            $label = $value['caption'] ?? 'Option';
+                                                            $stock = (int)($value['stock_qty'] ?? 0);
+                                                            $disabled = $stock <= 0;
+                                                            $isActive = (string)$selectedValueId === (string)$valueId;
+                                                        @endphp
+
+                                                        <button
+                                                            type="button"
+                                                            class="shop-detail-size-btn {{ $isActive ? 'active' : '' }} {{ $disabled ? 'disabled' : '' }}"
+                                                            wire:click="selectVariationValue({{ $groupId }}, {{ $valueId }})"
+                                                            @disabled($disabled)
+                                                        >
+                                                            {{ $label }}
+                                                        </button>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </section>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="shop-detail-divider mb-4" style="background: linear-gradient(90deg, rgba(212,175,55,.18), transparent); height: 1px;"></div>
+
+                    <div class="shop-detail-story-title">
+                        <span style="color: var(--luxe-gold); margin-right: .5rem;">|</span>The Craftsmanship
+                    </div>
+                    <div class="shop-detail-story">
+                        {!! $descriptionHtml !!}
+                    </div>
+                </div>
+            </div>
+
+            {{-- RIGHT: SIDEBAR (3/12) --}}
+            <div class="col-lg-3">
+                <div class="shop-detail-sidebar">
+                    {{-- SIDE CARD (Mirroring Archive Side Card) --}}
+                    <div class="shop-detail-side-card">
+                        <div class="shop-detail-side-kicker">ADD TO CART</div>
+                        
+                        {{-- PURCHASE ACTIONS --}}
+                        <div class="shop-detail-purchase-row flex-column gap-3">
+                            <div class="shop-detail-qty w-100 d-flex justify-content-between p-2" style="background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
                                 <button type="button" class="shop-detail-qty-btn" wire:click="decrementQuantity">
                                     <i class="mdi mdi-minus"></i>
                                 </button>
@@ -905,7 +1014,7 @@
                                 </button>
                             </div>
 
-                            <button type="button" class="shop-detail-add-btn" wire:click="addToCart" wire:loading.attr="disabled" @disabled(!$inStock)>
+                            <button type="button" class="shop-detail-add-btn w-100 py-3" wire:click="addToCart" wire:loading.attr="disabled" @disabled(!$inStock)>
                                 <span wire:loading.remove wire:target="addToCart">
                                     {{ $inStock ? 'Add to Cart' : 'Out of Stock' }}
                                 </span>
@@ -913,35 +1022,25 @@
                                     Adding...
                                 </span>
                             </button>
-
-                            <button type="button" class="shop-detail-icon-btn" aria-label="Add to wishlist">
-                                <i class="mdi mdi-heart-outline"></i>
-                            </button>
                         </div>
+                    </div>
 
-                        <div class="shop-detail-micro-features">
-                            <div class="shop-detail-micro-feature">
-                                <i class="mdi mdi-truck-fast-outline"></i>
-                                <span>Free Express Shipping</span>
-                            </div>
+                    {{-- CERT CARD --}}
+                    <div class="shop-detail-cert-card mt-3">
+                        <i class="mdi mdi-seal-variant"></i>
+                        <div class="shop-detail-cert-title">Certified & Authentic</div>
+                        <div class="shop-detail-cert-subtitle">Guaranteed heritage gear from ECC.</div>
+                    </div>
 
-                            <div class="shop-detail-micro-feature">
-                                <i class="mdi mdi-shield-check-outline"></i>
-                                <span>Authentic Heritage Gear</span>
-                            </div>
+                    <div class="shop-detail-micro-features mt-3">
+                        <div class="shop-detail-micro-feature">
+                            <i class="mdi mdi-truck-fast-outline"></i>
+                            <span>Free Express Shipping</span>
                         </div>
-                    </section>
-
-                    {{-- STORY / DESCRIPTION --}}
-                    <section>
-                        <div class="shop-detail-story-title">The Craftsmanship</div>
-
-                        <div class="shop-detail-story">
-                            {!! $descriptionHtml !!}
-                        </div>
-                    </section>
+                    </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 
