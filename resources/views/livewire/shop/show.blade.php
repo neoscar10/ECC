@@ -13,9 +13,9 @@
         .shop-detail-gallery-stage {
             position: relative;
             flex: 1;
-            min-height: 520px;
-            height: clamp(520px, 60vh, 680px);
-            max-height: 680px;
+            min-height: 850px;
+            height: clamp(850px, 85vh, 1000px);
+            max-height: 1000px;
             border-radius: 22px;
             overflow: hidden;
             border: 1px solid rgba(212,175,55,.14);
@@ -23,18 +23,73 @@
                 linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
                 rgba(23,19,13,.95);
             box-shadow: 0 12px 32px rgba(0,0,0,.3);
+            display: flex;
+            align-items: stretch;
+            padding: 1.5rem;
         }
 
-        .shop-detail-gallery-stage img {
+        .shop-detail-stage-image-wrap {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .shop-detail-stage-thumbs {
+            flex-shrink: 0;
+            width: 110px;
+            height: 100%;
+            padding-left: 1.25rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .shop-detail-stage-image-wrap img#shopDetailMainImage {
             width: 100%;
             height: 100%;
+            max-width: 98%;
+            max-height: 98%;
             object-fit: contain;
             display: block;
+            margin: auto;
             transition: transform .7s ease;
         }
 
-        .shop-detail-gallery-stage:hover img {
+        .shop-detail-stage-image-wrap:hover img#shopDetailMainImage {
             transform: scale(1.04);
+        }
+
+        @media (max-width: 991.98px) {
+            .shop-detail-gallery-stage {
+                min-height: 540px;
+                height: auto;
+                max-height: 640px;
+            }
+
+            .shop-detail-gallery-stage img {
+                width: auto;
+                height: 100%;
+                max-width: 98%;
+                max-height: 100%;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .shop-detail-gallery-stage {
+                min-height: 400px;
+                height: auto;
+                max-height: 500px;
+            }
+
+            .shop-detail-gallery-stage img {
+                width: auto;
+                height: 100%;
+                max-width: 100%;
+                max-height: 100%;
+            }
         }
 
         .shop-detail-stage-badge {
@@ -125,14 +180,14 @@
 
         .shop-detail-thumb {
             position: relative;
-            border-radius: 18px;
+            border-radius: 14px;
             overflow: hidden;
             border: 1px solid rgba(212,175,55,.14);
             background: #120f08;
             aspect-ratio: 1 / 1;
             padding: 0;
             transition: .2s ease;
-            box-shadow: 0 12px 24px rgba(0,0,0,.16);
+            box-shadow: 0 8px 16px rgba(0,0,0,.16);
             width: 100%;
             flex: 0 0 auto;
         }
@@ -664,9 +719,8 @@
             }
 
             .shop-detail-gallery-stage {
-                min-height: 460px;
-                height: auto;
-                max-height: 580px;
+                min-height: 420px;
+                max-height: 550px;
             }
 
             .shop-detail-size-grid {
@@ -676,9 +730,8 @@
 
         @media (max-width: 767.98px) {
             .shop-detail-gallery-stage {
-                min-height: 360px;
-                height: auto;
-                max-height: 460px;
+                min-height: 340px;
+                max-height: 450px;
             }
 
             .shop-detail-thumb-rail {
@@ -791,88 +844,93 @@
     @endphp
 
     <div class="shop-detail-main">
-        <div class="row g-4 mb-5">
-            {{-- LEFT: GALLERY STAGE (9/12) --}}
+        {{-- MAIN CONTENT GRID (9/3 Split for the entire layout) --}}
+        <div class="row g-4 g-xl-5 mb-5">
+            {{-- LEFT: PRODUCT CONTENT & GALLERY STAGE (9/12) --}}
             <div class="col-lg-9">
-                <div class="shop-detail-gallery-stage">
-                    @if(!empty($mainImage))
-                        <img
-                            src="{{ $mainImage }}"
-                            alt="{{ $title }}"
-                            id="shopDetailMainImage"
-                        >
-                    @else
-                        <img
-                            src="https://placehold.co/1000x1200/17130b/d4af37?text=Product"
-                            alt="{{ $title }}"
-                            id="shopDetailMainImage"
-                        >
-                    @endif
+                
+                {{-- GALLERY STAGE (Includes Main Image & Desktop Thumbnails) --}}
+                <div class="shop-detail-gallery-stage mb-5">
+                    
+                    {{-- MAIN IMAGE WRAPPER --}}
+                    <div class="shop-detail-stage-image-wrap">
+                        @if(!empty($mainImage))
+                            <img
+                                src="{{ $mainImage }}"
+                                alt="{{ $title }}"
+                                id="shopDetailMainImage"
+                            >
+                        @else
+                            <img
+                                src="https://placehold.co/1000x1200/17130b/d4af37?text=Product"
+                                alt="{{ $title }}"
+                                id="shopDetailMainImage"
+                            >
+                        @endif
 
-                    @if(!empty($badge))
-                        <div class="shop-detail-stage-badge">{{ $badge }}</div>
-                    @endif
+                        @if(!empty($badge))
+                            <div class="shop-detail-stage-badge">{{ $badge }}</div>
+                        @endif
 
-                    @if($galleryItems->count() > 1)
-                        <button type="button" class="shop-detail-stage-control prev" wire:click="selectMedia({{ ($selectedMediaIndex - 1 + $galleryItems->count()) % $galleryItems->count() }})" aria-label="Previous image">
-                            <i class="mdi mdi-chevron-left"></i>
+                        @if($galleryItems->count() > 1)
+                            <button type="button" class="shop-detail-stage-control prev" wire:click="selectMedia({{ ($selectedMediaIndex - 1 + $galleryItems->count()) % $galleryItems->count() }})" aria-label="Previous image">
+                                <i class="mdi mdi-chevron-left"></i>
+                            </button>
+
+                            <button type="button" class="shop-detail-stage-control next" wire:click="selectMedia({{ ($selectedMediaIndex + 1) % $galleryItems->count() }})" aria-label="Next image">
+                                <i class="mdi mdi-chevron-right"></i>
+                            </button>
+                        @endif
+
+                        <button type="button" class="shop-detail-stage-control zoom" id="shopDetailZoomBtn" aria-label="Zoom image">
+                            <i class="mdi mdi-magnify-plus-outline"></i>
                         </button>
+                    </div>
 
-                        <button type="button" class="shop-detail-stage-control next" wire:click="selectMedia({{ ($selectedMediaIndex + 1) % $galleryItems->count() }})" aria-label="Next image">
-                            <i class="mdi mdi-chevron-right"></i>
-                        </button>
-                    @endif
+                    {{-- DESKTOP THUMBNAILS (Inside the Stage card) --}}
+                    <div class="shop-detail-stage-thumbs d-none d-lg-flex">
+                        <div class="shop-detail-thumb-rail scroll-luxury w-100" id="shopDetailThumbGrid">
+                            @if($galleryItems->count())
+                                @foreach($galleryItems as $index => $media)
+                                    @php
+                                        $thumbUrl = $media['thumb_url'] ?? $media['url'] ?? null;
+                                        $fullUrl = $media['url'] ?? null;
+                                    @endphp
 
-                    <button type="button" class="shop-detail-stage-control zoom" id="shopDetailZoomBtn" aria-label="Zoom image">
-                        <i class="mdi mdi-magnify-plus-outline"></i>
-                    </button>
+                                    <button
+                                        type="button"
+                                        class="shop-detail-thumb {{ (int)$selectedMediaIndex === (int)$index ? 'active' : '' }}"
+                                        wire:click="selectMedia({{ $index }})"
+                                        aria-label="View image {{ $index + 1 }}"
+                                    >
+                                        <img src="{{ $thumbUrl ?: $fullUrl }}" alt="{{ $title }} thumbnail {{ $index + 1 }}">
+                                    </button>
+                                @endforeach
+                            @endif
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            {{-- RIGHT: THUMBNAILS (3/12) --}}
-            <div class="col-lg-3 d-none d-lg-block">
-                <div class="shop-detail-thumb-rail scroll-luxury" id="shopDetailThumbGrid">
-                    @if($galleryItems->count())
+                {{-- MOBILE THUMBS (Hidden on Desktop) --}}
+                <div class="col-12 d-lg-none mb-5">
+                    <div class="shop-detail-thumb-rail-mobile scroll-luxury">
                         @foreach($galleryItems as $index => $media)
                             @php
                                 $thumbUrl = $media['thumb_url'] ?? $media['url'] ?? null;
-                                $fullUrl = $media['url'] ?? null;
                             @endphp
-
                             <button
                                 type="button"
                                 class="shop-detail-thumb {{ (int)$selectedMediaIndex === (int)$index ? 'active' : '' }}"
                                 wire:click="selectMedia({{ $index }})"
-                                aria-label="View image {{ $index + 1 }}"
                             >
-                                <img src="{{ $thumbUrl ?: $fullUrl }}" alt="{{ $title }} thumbnail {{ $index + 1 }}">
+                                <img src="{{ $thumbUrl }}" alt="thumb">
                             </button>
                         @endforeach
-                    @endif
+                    </div>
                 </div>
-            </div>
 
-            {{-- MOBILE THUMBS (Hidden on Desktop) --}}
-            <div class="col-12 d-lg-none">
-                <div class="shop-detail-thumb-rail-mobile scroll-luxury">
-                    @foreach($galleryItems as $index => $media)
-                        <button
-                            type="button"
-                            class="shop-detail-thumb {{ (int)$selectedMediaIndex === (int)$index ? 'active' : '' }}"
-                            wire:click="selectMedia({{ $index }})"
-                        >
-                            <img src="{{ $media['thumb_url'] ?? $media['url'] }}" alt="thumb">
-                        </button>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        {{-- MAIN CONTENT GRID (9/3 Split) --}}
-        <div class="row g-4 g-xl-5 mt-4">
-            {{-- LEFT: PRODUCT CONTENT (9/12) --}}
-            <div class="col-lg-9">
-                <div class="shop-detail-info-block">
+                {{-- PRODUCT INFO BELOW GALLERY --}}
+                <div class="shop-detail-info-block mt-lg-5 mt-4">
                     <header class="mb-3">
                         @if(!empty($badge))
                             <div class="shop-detail-kicker mb-2">
