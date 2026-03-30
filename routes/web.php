@@ -33,16 +33,16 @@ Route::middleware(['auth', 'ensure_registration_complete'])->group(function () {
 Route::get('/welcome', WelcomePage::class)->name('welcome');
 Route::get('/gated-entry', GatedEntryPage::class)->name('gated.entry');
 
-Route::get('/user/login', UserLoginPage::class)
+Route::get('/login', UserLoginPage::class)
     ->middleware('guest:web')
-    ->name('user.login');
+    ->name('login');
 
 Route::get('/', SplashScreen::class)->name('root');
 Route::get('/splash', SplashScreen::class)->name('splash');
 
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'index'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/admin/login', [AuthController::class, 'index'])->name('admin.login');
+    Route::post('/admin/login', [AuthController::class, 'login']);
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

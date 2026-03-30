@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable" data-theme="material" data-theme-colors="default">
 
 
@@ -620,6 +620,9 @@
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ request()->routeIs('admin.shop.*') ? 'active' : '' }}" href="#sidebarShop" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('admin.shop.*') ? 'true' : 'false' }}" aria-controls="sidebarShop">
                                 <i class="ri-store-2-line"></i> <span data-key="t-shop">Shop</span>
+                                @if(($placedOrdersCount ?? 0) > 0)
+                                    <span class="badge me-3 bg-danger ms-auto">{{ $placedOrdersCount }}</span>
+                                @endif
                             </a>
                             <div class="collapse menu-dropdown {{ request()->routeIs('admin.shop.*') ? 'show' : '' }}" id="sidebarShop">
                                 <ul class="nav nav-sm flex-column">
@@ -639,7 +642,12 @@
                                         <a href="{{ route('admin.shop.carts') }}" class="nav-link {{ request()->routeIs('admin.shop.carts') ? 'active' : '' }}" data-key="t-shop-carts">Carts</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.shop.orders') }}" class="nav-link {{ request()->routeIs('admin.shop.orders*') ? 'active' : '' }}" data-key="t-shop-orders">Orders</a>
+                                        <a href="{{ route('admin.shop.orders') }}" class="nav-link {{ request()->routeIs('admin.shop.orders*') ? 'active' : '' }}" data-key="t-shop-orders">
+                                            <span>Orders</span>
+                                            @if(($placedOrdersCount ?? 0) > 0)
+                                                <span class="badge bg-danger ms-auto">{{ $placedOrdersCount }}</span>
+                                            @endif
+                                        </a>
                                     </li>
                                 </ul>
                             </div>

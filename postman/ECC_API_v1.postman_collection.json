@@ -606,6 +606,49 @@
                     ]
                 },
                 {
+                    "name": "09 Delete Account",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/auth/me/account",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "auth",
+                                "me",
+                                "account"
+                            ]
+                        },
+                        "description": "Self-service account deletion for the authenticated user.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Behavior:**\n- Soft-deletes user record.\n- Unregisters device tokens.\n- Invalidates JWT."
+                    },
+                    "response": [
+                        {
+                            "name": "Success (200)",
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n    \"success\": true,\n    \"message\": \"Account deleted successfully.\",\n    \"data\": null,\n    \"meta\": null,\n    \"errors\": null\n}"
+                        }
+                    ]
+                },
+                {
                     "name": "Login with OTP (Dummy)",
                     "item": [
                         {

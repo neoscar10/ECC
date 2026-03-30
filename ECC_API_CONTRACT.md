@@ -1,4 +1,4 @@
-﻿# Executive Cricket Club (ECC) API Documentation
+# Executive Cricket Club (ECC) API Documentation
 
 **Version:** v1
 **Base URL:** `{{base_url}}/api/v1` (e.g., `http://localhost:8000/api/v1`)
@@ -150,6 +150,24 @@ Refresh the JWT token.
 #### POST /auth/logout
 Invalidate the current token.
 *   **Auth:** Yes
+
+#### DELETE /auth/me/account
+Self-service account deletion for the authenticated user.
+*   **Auth:** Yes
+*   **Behavior:** 
+    *   Soft-deletes the user account to preserve historical data (bids, orders, etc.).
+    *   Unregisters all device tokens for the user.
+    *   Invalidates the current JWT token.
+*   **Success Response:**
+    ```json
+    {
+        "success": true,
+        "message": "Account deleted successfully.",
+        "data": null,
+        "meta": null,
+        "errors": null
+    }
+    ```
 
 ---
 

@@ -1,0 +1,160 @@
+<div class="col-lg-4">
+    <div class="auction-sticky-col">
+        {{-- MAIN BIDDING CARD --}}
+        <div class="auction-bid-card overflow-hidden mb-4">
+            <div class="auction-bid-head p-4 p-lg-5">
+                <div class="d-flex align-items-start justify-content-between gap-3 mb-4">
+                    <div>
+                        <div class="auction-kicker mb-2">Current Bid</div>
+                        <div class="auction-highest-bid">{{ $highestBid }}</div>
+                    </div>
+
+                    @if($isLive)
+                        <div class="auction-live-chip">
+                            <span class="auction-live-chip-dot"></span>
+                            <span>Live</span>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="auction-bid-meta">
+                    <div class="d-inline-flex align-items-center gap-2">
+                        <i class="mdi mdi-timer-outline"></i>
+                        <span><strong id="ecc-countdown-display" data-ends-at="{{ !empty($lotPrepared->ends_at_iso) ? $lotPrepared->ends_at_iso : '' }}">{{ $lotPrepared->time_remaining_display ?? '' }}</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 p-lg-5">
+                {{-- AUTO BID --}}
+                <div class="mb-4">
+                    <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+                        <div class="auction-section-label">
+                            <i class="mdi mdi-robot-outline" style="color: var(--luxe-gold);"></i>
+                            <span>Auto-Bid Settings</span>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <div style="font-size: .8rem; font-weight: 800; color: {{ $hasAutoBidConfigured ? 'var(--luxe-gold)' : 'var(--luxe-text-soft)'}};">
+                                {{ $hasAutoBidConfigured ? 'ON' : 'OFF' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="auction-place-bid-btn w-100" style="min-height: 48px; font-size: 0.82rem; background: rgba(212,175,55,.12); border: 1px solid rgba(212,175,55,.2); color: var(--luxe-gold); box-shadow: none;" wire:click="openAutoBidModal" @if(empty($canAutoBid)) disabled @endif>
+                        <i class="mdi mdi-flash me-2"></i>
+                        {{ $hasAutoBidConfigured ? 'Update Auto Bid' : 'Set Auto Bid Limit' }}
+                    </button>
+                </div>
+
+                {{-- PLACE BID --}}
+                <div>
+                    <div class="auction-section-label mb-3">
+                        <i class="mdi mdi-cash-fast" style="color: var(--luxe-gold);"></i>
+                        <span>Place New Bid</span>
+                    </div>
+
+                    {{-- QUICK INCREMENT BUTTONS --}}
+                    @if(!empty($increments) && count($increments))
+                        <div class="auction-quick-bids mb-4">
+                            @foreach($increments as $increment)
+                                @php
+                                    $label = is_array($increment) ? ($increment['label'] ?? '') : ($increment->label ?? '');
+                                    $isRecommended = (bool) (is_array($increment) ? ($increment['recommended'] ?? false) : ($increment->recommended ?? false));
+                                @endphp
+                                <button
+                                    type="button"
+                                    class="auction-quick-bid-btn {{ $isRecommended ? 'active' : '' }}"
+                                    @if(!empty($label)) wire:click="applyIncrement('{{ $label }}')" @endif
+                                >
+                                    {{ $label }}
+                                </button>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    {{-- BID FORM --}}
+                    <div class="auction-bid-input-wrap mb-3">
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="0"
+                            wire:model.defer="bidAmount"
+                        >
+                        <span class="auction-bid-currency">{{ $currency }}</span>
+                    </div>
+                    
+                    @error('bidAmount')
+                        <div class="text-danger small mt-2 fw-medium mb-3 px-2">{{ $message }}</div>
+                    @enderror
+
+                    <button type="button" class="auction-place-bid-btn mb-3" wire:click="reviewBid" @if(empty($lotPrepared->can_bid)) disabled @endif>
+                        <i class="mdi mdi-gavel me-2"></i>
+                        {{ empty($lotPrepared->can_bid) ? 'Bidding Closed' : 'Review Bid' }}
+                    </button>
+
+                    <div class="auction-micro-copy text-center">
+                        Highest bidder must pay within 24h.
+                        <a href="" class="text-decoration-underline" style="color: var(--luxe-gold);">Terms apply</a>.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- BID HISTORY --}}
+        <div class="auction-history-card overflow-hidden mb-4" x-data="{ showAllBids: false }">
+            <div class="auction-history-head px-4 px-lg-5 py-4 d-flex align-items-center justify-content-between gap-3">
+                <div class="fw-black text-uppercase text-white" style="letter-spacing: .08em; font-size: .84rem;">Bid History</div>
+                <div class="small fw-bold text-uppercase" style="color: var(--luxe-muted); letter-spacing: .06em;">
+                    {{ $bidHistory->count() }} Total Bids
+                </div>
+            </div>
+
+            <div>
+                @forelse($bidHistory as $index => $entry)
+                    @php
+                        $bidderLabel = $entry['bidder_label'] ?? $entry->bidder_label ?? 'User';
+                        $amount = $entry['amount_display'] ?? $entry->amount_display ?? (isset($entry['amount']) ? '₹' . number_format((float) $entry['amount']) : '₹0');
+                        $timeAgo = $entry['time_human'] ?? $entry->time_human ?? '--';
+                        $isHighest = $entry['is_highest_bid'] ?? false;
+                    @endphp
+
+                    @if($index === 6)
+                        <div x-show="showAllBids" style="display: none;">
+                    @endif
+
+                    <div class="auction-bid-row px-4 px-lg-5 py-3 d-flex align-items-center justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-3 min-w-0">
+                            <div class="auction-bid-row-index {{ $isHighest ? 'text-success' : '' }}">#{{ $bidHistory->count() - $index }}</div>
+                            <div class="text-truncate {{ $index > 0 ? 'auction-bid-row-muted' : '' }}">
+                                {{ $bidderLabel }}
+                            </div>
+                        </div>
+
+                        <div class="text-end {{ $index > 0 ? 'auction-bid-row-muted' : '' }}">
+                            <div class="fw-bold {{ $isHighest ? 'text-success' : 'text-white' }}">{{ $amount }}</div>
+                            <div class="small" style="color: var(--luxe-muted);">{{ $timeAgo }}</div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-4 px-lg-5" style="color: var(--luxe-text-soft);">
+                        No bids yet.
+                    </div>
+                @endforelse
+
+                @if($bidHistory->count() > 6)
+                    </div>
+                @endif
+            </div>
+
+            @if($bidHistory->count() > 6)
+                <div class="px-4 px-lg-5 py-3 text-center" style="background: rgba(255,255,255,.03); border-top: 1px solid rgba(212,175,55,.06);">
+                    <a href="javascript:void(0)" @click.prevent="showAllBids = !showAllBids" class="btn btn-link p-0 text-decoration-none fw-black text-uppercase" style="letter-spacing: .08em; color: var(--luxe-gold); font-size: .72rem;">
+                        <span x-text="showAllBids ? 'Show Less' : 'See All Bids'"></span>
+                        <i class="mdi ms-1" :class="showAllBids ? 'mdi-chevron-up' : 'mdi-chevron-down'"></i>
+                    </a>
+                </div>
+            @endif
+        </div>
+
+    </div>
+</div>

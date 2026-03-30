@@ -15,7 +15,7 @@
         
         <div style="background-color: #f3f6f9; padding: 20px; border-radius: 5px; margin: 25px 0; border: 1px solid #e2e8f0;">
             <h4 style="margin-top: 0; color: #405189; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px;">Login Credentials</h4>
-            <p style="margin: 10px 0;"><strong>Login URL:</strong> <a href="{{ route('user.login') }}" style="color: #405189;">{{ route('user.login') }}</a></p>
+            <p style="margin: 10px 0;"><strong>Login URL:</strong> <a href="{{ route('login') }}" style="color: #405189;">{{ route('login') }}</a></p>
             <p style="margin: 10px 0;"><strong>Email:</strong> {{ $user->email }}</p>
             @if($user->phone)
             <p style="margin: 10px 0;"><strong>Phone:</strong> {{ $user->phone }}</p>
@@ -33,7 +33,7 @@
         </div>
 
         <div style="text-align: center; margin-top: 30px;">
-            <a href="{{ route('user.login') }}" style="background-color: #405189; color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Login to ECC Pavilion</a>
+            <a href="{{ route('login') }}" style="background-color: #405189; color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Login to ECC Pavilion</a>
         </div>
         
         <p style="margin-top: 30px; font-size: 13px; color: #666;">

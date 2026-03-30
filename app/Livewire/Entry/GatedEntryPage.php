@@ -28,9 +28,9 @@ class GatedEntryPage extends Component
         }
 
         // Existing member login
-        $this->loginUrl = \Illuminate\Support\Facades\Route::has('user.login')
-            ? route('user.login')
-            : url('/user/login');
+        $this->loginUrl = \Illuminate\Support\Facades\Route::has('login')
+            ? route('login')
+            : url('/login');
 
         // Guest preview (prefer named route if exists)
         if (Route::has('guest.preview')) {

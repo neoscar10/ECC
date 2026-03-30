@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\MembershipApplication;
 use App\Models\Auctions\AuctionEnquiry;
 use App\Models\Archive\ArchiveProductEnquiry;
+use App\Models\Shop\ShopOrder;
 
 class AdminSidebarComposer
 {
@@ -24,6 +25,7 @@ class AdminSidebarComposer
                 'newAuctionEnquiriesCount' => AuctionEnquiry::where('status', 'new')->count(),
                 'newArchiveEnquiriesCount' => ArchiveProductEnquiry::where('status', 'new')->count(),
                 'newContactEnquiriesCount' => \App\Models\ContactEnquiry::where('status', 'new')->count(),
+                'placedOrdersCount' => ShopOrder::where('status', 'placed')->count(),
             ];
         });
 

@@ -746,7 +746,7 @@
         ['key'=>'club',    'label'=>'Club',     'icon'=>'shield_person',    'href'=>url('/club')],
         ['key'=>'shop',    'label'=>'Shop',     'icon'=>'storefront',       'href'=>route('shop.index')],
         ['key'=>'orders',  'label'=>'Orders',   'icon'=>'receipt_long',     'href'=>route('shop.orders')],
-        // ['key'=>'settings','label'=>'Settings', 'icon'=>'settings',         'href'=>route('settings')],
+        ['key'=>'settings','label'=>'Settings', 'icon'=>'settings',         'href'=>route('settings')],
       ];
 
       $isOn = fn($k) => $active === $k;
@@ -797,35 +797,11 @@
                                 </template>
                             </a>
 
-                            @auth
-                                <div class="dropdown">
-                                    <a href="#" class="d-inline-flex align-items-center text-decoration-none ms-2" data-bs-toggle="dropdown" aria-expanded="false">
-                                        @php
-                                            $avatar = auth()->user()->profile_photo_url ?? auth()->user()->avatar_url ?? null;
-                                        @endphp
-                                        @if($avatar)
-                                            <img src="{{ $avatar }}" alt="Profile" class="luxe-avatar">
-                                        @else
-                                            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'User') }}&background=d4af37&color=111111" alt="Profile" class="luxe-avatar">
-                                        @endif
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" style="background: rgba(23, 19, 11, 0.95); border: 1px solid rgba(212, 175, 55, 0.18);">
-                                        <li><a class="dropdown-item" href="{{ route('shop.orders') }}">My Orders</a></li>
-                                        <!-- <li><a class="dropdown-item" href="{{ url('/settings') }}">Settings</a></li>
-                                        <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li> -->
-                                        <li>
-                                            <form action="{{ route('logout') }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="dropdown-item">Logout</button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
-                            @else
+                            @guest
                                 <a href="{{ route('login') }}" class="luxe-top-link ms-2" style="background: rgba(255,255,255,0.06);">
                                     <span>Log In</span>
                                 </a>
-                            @endauth
+                            @endguest
                         </div>
                     </div>
 

@@ -37,6 +37,9 @@ Route::prefix('v1')->group(function () {
 
              // Password Change
              Route::post('change-password', [AuthController::class, 'changePassword']);
+
+             // Account Deletion
+             Route::delete('me/account', [AuthController::class, 'deleteAccount']);
         });
     });
 

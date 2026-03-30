@@ -187,6 +187,21 @@ class AuthController extends Controller
     }
 
     /**
+     * Delete the authenticated user's account.
+     */
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        $user = auth('api')->user();
+
+        try {
+            $this->authService->deleteAccount($user);
+            return $this->success(null, 'Account deleted successfully.');
+        } catch (\Exception $e) {
+            return $this->error('Failed to delete account.', 500);
+        }
+    }
+
+    /**
      * Get the token array structure.
      */
     protected function respondWithToken(string $token, $user = null, $application = null): JsonResponse

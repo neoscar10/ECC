@@ -4,12 +4,14 @@
         .shop-page {
             padding-top: .25rem;
             padding-bottom: 1.5rem;
+            overflow: visible !important;
         }
 
         .shop-layout {
             display: flex;
             gap: 2rem;
             align-items: stretch;
+            overflow: visible !important;
         }
 
         .shop-sidebar {
@@ -17,18 +19,54 @@
             flex: 0 0 310px;
         }
 
-        .shop-sidebar-inner {
-            position: sticky;
-            top: 100px; /* Offset for header */
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(212, 175, 55, 0.12);
-            border-radius: 20px;
-            padding: 0;
-            overflow: hidden;
-            box-shadow: 0 12px 34px rgba(0,0,0,0.18);
+        @media (min-width: 992px) {
+            .shop-sidebar-inner {
+                position: sticky;
+                top: 110px; /* Offset for header + breathe */
+                max-height: calc(100vh - 130px);
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid rgba(212, 175, 55, 0.12);
+                border-radius: 20px;
+                padding: 0;
+                box-shadow: 0 12px 34px rgba(0,0,0,0.18);
+                scrollbar-width: thin;
+                scrollbar-color: rgba(212, 175, 55, 0.22) transparent;
+            }
+
+            .shop-sidebar-inner::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .shop-sidebar-inner::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            .shop-sidebar-inner::-webkit-scrollbar-thumb {
+                background: rgba(212, 175, 55, 0.22);
+                border-radius: 10px;
+            }
+
+            .shop-sidebar-inner::-webkit-scrollbar-thumb:hover {
+                background: rgba(212, 175, 55, 0.4);
+            }
+        }
+
+        /* Fallback/Mobile Sidebar Reset */
+        @media (max-width: 991.98px) {
+            .shop-sidebar-inner {
+                position: relative;
+                top: 0;
+                max-height: none;
+                overflow: visible;
+                background: none;
+                border: none;
+                box-shadow: none;
+            }
         }
 
         .shop-filter-section {

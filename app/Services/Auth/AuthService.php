@@ -143,6 +143,39 @@ class AuthService
     }
 
     /**
+     * Safely delete a user account.
+     */
+    public function deleteAccount(User $user): void
+    {
+        DB::transaction(function () use ($user) {
+            // 1. Unregister Device Tokens (Stops notifications)
+            $user->deviceTokens()->each(function ($token) {
+                try {
+                    $fcmManager = app(\App\Services\Notifications\FcmTopicManager::class);
+                    $namer = \App\Support\Notifications\FcmTopicNamer::class;
+                    
+                    $fcmManager->unsubscribeTokensFromTopic([$token->token], $namer::globalTopic());
+                    $fcmManager->unsubscribeTokensFromTopic([$token->token], $namer::userTopic($token->user_id));
+                    
+                    $currentMembership = $token->user->currentMembership;
+                    if ($currentMembership && $currentMembership->membership_tier_id) {
+                        $fcmManager->unsubscribeTokensFromTopic([$token->token], $namer::membershipTierTopic($currentMembership->membership_tier_id));
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('FCM Unsubscribe failed during account deletion: ' . $e->getMessage());
+                }
+                $token->delete();
+            });
+
+            // 2. Invalidate JWT Token
+            auth('api')->logout();
+
+            // 3. Soft Delete User
+            $user->delete();
+        });
+    }
+
+    /**
      * Minimal Phone Normalization.
      */
     private function normalizePhone(string $phone): string
