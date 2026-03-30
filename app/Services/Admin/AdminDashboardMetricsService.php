@@ -39,7 +39,7 @@ class AdminDashboardMetricsService
     public function getNeedsAttentionQueues(): array
     {
         return [
-            'pending_applications' => MembershipApplication::with(['user', 'membershipTier'])
+            'pending_applications' => MembershipApplication::with(['user' => fn($q) => $q->withTrashed(), 'membershipTier'])
                 ->where('status', 'submitted')
                 ->latest()
                 ->limit(5)
@@ -81,15 +81,15 @@ class AdminDashboardMetricsService
      */
     private function getLatestNewEnquiries(int $limit): \Illuminate\Support\Collection
     {
-        $archive = ArchiveProductEnquiry::with('user')->where('status', 'new')->latest()->limit($limit)->get()
+        $archive = ArchiveProductEnquiry::with(['user' => fn($q) => $q->withTrashed()])->where('status', 'new')->latest()->limit($limit)->get()
             ->map(fn($e) => ['type' => 'Archive', 'subject' => $e->contact_name ?? $e->user?->name, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.archive.enquiries')])
             ->toBase();
             
-        $auction = AuctionEnquiry::with('user')->where('status', 'new')->latest()->limit($limit)->get()
+        $auction = AuctionEnquiry::with(['user' => fn($q) => $q->withTrashed()])->where('status', 'new')->latest()->limit($limit)->get()
             ->map(fn($e) => ['type' => 'Auction', 'subject' => $e->contact_name ?? $e->user?->name, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.auctions.enquiries')])
             ->toBase();
             
-        $contact = ContactEnquiry::with('user')->where('status', 'new')->latest()->limit($limit)->get()
+        $contact = ContactEnquiry::with(['user' => fn($q) => $q->withTrashed()])->where('status', 'new')->latest()->limit($limit)->get()
             ->map(fn($e) => ['type' => 'General', 'subject' => $e->subject, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.enquiries.index')])
             ->toBase();
 

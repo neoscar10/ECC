@@ -1,4 +1,4 @@
-﻿<x-guest-layout>
+<x-guest-layout>
 <div class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100">
         <div class="bg-overlay"></div>
         <!-- auth-page content -->
@@ -61,7 +61,7 @@
                                         </div>
 
                                         <div class="mt-4">
-                                            <form action="{{ route('login') }}" method="POST">
+                                            <form action="{{ route('admin.login.submit') }}" method="POST">
                                                 @csrf
 
                                                 <div class="mb-3">

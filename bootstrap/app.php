@@ -20,6 +20,18 @@ return Application::configure(basePath: dirname(__DIR__))
             'verified_phone' => \App\Http\Middleware\EnsurePhoneVerified::class,
             'ensure_registration_complete' => \App\Http\Middleware\EnsureRegistrationComplete::class,
         ]);
+
+        $middleware->redirectTo(
+            guests: '/login',
+            users: function (\Illuminate\Http\Request $request) {
+                if ($request->user() && method_exists($request->user(), 'hasAnyRole')) {
+                    if ($request->user()->hasAnyRole(['super_admin', 'ecc_admin'])) {
+                        return route('admin.dashboard');
+                    }
+                }
+                return route('home');
+            }
+        );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->shouldRenderJsonWhen(function ($request, $e) {

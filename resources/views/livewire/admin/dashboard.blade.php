@@ -1,4 +1,4 @@
-﻿<div>
+<div>
     <div class="row">
         <div class="col-12">
             <div class="page-title-box d-sm-flex align-items-center justify-content-between">
@@ -97,9 +97,7 @@
                                 @forelse($queues['pending_applications'] as $app)
                                     <tr>
                                         <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="flex-grow-1">{{ $app->user->name }}</div>
-                                            </div>
+                                                <div class="flex-grow-1">{{ $app->user?->name ?? 'Unknown User' }}</div>
                                         </td>
                                         <td>{{ $app->membershipTier?->name }}</td>
                                         <td>{{ $app->created_at->format('d M, Y') }}</td>
