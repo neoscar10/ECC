@@ -1,9 +1,15 @@
 @php
   $active = $active ?? null;
 
+  $userHasVaultAccess = auth('web')->user()?->has_vault_access ?? false;
+  $vaultConfig = $userHasVaultAccess
+      ? ['key'=>'vault', 'label'=>'Vault','icon'=>'security',  'href'=>url('/vault')]
+      : ['key'=>'vault', 'label'=>'Vault','icon'=>'security',  'href'=>'#', 'extras'=>'x-data @click.prevent="$dispatch(\'open-vault-modal\')"'];
+
   $items = [
     ['key'=>'explore','label'=>'Explore','icon'=>'explore',       'href'=>url('/home')],
     ['key'=>'archive','label'=>'Archive','icon'=>'inventory_2',   'href'=>url('/archive')],
+    $vaultConfig,
     ['key'=>'auctions','label'=>'Auctions','icon'=>'gavel',       'href'=>url('/auctions')],
     ['key'=>'club',    'label'=>'Club',   'icon'=>'shield_person','href'=>url('/club')],
     ['key'=>'shop',    'label'=>'Shop',   'icon'=>'storefront',   'href'=>route('shop.index')],
@@ -35,6 +41,7 @@
           @php $on = $isOn($it['key']); @endphp
           <div class="col px-1">
             <a href="{{ $it['href'] }}"
+               {!! $it['extras'] ?? '' !!}
                class="mx-0 px-0 mx-md-4 px-md-2 ecc-app-nav__item d-inline-flex flex-column align-items-center justify-content-center gap-1 text-decoration-none {{ $on ? 'is-active' : '' }}">
               <span class="material-symbols-outlined ecc-app-nav__icon">{{ $it['icon'] }}</span>
               <span class="ecc-app-nav__label">{{ $it['label'] }}</span>

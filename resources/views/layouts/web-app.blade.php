@@ -733,15 +733,22 @@
       $active = 'home';
       if (request()->is('auctions*')) { $active = 'auctions'; }
       elseif (request()->is('archive*')) { $active = 'archive'; }
+      elseif (request()->is('vault*')) { $active = 'vault'; }
       elseif (request()->is('club*')) { $active = 'club'; }
       elseif (request()->is('orders*')) { $active = 'orders'; }
       elseif (request()->is('settings*')) { $active = 'settings'; }
       elseif (request()->is('shop*') || request()->is('products*')) { $active = 'shop'; }
       elseif (request()->is('home*')) { $active = 'explore'; }
 
+      $userHasVaultAccess = auth('web')->user()?->has_vault_access ?? false;
+      $vaultConfig = $userHasVaultAccess
+          ? ['key'=>'vault', 'label'=>'Vault', 'icon'=>'security', 'href'=>url('/vault')]
+          : ['key'=>'vault', 'label'=>'Vault', 'icon'=>'security', 'href'=>'#', 'extras'=>'x-data @click.prevent="$dispatch(\'open-vault-modal\')"'];
+
       $mainItems = [
         ['key'=>'explore', 'label'=>'Explore',  'icon'=>'explore',          'href'=>url('/home')],
         ['key'=>'archive', 'label'=>'Archive',  'icon'=>'inventory_2',      'href'=>url('/archive')],
+        $vaultConfig,
         ['key'=>'auctions','label'=>'Auctions', 'icon'=>'gavel',            'href'=>url('/auctions')],
         ['key'=>'club',    'label'=>'Club',     'icon'=>'shield_person',    'href'=>url('/club')],
         ['key'=>'shop',    'label'=>'Shop',     'icon'=>'storefront',       'href'=>route('shop.index')],
@@ -771,7 +778,7 @@
                     <div class="d-none d-lg-flex align-items-center gap-3">
                         <nav class="luxe-top-nav">
                             @foreach($mainItems as $it)
-                                <a href="{{ $it['href'] }}" class="luxe-top-link {{ $isOn($it['key']) ? 'active' : '' }}">
+                                <a href="{{ $it['href'] }}" class="luxe-top-link {{ $isOn($it['key']) ? 'active' : '' }}" {!! $it['extras'] ?? '' !!}>
                                     <span class="material-symbols-outlined">{{ $it['icon'] }}</span>
                                     <span>{{ $it['label'] }}</span>
                                 </a>
@@ -828,7 +835,7 @@
 
                         <div class="luxe-mobile-nav">
                             @foreach($mainItems as $it)
-                                <a href="{{ $it['href'] }}" class="{{ $isOn($it['key']) ? 'text-warning' : '' }} d-flex align-items-center gap-2">
+                                <a href="{{ $it['href'] }}" class="{{ $isOn($it['key']) ? 'text-warning' : '' }} d-flex align-items-center gap-2" {!! $it['extras'] ?? '' !!}>
                                     <span class="material-symbols-outlined fs-5">{{ $it['icon'] }}</span>
                                     <span>{{ $it['label'] }}</span>
                                 </a>
@@ -875,6 +882,7 @@
                         <div class="d-flex flex-column">
                             <a href="{{ route('auctions.index') }}" class="luxe-footer-link">Live Auctions</a>
                             <a href="{{ url('/archive') }}" class="luxe-footer-link">Archive</a>
+                            <a href="{{ $vaultConfig['href'] }}" class="luxe-footer-link" {!! $vaultConfig['extras'] ?? '' !!}>Vault</a>
                             <a href="{{ route('shop.index') }}" class="luxe-footer-link">Shop</a>
                         </div>
                     </div>
@@ -918,5 +926,6 @@
     @livewireScripts
     @stack('scripts')
     @includeIf('layouts.partials._overlay_cleanup')
+    @livewire('vault.global-access-modal')
 </body>
 </html>
