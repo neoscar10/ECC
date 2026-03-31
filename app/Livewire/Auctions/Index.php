@@ -123,7 +123,7 @@ class Index extends Component
 
         // Filter by Tab (Status)
         if ($this->activeTab === 'past') {
-            $query->whereIn('status', ['closed']);
+            $query->whereIn('status', ['closed', 'ended']);
             // If they have distinct 'processing' or 'ended' statuses, add them here.
         } else {
             $query->where('status', $this->activeTab);
