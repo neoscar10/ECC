@@ -62,7 +62,10 @@ class UsersIndex extends Component
     // --- Bulk Import Properties ---
     public $bulkUploadFile;
     public $bulkPreview = [];
+    public $bulkPreviewRows = []; // [{data, errors, is_valid, is_corrected, status}]
     public $bulkResults = null;
+    public $editingRowIndex = null;
+    public $editingRowData = []; // Temporary storage for the row being edited
 
     protected $paginationTheme = 'bootstrap';
 
@@ -77,29 +80,14 @@ class UsersIndex extends Component
         session()->flash('success', $message);
     }
 
+    public function mount()
+    {
+        \Illuminate\Support\Facades\Log::info('UsersIndex mounted');
+    }
+
     public function render()
     {
-        $usersQuery = User::query()->whereDoesntHave('roles', function($q) {
-            $q->whereIn('name', ['super_admin', 'ecc_admin']);
-        })->with('currentMembership.membershipTier');
-
-        if ($this->search) {
-            $usersQuery->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('email', 'like', '%' . $this->search . '%')
-                  ->orWhere('phone', 'like', '%' . $this->search . '%')
-                  ->orWhere('full_name', 'like', '%' . $this->search . '%');
-            });
-        }
-
-        if ($this->membershipFilter) {
-            $usersQuery->whereHas('currentMembership', function($q) {
-                 $q->where('membership_tier_id', $this->membershipFilter);
-            });
-        }
-
-        $users = $usersQuery->orderBy($this->sortField, $this->sortDirection)
-                            ->paginate(10);
+        $users = User::orderBy($this->sortField, $this->sortDirection)->paginate(10);
 
         return view('livewire.admin.users.users-index', [
             'users' => $users,
@@ -346,11 +334,21 @@ class UsersIndex extends Component
     
     public function resetBulkUpload()
     {
-        $this->reset(['bulkUploadFile', 'bulkPreview', 'bulkResults']);
+        $this->reset(['bulkUploadFile', 'bulkPreview', 'bulkPreviewRows', 'bulkResults', 'editingRowIndex', 'editingRowData']);
     }
 
-    public function downloadTemplate()
+    public function downloadTemplate($format = 'xlsx')
     {
+        $filename = 'ecc_users_import_template.' . $format;
+
+        if ($format === 'xlsx') {
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\Admin\UserImportTemplateExport(), 
+                $filename
+            );
+        }
+
+        // CSV Fallback
         $headers = [
             'full_name', 'email', 'phone', 'membership_tier_code', 'membership_expiry_date',
             'dob', 'country', 'city', 'state',
@@ -358,7 +356,6 @@ class UsersIndex extends Component
             'focus', 'investment_horizon', 'interests', 'postal_code'
         ];
 
-        $filename = 'ecc_users_import_template.csv';
         $handle = fopen('php://temp', 'w+');
         fputcsv($handle, $headers);
         
@@ -383,7 +380,7 @@ class UsersIndex extends Component
     public function updatedBulkUploadFile()
     {
         $this->validate([
-            'bulkUploadFile' => 'required|file|mimes:csv,txt|max:10240', // 10MB max
+            'bulkUploadFile' => 'required|file|mimes:csv,txt,xlsx,xls|max:10240',
         ]);
 
         $this->previewImport();
@@ -393,56 +390,179 @@ class UsersIndex extends Component
     {
         if (!$this->bulkUploadFile) return;
 
-        $path = $this->bulkUploadFile->getRealPath();
-        $handle = fopen($path, 'r');
-        
-        $headers = fgetcsv($handle);
-        if (!$headers) return;
-        
-        // Normalize headers
-        $headers = array_map(function($h) { return trim(strtolower($h)); }, $headers);
-        
-        $preview = [];
-        $rowCount = 0;
-        
-        while (($row = fgetcsv($handle)) !== false) {
-            $rowCount++;
-            if (count($preview) < 5) {
-                // Map row to headers
+        try {
+            $path = $this->bulkUploadFile->getRealPath();
+            $extension = $this->bulkUploadFile->getClientOriginalExtension();
+            $importData = [];
+            $headers = [];
+
+            if (in_array(strtolower($extension), ['xlsx', 'xls'])) {
+                $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
+                $sheet = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+                
+                if (empty($sheet)) {
+                    $this->addError('bulkUploadFile', 'The uploaded Excel file appears to be empty.');
+                    return;
+                }
+
+                $headers = array_shift($sheet);
+                $importData = $sheet;
+            } else {
+                $handle = fopen($path, 'r');
+                $headers = fgetcsv($handle);
+                if (!$headers) {
+                    fclose($handle);
+                    return;
+                }
+
+                while (($row = fgetcsv($handle)) !== false) {
+                    $importData[] = $row;
+                }
+                fclose($handle);
+            }
+            
+            // Normalize headers (handle both numeric indices from CSV and letter indices from Excel)
+            $headers = array_map(function($h) { return trim(strtolower((string)$h)); }, $headers);
+            
+            $previewRows = [];
+            $importService = app(\App\Services\Admin\AdminUserBulkImportService::class);
+
+            foreach ($importData as $row) {
+                // Skip completely empty rows
+                if (empty(array_filter($row, function($value) { return trim((string)$value) !== ''; }))) {
+                    continue;
+                }
+
                 $mappedRow = [];
                 foreach ($headers as $index => $header) {
-                    $mappedRow[$header] = $row[$index] ?? null;
+                    // $index will be 'A', 'B'... for Excel or 0, 1, 2... for CSV
+                    $mappedRow[$header] = isset($row[$index]) ? trim((string)$row[$index]) : null;
                 }
-                $preview[] = $mappedRow;
-            }
-        }
-        fclose($handle);
 
-        $this->bulkPreview = [
-            'total_rows' => $rowCount,
-            'headers' => $headers,
-            'rows' => $preview
-        ];
+                $validation = $importService->validateRowData($mappedRow);
+
+                $previewRows[] = [
+                    'data' => $mappedRow,
+                    'errors' => $validation['errors'],
+                    'is_valid' => $validation['is_valid'],
+                    'is_corrected' => false,
+                    'status' => $validation['is_valid'] ? 'Ready' : 'Needs Fix'
+                ];
+            }
+
+            $this->bulkPreviewRows = $previewRows;
+            $this->bulkPreview = [
+                'total_rows' => count($previewRows),
+                'headers' => $headers,
+            ];
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Bulk import preview error: ' . $e->getMessage(), ['exception' => $e]);
+            $this->addError('bulkUploadFile', 'Failed to parse file: ' . $e->getMessage());
+            $this->resetBulkUpload();
+        }
+    }
+
+    public function editRow($index)
+    {
+        $this->editingRowIndex = $index;
+        $this->editingRowData = $this->bulkPreviewRows[$index]['data'];
+    }
+
+    public function cancelEdit()
+    {
+        $this->editingRowIndex = null;
+        $this->editingRowData = [];
+    }
+
+    public function updateRow()
+    {
+        if ($this->editingRowIndex === null) return;
+
+        $importService = app(\App\Services\Admin\AdminUserBulkImportService::class);
+        $validation = $importService->validateRowData($this->editingRowData);
+
+        $this->bulkPreviewRows[$this->editingRowIndex]['data'] = $this->editingRowData;
+        $this->bulkPreviewRows[$this->editingRowIndex]['errors'] = $validation['errors'];
+        $this->bulkPreviewRows[$this->editingRowIndex]['is_valid'] = $validation['is_valid'];
+        $this->bulkPreviewRows[$this->editingRowIndex]['is_corrected'] = true;
+        $this->bulkPreviewRows[$this->editingRowIndex]['status'] = $validation['is_valid'] ? 'Corrected' : 'Needs Fix';
+
+        $this->cancelEdit();
+        $this->dispatch('operation-success', 'Row updated and re-validated.');
+    }
+
+    public function removeRow($index)
+    {
+        unset($this->bulkPreviewRows[$index]);
+        $this->bulkPreviewRows = array_values($this->bulkPreviewRows); // Re-index
+        $this->bulkPreview['total_rows'] = count($this->bulkPreviewRows);
     }
     
     public function processImport(\App\Services\Admin\AdminUserBulkImportService $importService)
     {
-        $this->validate([
-            'bulkUploadFile' => 'required|file|mimes:csv,txt|max:10240',
-        ]);
-
-        $path = $this->bulkUploadFile->getRealPath();
-        
-        try {
-            $results = $importService->importCsv($path);
-            $this->bulkResults = $results;
-            
-            $this->dispatch('operation-success', 'Import completed successfully.');
-            
-            $this->resetPage();
-        } catch (\Exception $e) {
-            session()->flash('error', 'Import failed: ' . $e->getMessage());
+        if (empty($this->bulkPreviewRows)) {
+             $this->previewImport();
         }
+        
+        if (empty($this->bulkPreviewRows)) return;
+        
+        $results = [
+            'total' => count($this->bulkPreviewRows),
+            'created' => 0,
+            'skipped' => 0,
+            'failed' => 0,
+            'failed_rows' => []
+        ];
+
+        foreach ($this->bulkPreviewRows as $index => $rowMeta) {
+            if (!$rowMeta['is_valid']) {
+                $isDuplicate = collect($rowMeta['errors'])->contains(fn($e) => stripos($e, 'already exists') !== false);
+                
+                if ($isDuplicate) {
+                    $results['skipped']++;
+                    $results['failed_rows'][] = [
+                        'row_number' => $index + 1,
+                        'data' => $rowMeta['data'],
+                        'error' => implode(', ', $rowMeta['errors']),
+                        'type' => 'duplicate'
+                    ];
+                } else {
+                    $results['failed']++;
+                    $results['failed_rows'][] = [
+                        'row_number' => $index + 1,
+                        'data' => $rowMeta['data'],
+                        'error' => implode(', ', $rowMeta['errors']),
+                        'type' => 'validation'
+                    ];
+                }
+                continue;
+            }
+
+            try {
+                $importService->processRow($rowMeta['data'], $index + 1);
+                $results['created']++;
+            } catch (\App\Exceptions\BulkImportDuplicateException $e) {
+                $results['skipped']++;
+                $results['failed_rows'][] = [
+                    'row_number' => $index + 1,
+                    'data' => $rowMeta['data'],
+                    'error' => $e->getMessage(),
+                    'type' => 'duplicate'
+                ];
+            } catch (\Exception $e) {
+                $results['failed']++;
+                $results['failed_rows'][] = [
+                    'row_number' => $index + 1,
+                    'data' => $rowMeta['data'],
+                    'error' => $e->getMessage(),
+                    'type' => 'error'
+                ];
+            }
+        }
+
+        $this->bulkResults = $results;
+        $this->dispatch('operation-success', 'Import completed successfully.');
+        $this->resetPage();
     }
 
     public function downloadErrorReport()

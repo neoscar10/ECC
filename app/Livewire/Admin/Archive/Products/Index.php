@@ -42,6 +42,7 @@ class Index extends Component
     public $showEarlyAccessModal = false;
     public $isEditMode = false;
     public $productId;
+    public $isHydrating = false;
     
     // Delete Modal State
     public $confirmingDelete = false;
@@ -150,14 +151,22 @@ class Index extends Component
 
     public function updatedRestrictionMode($value)
     {
+        if ($this->isHydrating) return;
         if ($value === 'public') {
             $this->selectedVisibilityTiers = [];
         }
         $this->computeEligibleBlurTiers();
     }
 
+    public function updatedSelectedVisibilityTiers()
+    {
+        if ($this->isHydrating) return;
+        $this->computeEligibleBlurTiers();
+    }
+
     public function updatedRestrictionType($value)
     {
+        if ($this->isHydrating) return;
         if ($value !== 'hierarchical') {
             $this->restrictedMinTierId = null;
         }
@@ -197,15 +206,6 @@ class Index extends Component
         } elseif ($step === 3) {
             $this->validate([
                 'restrictionMode' => 'required|in:public,restricted',
-                'restrictionType' => ['exclude_unless:restrictionMode,restricted', 'required', 'in:hierarchical,random,private'],
-                'restrictedMinTierId' => ['exclude_unless:restrictionType,hierarchical', 'required', 'exists:membership_tiers,id'],
-                'restrictedPrivateTierId' => ['exclude_unless:restrictionType,private', 'required', 'exists:membership_tiers,id'],
-                'selectedRandomTiers' => ['exclude_unless:restrictionType,random', 'array', 'min:1'],
-                'selectedRandomTiers.*' => ['exclude_unless:restrictionType,random', 'exists:membership_tiers,id'],
-            ]);
-        } elseif ($step === 3) {
-            $this->validate([
-                'restrictionMode' => 'required|in:public,restricted',
                 // Visibility Tiers
                 'selectedVisibilityTiers' => ['exclude_unless:restrictionMode,restricted', 'required', 'array', 'min:1'],
                 'selectedVisibilityTiers.*' => ['exists:membership_tiers,id'],
@@ -215,18 +215,18 @@ class Index extends Component
                 'restrictionType' => ['exclude_if:blurEnabled,false', 'required', 'in:hierarchical,random,private'],
                 'restrictedMinTierId' => ['exclude_unless:restrictionType,hierarchical', 'required', 'exists:membership_tiers,id', function($attribute, $value, $fail) {
                      // Ensure min tier is in visibility set (or public)
-                     if (!in_array($value, $this->computedVisibilityTierIds)) {
+                     if (!in_array((string)$value, $this->computedVisibilityTierIds)) {
                          $fail('Selected minimum tier is not in the visible access list.');
                      }
                 }],
                 'restrictedPrivateTierId' => ['exclude_unless:restrictionType,private', 'required', 'exists:membership_tiers,id', function($attribute, $value, $fail) {
-                     if (!in_array($value, $this->computedVisibilityTierIds)) {
+                     if (!in_array((string)$value, $this->computedVisibilityTierIds)) {
                          $fail('Selected private tier is not in the visible access list.');
                      }
                 }],
                 'selectedRandomTiers' => ['exclude_unless:restrictionType,random', 'array', 'min:1'],
                 'selectedRandomTiers.*' => ['exclude_unless:restrictionType,random', 'exists:membership_tiers,id', function($attribute, $value, $fail) {
-                     if (!in_array($value, $this->computedVisibilityTierIds)) {
+                     if (!in_array((string)$value, $this->computedVisibilityTierIds)) {
                          $fail('Selected random tier is not in the visible access list.');
                      }
                 }],
@@ -298,9 +298,11 @@ class Index extends Component
     {
         $this->resetForm();
         $this->isEditMode = true;
+        $this->isHydrating = true; // [FIX] Start hydration guard
         $this->productId = $id;
 
-        $product = ArchiveProduct::with(['images', 'images360', 'tiers'])->findOrFail($id);
+        // [FIX] Eager load visibility and clear view tiers
+        $product = ArchiveProduct::with(['images', 'images360', 'tiers', 'visibilityTiers', 'clearViewTiers'])->findOrFail($id);
         
         $this->title = $product->title;
         $this->categoryId = $product->archive_category_id;
@@ -319,23 +321,27 @@ class Index extends Component
         
         $this->restrictionMode = $product->restriction_mode;
         $this->restrictionType = $product->restriction_type;
-        $this->restrictedMinTierId = $product->restricted_min_tier_id;
-        $this->restrictedPrivateTierId = $product->restricted_private_tier_id;
+        $this->restrictedMinTierId = $product->restricted_min_tier_id ? (string)$product->restricted_min_tier_id : null;
+        $this->restrictedPrivateTierId = $product->restricted_private_tier_id ? (string)$product->restricted_private_tier_id : null;
         
         $this->existingImages = $product->images;
         $this->existing360Images = $product->images360;
         
+        // [FIX] Hydrate Visibility Tiers (The missing piece)
+        $this->selectedVisibilityTiers = $product->visibilityTiers->pluck('id')->map(fn($id) => (string)$id)->toArray();
+
         if ($product->restriction_type === 'random') {
-             $this->selectedRandomTiers = $product->tiers->pluck('id')->toArray();
+             $this->selectedRandomTiers = $product->tiers->pluck('id')->map(fn($id) => (string)$id)->toArray();
         }
         
-        $this->blurEnabled = $product->blur_enabled;
+        $this->blurEnabled = (bool)$product->blur_enabled;
         $this->clearViewTierIds = $product->clearViewTiers->pluck('id')->map(fn($id) => (string)$id)->toArray();
         
         $this->computeEligibleBlurTiers();
         
         $this->createStep = 1;
 
+        $this->isHydrating = false; // [FIX] End hydration guard
         $this->dispatch('show-create-modal');
     }
 
@@ -402,8 +408,6 @@ class Index extends Component
                 'go_live_at' => $this->goLiveNow ? null : $this->goLiveAt,
                 'early_access_enabled' => (!$this->goLiveNow && $this->allowsEarlyAccess),
                 'restriction_mode' => $this->restrictionMode,
-                'restriction_type' => $this->restrictionType,
-                'restricted_min_tier_id' => $this->restrictedMinTierId,
                 'restriction_type' => $this->restrictionType,
                 'restricted_min_tier_id' => $this->restrictedMinTierId,
                 'restricted_private_tier_id' => $this->restrictedPrivateTierId,
@@ -685,11 +689,15 @@ class Index extends Component
     public function getVisibilityAllowedTierIdsProperty()
     {
         if ($this->restrictionMode === 'public') {
-            return $this->categoryAllowedTierIds;
+            return array_map(fn($id) => (string)$id, $this->categoryAllowedTierIds);
         }
         
         // Restricted: Intersection of Category Allowed AND User Selected
-        return array_intersect($this->categoryAllowedTierIds, $this->selectedVisibilityTiers);
+        // Normalize both to strings for reliable intersection
+        $catIds = array_map(fn($id) => (string)$id, $this->categoryAllowedTierIds);
+        $selIds = array_map(fn($id) => (string)$id, $this->selectedVisibilityTiers);
+        
+        return array_values(array_intersect($catIds, $selIds));
     }
     
     // Computed Property: Collection of models
@@ -704,7 +712,10 @@ class Index extends Component
     // This methods updates the simple array property used by UI/Validation
     public function computeEligibleBlurTiers()
     {
+        // ALWAYS update this so validation/UI stays fresh
         $this->computedVisibilityTierIds = array_map(fn($id) => (string)$id, $this->visibilityAllowedTierIds);
+        
+        if ($this->isHydrating) return; // Guard only the destructive parts
         
         // Auto-sanitize Blur Selections
         if ($this->blurEnabled) {
@@ -720,24 +731,20 @@ class Index extends Component
         }
     }
     
-    public function updatedSelectedVisibilityTiers()
-    {
-        $this->computeEligibleBlurTiers();
-    }
     
     public function computeCategoryAllowedTiers()
     {
         if ($this->categoryId) {
             $cat = ArchiveCategory::with('tiers')->find($this->categoryId);
             if ($cat) {
-                 $this->categoryAllowedTierIds = $cat->getAllowedTierIds();
-                 // Auto-clean selected if not allowed
-                 if (!empty($this->selectedVisibilityTiers)) {
-                     $valid = array_intersect($this->selectedVisibilityTiers, $this->categoryAllowedTierIds);
-                     if (count($valid) !== count($this->selectedVisibilityTiers)) {
-                         $this->selectedVisibilityTiers = array_values($valid);
-                     }
-                 }
+                 $this->categoryAllowedTierIds = array_map(fn($id) => (string)$id, $cat->getAllowedTierIds());
+                  // Auto-clean selected if not allowed
+                  if (!$this->isHydrating && !empty($this->selectedVisibilityTiers)) {
+                      $valid = array_intersect($this->selectedVisibilityTiers, $this->categoryAllowedTierIds);
+                      if (count($valid) !== count($this->selectedVisibilityTiers)) {
+                          $this->selectedVisibilityTiers = array_values($valid);
+                      }
+                  }
             } else {
                 $this->categoryAllowedTierIds = [];
             }

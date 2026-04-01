@@ -129,7 +129,7 @@ class ArchiveBrowse extends Component
 
         // Fetch Dynamic Categories (SSOT)
         $categoryQuery = \App\Models\Archive\ArchiveCategory::query();
-        $accessService->applyAccessibleScope($categoryQuery, $tierId, true); // true to include locked but marked
+        $accessService->applyAccessibleScope($categoryQuery, $tierId, false); // false to exclude categories the user doesn't have access to
         $categories = $categoryQuery->orderBy('sort_order')->orderBy('title')->get();
 
         $tabs = $categories->map(function($cat) {

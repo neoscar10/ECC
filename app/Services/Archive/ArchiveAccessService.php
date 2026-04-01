@@ -19,11 +19,6 @@ class ArchiveAccessService
 
     /**
      * Apply access filtering to the category query.
-     *
-     * @param Builder $query
-     * @param int|null $tierId
-     * @param bool $includeLocked If true, returns all items but marks them as locked. If false, returns only accessible.
-     * @return Builder
      */
     public function applyAccessibleScope(Builder $query, ?int $tierId, bool $includeLocked = false): Builder
     {
@@ -32,14 +27,11 @@ class ArchiveAccessService
                 // Always include public
                 $q->where('visibility', 'public');
 
-                // If include_locked is true, we simply don't filter out the restricted ones here
-                // We just let them pass (and handle "is_accessible" property later)
                 if ($includeLocked) {
                     $q->orWhere('visibility', 'restricted');
                     return;
                 }
 
-                // Otherwise, restrict to allowed tiers
                 if ($tierId) {
                     $q->orWhere(function ($sub) use ($tierId) {
                         $sub->where('visibility', 'restricted')
@@ -68,14 +60,13 @@ class ArchiveAccessService
             return false;
         }
 
-        // Check if tier is in the allowed list
-        // Optimization: if relations loaded
         if ($category->relationLoaded('tiers')) {
             return $category->tiers->contains('id', $tierId);
         }
 
         return $category->tiers()->where('membership_tier_id', $tierId)->exists();
     }
+
     /**
      * Resolve the full membership tier for the user.
      */
@@ -94,33 +85,17 @@ class ArchiveAccessService
         $userTier = $this->resolveUserTier($user);
         
         // 1. Base Visibility (Can list/access AT ALL?)
-        // If not accessible -> BLOCKED
         if (!$this->isProductVisible($product, $userTier)) {
              return $this->buildAccessResponse('blocked', 'visibility_blocked', $product, $userTier);
         }
 
         // 2. Blur / Clear View Logic
-        // If visible, check if we need to blur it
         if ($product->blur_enabled) {
-             // Check if user is in the CLEAR VIEW list
-             // We can optimize this if needed, but for now:
              $hasClearView = $this->hasClearViewAccess($product, $userTier);
              
              if (!$hasClearView) {
                  return $this->buildAccessResponse('blur', 'blurred', $product, $userTier);
              }
-        }
-
-        // 3. Early Access Check (If not live yet)
-        // If visible but early access logic applies
-        if (!$product->go_live_now && $product->go_live_at && now()->lt($product->go_live_at)) {
-             // Visibility already passed, but early access might still block FULL access if we treat early access purely
-             // as a "can you see it" gate. 
-             // However, existing logic says if early access enabled, user sees it if they have early access window.
-             // If they don't have early access window, they shouldn't have passed visibility check?
-             // Actually, `isProductVisible` handles early access logic too.
-             // But let's refining 'clear' vs 'blur' for early access if needed.
-             // For now, if visible and early access active, it's clear.
         }
 
         return [
@@ -134,17 +109,14 @@ class ArchiveAccessService
 
     protected function isProductVisible($product, $userTier): bool
     {
-         // 1. Check Active
         if (!$product->is_active) return false;
 
-        // 2. Check Live/Schedule
         $isLive = $product->go_live_now || ($product->go_live_at && now()->gte($product->go_live_at));
         
         if ($isLive) {
             return $this->checkStandardRestriction($product, $userTier);
         }
 
-        // 3. Early Access
         if ($product->early_access_enabled && $userTier) {
             $window = $product->earlyAccessWindows()
                 ->where('membership_tier_id', $userTier->id)
@@ -169,20 +141,18 @@ class ArchiveAccessService
     protected function buildAccessResponse($mode, $reason, $product, $userTier): array
     {
         $response = [
-            'can_list' => ($mode !== 'blocked'), // If blurred, can_list is true (it appears in list)
-            'view_mode' => $mode, // blocked, blur, clear
+            'can_list' => ($mode !== 'blocked'),
+            'view_mode' => $mode,
             'reason_code' => $reason,
             'message' => null,
             'action' => null
         ];
 
-        // Add upgrade CTA
         $upgrade = null;
         if ($mode === 'blocked') {
-            $upgrade = $this->findBaseRestrictionUpgrade($product);
+            $upgrade = $this->findBaseRestrictionUpgrade($product, $userTier);
         } elseif ($mode === 'blur') {
-            // Find upgrade that grants Clear View
-            $upgrade = $this->findClearViewUpgrade($product);
+            $upgrade = $this->findClearViewUpgrade($product, $userTier);
         }
 
         if ($upgrade) {
@@ -200,23 +170,18 @@ class ArchiveAccessService
         return $response;
     }
 
-    protected function findClearViewUpgrade($product): ?array
+    protected function findClearViewUpgrade($product, ?\App\Models\MembershipTier $userTier): ?array
     {
-        // Find lowest tier in clearViewTiers
         $tier = $product->clearViewTiers()->orderBy('level', 'asc')->first();
         if ($tier) {
              return [
                 'tier_id' => $tier->id,
-                'message' => "Upgrade to {$tier->name} to view clearly."
+                'message' => $this->composeSmartAccessMessage($product, $userTier, $tier, true)
             ];
         }
         return null;
     }
 
-    /**
-     * Deprecated wrapper if needed, or remove.
-     * Keeping for compatibility with standard restriction check function usage inside class
-     */
     public function isProductAccessible(\App\Models\Archive\ArchiveProduct $product, ?\App\Models\MembershipTier $userTier): bool
     {
         return $this->isProductVisible($product, $userTier);
@@ -252,17 +217,14 @@ class ArchiveAccessService
 
     public function getRecommendedUpgrade(\App\Models\Archive\ArchiveProduct $product): ?array 
     {
-         // Re-implement or wrapper
-         // This seems used by old logic. We should unify.
-         // For now, keeping logic but relying on buildAccessResponse helper concepts if possible.
-         // Left mostly as is for `blocked` state fallback.
-         
          return $this->findBaseRestrictionUpgrade($product);
     }
 
-    protected function findBaseRestrictionUpgrade($entity): ?array
+    protected function findBaseRestrictionUpgrade($entity, ?\App\Models\MembershipTier $userTier = null): ?array
     {
         if ($entity->restriction_mode === 'public') return null;
+
+        $product = ($entity instanceof \App\Models\Archive\ArchiveProduct) ? $entity : null;
 
         if ($entity->restriction_type === 'hierarchical') {
             $min = $entity->restrictedMinTier;
@@ -270,20 +232,19 @@ class ArchiveAccessService
                 return [
                     'tier_id' => $min->id,
                     'tier_name' => $min->name,
-                    'message' => "Upgrade to {$min->name} to unlock.",
+                    'message' => $product ? $this->composeSmartAccessMessage($product, $userTier, $min) : "Upgrade to {$min->name} to unlock.",
                     'reason' => 'tier_required'
                 ];
             }
         }
         
         if ($entity->restriction_type === 'random') {
-            // Pick lowest level allowed tier
             $tier = $entity->tiers()->orderBy('level', 'asc')->first();
             if ($tier) {
                  return [
                     'tier_id' => $tier->id,
                     'tier_name' => $tier->name,
-                    'message' => "Upgrade to {$tier->name} to unlock.",
+                    'message' => $product ? $this->composeSmartAccessMessage($product, $userTier, $tier) : "Upgrade to {$tier->name} to unlock.",
                     'reason' => 'tier_required'
                 ];
             }
@@ -295,7 +256,7 @@ class ArchiveAccessService
                  return [
                     'tier_id' => $p->id,
                     'tier_name' => $p->name,
-                    'message' => "Exclusive to {$p->name} members.",
+                    'message' => $product ? $this->composeSmartAccessMessage($product, $userTier, $p) : "Exclusive to {$p->name} members.",
                     'reason' => 'private_collection'
                 ];
              }
@@ -303,28 +264,80 @@ class ArchiveAccessService
         
         return null;
     }
+
+    /**
+     * Compose a rich, time-aware message for restricted access.
+     */
+    public function composeSmartAccessMessage($product, $userTier, $targetTier, $isBlur = false): string
+    {
+        $messages = [];
+        $now = now();
+
+        // 1. Target Tier Early Access (The Recommendation)
+        if ($product->early_access_enabled && $targetTier) {
+            $targetWindow = $product->earlyAccessWindows()
+                ->where('membership_tier_id', $targetTier->id)
+                ->first();
+
+            if ($targetWindow) {
+                if ($targetWindow->access_at->lte($now)) {
+                    $messages[] = "Early access for {$targetTier->name} is active now.";
+                } else {
+                    $messages[] = "{$targetTier->name} early access begins " . $targetWindow->access_at->diffForHumans(['parts' => 1]) . ".";
+                }
+            }
+        }
+
+        // 2. User's Current Tier Access (If applicable and different from target)
+        if ($product->early_access_enabled && $userTier && $userTier->id !== $targetTier->id) {
+            $userWindow = $product->earlyAccessWindows()
+                ->where('membership_tier_id', $userTier->id)
+                ->first();
+            
+            if ($userWindow && $userWindow->access_at->gt($now)) {
+                 $messages[] = "Your tier gains access " . $userWindow->access_at->diffForHumans(['parts' => 1]) . ".";
+            }
+        }
+
+        // 3. General Access Timing
+        // Only added if no specific tier access info was added (keeps it focused as per user request)
+        if (empty($messages) && !$product->go_live_now && $product->go_live_at && $product->go_live_at->gt($now)) {
+            $messages[] = "General access opens " . $product->go_live_at->diffForHumans(['parts' => 1]) . ".";
+        }
+
+        // Fallback or Basic Descriptor
+        if (empty($messages)) {
+            if ($isBlur) {
+                return "Upgrade to {$targetTier->name} to view clearly.";
+            }
+            if ($product->restriction_type === 'private') {
+                 return "Exclusive to {$targetTier->name} members.";
+            }
+            return "Upgrade to {$targetTier->name} to unlock.";
+        }
+
+        return implode(' ', array_slice($messages, 0, 2));
+    }
     
     public function isAttachmentAccessible(\App\Models\Archive\ArchiveProductAttachment $att, \App\Models\Archive\ArchiveProduct $product, ?\App\Models\MembershipTier $userTier): bool 
     {
-        // 1. Base Product Access Requirement (Attachments are sub-resources)
         if (!$this->isProductAccessible($product, $userTier)) {
             return false;
         }
 
-        // 2. Attachment Specific Rules
         if ($att->restriction_mode === 'inherit') {
-            return true; // Covered by product access
+            return true;
         }
         
         if ($att->restriction_mode === 'public') {
-            return true; // Still within product scope, which is verified
+            return true;
         }
         
         return $this->checkStandardRestriction($att, $userTier);
     }
 
-    public function getAttachmentUpgrade(\App\Models\Archive\ArchiveProductAttachment $att): ?array
+    public function getAttachmentUpgrade(\App\Models\Archive\ArchiveProductAttachment $att, ?\App\Models\MembershipTier $userTier = null): ?array
     {
-        return $this->findBaseRestrictionUpgrade($att);
+        return $this->findBaseRestrictionUpgrade($att, $userTier);
     }
 }

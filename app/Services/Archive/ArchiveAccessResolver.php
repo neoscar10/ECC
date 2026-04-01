@@ -159,7 +159,9 @@ class ArchiveAccessResolver
 
                 $context = [
                     'days_remaining' => $days,
-                    'early_access_tier_name' => $recommendation['tier']->name
+                    'early_access_tier_name' => $recommendation['tier']->name,
+                    'body' => app(\App\Services\Archive\ArchiveAccessService::class)
+                        ->composeSmartAccessMessage($product, $userTier, $recommendation['tier'])
                 ];
 
                 // C) Override body ONLY when viewer is the tier that has the NEXT early access window
@@ -318,7 +320,11 @@ class ArchiveAccessResolver
                       return $this->buildAccessResponse(
                           'blur',
                           'blurred',
-                          ['clear_view_tier_name' => $upgrade['tier']?->name ?? 'Higher Tier'],
+                          [
+                              'clear_view_tier_name' => $upgrade['tier']?->name ?? 'Higher Tier',
+                              'body' => app(\App\Services\Archive\ArchiveAccessService::class)
+                                  ->composeSmartAccessMessage($product, $userTier, $upgrade['tier'], true)
+                          ],
                           [
                             'type' => 'upgrade_membership',
                             'label' => 'Upgrade for Clear View',
@@ -344,11 +350,14 @@ class ArchiveAccessResolver
                  // Rule 2: Private
                  $context['private_tier_name'] = $upgrade['tier']?->name ?? 'Private';
             } else {
-                 // Rule 1: Restricted
-                 $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
+                  // Rule 1: Restricted
+                  $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
+                  $context['body'] = app(\App\Services\Archive\ArchiveAccessService::class)
+                      ->composeSmartAccessMessage($product, $userTier, $upgrade['tier']);
             }
         } else {
              $context['required_tier_name'] = 'Membership';
+             $context['body'] = 'Upgrade to unlock.';
         }
 
         return $this->buildLockedAccess(
@@ -411,6 +420,7 @@ class ArchiveAccessResolver
         } else {
             // Fallback for broken config (prevent crash)
             $context['required_tier_name'] = 'Membership';
+            $context['body'] = 'Upgrade to unlock.';
         }
 
         return $this->buildLockedAccess(

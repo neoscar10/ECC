@@ -17,8 +17,12 @@ class AdminUserBulkImportService
     public function __construct(AdminUserCreationService $creationService)
     {
         $this->creationService = $creationService;
+    }
+
+    protected function loadTierCache()
+    {
+        if (!empty($this->tierCache)) return;
         
-        // Cache tiers by code to avoid multiple DB queries
         $tiers = MembershipTier::where('is_active', true)->get();
         foreach ($tiers as $tier) {
             $this->tierCache[strtoupper($tier->code)] = $tier->id;
@@ -90,20 +94,17 @@ class AdminUserBulkImportService
     /**
      * Process a single mapped row
      */
-    protected function processRow(array $data, int $rowNumber)
+    public function processRow(array $data, int $rowNumber)
     {
-        // 1. Basic Validation
-        $validator = Validator::make($data, [
-            'full_name' => 'required|string|min:2|max:120',
-            'email' => 'required|email',
-            'phone' => 'required|string',
-            'membership_tier_code' => 'required|string',
-            'membership_expiry_date' => 'nullable|date',
-        ]);
+        $this->loadTierCache();
+        // 1. Validation & Normalization
+        $validation = $this->validateRowData($data);
 
-        if ($validator->fails()) {
-            throw new \Exception('Validation Error: ' . implode(', ', $validator->errors()->all()));
+        if (!$validation['is_valid']) {
+            throw new \Exception('Validation Error: ' . implode(', ', $validation['errors']));
         }
+
+        $data = $validation['normalized_data'];
 
         // 2. Duplicate Check
         $emailExists = User::where('email', $data['email'])->exists();
@@ -116,17 +117,10 @@ class AdminUserBulkImportService
             throw new \App\Exceptions\BulkImportDuplicateException(implode(' and ', $reason));
         }
 
-        // 3. Tier Validation
-        $tierCode = strtoupper($data['membership_tier_code']);
-        if (!isset($this->tierCache[$tierCode])) {
-            throw new \Exception("Invalid or inactive Membership Tier Code: '{$tierCode}'");
-        }
-        $tierId = $this->tierCache[$tierCode];
-
-        // 4. Passwords are ALWAYS auto-generated, regardless of template columns.
+        // 3. Passwords are ALWAYS auto-generated, regardless of template columns.
         $manualPassword = null;
 
-        // 5. Structure data for AdminUserCreationService
+        // 4. Structure data for AdminUserCreationService
         $userData = [
             'name' => explode(' ', $data['full_name'])[0], // Basic first name guess
             'full_name' => $data['full_name'],
@@ -154,11 +148,69 @@ class AdminUserBulkImportService
             ])
         ];
 
-        // Use a transaction per row
+        // 5. Tier Validation
+        $tierId = $data['tier_id'];
+
+        // 6. Use a transaction per row
         $expiresAt = $data['membership_expiry_date'] ?? null;
         DB::transaction(function () use ($userData, $tierId, $applicationData, $manualPassword, $expiresAt) {
             $this->creationService->createAdminUser($userData, $tierId, $applicationData, $manualPassword, $expiresAt);
         });
+    }
+
+    /**
+     * Validates and normalizes row data for import or preview
+     * 
+     * @param array $data
+     * @return array ['is_valid' => bool, 'errors' => array, 'normalized_data' => array]
+     */
+    public function validateRowData(array $data): array
+    {
+        $this->loadTierCache();
+        $errors = [];
+        $normalizedData = $data;
+
+        // 1. Laravel Validation Rules
+        $validator = Validator::make($data, [
+            'full_name' => 'required|string|min:2|max:120',
+            'email' => 'required|email',
+            'phone' => 'required|string',
+            'membership_tier_code' => 'required|string',
+            'membership_expiry_date' => 'nullable|date',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = array_merge($errors, $validator->errors()->all());
+        }
+
+        // 2. Duplicate Check
+        $email = $data['email'] ?? null;
+        $phone = $data['phone'] ?? null;
+
+        // We only check duplicates if the basic format is valid
+        if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            if (User::where('email', $email)->exists()) {
+                $errors[] = "Email already exists";
+            }
+        }
+        
+        if ($phone && User::where('phone', $phone)->exists()) {
+            $errors[] = "Phone already exists";
+        }
+
+        // 3. Tier Validation
+        $tierCode = strtoupper($data['membership_tier_code'] ?? '');
+        if (!isset($this->tierCache[$tierCode])) {
+            $errors[] = "Invalid or inactive tier code: '{$tierCode}'";
+        } else {
+            $normalizedData['tier_id'] = $this->tierCache[$tierCode];
+        }
+
+        return [
+            'is_valid' => empty($errors),
+            'errors' => $errors,
+            'normalized_data' => $normalizedData
+        ];
     }
 
     /**

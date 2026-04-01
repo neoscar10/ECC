@@ -102,6 +102,7 @@ class ProfileService
             return [
                 'tier' => null,
                 'status' => 'inactive',
+                'expires_at' => null,
                 'privileges' => []
             ];
         }

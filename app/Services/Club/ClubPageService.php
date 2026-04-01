@@ -34,7 +34,7 @@ class ClubPageService
             'member_name' => $user->full_name ?? $user->name,
             'tier_name' => $tier ? $tier->name : 'Guest',
             'member_id' => $user->member_id ?? '—',
-            'valid_thru' => $profile['expires_at'] ? Carbon::parse($profile['expires_at'])->format('d M Y') : 'Lifetime',
+            'valid_thru' => (isset($profile['expires_at']) && $profile['expires_at']) ? Carbon::parse($profile['expires_at'])->format('d M Y') : 'Lifetime',
             'avatar_url' => $user->avatar_path ? \Illuminate\Support\Facades\Storage::url($user->avatar_path) : null,
             'is_verified' => (bool)$user->is_verified,
         ];
@@ -92,7 +92,7 @@ class ClubPageService
             'concierge' => $concierge,
             'auction_dossier' => $dossier,
             'tier_headline' => $tier ? strtoupper($tier->name) . ' PRIVILEGES' : 'ECC PRIVILEGES',
-            'tier_quote' => $tier->description ?? 'Experience the pinnacle of luxury and exclusivity with Executive Cricket Club.',
+            'tier_quote' => ($tier->description ?? null) ?: 'Experience the pinnacle of luxury and exclusivity with Executive Cricket Club.',
             'club_stats' => $stats,
             'urls' => [
                 'settings' => route('settings'),

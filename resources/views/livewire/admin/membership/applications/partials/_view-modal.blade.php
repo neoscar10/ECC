@@ -23,6 +23,9 @@
                                         <div class="flex-grow-1 ms-3">
                                             <h5 class="fs-15 mb-1">{{ $selectedApplication->user->name ?? 'Unknown Applicant' }}</h5>
                                             <p class="text-muted mb-0">{{ $selectedApplication->user->email ?? '' }}</p>
+                                            @if($selectedApplication->user->phone)
+                                                <p class="text-muted mb-0 small"><i class="ri-phone-line align-middle me-1"></i> {{ $selectedApplication->user->phone }}</p>
+                                            @endif
                                         </div>
                                         <div class="text-end">
                                             <div class="mb-1">
