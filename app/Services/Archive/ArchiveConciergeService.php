@@ -24,7 +24,7 @@ class ArchiveConciergeService
 
         // 2. Fetch the full Enquiry models that match these MAX IDs
         $ledgerEntries = ArchiveProductEnquiry::whereIn('id', $latestEnquiryIdsQuery)
-            ->with(['product.images']) 
+            ->with(['product' => fn($q) => $q->withTrashed(), 'product.images']) 
             ->orderBy('id', 'desc')
             ->paginate($perPage);
 
@@ -32,8 +32,22 @@ class ArchiveConciergeService
         $ledgerEntries->getCollection()->transform(function ($enquiry) use ($userId) {
             $product = $enquiry->product;
             
+            // Fallback for hard-deleted products
             if (!$product) {
-                return null;
+                return [
+                    'id' => $enquiry->archive_product_id,
+                    'title' => 'Product no longer available',
+                    'thumbnail_url' => null,
+                    'status' => $enquiry->status,
+                    'status_label' => ucfirst($enquiry->status),
+                    'meta' => "Request #{$enquiry->id} • " . $enquiry->created_at->format('M d, Y'),
+                    'url' => '#',
+                    'count' => ArchiveProductEnquiry::where('user_id', $userId)
+                        ->where('archive_product_id', $enquiry->archive_product_id)
+                        ->count(),
+                    'created_at' => $enquiry->created_at,
+                    'is_deleted' => true,
+                ];
             }
 
             $count = ArchiveProductEnquiry::where('user_id', $userId)
@@ -53,6 +67,7 @@ class ArchiveConciergeService
                 'url' => route('pavilion.detail', ['type' => 'artifact', 'slugOrId' => $product->id]), // Fallback to detail
                 'count' => $count,
                 'created_at' => $enquiry->created_at,
+                'is_deleted' => (bool)$product->deleted_at,
             ];
         });
 

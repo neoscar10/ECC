@@ -64,9 +64,10 @@ class ArchiveConciergeLedgerController extends Controller
         }
 
         // 2. Fetch Product 
-        // Reuse ArchiveProductResource for consistent "item detail" shape
-        $product = ArchiveProduct::with(['images', 'images360', 'attachments', 'category'])
-            ->findOrFail($id);
+        // Use withTrashed() to handle soft-deleted items
+        $product = ArchiveProduct::withTrashed()
+            ->with(['images', 'images360', 'attachments', 'category'])
+            ->find($id);
             
         // 3. Fetch Enquiries History
         $enquiries = ArchiveProductEnquiry::where('user_id', $userId)
@@ -85,8 +86,17 @@ class ArchiveConciergeLedgerController extends Controller
                 ];
             });
 
+        $itemData = $product 
+            ? new ArchiveProductResource($product)
+            : [
+                'id' => $id,
+                'title' => 'Product no longer available',
+                'is_deleted' => true,
+                'primary_image_url' => null,
+            ];
+
         return $this->success([
-            'item' => new ArchiveProductResource($product),
+            'item' => $itemData,
             'enquiries' => $enquiries
         ], 'Ledger item details fetched successfully.');
     }

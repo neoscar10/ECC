@@ -20,6 +20,7 @@ class ConciergeLedgerItemResource extends JsonResource
                 'id' => $this->resource['id'],
                 'title' => $this->resource['title'],
                 'primary_image_url' => $this->resource['thumbnail_url'],
+                'is_deleted' => $this->resource['is_deleted'] ?? false,
             ],
             'enquiry_summary' => [
                 'last_enquiry_status' => $this->resource['status'],

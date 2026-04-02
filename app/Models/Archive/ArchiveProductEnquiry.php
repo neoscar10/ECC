@@ -20,7 +20,7 @@ class ArchiveProductEnquiry extends Model
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(ArchiveProduct::class, 'archive_product_id');
+        return $this->belongsTo(ArchiveProduct::class, 'archive_product_id')->withTrashed();
     }
 
     public function order(): BelongsTo
