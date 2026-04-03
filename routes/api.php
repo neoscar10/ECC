@@ -195,6 +195,7 @@ Route::prefix('v1')->group(function () {
         Route::get('summary', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'summary']);
         Route::get('/', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'index']);
         Route::get('{id}', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'show']);
+        Route::post('{id}/request-removal', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'requestRemoval']);
     });
 
     // Auction Subscriptions

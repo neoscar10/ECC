@@ -117,4 +117,10 @@ class ShopProduct extends Model
         
         return (int) ($minGroupStock ?? 0);
     }
+
+    public function getDisplayIdAttribute(): string
+    {
+        $hash = strtoupper(substr(md5('shop' . $this->id), 0, 5));
+        return "SHP-{$hash}-{$this->id}";
+    }
 }

@@ -13,6 +13,13 @@ use App\Events\AuctionExtended;
 
 class AuctionBiddingService
 {
+    protected $accessResolver;
+
+    public function __construct(AuctionAccessResolverService $accessResolver)
+    {
+        $this->accessResolver = $accessResolver;
+    }
+
     /**
      * Place a bid on an auction lot.
      * 
@@ -31,8 +38,8 @@ class AuctionBiddingService
             $lot = AuctionLot::lockForUpdate()->find($lot->id);
 
             // 2. Validate Status & Time
-            if ($lot->status !== 'live') {
-                throw new \Exception("Auction is not live.");
+            if (!$this->accessResolver->isBiddingOpenForUser($lot, $user)) {
+                throw new \Exception("Bidding is not open for this item yet.");
             }
             if ($lot->ends_at && now()->gt($lot->ends_at)) {
                 throw new \Exception("Auction has ended.");

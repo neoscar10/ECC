@@ -19,22 +19,35 @@
 
                 <div class="col-12 col-lg-5">
                     <div class="ecc-vault-standing-card">
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3">
-                            <div>
-                                <div class="ecc-vault-standing-label">ACCOUNT STANDING</div>
-                                <div class="ecc-vault-standing-tier">{{ $vaultTierLabel }}</div>
-                            </div>
-
-                            <div class="text-md-end">
+                        <div class="d-flex flex-column gap-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="ecc-vault-standing-label">ACCOUNT STANDING</div>
+                                    <div class="ecc-vault-standing-tier">{{ $vaultTierLabel }}</div>
+                                </div>
                                 <span class="ecc-vault-access-pill">
                                     <i class="mdi mdi-shield-check-outline me-2"></i>
                                     {{ $vaultAccessLabel ?? 'VAULT ACCESS: GRANTED' }}
                                 </span>
-
-                                @if(!empty($vaultVerificationLabel))
-                                    <div class="ecc-vault-standing-note mt-2">{{ $vaultVerificationLabel }}</div>
-                                @endif
                             </div>
+
+                            <div class="row g-3 mt-1 pt-3 border-top border-white-5 border-opacity-10">
+                                <div class="col-6">
+                                    <div class="ecc-vault-mini-stat-label">TOTAL ASSETS</div>
+                                    <div class="ecc-vault-mini-stat-value">{{ number_format($vaultSummary['total_items_count']) }}</div>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <div class="ecc-vault-mini-stat-label text-end">VALUATION (EST)</div>
+                                    <div class="ecc-vault-mini-stat-value text-end">{{ number_format($vaultSummary['total_value']) }} <small class="fs-10 opacity-50">INR</small></div>
+                                </div>
+                            </div>
+                            
+                            @if($vaultSummary['pending_requests_count'] > 0)
+                                <div class="ecc-vault-alert-pill mt-1">
+                                    <i class="ri-history-line me-2"></i>
+                                    {{ $vaultSummary['pending_requests_count'] }} PENDING REMOVAL REQUESTS
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -113,9 +126,11 @@
                     </div>
 
                     <div class="row g-4">
-                        @foreach($vaultArtifacts as $artifact)
+                        @foreach($mappedArtifacts as $artifact)
                             <div class="{{ $vaultViewMode === 'list' ? 'col-12' : 'col-12 col-md-6' }}">
-                                <article class="ecc-vault-artifact-card h-100 {{ $vaultViewMode === 'list' ? 'd-flex align-items-center' : '' }}">
+                                <article class="ecc-vault-artifact-card h-100 {{ $vaultViewMode === 'list' ? 'd-flex align-items-center' : '' }}" 
+                                         wire:click="selectArtifact({{ $artifact->id }})" 
+                                         style="cursor: pointer;">
                                     <div class="ecc-vault-artifact-media position-relative {{ $vaultViewMode === 'list' ? 'w-25 h-100 min-vh-25' : '' }}" @if($vaultViewMode === 'list') style="min-width: 250px" @endif>
                                         <img src="{{ $artifact->image_url }}"
                                              alt="{{ $artifact->title }}"
@@ -126,30 +141,33 @@
                                                 {{ $artifact->status_badge_label }}
                                             </span>
                                         @endif
+                                        
+                                        @if($artifact->has_pending_request)
+                                            <div class="ecc-vault-pending-overlay">
+                                                <div class="ecc-vault-pending-badge">REMOVAL PENDING</div>
+                                            </div>
+                                        @endif
                                     </div>
 
                                     <div class="ecc-vault-artifact-body {{ $vaultViewMode === 'list' ? 'flex-grow-1 p-4' : '' }}">
-                                        <h3 class="ecc-vault-artifact-title">{{ $artifact->title }}</h3>
+                                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                            <h3 class="ecc-vault-artifact-title mb-0">{{ $artifact->title }}</h3>
+                                            <span class="ecc-vault-artifact-price-mini">
+                                                {{ number_format($artifact->total_value) }} {{ $artifact->currency }}
+                                            </span>
+                                        </div>
 
                                         @if($artifact->description)
-                                            <p class="ecc-vault-artifact-text {{ $vaultViewMode === 'list' ? 'pe-lg-5' : '' }}">{{ \Illuminate\Support\Str::limit($artifact->description, 120) }}</p>
+                                            <p class="ecc-vault-artifact-text {{ $vaultViewMode === 'list' ? 'pe-lg-5' : '' }}">{{ \Illuminate\Support\Str::limit($artifact->description, 100) }}</p>
                                         @endif
 
                                         <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mt-auto pt-3">
-                                            @if($artifact->certificate_url)
-                                                <a href="{{ $artifact->certificate_url }}"
-                                                   target="_blank"
-                                                   class="ecc-vault-inline-link">
-                                                    <i class="mdi mdi-file-document-outline"></i>
-                                                    <span>DIGITAL CERTIFICATE</span>
-                                                </a>
-                                            @elseif($artifact->details_url)
-                                                <a href="{{ $artifact->details_url }}"
-                                                   class="ecc-vault-inline-link">
-                                                    <i class="mdi mdi-file-document-outline"></i>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <button type="button" class="ecc-vault-inline-link border-0 bg-transparent p-0">
+                                                    <i class="mdi mdi-eye-outline"></i>
                                                     <span>VIEW DETAILS</span>
-                                                </a>
-                                            @endif
+                                                </button>
+                                            </div>
 
                                             @if($artifact->reference_label)
                                                 <span class="ecc-vault-ref">{{ $artifact->reference_label }}</span>
@@ -160,7 +178,7 @@
                             </div>
                         @endforeach
 
-                        @if(empty($vaultArtifacts) || count($vaultArtifacts) === 0)
+                        @if(empty($mappedArtifacts) || count($mappedArtifacts) === 0)
                             <div class="col-12">
                                 <div class="ecc-empty-state py-5 text-center">
                                     <div class="mb-3">
@@ -191,6 +209,108 @@
         </section>
 
     </div>
+
+    {{-- Artifact Details Modal --}}
+    @if($selectedArtifact)
+        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content ecc-vault-modal-content">
+                    <div class="modal-header border-0 pb-0">
+                        <button type="button" class="btn-close btn-close-white ms-auto" wire:click="closeArtifactModal"></button>
+                    </div>
+                    <div class="modal-body p-4 p-lg-5 pt-0">
+                        <div class="row g-4 g-lg-5">
+                            <div class="col-12 col-lg-5">
+                                <div class="ecc-vault-modal-media rounded-4 overflow-hidden border border-white-5">
+                                    <img src="{{ $selectedArtifact['image_url'] }}" class="w-100 h-100 object-fit-cover shadow-lg" alt="">
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-7">
+                                <div class="ecc-vault-modal-header mb-4">
+                                    <div class="ecc-vault-kicker mb-2">SECURED ASSET DEFINITION</div>
+                                    <h2 class="ecc-vault-modal-title mb-1">{{ $selectedArtifact['title'] }}</h2>
+                                    <div class="ecc-vault-ref fs-12">{{ $selectedArtifact['reference_label'] }}</div>
+                                </div>
+
+                                <div class="ecc-vault-modal-stats row g-3 mb-4">
+                                    <div class="col-4">
+                                        <div class="ecc-vault-mini-stat-label">QUANTITY</div>
+                                        <div class="ecc-vault-mini-stat-value fs-18">{{ $selectedArtifact['quantity'] }}</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="ecc-vault-mini-stat-label">UNIT PRICE</div>
+                                        <div class="ecc-vault-mini-stat-value fs-18">{{ number_format($selectedArtifact['unit_price']) }}</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="ecc-vault-mini-stat-label">LOCK DATE</div>
+                                        <div class="ecc-vault-mini-stat-value fs-18" style="font-size: 0.9rem !important;">{{ $selectedArtifact['locked_at_human'] }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="ecc-vault-modal-desc mb-4">
+                                    <div class="ecc-vault-standing-label mb-2" style="font-size: 0.6rem;">MANIFEST NOTES</div>
+                                    <p class="text-white-50 fs-14 lh-lg">{{ $selectedArtifact['description'] ?: 'No additional manifest data available for this artifact.' }}</p>
+                                </div>
+
+                                <div class="ecc-vault-valuation-line mb-4 p-3 rounded-3 bg-white-5 border border-white-5">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="ecc-vault-standing-label">TOTAL VALUATION</span>
+                                        <span class="ecc-vault-modal-total">
+                                            {{ number_format($selectedArtifact['total_value']) }} <small class="fs-12 opacity-50">{{ $selectedArtifact['currency'] }}</small>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-3">
+                                    @if($selectedArtifact['has_pending_request'])
+                                        <div class="flex-grow-1 p-3 rounded-3 bg-warning-subtle border border-warning-subtle text-warning text-center fw-bold fs-12">
+                                           <i class="ri-time-line me-2"></i> REMOVAL REQUEST PENDING REVIEW
+                                        </div>
+                                    @else
+                                        <button class="btn ecc-vault-btn-outline w-100" wire:click="openRemovalModal">
+                                            REQUEST REMOVAL
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Request Removal Modal --}}
+    @if($showRemovalModal && $selectedArtifact)
+        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.4); z-index: 1060;">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content ecc-vault-modal-content border-warning-subtle">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title text-white fw-bold">REQUEST REMOVAL</h5>
+                        <button type="button" class="btn-close btn-close-white ms-auto" wire:click="$set('showRemovalModal', false)"></button>
+                    </div>
+                    <div class="modal-body p-4 pt-1">
+                        <div class="alert alert-warning-subtle border-0 rounded-3 mb-4 fs-13 lh-base">
+                            <i class="ri-error-warning-line me-2 fs-16 align-middle"></i>
+                            Removal requests are subject to review by the ECC administration. Once approved, the item will be released from your digital vault for physical retrieval or transfer.
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="ecc-vault-standing-label mb-2">REASON FOR REMOVAL (OPTIONAL)</label>
+                            <textarea wire:model="removalMessage" class="form-control ecc-vault-input" rows="3" placeholder="Explain why you wish to remove this asset..."></textarea>
+                        </div>
+
+                        <div class="d-flex gap-3 mt-4">
+                            <button class="btn btn-link text-white-50 text-decoration-none fw-bold fs-13" wire:click="$set('showRemovalModal', false)">CANCEL</button>
+                            <button class="btn ecc-btn-gold px-4 ms-auto" wire:click="submitRemovalRequest">
+                                SUBMIT REQUEST
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     {{-- Premium Access Upgrade Modal --}}
     @include('components.shared.premium-access-modal')
@@ -549,6 +669,123 @@
     .ecc-btn-gold:focus {
         filter: brightness(1.1);
         color: #16110a;
+    }
+    .ecc-vault-mini-stat-label {
+        color: rgba(245,239,225,.35);
+        font-size: .62rem;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        margin-bottom: .25rem;
+    }
+
+    .ecc-vault-mini-stat-value {
+        color: #fff;
+        font-size: 1.25rem;
+        font-weight: 900;
+        letter-spacing: -.02em;
+    }
+
+    .ecc-vault-alert-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: .45rem .85rem;
+        border-radius: .65rem;
+        background: rgba(242,185,13,.10);
+        border: 1px solid rgba(242,185,13,.20);
+        color: #f2b90d;
+        font-size: .64rem;
+        font-weight: 800;
+        letter-spacing: .08em;
+    }
+
+    .ecc-vault-pending-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 5;
+    }
+
+    .ecc-vault-pending-badge {
+        background: #f2b90d;
+        color: #16110a;
+        padding: .5rem 1rem;
+        border-radius: .5rem;
+        font-size: .72rem;
+        font-weight: 900;
+        letter-spacing: .1em;
+        box-shadow: 0 4px 15px rgba(242,185,13,0.3);
+    }
+
+    .ecc-vault-artifact-price-mini {
+        font-size: .85rem;
+        font-weight: 900;
+        color: #d4af37;
+        letter-spacing: .02em;
+    }
+
+    .ecc-vault-modal-content {
+        background: #17130b !important;
+        border: 1px solid rgba(212,175,55,0.2) !important;
+        border-radius: 1.5rem !important;
+        box-shadow: 0 25px 80px rgba(0,0,0,0.8) !important;
+    }
+
+    .ecc-vault-modal-title {
+        font-size: 2.25rem;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        color: #fff;
+    }
+
+    .ecc-vault-modal-total {
+        font-size: 1.75rem;
+        font-weight: 900;
+        color: #d4af37;
+        letter-spacing: -0.02em;
+    }
+
+    .ecc-vault-btn-outline {
+        background: transparent;
+        border: 1px solid rgba(212,175,55,0.4);
+        color: #d4af37;
+        font-weight: 800;
+        padding: 0.85rem 2rem;
+        border-radius: 1rem;
+        letter-spacing: 0.1em;
+        transition: all 0.2s ease;
+    }
+
+    .ecc-vault-btn-outline:hover {
+        background: rgba(212,175,55,0.1);
+        border-color: #d4af37;
+        color: #d4af37;
+    }
+
+    .bg-white-5 {
+        background: rgba(255,255,255,0.05);
+    }
+    .border-white-5 {
+        border-color: rgba(255,255,255,0.05) !important;
+    }
+    .ecc-vault-input {
+        background: rgba(255,255,255,0.03) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: #fff !important;
+        border-radius: 0.75rem !important;
+        padding: 0.75rem 1rem !important;
+    }
+    .ecc-vault-input:focus {
+        border-color: #d4af37 !important;
+        box-shadow: 0 0 0 0.25rem rgba(212,175,55,0.1) !important;
+    }
+
+    .ecc-vault-valuation-line {
+        background: linear-gradient(90deg, rgba(212,175,55,0.05), transparent);
     }
 </style>
 @endpush

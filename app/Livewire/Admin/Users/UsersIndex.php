@@ -87,7 +87,21 @@ class UsersIndex extends Component
 
     public function render()
     {
-        $users = User::orderBy($this->sortField, $this->sortDirection)->paginate(10);
+        $users = User::query()
+            ->when($this->search, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('email', 'like', '%' . $this->search . '%')
+                      ->orWhere('phone', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->when($this->membershipFilter, function ($query) {
+                $query->whereHas('currentMembership', function ($q) {
+                    $q->where('membership_tier_id', $this->membershipFilter);
+                });
+            })
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate(10);
 
         return view('livewire.admin.users.users-index', [
             'users' => $users,
@@ -252,6 +266,11 @@ class UsersIndex extends Component
     }
     
     public function updatedMembershipFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSearch()
     {
         $this->resetPage();
     }

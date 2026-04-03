@@ -49,12 +49,16 @@ class VaultItemResource extends JsonResource
 
             'display' => [
                 'title' => $this->item_title,
-                'subtitle' => $this->currency . ' ' . number_format($this->price, 2),
+                'subtitle' => $this->currency . ' ' . number_format($this->total_value, 2),
                 'ref' => $this->item_ref,
                 'currency' => $this->currency,
                 'price' => (string) $this->price,
+                'unit_price' => (string) ($this->unit_price ?: $this->price),
+                'quantity' => (int) ($this->quantity ?: 1),
+                'total_value' => (string) $this->total_value,
                 // Description might need to come from source if not snapshotted
                 'description' => $this->notes, 
+                'has_pending_request' => $this->pendingRemovalRequest()->exists(),
             ],
 
             'media' => [

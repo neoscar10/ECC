@@ -675,12 +675,30 @@
                         </li>
                         
                         @php
-                            $isVaultActive = request()->routeIs('admin.vault-access.*');
+                            $isVaultActive = request()->routeIs('admin.vault.*') || request()->routeIs('admin.vault-access.*');
                         @endphp
                         <li class="nav-item">
-                            <a class="nav-link menu-link {{ $isVaultActive ? 'active' : '' }}" href="{{ route('admin.vault-access.index') }}">
-                                <i class="ri-safe-2-line"></i> <span data-key="t-vault">Vault Access</span>
+                            <a class="nav-link menu-link {{ $isVaultActive ? 'active' : '' }}" href="#sidebarVault" data-bs-toggle="collapse" role="button" aria-expanded="{{ $isVaultActive ? 'true' : 'false' }}" aria-controls="sidebarVault">
+                                <i class="ri-safe-2-line"></i> <span data-key="t-vault">Vault Management</span>
+                                @if(($pendingVaultRemovalRequestsCount ?? 0) > 0)
+                                    <span class="badge me-3 bg-warning text-dark ms-auto">{{ $pendingVaultRemovalRequestsCount }}</span>
+                                @endif
                             </a>
+                            <div class="collapse menu-dropdown {{ $isVaultActive ? 'show' : '' }}" id="sidebarVault">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.vault-access.index') }}" class="nav-link {{ request()->routeIs('admin.vault-access.*') ? 'active' : '' }}" data-key="t-vault-access">Vault Access</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.vault.removal-requests') }}" class="nav-link {{ request()->routeIs('admin.vault.removal-requests') ? 'active' : '' }}" data-key="t-removal-requests">
+                                            <span>Removal Requests</span>
+                                            @if(($pendingVaultRemovalRequestsCount ?? 0) > 0)
+                                                <span class="badge bg-warning text-dark ms-auto">{{ $pendingVaultRemovalRequestsCount }}</span>
+                                            @endif
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}">

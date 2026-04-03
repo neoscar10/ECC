@@ -88,12 +88,11 @@
                             </thead>
                             <tbody>
                                 @forelse($items as $item)
-                                    <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="flex-shrink-0 me-3">
                                                     @if($item->display_image_url)
-                                                        <img src="{{ $item->display_image_url }}" alt="" class="avatar-sm rounded" onerror="this.onerror=null;this.src='https://placehold.co/100?text=No+Image';">
+                                                        <img src="{{ $item->display_image_url }}" alt="" class="avatar-sm rounded object-fit-cover" onerror="this.onerror=null;this.src='https://placehold.co/100?text=No+Image';">
                                                     @else
                                                         <div class="avatar-sm bg-light rounded d-flex align-items-center justify-content-center">
                                                             <i class="ri-image-2-line fs-20 text-muted"></i>
@@ -102,14 +101,23 @@
                                                 </div>
                                                 <div>
                                                     <h5 class="fs-14 my-1">{{ $item->item_title }}</h5>
-                                                    <p class="text-muted mb-0">{{ $item->currency }} {{ number_format($item->price, 2) }}</p>
+                                                    <p class="text-muted mb-0 fs-11">{{ $item->item_ref ?: 'No Reference' }}</p>
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td>
+                                            <div class="fs-13 fw-medium">{{ $item->quantity }} x {{ number_format($item->unit_price ?: $item->price) }}</div>
+                                            <div class="text-muted fs-11">Total: {{ $item->currency }} {{ number_format($item->total_value) }}</div>
                                         </td>
                                         <td>{{ $item->locked_at->format('d M, Y h:i A') }}</td>
                                         <td>
                                             @if($item->status === 'locked')
                                                 <span class="badge bg-success-subtle text-success text-uppercase">Locked</span>
+                                                @if($item->pendingRemovalRequest)
+                                                    <div class="mt-1">
+                                                        <span class="badge bg-warning-subtle text-warning text-uppercase fs-10">Removal Pending</span>
+                                                    </div>
+                                                @endif
                                             @else
                                                 <span class="badge bg-secondary-subtle text-secondary text-uppercase">Removed</span>
                                                 <div class="small text-muted">{{ $item->removed_at?->format('d M, Y') }}</div>

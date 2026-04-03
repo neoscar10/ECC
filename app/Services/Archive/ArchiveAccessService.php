@@ -270,53 +270,8 @@ class ArchiveAccessService
      */
     public function composeSmartAccessMessage($product, $userTier, $targetTier, $isBlur = false): string
     {
-        $messages = [];
-        $now = now();
-
-        // 1. Target Tier Early Access (The Recommendation)
-        if ($product->early_access_enabled && $targetTier) {
-            $targetWindow = $product->earlyAccessWindows()
-                ->where('membership_tier_id', $targetTier->id)
-                ->first();
-
-            if ($targetWindow) {
-                if ($targetWindow->access_at->lte($now)) {
-                    $messages[] = "Early access for {$targetTier->name} is active now.";
-                } else {
-                    $messages[] = "{$targetTier->name} early access begins " . $targetWindow->access_at->diffForHumans(['parts' => 1]) . ".";
-                }
-            }
-        }
-
-        // 2. User's Current Tier Access (If applicable and different from target)
-        if ($product->early_access_enabled && $userTier && $userTier->id !== $targetTier->id) {
-            $userWindow = $product->earlyAccessWindows()
-                ->where('membership_tier_id', $userTier->id)
-                ->first();
-            
-            if ($userWindow && $userWindow->access_at->gt($now)) {
-                 $messages[] = "Your tier gains access " . $userWindow->access_at->diffForHumans(['parts' => 1]) . ".";
-            }
-        }
-
-        // 3. General Access Timing
-        // Only added if no specific tier access info was added (keeps it focused as per user request)
-        if (empty($messages) && !$product->go_live_now && $product->go_live_at && $product->go_live_at->gt($now)) {
-            $messages[] = "General access opens " . $product->go_live_at->diffForHumans(['parts' => 1]) . ".";
-        }
-
-        // Fallback or Basic Descriptor
-        if (empty($messages)) {
-            if ($isBlur) {
-                return "Upgrade to {$targetTier->name} to view clearly.";
-            }
-            if ($product->restriction_type === 'private') {
-                 return "Exclusive to {$targetTier->name} members.";
-            }
-            return "Upgrade to {$targetTier->name} to unlock.";
-        }
-
-        return implode(' ', array_slice($messages, 0, 2));
+        return app(\App\Services\Common\AccessMessagingService::class)
+            ->composeSmartAccessMessage($product, $userTier, $targetTier, $isBlur);
     }
     
     public function isAttachmentAccessible(\App\Models\Archive\ArchiveProductAttachment $att, \App\Models\Archive\ArchiveProduct $product, ?\App\Models\MembershipTier $userTier): bool 

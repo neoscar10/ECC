@@ -15,7 +15,9 @@ class UserVaultItem extends Model
     protected $casts = [
         'locked_at' => 'datetime',
         'removed_at' => 'datetime',
+        'unit_price' => 'decimal:2',
         'price' => 'decimal:2',
+        'quantity' => 'integer',
     ];
 
     public function user()
@@ -31,6 +33,21 @@ class UserVaultItem extends Model
     public function saleContext()
     {
         return $this->morphTo();
+    }
+
+    public function removalRequests()
+    {
+        return $this->hasMany(VaultRemovalRequest::class, 'vault_item_id');
+    }
+
+    public function pendingRemovalRequest()
+    {
+        return $this->hasOne(VaultRemovalRequest::class, 'vault_item_id')->where('status', 'pending');
+    }
+
+    public function getTotalValueAttribute()
+    {
+        return ($this->unit_price ?? $this->price ?? 0) * ($this->quantity ?? 1);
     }
 
     public function scopeLocked($query)

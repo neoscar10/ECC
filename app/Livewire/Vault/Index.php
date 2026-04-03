@@ -92,6 +92,67 @@ class Index extends Component
         }
     }
 
+    public ?array $selectedArtifact = null;
+    public $removalMessage = '';
+    public bool $showRemovalModal = false;
+
+    public function selectArtifact(int $id)
+    {
+        $user = auth('web')->user();
+        $item = $user->vaultItems()->find($id);
+        
+        if (!$item) return;
+
+        $img = 'https://placehold.co/800x600/17130b/d4af37?text=Secured+Asset';
+        $img = $item->display_image_url ?? $img;
+
+        $this->selectedArtifact = [
+            'id' => $item->id,
+            'title' => $item->item_title ?? 'Secured Asset',
+            'description' => $item->notes ?? '',
+            'image_url' => $img,
+            'status_badge_label' => strtoupper($item->status ?? 'LOCKED'),
+            'reference_label' => $item->item_ref ?? null,
+            'quantity' => $item->quantity ?? 1,
+            'unit_price' => $item->unit_price ?? $item->price,
+            'total_value' => $item->total_value,
+            'currency' => $item->currency ?? 'INR',
+            'locked_at_human' => $item->locked_at ? $item->locked_at->format('d M Y') : 'N/A',
+            'has_pending_request' => $item->pendingRemovalRequest()->exists(),
+        ];
+    }
+
+    public function closeArtifactModal()
+    {
+        $this->selectedArtifact = null;
+        $this->removalMessage = '';
+        $this->showRemovalModal = false;
+    }
+
+    public function openRemovalModal()
+    {
+        if (!$this->selectedArtifact) return;
+        $this->showRemovalModal = true;
+    }
+
+    public function submitRemovalRequest(\App\Services\VaultService $service)
+    {
+        if (!$this->selectedArtifact) return;
+
+        $user = auth('web')->user();
+        $item = $user->vaultItems()->find($this->selectedArtifact['id']);
+
+        if (!$item) return;
+
+        try {
+            $service->requestRemoval($item, $user, $this->removalMessage);
+            session()->flash('success', 'Removal request submitted successfully. Our team will review it shortly.');
+            $this->closeArtifactModal();
+        } catch (\Exception $e) {
+            session()->flash('error', $e->getMessage());
+        }
+    }
+
     public function proceedToSubscribe(ApplicationWizardService $wiz)
     {
         if (!auth('web')->check()) {
@@ -113,7 +174,7 @@ class Index extends Component
         return redirect()->route('membership.upgrade.payment');
     }
 
-    public function render(VaultAccessResolver $resolver, MembershipTierResolver $tierResolver)
+    public function render(VaultAccessResolver $resolver, MembershipTierResolver $tierResolver, \App\Services\VaultService $vaultService)
     {
         $user = auth('web')->user();
         
@@ -126,45 +187,44 @@ class Index extends Component
                 'vaultIntroText' => 'Your digital stronghold for authenticated assets and secured certificates of provenance.',
                 'vaultProtocolVersion' => 'V4.2',
                 'vaultSecurityItems' => [],
-                'insuredValueLabel' => null,
-                'policyStatusLabel' => null,
+                'vaultSummary' => [
+                    'total_items_count' => 0,
+                    'total_value' => 0,
+                    'pending_requests_count' => 0
+                ],
+                'mappedArtifacts' => [],
                 'vaultArtifactCount' => 0,
-                'vaultArtifacts' => [],
                 'supportsVaultViewToggle' => false,
              ])->layout('layouts.web-app', ['title' => 'The Vault', 'activeNav' => 'archive']);
         }
 
         $tier = $tierResolver->resolveForUser($user);
+        $vaultSummary = $vaultService->getVaultSummary($user);
 
         // Fetch user's secured items
-        $itemsQuery = call_user_func([$user, 'vaultItems']);
-        
-        // Scope logic
-        if (method_exists($itemsQuery->getModel(), 'scopeLocked')) {
-            $itemsQuery->locked();
-        } else {
-            $itemsQuery->where('status', 'locked');
-        }
-
-        $vaultArtifacts = $itemsQuery->orderBy('locked_at', 'desc')->get();
+        $vaultArtifacts = $user->vaultItems()
+            ->with('pendingRemovalRequest')
+            ->locked()
+            ->orderBy('locked_at', 'desc')
+            ->get();
         
         $mappedArtifacts = $vaultArtifacts->map(function($item) {
             $img = 'https://placehold.co/800x600/17130b/d4af37?text=Secured+Asset';
-            if (method_exists($item, 'getFirstMediaUrl')) {
-                $img = $item->getFirstMediaUrl('default', 'thumb') ?: ($item->item_image_url ?? $img);
-            } else {
-                $img = $item->item_image_url ?? $img;
-            }
+            $img = $item->display_image_url ?? $img;
 
             return (object) [
                 'id' => $item->id,
                 'title' => $item->item_title ?? 'Secured Asset',
-                'description' => $item->item_description ?? '',
+                'description' => $item->notes ?? '',
                 'image_url' => $img,
                 'status_badge_label' => strtoupper($item->status ?? 'LOCKED'),
-                'certificate_url' => null, 
-                'details_url' => null,
                 'reference_label' => $item->item_ref ?? null,
+                'quantity' => $item->quantity ?? 1,
+                'unit_price' => $item->unit_price ?? $item->price,
+                'total_value' => $item->total_value,
+                'currency' => $item->currency ?? 'INR',
+                'locked_at_human' => $item->locked_at ? $item->locked_at->format('d M Y') : 'N/A',
+                'has_pending_request' => (bool) $item->pendingRemovalRequest,
             ];
         });
 
@@ -196,7 +256,8 @@ class Index extends Component
             'insuredValueLabel' => null, 
             'policyStatusLabel' => null,
             'vaultArtifactCount' => $vaultArtifacts->count(),
-            'vaultArtifacts' => $mappedArtifacts,
+            'mappedArtifacts' => $mappedArtifacts,
+            'vaultSummary' => $vaultSummary,
             'supportsVaultViewToggle' => true,
         ])->layout('layouts.web-app', [
             'title' => 'The Vault',

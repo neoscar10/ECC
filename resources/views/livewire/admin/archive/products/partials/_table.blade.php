@@ -34,7 +34,7 @@
                             </div>
                             <div>
                                 <h5 class="fs-14 mb-1">{{ $product->title }}</h5>
-                                <p class="text-muted mb-0">{{ Str::limit(strip_tags($product->description_unlocked), 30) }}</p>
+                                <p class="text-muted mb-0">{{ $product->display_id }}</p>
                             </div>
                         </div>
                     </td>

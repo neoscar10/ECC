@@ -5,6 +5,7 @@ namespace App\Jobs\Auctions;
 use App\Models\Auctions\AuctionAutoBid;
 use App\Models\Auctions\AuctionEvent;
 use App\Models\Auctions\AuctionLot;
+use App\Services\Auctions\AuctionAccessResolverService;
 use App\Services\Auctions\AuctionAutoBidService;
 use App\Services\Auctions\AuctionBiddingService;
 use Illuminate\Bus\Queueable;
@@ -33,7 +34,7 @@ class ProcessAutoBidStepJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(AuctionBiddingService $biddingService, AuctionAutoBidService $autoBidService): void
+    public function handle(AuctionBiddingService $biddingService, AuctionAutoBidService $autoBidService, AuctionAccessResolverService $accessResolver): void
     {
         // 0. Release Concurrency Lock Early
         Cache::forget("auctions:auto_bid:pending:{$this->lotId}");
@@ -49,7 +50,7 @@ class ProcessAutoBidStepJob implements ShouldQueue
             }
 
             // 2. Refresh Status/Time
-            if ($lot->status !== 'live' || ($lot->ends_at && now()->gt($lot->ends_at))) {
+            if (!in_array($lot->status, ['live', 'upcoming']) || ($lot->ends_at && now()->gt($lot->ends_at))) {
                 DB::commit();
                 return;
             }
@@ -74,12 +75,20 @@ class ProcessAutoBidStepJob implements ShouldQueue
             // If the person with highest MAX bid cannot win, then NO ONE can win? 
             // (Assumes sorted by Max Bid). Yes.
             
-            $candidate = AuctionAutoBid::where('auction_lot_id', $lot->id)
+            $candidates = AuctionAutoBid::where('auction_lot_id', $lot->id)
                 ->where('is_enabled', true)
                 ->where('user_id', '!=', $winnerId)
                 ->orderBy('max_bid', 'desc')
                 ->orderBy('updated_at', 'asc')
-                ->first();
+                ->get();
+
+            $candidate = null;
+            foreach ($candidates as $c) {
+                if ($accessResolver->isBiddingOpenForUser($lot, $c->user)) {
+                    $candidate = $c;
+                    break;
+                }
+            }
 
             if (!$candidate) {
                 DB::commit();
@@ -160,7 +169,7 @@ class ProcessAutoBidStepJob implements ShouldQueue
 
             // 8. Re-evaluate Loop
             $lot->refresh(); 
-            $this->checkAndScheduleNext($lot, $autoBidService);
+            $this->checkAndScheduleNext($lot, $autoBidService, $accessResolver);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -168,21 +177,29 @@ class ProcessAutoBidStepJob implements ShouldQueue
         }
     }
 
-    protected function checkAndScheduleNext(AuctionLot $lot, AuctionAutoBidService $service) 
+    protected function checkAndScheduleNext(AuctionLot $lot, AuctionAutoBidService $service, AuctionAccessResolverService $accessResolver) 
     {
-         if ($lot->status !== 'live') return;
+         if (!in_array($lot->status, ['live', 'upcoming'])) return;
          if ($lot->ends_at && now()->gt($lot->ends_at)) return;
 
          // We just verify if ANY enabled candidates remain who MIGHT be eligible
-         // We don't do complex math here, just existence check.
+         // We must check if at least one of them is allowed to bid NOW.
          $winnerId = $lot->winner_user_id;
 
-         $exists = AuctionAutoBid::where('auction_lot_id', $lot->id)
+         $candidates = AuctionAutoBid::where('auction_lot_id', $lot->id)
             ->where('is_enabled', true)
             ->where('user_id', '!=', $winnerId)
-            ->exists();
+            ->get();
             
-         if ($exists) {
+         $anyEligible = false;
+         foreach ($candidates as $c) {
+             if ($accessResolver->isBiddingOpenForUser($lot, $c->user)) {
+                 $anyEligible = true;
+                 break;
+             }
+         }
+
+         if ($anyEligible) {
              $service->scheduleAutoBidStep($lot->id);
          }
     }

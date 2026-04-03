@@ -14,10 +14,12 @@ use Illuminate\Support\Facades\Log;
 class AuctionAutoBidService
 {
     protected $biddingService;
+    protected $accessResolver;
 
-    public function __construct(AuctionBiddingService $biddingService)
+    public function __construct(AuctionBiddingService $biddingService, AuctionAccessResolverService $accessResolver)
     {
         $this->biddingService = $biddingService;
+        $this->accessResolver = $accessResolver;
     }
 
     /**
@@ -81,7 +83,8 @@ class AuctionAutoBidService
              $freshLot = AuctionLot::lockForUpdate()->find($lot->id);
              
              // Only act if auction is live (sanity check, covered by validation but status can change)
-             if ($freshLot && $freshLot->status === 'live' && (!$freshLot->ends_at || now()->lt($freshLot->ends_at))) {
+             // Only act if bidding is open for this specific user
+             if ($freshLot && $this->accessResolver->isBiddingOpenForUser($freshLot, $user) && (!$freshLot->ends_at || now()->lt($freshLot->ends_at))) {
                  $currentWinnerId = $freshLot->winner_user_id;
                  $currentHighest = $freshLot->current_highest_bid;
                  
@@ -136,7 +139,7 @@ class AuctionAutoBidService
     {
         // 1. Lightweight fetch to verify status/time & calculate delay
         $lot = AuctionLot::find($lotId);
-        if (!$lot || $lot->status !== 'live') {
+        if (!$lot || !in_array($lot->status, ['live', 'upcoming'])) {
             return;
         }
         if ($lot->ends_at && now()->gt($lot->ends_at)) {

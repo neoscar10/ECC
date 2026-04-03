@@ -185,3 +185,6 @@
         </div>
     </div>
 </div>
+
+{{-- Premium Access Upgrade Modal --}}
+@include('components.shared.premium-access-modal')

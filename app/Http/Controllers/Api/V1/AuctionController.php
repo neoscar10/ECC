@@ -38,7 +38,21 @@ class AuctionController extends Controller
 
         // 1. Filter by Status
         if ($request->has('status')) {
-            $query->where('status', $request->status);
+            if ($request->status === 'live') {
+                $query->where(function($q) use ($user) {
+                    $q->where('status', 'live')
+                      ->orWhere(function($sq) use ($user) {
+                          $sq->where('status', 'upcoming')
+                             ->where('early_access_enabled', true)
+                             ->whereHas('earlyAccessWindows', function($w) use ($user) {
+                                 $w->where('membership_tier_id', $user?->currentMembership?->membership_tier_id)
+                                   ->where('access_at', '<=', now());
+                             });
+                      });
+                });
+            } else {
+                $query->where('status', $request->status);
+            }
         } else {
             // Default to live/upcoming
             $query->whereIn('status', ['live', 'upcoming']);
@@ -140,8 +154,8 @@ class AuctionController extends Controller
              ];
         });
 
-        // Logic Update: Enforce 'clear' view for bidding
-        $canBid = $user && ($lot->status === 'live') && ($access['view_mode'] === 'clear');
+        // Logic Update: Use resolver to check if bidding is open for this user/timing
+        $canBid = $user && ($access['view_mode'] === 'clear') && $this->accessResolver->isBiddingOpenForUser($lot, $user);
         
         // Auto Bid Logic (Top Level, Dependent on canBid)
         $userTier = $user?->currentMembership?->membershipTier;
@@ -163,6 +177,7 @@ class AuctionController extends Controller
             'currency' => $lot->currency,
             'starts_at' => $lot->starts_at,
             'ends_at' => $lot->ends_at,
+            'is_early_access_active' => $access['is_early_access_active'] ?? false,
             'is_user_winning' => $user ? $lot->winner_user_id === $user->id : false,
             'can_bid' => $canBid,
             'can_auto_bid' => $canAutoBid,
@@ -302,7 +317,7 @@ class AuctionController extends Controller
              return response()->json(['message' => 'Access Denied: You do not have access to bid.'], 403);
         }
 
-        if ($lot->status !== 'live' && !($user->id === 1)) {
+        if (!$this->accessResolver->isBiddingOpenForUser($lot, $user) && !($user->id === 1)) {
              return response()->json(['message' => 'Bidding is not open for this item.'], 403);
         }
 

@@ -133,4 +133,10 @@ class ArchiveProduct extends Model
         $image = $this->images->first();
         return $image ? \Illuminate\Support\Facades\Storage::url($image->image_path) : null;
     }
+
+    public function getDisplayIdAttribute(): string
+    {
+        $hash = strtoupper(substr(md5('archive' . $this->id), 0, 5));
+        return "ARC-{$hash}-{$this->id}";
+    }
 }

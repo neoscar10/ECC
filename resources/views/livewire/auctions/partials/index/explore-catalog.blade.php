@@ -79,7 +79,11 @@
                                 </div>
                             @endif
                             
-                            @if($hasPremiumBadge)
+                            @if($lot['is_early_access_active'] ?? false)
+                                <span class="luxe-live-pill" style="left: 12px; right: auto; bottom: 12px; top: auto; background: #e31837; font-size: 0.65rem; border: 1px solid rgba(255,255,255,0.2); color: #fff; backdrop-filter: blur(8px); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">
+                                    <i class="mdi mdi-clock-fast"></i> Early Access
+                                </span>
+                            @elseif($hasPremiumBadge)
                                 <span class="luxe-live-pill" style="left: 12px; right: auto; bottom: 12px; top: auto; background: rgba(0,0,0,0.7); font-size: 0.65rem; border: 1px solid rgba(212,175,55,0.4); color: #f2b90d; backdrop-filter: blur(8px);">
                                     <i class="mdi mdi-diamond-stone"></i> {{ $lot['access_badge_label'] ?? 'Platinum Access' }}
                                 </span>
@@ -92,15 +96,23 @@
                             {{-- Blurred State Elements --}}
                             @if(!$canView || $isBlurred)
                                 <div class="ecc-lock-overlay">
-                                    <div class="ecc-lock-icon" style="width:36px; height:36px;">
-                                        <span class="material-symbols-outlined" style="font-size: 16px;">
-                                            @if($lockType === 'time-lock') lock_clock
-                                            @elseif($lockType === 'diamond') diamond
-                                            @else lock
-                                            @endif
-                                        </span>
+                                    <div class="ecc-lock-content">
+                                        <div class="ecc-lock-icon-circle">
+                                            <span class="material-symbols-outlined fs-2">
+                                                @if($lockType === 'time-lock') lock_clock
+                                                @elseif($lockType === 'diamond') diamond
+                                                @else lock
+                                                @endif
+                                            </span>
+                                        </div>
+                                        <div class="ecc-lock-title text-uppercase">{{ $lockTitle }}</div>
+                                        @if(!empty($lockHint))
+                                            <p class="ecc-lock-hint">{{ $lockHint }}</p>
+                                        @endif
+                                        <button type="button" class="ecc-unlock-btn" wire:click.prevent="openAccessModal({{ $lot['id'] }})">
+                                            Unlock View
+                                        </button>
                                     </div>
-                                    <div class="ecc-lock-title text-uppercase" style="font-size: 9px;">{{ $lockTitle }}</div>
                                 </div>
                             @endif
 
@@ -132,7 +144,7 @@
                                     <button type="button" class="luxe-gold-outline-btn w-100 py-2 fs-6" style="height: 42px;" wire:click.prevent="openAccessModal({{ $lot['id'] }})">
                                         UNLOCK
                                     </button>
-                                @elseif($isLiveTab)
+                                @elseif($isLiveTab || ($lot['is_effectively_live'] ?? false))
                                     <a href="{{ $bidUrl }}" class="luxe-gold-btn w-100 py-2 fs-6" style="height: 42px;">
                                         BID NOW
                                     </a>

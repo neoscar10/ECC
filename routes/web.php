@@ -109,6 +109,7 @@ Route::middleware(['auth:web', EnsureAdminRole::class])->prefix('admin')->name('
     // Vault Access
     Route::get('/vault-access', \App\Livewire\Admin\Vault\Index::class)->name('vault-access.index');
     Route::get('/vault-access/{user}', \App\Livewire\Admin\Vault\Show::class)->name('vault-access.show');
+    Route::get('/vault/removal-requests', \App\Livewire\Admin\Vault\RemovalRequests::class)->name('vault.removal-requests');
 
     // Reports
     Route::prefix('reports')->name('reports.')->group(function () {

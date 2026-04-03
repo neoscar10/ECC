@@ -33,6 +33,36 @@ class AuctionAccessResolverService
     }
 
     /**
+     * Determine if bidding is currently open for a specific user.
+     * Accounts for global 'live' status AND active early-access windows.
+     */
+    public function isBiddingOpenForUser(AuctionLot $lot, ?User $user): bool
+    {
+        // 1. If globally live, it's open for everyone with access
+        if ($lot->status === 'live') {
+            return true;
+        }
+
+        // 2. If not live (e.g. upcoming), check if user is in an early access window
+        if ($lot->status === 'upcoming' && $lot->early_access_enabled && $user) {
+            $userTier = $user->currentMembership?->membershipTier;
+            if ($userTier && $userTier->has_early_access) {
+                return $lot->earlyAccessWindows()
+                    ->where('membership_tier_id', $userTier->id)
+                    ->where('access_at', '<=', now())
+                    ->exists();
+            }
+        }
+
+        // 3. Fallback for superadmin (optional, but usually helpful)
+        if ($user && $user->id === 1) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Resolve the access object for an auction lot.
      * Mirrors ArchiveAccessResolver::resolveProductAccess
      */
@@ -40,183 +70,165 @@ class AuctionAccessResolverService
     {
         $userTier = $userTier ?? $user?->currentMembership?->membershipTier;
         
-        // 1. Check Live Status First (Auctions: status != upcoming?)
-        // Archive uses go_live_at. Auctions use starts_at and status.
-        // If status is 'draft' or 'closed' and we are here, controller might have filtered it,
-        // but let's handle 'upcoming' logic if we want to support Early Access.
-        // For now, assuming basic "Live" check via status for simplicity, or mirroring Archive's go_live check if applicable.
-        // Auctions usually just check 'status'.
-        
-        // [ADAPTATION] Archive checks go_live_now/at. Auctions check status.
-        // If status is 'upcoming', it's like "Not Live Yet".
-        $isLive = ($lot->status === 'live');
-        
-        if (!$isLive && $lot->status === 'upcoming') {
-            // Not Live Yet -> Check Early Access (Mirror Archive)
-            if ($lot->early_access_enabled) {
-                if (!$user) {
-                     return $this->buildLockedAccess(
-                         'early_access_locked',
-                         ['days_remaining' => 0, 'early_access_tier_name' => 'Member'],
-                         ['type' => 'subscribe', 'label' => 'Login', 'deeplink' => '/login'],
-                         $userTier,
-                         'time-lock',
-                         ['go_live_at' => $lot->starts_at?->toIso8601String()]
-                     );
-                }
+        // --- STEP 1: VISIBILITY CHECK (The Archive-style Gate) ---
+        // This determines if the user can even see the lot in the list or open the detail page.
+        $hasVisibility = $this->checkStandardRestriction($lot, $userTier);
 
-                $activeWindow = null;
-                if ($userTier?->has_early_access) {
-                    $activeWindow = $lot->earlyAccessWindows()
-                        ->where('membership_tier_id', $userTier->id)
-                        ->where('access_at', '<=', now())
-                        ->first();
-                }
+        if (!$hasVisibility) {
+             // User is blocked from even seeing the lot details
+             if (!$user) {
+                  return $this->buildLockedAccess(
+                      'product_restricted',
+                      ['required_tier_name' => 'Member'],
+                      ['type' => 'subscribe', 'label' => 'Join Now', 'deeplink' => '/register'],
+                      $userTier,
+                      'lock'
+                  );
+             }
 
-                if ($activeWindow) {
-                    return $this->buildOpenAccess('Early Access Granted.', $userTier, ['go_live_at' => $lot->starts_at?->toIso8601String()]);
-                }
-                
-                // Recommendation Logic (Mirror Archive)
-                $activeEarlyTierNow = $lot->earlyAccessWindows()
-                     ->where('access_at', '<=', now())
-                     // ->whereHas('tier', fn($q) => $q->where('has_early_access', true)) // Assuming relations exist
-                     ->with('tier')
-                     ->get()
-                     ->sortBy(fn($w) => $w->tier->level ?? 999)
-                     ->first();
+             $upgrade = $this->findBaseRestrictionUpgrade($lot);
+             $context = [];
+             if ($upgrade) {
+                 if ($lot->restriction_type === 'private') {
+                      $context['private_tier_name'] = $upgrade['tier']?->name ?? 'Private';
+                 } else {
+                      $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
+                 }
+             } else {
+                  $context['required_tier_name'] = 'Membership';
+             }
 
-                $nextEarlyWindow = $lot->earlyAccessWindows()
-                     ->where('access_at', '>', now())
-                     ->with('tier')
-                     ->orderBy('access_at', 'asc')
-                     ->first();
+             $context['body'] = app(\App\Services\Common\AccessMessagingService::class)
+                 ->composeSmartAccessMessage($lot, $userTier, $upgrade['tier'] ?? null);
 
-                $recommendation = null;
-                if ($nextEarlyWindow) {
-                    $recommendation = ['tier' => $nextEarlyWindow->tier, 'access_at' => $nextEarlyWindow->access_at, 'is_future' => true];
-                } elseif ($activeEarlyTierNow) {
-                    $recommendation = ['tier' => $activeEarlyTierNow->tier, 'access_at' => $lot->starts_at, 'is_future' => false];
-                }
-
-                if ($recommendation) {
-                    // NEW: Viewer-Specific Timing
-                    $viewerNextWindowFuture = null;
-                    if ($userTier?->has_early_access) {
-                         $viewerNextWindowFuture = $lot->earlyAccessWindows()
-                             ->where('membership_tier_id', $userTier->id)
-                             ->where('access_at', '>', now())
-                             ->orderBy('access_at', 'asc')
-                             ->first();
-                    }
-
-                    $viewerUnlockAt = $viewerNextWindowFuture ? $viewerNextWindowFuture->access_at : $lot->starts_at;
-
-                    // NEW: Calendar Days Calculation
-                    $days = 0;
-                    if ($viewerUnlockAt instanceof \Carbon\Carbon) {
-                        $days = now()->gte($viewerUnlockAt)
-                            ? 0
-                            : now()->copy()->startOfDay()->diffInDays($viewerUnlockAt->copy()->startOfDay());
-                    }
-
-                    $context = [
-                        'days_remaining' => $days,
-                        'early_access_tier_name' => $recommendation['tier']->name
-                    ];
-
-                    // NEW: 'Coming soon...' Override
-                    if (($recommendation['is_future'] ?? false) && $userTier && ($recommendation['tier']->id === $userTier->id)) {
-                        $context['body'] = 'Coming soon...';
-                    }
-
-                    // Build Actions
-                    $actions = [];
-                    $primaryTargetTier = $recommendation['tier'];
-                    $hasRequiredTier = $userTier && $userTier->id === $primaryTargetTier->id;
-
-                    if (!$hasRequiredTier) {
-                        $actions[] = [
-                            'type' => 'upgrade_membership',
-                            'label' => $recommendation['is_future'] ? 'Get Early Access' : 'Upgrade to View',
-                            'target_tier' => $this->formatTier($primaryTargetTier),
-                            'deeplink' => '/membership/tiers',
-                            'priority' => 'primary'
-                        ];
-                    }
-
-                    return $this->buildLockedAccess(
-                        'early_access_locked',
-                        $context,
-                        $actions,
-                        $userTier,
-                        'time-lock',
-                        [
-                            'go_live_at' => $lot->starts_at?->toIso8601String(),
-                            'next_access_at' => ($viewerUnlockAt instanceof \Carbon\Carbon) ? $viewerUnlockAt->toIso8601String() : $viewerUnlockAt
-                        ]
-                    );
-                }
-            }
-            
-            // Not Live & No Early Access or Fallback
-            $goLiveText = $lot->starts_at ? "Goes live on " . $lot->starts_at->format('d M Y, h:i A') : 'Stay tuned.';
-            return $this->buildLockedAccess(
-                'not_live_yet',
-                ['title' => 'Coming Soon', 'body' => $goLiveText],
-                ['type' => 'wait', 'label' => 'Coming Soon'],
-                $userTier,
-                'time-lock',
-                ['go_live_at' => $lot->starts_at?->toIso8601String()]
-            );
-        }
-
-        // 2. Lot is Live -> Check Standard Restrictions
-        if ($lot->restriction_mode === 'public') {
-            return $this->checkBlueDisabledOrClear($lot, $userTier);
-        }
-        
-        if (!$user) {
              return $this->buildLockedAccess(
                  'product_restricted',
-                 ['required_tier_name' => 'Member'],
-                 ['type' => 'subscribe', 'label' => 'Join Now', 'deeplink' => '/register'],
+                 $context,
+                 [
+                     'type' => 'upgrade_membership',
+                     'label' => 'Upgrade',
+                     'target_tier' => isset($upgrade['tier']) ? $this->formatTier($upgrade['tier']) : null,
+                     'deeplink' => '/membership/tiers'
+                 ],
                  $userTier,
                  'lock'
              );
         }
 
-        if ($this->checkStandardRestriction($lot, $userTier)) {
-             // Access Granted via Visibility... check blur
-             return $this->checkBlueDisabledOrClear($lot, $userTier);
+        // --- STEP 2: BLUR / CLEAR VIEW CHECK ---
+        // User has basic visibility, now check if they see it blurred.
+        // Rule: Clear view should NOT be lost just because the lot is scheduled.
+        $isBiddingOpen = $this->isBiddingOpenForUser($lot, $user);
+        $viewModeResponse = $this->checkBlueDisabledOrClear($lot, $userTier);
+
+        if ($isBiddingOpen) {
+             // Bidding is currently open for this user (either global live or early access)
+             $viewModeResponse['message']['title'] = 'Auction Live';
+             $viewModeResponse['message']['body'] = 'Bidding is now open.';
+             $viewModeResponse['message']['icon'] = 'hammer'; // hammer icon for bidding open
+             
+             if ($lot->status === 'upcoming') {
+                  $viewModeResponse['message']['title'] = 'Early Access Live';
+                  $viewModeResponse['message']['body'] = 'You have early access to bid now.';
+             }
+        } elseif ($lot->status === 'upcoming') {
+             // Bidding is NOT yet open for this user -> Calculate "Upcoming" messaging
+             if ($lot->early_access_enabled) {
+                  // Early access logic (Mirror Archive)
+                  $activeEarlyTierNow = $lot->earlyAccessWindows()
+                       ->where('access_at', '<=', now())
+                       ->with('tier')
+                       ->get()
+                       ->sortBy(fn($w) => $w->tier->level ?? 999)
+                       ->first();
+
+                  $nextEarlyWindow = $lot->earlyAccessWindows()
+                       ->where('access_at', '>', now())
+                       ->with('tier')
+                       ->orderBy('access_at', 'asc')
+                       ->first();
+
+                  $recommendation = null;
+                  if ($nextEarlyWindow) {
+                      $recommendation = ['tier' => $nextEarlyWindow->tier, 'access_at' => $nextEarlyWindow->access_at, 'is_future' => true];
+                  } elseif ($activeEarlyTierNow) {
+                      $recommendation = ['tier' => $activeEarlyTierNow->tier, 'access_at' => $lot->starts_at, 'is_future' => false];
+                  }
+
+                  if ($recommendation) {
+                      $viewerNextWindowFuture = null;
+                      if ($userTier?->has_early_access) {
+                           $viewerNextWindowFuture = $lot->earlyAccessWindows()
+                               ->where('membership_tier_id', $userTier->id)
+                               ->where('access_at', '>', now())
+                               ->orderBy('access_at', 'asc')
+                               ->first();
+                      }
+
+                      $viewerUnlockAt = $viewerNextWindowFuture ? $viewerNextWindowFuture->access_at : $lot->starts_at;
+
+                      $days = 0;
+                      if ($viewerUnlockAt instanceof \Carbon\Carbon) {
+                          $days = now()->gte($viewerUnlockAt)
+                              ? 0
+                              : now()->copy()->startOfDay()->diffInDays($viewerUnlockAt->copy()->startOfDay());
+                      }
+
+                      $context = [
+                          'days_remaining' => $days,
+                          'early_access_tier_name' => $recommendation['tier']->name,
+                          'body' => app(\App\Services\Common\AccessMessagingService::class)
+                               ->composeSmartAccessMessage($lot, $userTier, $recommendation['tier'])
+                      ];
+
+                      if (($recommendation['is_future'] ?? false) && $userTier && ($recommendation['tier']->id === $userTier->id)) {
+                          $context['body'] = 'Coming soon...';
+                      }
+
+                      $actions = [];
+                      $primaryTargetTier = $recommendation['tier'];
+                      $hasRequiredTier = $userTier && $userTier->id === $primaryTargetTier->id;
+
+                      if (!$hasRequiredTier) {
+                          $actions[] = [
+                              'type' => 'upgrade_membership',
+                              'label' => $recommendation['is_future'] ? 'Get Early Access' : 'Upgrade to View',
+                              'target_tier' => $this->formatTier($primaryTargetTier),
+                              'deeplink' => '/membership/tiers',
+                              'priority' => 'primary'
+                          ];
+                      }
+
+                      // Update the message and actions but KEEP the view_mode from checkBlueDisabledOrClear
+                      $earlyAccessMessage = $this->buildMessage('early_access_locked', $context);
+                      $viewModeResponse['message'] = $earlyAccessMessage;
+                      $viewModeResponse['actions'] = array_merge($viewModeResponse['actions'], $actions);
+                      $viewModeResponse['reason'] = 'early_access_locked';
+                      $viewModeResponse['timing'] = array_merge($viewModeResponse['timing'], [
+                          'go_live_at' => $lot->starts_at?->toIso8601String(),
+                          'next_access_at' => ($viewerUnlockAt instanceof \Carbon\Carbon) ? $viewerUnlockAt->toIso8601String() : $viewerUnlockAt
+                      ]);
+                  }
+             } else {
+                 // Fallback for upcoming with no specific early access window context
+                 $goLiveText = $lot->starts_at ? "Goes live on " . $lot->starts_at->format('d M Y, h:i A') : 'Stay tuned.';
+                 $viewModeResponse['message'] = ['title' => 'Coming Soon', 'body' => $goLiveText, 'icon' => 'clock'];
+                 $viewModeResponse['reason'] = 'not_live_yet';
+             }
         }
 
-        // Recommend Upgrade (Totally Blocked)
-        $upgrade = $this->findBaseRestrictionUpgrade($lot);
-        
-        $context = [];
-        if ($upgrade) {
-            if ($lot->restriction_type === 'private') {
-                 $context['private_tier_name'] = $upgrade['tier']?->name ?? 'Private';
-            } else {
-                 $context['required_tier_name'] = $upgrade['tier']?->name ?? 'Higher';
-            }
-        } else {
-             $context['required_tier_name'] = 'Membership';
-        }
-
-        return $this->buildLockedAccess(
-            'product_restricted',
-            $context,
-            [
-                'type' => 'upgrade_membership',
-                'label' => 'Upgrade',
-                'target_tier' => isset($upgrade['tier']) ? $this->formatTier($upgrade['tier']) : null,
-                'deeplink' => '/membership/tiers'
-            ],
-            $userTier,
-            'lock'
-        );
+        return [
+            'view_mode' => $viewModeResponse['view_mode'],
+            'is_clear' => $viewModeResponse['view_mode'] === 'clear',
+            'is_blurred' => $viewModeResponse['view_mode'] === 'blur',
+            'is_blocked' => $viewModeResponse['view_mode'] === 'blocked',
+            'can_bid' => $isBiddingOpen && ($viewModeResponse['view_mode'] === 'clear'),
+            'is_early_access_active' => ($lot->status === 'upcoming' && $isBiddingOpen),
+            'reason' => $viewModeResponse['reason'] ?? 'unknown',
+            'message' => $viewModeResponse['message'] ?? null,
+            'actions' => $viewModeResponse['actions'] ?? [],
+            'timing' => $viewModeResponse['timing'] ?? [],
+        ];
     }
 
     private function checkBlueDisabledOrClear(AuctionLot $lot, ?MembershipTier $userTier): array

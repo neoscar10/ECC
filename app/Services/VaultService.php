@@ -39,7 +39,8 @@ class VaultService
      *  - item_ref: string|null
      *  - item_image_url: string|null
      *  - currency: string
-     *  - price: float|null
+     *  - unit_price: float|null
+     *  - quantity: int|null
      *  - notes: string|null
      */
     public function lockItemForUser(User $user, array $data): UserVaultItem
@@ -60,9 +61,114 @@ class VaultService
             'item_ref' => $data['item_ref'] ?? null,
             'item_image_url' => $data['item_image_url'] ?? null,
             'currency' => $data['currency'] ?? 'INR',
-            'price' => $data['price'] ?? null,
+            'unit_price' => $data['unit_price'] ?? ($data['price'] ?? null),
+            'price' => $data['price'] ?? ($data['unit_price'] ?? null),
+            'quantity' => $data['quantity'] ?? 1,
             'notes' => $data['notes'] ?? null,
         ]);
+    }
+
+    /**
+     * Get vault summary for a user.
+     */
+    public function getVaultSummary(User $user): array
+    {
+        $items = $user->vaultItems()->locked()->get();
+        $totalItems = $items->count();
+        $totalValue = $items->sum(fn($item) => $item->total_value);
+        
+        $pendingRequestsCount = \App\Models\VaultRemovalRequest::where('user_id', $user->id)
+            ->where('status', \App\Models\VaultRemovalRequest::STATUS_PENDING)
+            ->count();
+
+        return [
+            'total_items_count' => $totalItems,
+            'total_value' => $totalValue,
+            'pending_requests_count' => $pendingRequestsCount,
+            'has_access' => $this->userHasAccess($user),
+        ];
+    }
+
+    /**
+     * Create a removal request for a vault item.
+     */
+    public function requestRemoval(UserVaultItem $item, User $user, ?string $message = null): \App\Models\VaultRemovalRequest
+    {
+        // 1. Authorization
+        if ($item->user_id !== $user->id) {
+            throw new \Exception("Unauthorized: You do not own this vault item.");
+        }
+
+        if ($item->status !== 'locked') {
+            throw new \Exception("Invalid state: This item is already removed or processed.");
+        }
+
+        // 2. Prevent duplicate active requests
+        $exists = \App\Models\VaultRemovalRequest::where('vault_item_id', $item->id)
+            ->whereIn('status', [\App\Models\VaultRemovalRequest::STATUS_PENDING, \App\Models\VaultRemovalRequest::STATUS_APPROVED])
+            ->exists();
+
+        if ($exists) {
+            throw new \Exception("A removal request for this item is already in progress.");
+        }
+
+        // 3. Create request
+        return \App\Models\VaultRemovalRequest::create([
+            'user_id' => $user->id,
+            'vault_item_id' => $item->id,
+            'status' => \App\Models\VaultRemovalRequest::STATUS_PENDING,
+            'message' => $message,
+            'requested_at' => now(),
+        ]);
+    }
+
+    /**
+     * ADMIN: Approve removal request.
+     */
+    public function approveRemoval(\App\Models\VaultRemovalRequest $request, User $admin, ?string $note = null): \App\Models\VaultRemovalRequest
+    {
+        $request->update([
+            'status' => \App\Models\VaultRemovalRequest::STATUS_APPROVED,
+            'admin_note' => $note,
+            'reviewed_at' => now(),
+            'reviewed_by_admin_id' => $admin->id,
+        ]);
+
+        return $request;
+    }
+
+    /**
+     * ADMIN: Reject removal request.
+     */
+    public function rejectRemoval(\App\Models\VaultRemovalRequest $request, User $admin, ?string $note = null): \App\Models\VaultRemovalRequest
+    {
+        $request->update([
+            'status' => \App\Models\VaultRemovalRequest::STATUS_REJECTED,
+            'admin_note' => $note,
+            'reviewed_at' => now(),
+            'reviewed_by_admin_id' => $admin->id,
+        ]);
+
+        return $request;
+    }
+
+    /**
+     * ADMIN: Complete removal request (actual release).
+     */
+    public function completeRemoval(\App\Models\VaultRemovalRequest $request, User $admin, ?string $note = null): \App\Models\VaultRemovalRequest
+    {
+        DB::transaction(function() use ($request, $admin, $note) {
+            // 1. Mark vault item as removed
+            $this->markRemoved($request->vaultItem, $admin, $note ?: $request->admin_note);
+
+            // 2. Mark request as completed
+            $request->update([
+                'status' => \App\Models\VaultRemovalRequest::STATUS_COMPLETED,
+                'completed_at' => now(),
+            ]);
+        });
+
+        return $request;
     }
 
     /**
@@ -82,5 +188,13 @@ class VaultService
         ]);
 
         return $item;
+    }
+
+    /**
+     * ADMIN: Get unattended (pending) removal request count.
+     */
+    public function getPendingRemovalRequestsCount(): int
+    {
+        return \App\Models\VaultRemovalRequest::where('status', \App\Models\VaultRemovalRequest::STATUS_PENDING)->count();
     }
 }

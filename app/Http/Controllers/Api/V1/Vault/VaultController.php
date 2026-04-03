@@ -42,6 +42,9 @@ class VaultController extends Controller
         // 200 Payload
         $lockedCount = $user->vaultItems()->locked()->count();
         $removedCount = $user->vaultItems()->removed()->count();
+        $pendingRequestsCount = $user->vaultItems()->whereHas('removalRequests', function($q) {
+            $q->where('status', 'pending');
+        })->count();
 
         return response()->json([
             'success' => true,
@@ -52,6 +55,7 @@ class VaultController extends Controller
                 'counts' => [
                     'locked' => $lockedCount,
                     'removed' => $removedCount,
+                    'pending_removal_requests' => $pendingRequestsCount,
                     'total' => $lockedCount + $removedCount
                 ],
                 'membership' => [
@@ -67,6 +71,47 @@ class VaultController extends Controller
             'meta' => [],
             'errors' => []
         ]);
+    }
+
+    /**
+     * Request removal of a vault item.
+     */
+    public function requestRemoval(Request $request, $id, \App\Services\VaultService $service)
+    {
+        $user = $request->user();
+
+        if (!$user->has_vault_access) {
+            return $this->summary($request);
+        }
+
+        $item = $user->vaultItems()->find($id);
+
+        if (!$item) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vault item not found.',
+                'errors' => ['id' => ['Item not found or does not belong to user.']]
+            ], 404);
+        }
+
+        try {
+            $removalRequest = $service->requestRemoval($item, $user, $request->input('message'));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Removal request submitted successfully.',
+                'data' => [
+                    'request_id' => $removalRequest->id,
+                    'status' => $removalRequest->status
+                ]
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'errors' => ['logic' => [$e->getMessage()]]
+            ], 422);
+        }
     }
 
     /**

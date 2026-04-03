@@ -90,7 +90,7 @@ class Show extends Component
         $this->resetErrorBag();
         $this->autoBidErrorMessage = null;
 
-        if (!$this->canAutoBid || $this->lot->status !== 'live') {
+        if (!$this->canAutoBid) {
             return;
         }
 
@@ -207,7 +207,10 @@ class Show extends Component
         $this->existingAutoBid = null;
 
         if ($user) {
-            $this->canAutoBid = (($accessCheck['view_mode'] ?? 'blocked') === 'clear') && ($tier?->is_auto_bidding_enabled ?? false);
+            $resolver = app(\App\Services\Auctions\AuctionAccessResolverService::class);
+            $this->canAutoBid = (($accessCheck['view_mode'] ?? 'blocked') === 'clear') 
+                && ($tier?->is_auto_bidding_enabled ?? false)
+                && $resolver->isBiddingOpenForUser($this->lot, $user);
             
             $autoBid = \App\Models\Auctions\AuctionAutoBid::where('auction_lot_id', $this->lot->id)
                 ->where('user_id', $user->id)
@@ -250,8 +253,17 @@ class Show extends Component
         $tier = $tierResolver->resolveForUser($user);
         $access = $resolver->resolve($this->lot, $user, $tier);
 
-        if (($access['view_mode'] ?? 'blocked') !== 'clear' || $this->lot->status !== 'live') {
-            $this->bidErrorMessage = 'Bidding is not open for this item or you lack access permission.';
+        // Intelligently decide: Upgrade path first, then timing error
+        if (!empty($access['actions'])) {
+            return $this->triggerUpgradeFlow($access);
+        }
+
+        if (($access['view_mode'] ?? 'blocked') !== 'clear') {
+            return $this->triggerUpgradeFlow($access);
+        }
+
+        if (!$resolver->isBiddingOpenForUser($this->lot, $user)) {
+            $this->bidErrorMessage = 'Bidding is not open for this item yet.';
             $this->showBidConfirmModal = true;
             return;
         }
@@ -395,13 +407,86 @@ class Show extends Component
             'suggested_increments' => $suggestedIncrements,
             'terms_url' => route('welcome'), // standard fallback
             'back_url' => route('auctions.index'),
-            'can_bid' => $user && ($this->lot->status === 'live') && (($accessState['view_mode'] ?? 'blocked') === 'clear'),
+            'can_bid' => $user && (($accessState['view_mode'] ?? 'blocked') === 'clear') && $resolver->isBiddingOpenForUser($this->lot, $user),
+            'is_early_access_active' => $accessState['is_early_access_active'] ?? false,
+            'is_effectively_live' => $this->lot->status === 'live' || ($accessState['is_early_access_active'] ?? false),
+            'access_actions' => $accessState['actions'] ?? [],
+            'access_message' => $accessState['message']['body'] ?? null,
         ];
 
         return view('livewire.auctions.show', [
             'lotPrepared' => (object)$viewData
         ])->layout('layouts.web-app')
           ->title($viewData['title'] ?? 'Auction Detail'); 
-        // Note: setting hideBottomNav=true if the component itself implements the dark variant of the nav naturally.
+    }
+
+    public ?bool $showAccessModal = false;
+    public ?array $modalData = null;
+
+    protected function triggerUpgradeFlow(array $access)
+    {
+        $user = auth('web')->user();
+        $tierResolver = app(\App\Services\Membership\MembershipTierResolver::class);
+
+        // Find the target tier from the access actions
+        $targetTierId = null;
+        if (!empty($access['actions'])) {
+            foreach ($access['actions'] as $action) {
+                if ($action['type'] === 'upgrade_membership' && !empty($action['target_tier']['id'])) {
+                    $targetTierId = $action['target_tier']['id'];
+                    break;
+                }
+            }
+        }
+
+        if (!$targetTierId) {
+            return redirect('/membership/tiers');
+        }
+
+        $targetTierModel = $tierResolver->getTierWithDetails($targetTierId);
+        
+        if (!$targetTierModel) {
+            return redirect('/membership/tiers');
+        }
+
+        $this->modalData = [
+            'tier_id' => $targetTierModel->id,
+            'tier_name' => $targetTierModel->name,
+            'price_formatted' => $targetTierModel->price > 0 ? 'INR ' . number_format($targetTierModel->price) : 'Free',
+            'duration_label' => 'Year',
+            'icon' => \App\Support\Archive\AccessIconNormalizer::normalize($access['reason'] ?? null, $access['view_mode'] ?? 'blocked'),
+            'privileges' => $targetTierModel->privileges->toArray(),
+            'features' => $targetTierModel->features->toArray(),
+            'product_title' => $this->lot->title,
+        ];
+
+        $this->showAccessModal = true;
+    }
+
+    public function closeAccessModal(): void
+    {
+        $this->showAccessModal = false;
+        $this->modalData = null;
+    }
+
+    public function proceedToSubscribe(\App\Services\Membership\ApplicationWizardService $wiz)
+    {
+        if (!auth('web')->check()) {
+            return redirect('/membership/apply-intro');
+        }
+
+        if (!$this->modalData || empty($this->modalData['tier_id'])) {
+            return redirect(route('membership.application.step1'));
+        }
+
+        $draft = $wiz->getOrCreateDraft();
+        
+        if ($draft instanceof \App\Models\MembershipApplication) {
+            $draft->update([
+                'selected_tier_id' => $this->modalData['tier_id']
+            ]);
+        }
+
+        return redirect()->route('membership.upgrade.payment');
     }
 }

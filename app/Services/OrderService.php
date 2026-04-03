@@ -77,7 +77,8 @@ class OrderService
                         'item_ref' => $product->code,
                         'item_image_url' => $product->image_url, // Assuming accessor/column exists
                         'currency' => 'INR', // Default or from product
-                        'price' => $data['unit_price_inr'],
+                        'unit_price' => $data['unit_price_inr'],
+                        'quantity' => $data['qty'],
                         'notes' => 'Locked via Archive Sale',
                     ]
                 );
@@ -155,7 +156,8 @@ class OrderService
                         'item_ref' => $lot->lot_no,
                         'item_image_url' => $lot->image_url, // Assuming accessor/column exists
                         'currency' => 'INR',
-                        'price' => $data['unit_price_inr'],
+                        'unit_price' => $data['unit_price_inr'],
+                        'quantity' => 1,
                         'notes' => 'Locked via Auction Sale',
                     ]
                 );

@@ -26,6 +26,7 @@ class AdminSidebarComposer
                 'newArchiveEnquiriesCount' => ArchiveProductEnquiry::where('status', 'new')->count(),
                 'newContactEnquiriesCount' => \App\Models\ContactEnquiry::where('status', 'new')->count(),
                 'placedOrdersCount' => ShopOrder::where('status', 'placed')->count(),
+                'pendingVaultRemovalRequestsCount' => \App\Models\VaultRemovalRequest::where('status', 'pending')->count(),
             ];
         });
 

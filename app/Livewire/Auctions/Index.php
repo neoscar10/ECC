@@ -124,7 +124,18 @@ class Index extends Component
         // Filter by Tab (Status)
         if ($this->activeTab === 'past') {
             $query->whereIn('status', ['closed', 'ended']);
-            // If they have distinct 'processing' or 'ended' statuses, add them here.
+        } elseif ($this->activeTab === 'live') {
+            $query->where(function($q) use ($user) {
+                $q->where('status', 'live')
+                  ->orWhere(function($sq) use ($user) {
+                      $sq->where('status', 'upcoming')
+                         ->where('early_access_enabled', true)
+                         ->whereHas('earlyAccessWindows', function($w) use ($user) {
+                             $w->where('membership_tier_id', $user?->currentMembership?->membership_tier_id)
+                               ->where('access_at', '<=', now());
+                         });
+                  });
+            });
         } else {
             $query->where('status', $this->activeTab);
         }
@@ -196,6 +207,8 @@ class Index extends Component
                 'lock_type' => $icon ?? 'lock',
                 'lock_title' => $access['message']['title'] ?? 'Restricted View',
                 'lock_hint' => $access['message']['body'] ?? 'Membership Required',
+                'is_early_access_active' => $access['is_early_access_active'] ?? false,
+                'is_effectively_live' => $lot->status === 'live' || ($access['is_early_access_active'] ?? false),
             ];
         });
 

@@ -87,6 +87,7 @@
                                          @endif
                                          <div>
                                              <h5 class="fs-14 m-0"><a href="#" class="text-dark">{{ $product->title }}</a></h5>
+                                             <p class="text-muted mb-0" style="font-size: 11px;">{{ $product->display_id }}</p>
                                          </div>
                                     </div>
                                 </td>

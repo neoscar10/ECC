@@ -681,37 +681,74 @@
             position: absolute; inset: 0;
             z-index: 15;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 1.25rem;
+            background: rgba(20,16,8,.70);
+            backdrop-filter: blur(3px);
             text-align: center;
-            padding: 15px;
             cursor: pointer;
         }
 
-        .ecc-lock-icon {
-            width: 48px; height: 48px;
+        .ecc-lock-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .7rem;
+            max-width: 200px;
+        }
+
+        .ecc-lock-icon-circle {
+            width: 54px;
+            height: 54px;
             border-radius: 50%;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid rgba(242, 185, 13, 0.3);
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 12px;
-            color: #f2b90d;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            background: rgba(212,175,55,.12);
+            border: 1px solid rgba(212,175,55,.24);
+            color: var(--luxe-gold);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 2px;
         }
 
         .ecc-lock-title {
-            color: #f5ebd0;
-            font-weight: 800;
-            font-size: 11px;
-            letter-spacing: 0.05em;
+            color: var(--luxe-gold);
+            font-size: .72rem;
+            font-weight: 900;
+            letter-spacing: .1em;
+            text-transform: uppercase;
         }
 
         .ecc-lock-hint {
-            color: #cbbc90;
-            margin-top: 5px;
-            font-size: 10px;
-            font-weight: 600;
+            color: #fff;
+            opacity: 0.8;
+            margin: 0;
+            font-size: .76rem;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        .ecc-unlock-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: .6rem .95rem;
+            border-radius: 999px;
+            border: 1px solid var(--luxe-gold);
+            background: rgba(212,175,55,.10);
+            color: var(--luxe-gold);
+            font-size: .76rem;
+            font-weight: 800;
+            text-decoration: none;
+            transition: .2s ease;
+            margin-top: 4px;
+        }
+
+        .ecc-unlock-btn:hover {
+            background: var(--luxe-gold);
+            color: #111;
         }
 
         .luxe-logout-simple {

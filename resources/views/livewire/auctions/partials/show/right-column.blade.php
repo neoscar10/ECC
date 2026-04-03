@@ -9,7 +9,7 @@
                         <div class="auction-highest-bid">{{ $highestBid }}</div>
                     </div>
 
-                    @if($isLive)
+                    @if($lotPrepared->is_effectively_live ?? false)
                         <div class="auction-live-chip">
                             <span class="auction-live-chip-dot"></span>
                             <span>Live</span>
@@ -26,6 +26,14 @@
             </div>
 
             <div class="p-4 p-lg-5">
+                @if($lotPrepared->is_early_access_active ?? false)
+                    <div class="mb-4">
+                        <span class="badge border-0 py-2 px-3 d-flex align-items-center gap-2" style="background: #e31837; color: white; border-radius: 10px; width: fit-content; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <i class="mdi mdi-clock-fast fs-6"></i> Early Access Live
+                        </span>
+                    </div>
+                @endif
+
                 {{-- AUTO BID --}}
                 <div class="mb-4">
                     <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
@@ -87,10 +95,38 @@
                         <div class="text-danger small mt-2 fw-medium mb-3 px-2">{{ $message }}</div>
                     @enderror
 
-                    <button type="button" class="auction-place-bid-btn mb-3" wire:click="reviewBid" @if(empty($lotPrepared->can_bid)) disabled @endif>
+                    @php
+                        $canBidDirectly = !empty($lotPrepared->can_bid);
+                        $hasUpgradeAction = !empty($lotPrepared->access_actions);
+                        $isLive = ($lotPrepared->is_effectively_live ?? false);
+                        $isPast = in_array($lot->status, ['past', 'closed', 'ended']);
+                        
+                        // We only truly disable if it's past/closed. 
+                        // If it's upcoming, we allow clicking if there's an upgrade path to trigger the modal.
+                        $isButtonDisabled = $isPast || (!$isLive && !$hasUpgradeAction);
+                    @endphp
+
+                    <button type="button" class="auction-place-bid-btn mb-3" wire:click="reviewBid" @if($isButtonDisabled) disabled @endif>
                         <i class="mdi mdi-gavel me-2"></i>
-                        {{ empty($lotPrepared->can_bid) ? 'Bidding Closed' : 'Review Bid' }}
+                        @if($isPast)
+                            Bidding Closed
+                        @elseif(!$isLive && $hasUpgradeAction)
+                            Unlock to Bid
+                        @elseif(!$isLive)
+                            Coming Soon
+                        @else
+                            Review Bid
+                        @endif
                     </button>
+
+                    @if(!$canBidDirectly && !empty($lotPrepared->access_message))
+                        <div class="text-center mb-3 px-2">
+                            <span class="small fw-bold" style="color: var(--luxe-text-soft); font-size: 0.72rem; letter-spacing: 0.02em; line-height: 1.4;">
+                                <i class="mdi mdi-information-outline me-1" style="color: var(--luxe-gold);"></i>
+                                {{ $lotPrepared->access_message }}
+                            </span>
+                        </div>
+                    @endif
 
                     <div class="auction-micro-copy text-center">
                         Highest bidder must pay within 24h.
