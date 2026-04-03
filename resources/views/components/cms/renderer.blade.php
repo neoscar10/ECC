@@ -5,8 +5,11 @@
         <div class="cms-block-wrapper mb-4" data-block-id="{{ $block['id'] }}" data-block-type="{{ $block['type'] }}">
             @switch($block['type'])
                 @case('banner')
-                @case('card')
                     <x-cms.blocks.banner :block="$block" />
+                    @break
+
+                @case('card')
+                    <x-cms.blocks.card :block="$block" />
                     @break
 
                 @case('slider')

@@ -265,8 +265,13 @@ class Index extends Component
             }
         } elseif ($this->targetKind === 'item') {
             if ($this->targetSource === 'shop') {
-                $products = \App\Models\Shop\ShopProduct::with('images')->where('title', 'like', "%{$query}%")
-                            ->orWhere('sku', 'like', "%{$query}%")->limit(10)->get();
+                $products = \App\Models\Shop\ShopProduct::with('images')
+                            ->where(function($q) use ($query) {
+                                $q->where('title', 'like', "%{$query}%");
+                                if (is_numeric($query)) {
+                                    $q->orWhere('id', $query);
+                                }
+                            })->limit(10)->get();
                 foreach ($products as $prod) {
                      $img = $prod->images->first()?->image_path ? \Illuminate\Support\Facades\Storage::url($prod->images->first()->image_path) : null;
                      $results[] = [
@@ -820,8 +825,12 @@ class Index extends Component
 
         if ($this->sliderSource === 'shop') {
             $products = \App\Models\Shop\ShopProduct::with('images')
-                ->where('title', 'like', "%{$query}%")
-                ->orWhere('sku', 'like', "%{$query}%")
+                ->where(function($q) use ($query) {
+                    $q->where('title', 'like', "%{$query}%");
+                    if (is_numeric($query)) {
+                        $q->orWhere('id', $query);
+                    }
+                })
                 ->limit(15)
                 ->get();
             foreach ($products as $prod) {
