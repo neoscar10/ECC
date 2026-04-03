@@ -238,7 +238,7 @@
                                     <input type="text" class="form-control" 
                                         placeholder="Search {{ $sliderSource ?: 'items' }}..." 
                                         wire:model.live.debounce.300ms="itemSearchQuery"
-                                        wire:focus="$set('lotsDropdownOpen', true)"
+                                        wire:focus="focusItemSearch"
                                         @keydown.escape="closeDropdown()"
                                     >
                                 </div>

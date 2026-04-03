@@ -812,9 +812,81 @@ class Index extends Component
         $this->updateCategoryPreview(); // Trigger preview update
     }
 
-    // Real search for Manual Slider Items
+    public function focusItemSearch()
+    {
+        $this->lotsDropdownOpen = true;
+        if (empty($this->itemSearchQuery)) {
+            $this->searchItems();
+        }
+    }
+
+    public function loadDefaultItems()
+    {
+        $this->searchResults = [];
+        $results = [];
+
+        if ($this->sliderSource === 'shop') {
+            $products = \App\Models\Shop\ShopProduct::with('images')
+                ->active()
+                ->orderBy('created_at', 'desc')
+                ->limit(15)
+                ->get();
+            foreach ($products as $prod) {
+                $img = $prod->images->first()?->image_path ? \Illuminate\Support\Facades\Storage::url($prod->images->first()->image_path) : null;
+                $results[] = [
+                    'id' => $prod->id,
+                    'title' => $prod->title,
+                    'image' => $img,
+                    'price' => $prod->base_price > 0 ? 'INR ' . number_format($prod->base_price) : 'No Price'
+                ];
+            }
+        } elseif ($this->sliderSource === 'archive') {
+            $products = \App\Models\Archive\ArchiveProduct::active()
+                ->with('images')
+                ->orderBy('created_at', 'desc')
+                ->limit(15)
+                ->get();
+            foreach ($products as $prod) {
+                $img = $prod->images->first()?->image_path ? \Illuminate\Support\Facades\Storage::url($prod->images->first()->image_path) : null;
+                $results[] = [
+                    'id' => $prod->id,
+                    'title' => $prod->title,
+                    'image' => $img,
+                    'price' => $prod->code ?: 'Archive Item'
+                ];
+            }
+        } elseif ($this->sliderSource === 'auctions') {
+            $lots = \App\Models\Auctions\AuctionLot::with('images')
+                ->orderBy('created_at', 'desc')
+                ->limit(15)
+                ->get();
+            foreach ($lots as $lot) {
+                $price = $lot->current_highest_bid > 0 ? $lot->current_highest_bid : $lot->starting_price;
+                $img = $lot->images->first()?->path ? \Illuminate\Support\Facades\Storage::url($lot->images->first()->path) : null;
+                $results[] = [
+                    'id' => $lot->id,
+                    'title' => 'Lot ' . $lot->lot_no . ' - ' . $lot->title,
+                    'image' => $img,
+                    'price' => 'INR ' . number_format((float)$price)
+                ];
+            }
+        }
+
+        $this->searchResults = $results;
+    }
+
     public function updatedItemSearchQuery()
     {
+        $this->searchItems();
+    }
+
+    public function searchItems()
+    {
+        if (empty($this->itemSearchQuery)) {
+            $this->loadDefaultItems();
+            return;
+        }
+
         if (strlen($this->itemSearchQuery) < 2) {
             $this->searchResults = [];
             return;
@@ -839,7 +911,7 @@ class Index extends Component
                     'id' => $prod->id,
                     'title' => $prod->title,
                     'image' => $img,
-                    'price' => $prod->price > 0 ? 'INR ' . number_format($prod->price) : 'No Price'
+                    'price' => $prod->base_price > 0 ? 'INR ' . number_format($prod->base_price) : 'No Price'
                 ];
             }
         } elseif ($this->sliderSource === 'archive') {
