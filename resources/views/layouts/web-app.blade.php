@@ -796,6 +796,11 @@
       $isOn = fn($k) => $active === $k;
       $cartCount = $cartCount ?? 0;
       $cartUrl = route('shop.cart');
+
+      $isAwaitingApproval = false;
+      if ($user = auth('web')->user()) {
+          $isAwaitingApproval = !$user->hasActiveMembership() && $user->memberships()->where('status', 'pending')->exists();
+      }
     @endphp
     <div class="luxe-page-shell">
         <header class="luxe-header">
@@ -815,7 +820,13 @@
                     <div class="d-none d-lg-flex align-items-center gap-3">
                         <nav class="luxe-top-nav">
                             @foreach($mainItems as $it)
-                                <a href="{{ $it['href'] }}" class="luxe-top-link {{ $isOn($it['key']) ? 'active' : '' }}" {!! $it['extras'] ?? '' !!}>
+                                @php
+                                    $disabled = $isAwaitingApproval && $it['key'] !== 'explore';
+                                @endphp
+                                <a href="{{ $disabled ? 'javascript:void(0)' : $it['href'] }}"
+                                   class="luxe-top-link {{ $isOn($it['key']) ? 'active' : '' }}"
+                                   {!! $it['extras'] ?? '' !!}
+                                   @if($disabled) style="opacity: 0.45; pointer-events: none; cursor: default;" title="Awaiting Membership Approval" @endif>
                                     <span class="material-symbols-outlined">{{ $it['icon'] }}</span>
                                     <span>{{ $it['label'] }}</span>
                                 </a>
@@ -872,7 +883,13 @@
 
                         <div class="luxe-mobile-nav">
                             @foreach($mainItems as $it)
-                                <a href="{{ $it['href'] }}" class="{{ $isOn($it['key']) ? 'text-warning' : '' }} d-flex align-items-center gap-2" {!! $it['extras'] ?? '' !!}>
+                                @php
+                                    $disabled = $isAwaitingApproval && $it['key'] !== 'explore';
+                                @endphp
+                                <a href="{{ $disabled ? 'javascript:void(0)' : $it['href'] }}"
+                                   class="{{ $isOn($it['key']) ? 'text-warning' : '' }} d-flex align-items-center gap-2"
+                                   {!! $it['extras'] ?? '' !!}
+                                   @if($disabled) style="opacity: 0.45; pointer-events: none; cursor: default;" @endif>
                                     <span class="material-symbols-outlined fs-5">{{ $it['icon'] }}</span>
                                     <span>{{ $it['label'] }}</span>
                                 </a>

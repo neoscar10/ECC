@@ -146,7 +146,13 @@ class AuctionAutoBidService
             return;
         }
 
-        // 2. Calculate Delay
+        // 2. Terminal State Guard
+        // In terminal state, we resolve synchronously.
+        if ($lot->isTerminalState()) {
+            return;
+        }
+
+        // 3. Calculate Delay
         $lagMin = config('auctions.autobid_lag_min', 60);
         $lagMax = config('auctions.autobid_lag_max', 120);
         $cutoff = config('auctions.autobid_lag_cutoff', 120);

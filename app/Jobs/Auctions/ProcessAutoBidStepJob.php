@@ -55,6 +55,13 @@ class ProcessAutoBidStepJob implements ShouldQueue
                 return;
             }
 
+            // 2.5 Terminal State Guard
+            // If the auction reached terminal state, it's now handled synchronously by placeBid
+            if ($lot->isTerminalState()) {
+                DB::commit();
+                return;
+            }
+
             // 3. Determine Min Required
             // The absolute minimum bid required to take the lead
             $minRequired = $lot->current_highest_bid 

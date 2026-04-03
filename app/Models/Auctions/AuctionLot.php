@@ -181,4 +181,30 @@ class AuctionLot extends Model
         $image = $this->images->first();
         return $image ? $image->url : null;
     }
+
+    /**
+     * Check if the auction is in its "Endgame" / Terminal state.
+     * In this state, auto-bids must be resolved immediately/synchronously.
+     */
+    public function isTerminalState(): bool
+    {
+        if ($this->status !== 'live' || !$this->ends_at) {
+            return false;
+        }
+
+        $terminalWindowSeconds = 120; // 2 minutes
+        $secondsRemaining = now()->diffInSeconds($this->ends_at, false);
+
+        // 1. If we are within the terminal window OR the auction has already reached its end time (but still live)
+        if ($secondsRemaining <= $terminalWindowSeconds) {
+            return true;
+        }
+
+        // 2. If anti-sniping extensions are exhausted
+        if ($this->anti_sniping_enabled && !is_null($this->max_extensions) && $this->extensions_used >= $this->max_extensions) {
+            return true;
+        }
+
+        return false;
+    }
 }

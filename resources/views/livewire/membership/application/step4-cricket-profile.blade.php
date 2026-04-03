@@ -57,7 +57,7 @@
 
           <div class="row g-3">
             @foreach($this->formatOptions() as $opt)
-              @php $selected = in_array($opt['key'], $formats, true); @endphp
+              @php $selected = in_array($opt['key'], $preferred_formats, true); @endphp
               <div class="col-6">
                 <button type="button"
                         wire:click="toggleFormat('{{ $opt['key'] }}')"
@@ -78,7 +78,7 @@
             @endforeach
           </div>
 
-          @error('formats') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
+          @error('preferred_formats') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
         </div>
 
         {{-- Eras --}}

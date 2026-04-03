@@ -10,9 +10,11 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.user.blank')]
 class Step5CollectorIntent extends Component
 {
-    public string $history = 'yes';
-    public string $focus = 'rarity';
+    public bool $has_acquired_memorabilia_before = true;
+    public string $focus = 'RARITY';
     public int $horizon = 70;
+    public string $investment_horizon = 'Y5_10';
+    public array $interests = [];
     public ?string $errorMessage = null;
 
     protected $listeners = ['sliderChanged' => 'updateHorizon'];
@@ -23,15 +25,33 @@ class Step5CollectorIntent extends Component
         if ($draft) {
             if ($draft instanceof MembershipApplication) {
                 $payload = $draft->collector_intent_json ?? [];
-                $this->history = $payload['history'] ?? 'yes';
-                $this->focus = $payload['focus'] ?? 'rarity';
+                $this->has_acquired_memorabilia_before = $payload['has_acquired_memorabilia_before'] ?? (($payload['history'] ?? 'yes') === 'yes');
+                $this->focus = strtoupper($payload['focus'] ?? 'RARITY');
                 $this->horizon = (int)($payload['horizon_value'] ?? 70);
             } else {
                 $payload = $draft->payload_json;
-                $this->history = $payload['collector_history'] ?? 'yes';
-                $this->focus = $payload['collector_focus'] ?? 'rarity';
+                $this->has_acquired_memorabilia_before = $payload['has_acquired_memorabilia_before'] ?? (($payload['collector_history'] ?? 'yes') === 'yes');
+                $this->focus = strtoupper($payload['collector_focus'] ?? 'RARITY');
                 $this->horizon = (int)($payload['collector_horizon_value'] ?? 70);
             }
+        }
+        $this->syncHorizonToInvestmentCode();
+    }
+
+    public function updatedHorizon(): void
+    {
+        $this->syncHorizonToInvestmentCode();
+    }
+
+    private function syncHorizonToInvestmentCode(): void
+    {
+        $label = $this->getHorizonLabelProperty();
+        if ($this->horizon <= 60) {
+            $this->investment_horizon = 'Y1_5';
+        } elseif ($this->horizon <= 80) {
+            $this->investment_horizon = 'Y5_10';
+        } else {
+            $this->investment_horizon = 'Y10_PLUS';
         }
     }
 
@@ -49,10 +69,10 @@ class Step5CollectorIntent extends Component
         $this->errorMessage = null;
 
         try {
-            $this->validate(MembershipRules::collectorIntent());
+            $validated = $this->validate(MembershipRules::collectorIntent());
             
             $svc->saveStep5CollectorIntent([
-                'history' => $this->history,
+                'history' => $this->has_acquired_memorabilia_before ? 'yes' : 'no',
                 'focus' => $this->focus,
                 'horizon' => $this->horizon,
                 'horizon_label' => $this->horizonLabel,

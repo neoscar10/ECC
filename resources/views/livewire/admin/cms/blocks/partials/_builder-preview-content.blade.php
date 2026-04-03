@@ -73,9 +73,14 @@
         @elseif($type === 'slider')
             <!-- Slider Preview -->
             <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-2 px-1">
-                    <h6 class="fw-bold mb-0 text-dark">{{ $contentTitle ?: 'Slider Section' }}</h6>
-                    @if($contentCtaText) <small class="text-primary fw-medium">{{ $contentCtaText }}</small> @endif
+                <div class="px-1 mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-0">
+                        <h6 class="fw-bold mb-0 text-dark">{{ $contentTitle ?: 'Slider Section' }}</h6>
+                        @if($contentCtaText) <small class="text-primary fw-medium">{{ $contentCtaText }}</small> @endif
+                    </div>
+                    @if($contentSubtitle)
+                        <small class="text-muted d-block fs-11">{{ $contentSubtitle }}</small>
+                    @endif
                 </div>
                 
                 @if($sliderMode === 'images')
@@ -104,19 +109,22 @@
                 @else
                     <!-- Item Slider Preview (Category/Manual) -->
                     <div class="d-flex gap-2 overflow-hidden" style="margin-right: -16px;">
-                        @if($sliderMode === 'category' && isset($previewData['items']) && !empty($previewData['items']))
-                            @foreach($previewData['items'] as $item)
+                        @php
+                            $displayItems = ($sliderMode === 'manual') ? $selectedSliderItems : ($previewData['items'] ?? []);
+                        @endphp
+                        @if(!empty($displayItems))
+                            @foreach($displayItems as $item)
                                 <div class="card border-0 shadow-sm flex-shrink-0" style="width: 140px;">
                                     <div class="bg-light rounded-top position-relative" style="height: 100px;">
                                         @if(!empty($item['image']))
-                                            <img src="{{ $item['image'] }}" class="w-100 h-100 object-fit-cover rounded-top">
+                                            <img src="{{ Str::startsWith($item['image'], 'http') ? $item['image'] : asset('storage/'.$item['image']) }}" class="w-100 h-100 object-fit-cover rounded-top">
                                         @else
                                             <div class="d-flex align-items-center justify-content-center h-100 text-muted fs-10">No Image</div>
                                         @endif
                                     </div>
                                     <div class="card-body p-2">
-                                        <h6 class="fs-12 fw-bold mb-1 text-truncate" title="{{ $item['title'] }}">{{ $item['title'] }}</h6>
-                                        <p class="fs-10 text-muted mb-0">{{ $item['price'] ?? '' }}</p>
+                                        <h6 class="fs-12 fw-bold mb-1 text-truncate" title="{{ $item['title'] ?? ($item['name'] ?? 'Item') }}">{{ $item['title'] ?? ($item['name'] ?? 'Item') }}</h6>
+                                        <p class="fs-10 text-muted mb-0">{{ $item['price'] ?? ($item['meta'] ?? '') }}</p>
                                     </div>
                                 </div>
                             @endforeach

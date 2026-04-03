@@ -11,7 +11,7 @@ use Livewire\Attributes\Layout;
 class Step3PersonalDetails extends Component
 {
     public string $full_name = '';
-    public string $dob = '';
+    public string $date_of_birth = '';
     public string $country = '';
     public string $city = '';
     public string $errorMessage = '';
@@ -27,8 +27,8 @@ class Step3PersonalDetails extends Component
         }
 
         $this->full_name = $data['full_name'] ?? '';
-        $this->dob = $data['dob'] ?? '';
-        $this->country = $data['country'] ?? '';
+        $this->date_of_birth = $data['date_of_birth'] ?? $data['dob'] ?? '';
+        $this->country = $data['country'] ?? 'India';
         $this->city = $data['city'] ?? '';
     }
 

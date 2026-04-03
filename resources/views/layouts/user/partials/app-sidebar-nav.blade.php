@@ -34,6 +34,11 @@
   $active = $active ?? $keyFromPath;
 
   $isOn = fn($k) => $active === $k;
+
+  $isAwaitingApproval = false;
+  if ($user = auth('web')->user()) {
+      $isAwaitingApproval = !$user->hasActiveMembership() && $user->memberships()->where('status', 'pending')->exists();
+  }
 @endphp
 
 <div class="ecc-sidebar-nav h-100 d-flex flex-column py-4 px-3">
@@ -41,9 +46,13 @@
   
   <div class="d-flex flex-column gap-2 mb-4">
     @foreach($mainItems as $it)
-      @php $on = $isOn($it['key']); @endphp
-      <a href="{{ $it['href'] }}" 
-         class="ecc-sidebar-item d-flex align-items-center gap-3 text-decoration-none {{ $on ? 'is-active' : '' }}">
+      @php 
+        $on = $isOn($it['key']); 
+        $disabled = $isAwaitingApproval && $it['key'] !== 'explore';
+      @endphp
+      <a href="{{ $disabled ? 'javascript:void(0)' : $it['href'] }}" 
+         class="ecc-sidebar-item d-flex align-items-center gap-3 text-decoration-none {{ $on ? 'is-active' : '' }}"
+         @if($disabled) style="opacity: 0.45; pointer-events: none; cursor: default;" title="Awaiting Membership Approval" @endif>
         <span class="material-symbols-outlined ecc-sidebar-icon">{{ $it['icon'] }}</span>
         <span class="ecc-sidebar-label">{{ $it['label'] }}</span>
         @if($on)
@@ -56,9 +65,13 @@
   <div class="ecc-sidebar-section-header mb-3 mt-auto">ACCOUNT</div>
   <div class="d-flex flex-column gap-2">
     @foreach($bottomItems as $it)
-      @php $on = $isOn($it['key']); @endphp
-      <a href="{{ $it['href'] }}" 
-         class="ecc-sidebar-item d-flex align-items-center gap-3 text-decoration-none {{ $on ? 'is-active' : '' }}">
+      @php 
+        $on = $isOn($it['key']); 
+        $disabled = $isAwaitingApproval; // Settings etc are always disabled for pending
+      @endphp
+      <a href="{{ $disabled ? 'javascript:void(0)' : $it['href'] }}" 
+         class="ecc-sidebar-item d-flex align-items-center gap-3 text-decoration-none {{ $on ? 'is-active' : '' }}"
+         @if($disabled) style="opacity: 0.45; pointer-events: none; cursor: default;" title="Awaiting Membership Approval" @endif>
         <span class="material-symbols-outlined ecc-sidebar-icon">{{ $it['icon'] }}</span>
         <span class="ecc-sidebar-label">{{ $it['label'] }}</span>
         @if($on)

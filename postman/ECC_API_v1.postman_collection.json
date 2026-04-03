@@ -4037,6 +4037,45 @@
                         "description": "Get details of a specific vault item."
                     },
                     "response": []
+                },
+                {
+                    "name": "Request Removal",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"message\": \"I would like to have this item delivered to my home.\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/me/vault/{{vault_item_id}}/request-removal",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "{{api_prefix}}",
+                                "me",
+                                "vault",
+                                "{{vault_item_id}}",
+                                "request-removal"
+                            ]
+                        },
+                        "description": "Request removal of a vault item. Creates a pending removal request for admin approval.\n\n**Body:**\n- `message` (Optional): String"
+                    },
+                    "response": []
                 }
             ]
         }

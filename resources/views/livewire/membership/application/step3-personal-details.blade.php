@@ -66,7 +66,7 @@
         </div>
 
         {{-- DOB --}}
-        <div class="ecc-field" x-data="{
+        <div class="ecc-field" wire:ignore x-data="{
              initFlatpickr() {
                  flatpickr($refs.dobInput, {
                      dateFormat: 'Y-m-d',
@@ -76,21 +76,21 @@
                      disableMobile: true,
                      allowInput: true,
                      onChange: (selectedDates, dateStr) => {
-                         $wire.set('dob', dateStr);
+                         $wire.set('date_of_birth', dateStr);
                      }
                  });
              }
         }" x-init="initFlatpickr()">
-          <label class="ecc-label" for="dob">Date of Birth</label>
+          <label class="ecc-label" for="date_of_birth">Date of Birth</label>
           <div class="position-relative">
-            <input id="dob" type="text"
+            <input id="date_of_birth" type="text"
                    x-ref="dobInput"
-                   wire:model.defer="dob"
-                   class="form-control ecc-input @error('dob') is-invalid @enderror"
+                   wire:model.defer="date_of_birth"
+                   class="form-control ecc-input @error('date_of_birth') is-invalid @enderror"
                    placeholder="DD / MM / YYYY">
             <span class="material-symbols-outlined ecc-input-ic" style="cursor: pointer;" @click="$refs.dobInput._flatpickr.open()">calendar_month</span>
           </div>
-          @error('dob') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
+          @error('date_of_birth') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
         </div>
 
         {{-- Country --}}
@@ -99,11 +99,9 @@
           <div class="position-relative">
             <select id="country" wire:model.defer="country" class="form-select ecc-input ecc-select @error('country') is-invalid @enderror">
               <option value="" disabled>Select Country</option>
-              <option value="United Kingdom">United Kingdom</option>
-              <option value="India">India</option>
-              <option value="Australia">Australia</option>
-              <option value="South Africa">South Africa</option>
-              <option value="New Zealand">New Zealand</option>
+              @foreach(config('ecc_countries', []) as $cn)
+                <option value="{{ $cn }}">{{ $cn }}</option>
+              @endforeach
             </select>
             <span class="material-symbols-outlined ecc-input-ic">expand_more</span>
           </div>

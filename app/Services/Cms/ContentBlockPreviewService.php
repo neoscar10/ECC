@@ -41,9 +41,13 @@ class ContentBlockPreviewService
 
         // 2. Manual Mode
         if ($mode === 'manual') {
-            // TODO: Implement manual item resolution if needed. 
-            // For now, consistent with request, we focus on Category/Lot sources being real.
-            // If manual IDs are passed, we'd fetch them here.
+            if ($source === 'shop') {
+                return $this->resolveShopItems(null, $limit, $manualItemIds);
+            } elseif ($source === 'archive') {
+                return $this->resolveArchiveItems(null, $limit, $manualItemIds);
+            } elseif ($source === 'auctions') {
+                return $this->resolveAuctionLots($manualItemIds);
+            }
             return []; 
         }
 
@@ -62,19 +66,22 @@ class ContentBlockPreviewService
         return $items;
     }
 
-    protected function resolveShopItems(?int $categoryId, int $limit): array
+    protected function resolveShopItems(?int $categoryId, int $limit, array $ids = []): array
     {
-        if (!$categoryId) return [];
+        if (!$categoryId && empty($ids)) return [];
 
         $query = ShopProduct::query()->active();
         
-        // Assuming strict category relationship (pivot)
-        $query->whereHas('categories', function($q) use ($categoryId) {
-            $q->where('shop_categories.id', $categoryId);
-        });
+        if (!empty($ids)) {
+            $query->whereIn('id', $ids);
+        } else {
+            $query->whereHas('categories', function($q) use ($categoryId) {
+                $q->where('shop_categories.id', $categoryId);
+            })->take($limit);
+        }
 
         // Eager load images for preview
-        $products = $query->with(['images'])->take($limit)->get();
+        $products = $query->with(['images'])->get();
 
         return $products->map(function($product) {
             return [
@@ -91,14 +98,19 @@ class ContentBlockPreviewService
         })->toArray();
     }
 
-    protected function resolveArchiveItems(?int $categoryId, int $limit): array
+    protected function resolveArchiveItems(?int $categoryId, int $limit, array $ids = []): array
     {
-        if (!$categoryId) return [];
+        if (!$categoryId && empty($ids)) return [];
 
         $query = ArchiveProduct::query(); // Add active/visible scopes if needed
-        $query->where('archive_category_id', $categoryId);
         
-        $products = $query->with(['images'])->take($limit)->get();
+        if (!empty($ids)) {
+            $query->whereIn('id', $ids);
+        } else {
+            $query->where('archive_category_id', $categoryId)->take($limit);
+        }
+        
+        $products = $query->with(['images'])->get();
 
         return $products->map(function($product) {
             $priceLabel = 'Price on Request';

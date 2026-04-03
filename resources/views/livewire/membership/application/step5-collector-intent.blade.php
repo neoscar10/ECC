@@ -58,19 +58,19 @@
 
           <div class="ecc-seg">
             <button type="button"
-                    class="ecc-seg__btn {{ $history === 'yes' ? 'is-on' : '' }}"
-                    wire:click="$set('history','yes')">
+                    class="ecc-seg__btn {{ $has_acquired_memorabilia_before ? 'is-on' : '' }}"
+                    wire:click="$set('has_acquired_memorabilia_before', true)">
               Yes, I have
             </button>
 
             <button type="button"
-                    class="ecc-seg__btn {{ $history === 'no' ? 'is-on' : '' }}"
-                    wire:click="$set('history','no')">
+                    class="ecc-seg__btn {{ !$has_acquired_memorabilia_before ? 'is-on' : '' }}"
+                    wire:click="$set('has_acquired_memorabilia_before', false)">
               No, I haven't
             </button>
           </div>
 
-          @error('history') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
+          @error('has_acquired_memorabilia_before') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
         </section>
 
         {{-- FOCUS --}}
@@ -81,8 +81,8 @@
           <div class="row g-3">
             <div class="col-4">
               <button type="button"
-                      class="ecc-focus {{ $focus === 'legacy' ? 'is-on' : '' }}"
-                      wire:click="$set('focus','legacy')">
+                      class="ecc-focus {{ $focus === 'LEGACY' ? 'is-on' : '' }}"
+                      wire:click="$set('focus','LEGACY')">
                 <span class="material-symbols-outlined ecc-focus__ic">history_edu</span>
                 <span class="ecc-focus__tx">Legacy</span>
               </button>
@@ -90,8 +90,8 @@
 
             <div class="col-4">
               <button type="button"
-                      class="ecc-focus {{ $focus === 'rarity' ? 'is-on' : '' }}"
-                      wire:click="$set('focus','rarity')">
+                      class="ecc-focus {{ $focus === 'RARITY' ? 'is-on' : '' }}"
+                      wire:click="$set('focus','RARITY')">
                 <span class="material-symbols-outlined ecc-focus__ic">diamond</span>
                 <span class="ecc-focus__tx">Rarity</span>
               </button>
@@ -99,8 +99,8 @@
 
             <div class="col-4">
               <button type="button"
-                      class="ecc-focus {{ $focus === 'value' ? 'is-on' : '' }}"
-                      wire:click="$set('focus','value')">
+                      class="ecc-focus {{ $focus === 'VALUE' ? 'is-on' : '' }}"
+                      wire:click="$set('focus','VALUE')">
                 <span class="material-symbols-outlined ecc-focus__ic">trending_up</span>
                 <span class="ecc-focus__tx">Value</span>
               </button>
@@ -130,7 +130,7 @@
             </div>
           </div>
 
-          @error('horizon') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
+          @error('investment_horizon') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
         </section>
 
         {{-- CTA (NOT STICKY) --}}

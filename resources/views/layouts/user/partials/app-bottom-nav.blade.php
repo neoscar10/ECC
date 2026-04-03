@@ -31,6 +31,11 @@
   $active = $active ?? $keyFromPath;
 
   $isOn = fn($k) => $active === $k;
+
+  $isAwaitingApproval = false;
+  if ($user = auth('web')->user()) {
+      $isAwaitingApproval = !$user->hasActiveMembership() && $user->memberships()->where('status', 'pending')->exists();
+  }
 @endphp
 
 <div class="ecc-app-nav-wrapper fixed-bottom d-flex d-md-none justify-content-center w-100 pb-2">
@@ -38,11 +43,15 @@
     <div class="ecc-app-nav__container">
       <div class="row g-0 text-center flex-nowrap overflow-auto hide-scrollbar">
         @foreach($items as $it)
-          @php $on = $isOn($it['key']); @endphp
+          @php 
+            $on = $isOn($it['key']); 
+            $disabled = $isAwaitingApproval && $it['key'] !== 'explore';
+          @endphp
           <div class="col px-1">
-            <a href="{{ $it['href'] }}"
+            <a href="{{ $disabled ? 'javascript:void(0)' : $it['href'] }}"
                {!! $it['extras'] ?? '' !!}
-               class="mx-0 px-0 mx-md-4 px-md-2 ecc-app-nav__item d-inline-flex flex-column align-items-center justify-content-center gap-1 text-decoration-none {{ $on ? 'is-active' : '' }}">
+               class="mx-0 px-0 mx-md-4 px-md-2 ecc-app-nav__item d-inline-flex flex-column align-items-center justify-content-center gap-1 text-decoration-none {{ $on ? 'is-active' : '' }}"
+               @if($disabled) style="opacity: 0.45; pointer-events: none; cursor: default;" @endif>
               <span class="material-symbols-outlined ecc-app-nav__icon">{{ $it['icon'] }}</span>
               <span class="ecc-app-nav__label">{{ $it['label'] }}</span>
               @if($on)

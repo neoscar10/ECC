@@ -9,6 +9,13 @@ use Illuminate\Support\Facades\Log;
 
 class AuctionLifecycleService
 {
+    protected $terminalValueCapture;
+
+    public function __construct(AuctionTerminalValueCaptureService $terminalValueCapture)
+    {
+        $this->terminalValueCapture = $terminalValueCapture;
+    }
+
     /**
      * Check and transition auction statuses.
      * Run this scheduled (every minute).
@@ -55,6 +62,10 @@ class AuctionLifecycleService
             
         foreach ($ending as $lot) {
             \Illuminate\Support\Facades\DB::transaction(function () use ($lot, $now) {
+                // Perform final terminal value capture pass before closing
+                $this->terminalValueCapture->capture($lot);
+                $lot->refresh();
+
                 // Determine outcome using shared service
                 $outcomeService = new \App\Services\Auctions\AuctionOutcomeService();
                 $outcome = $outcomeService->determineOutcome($lot);

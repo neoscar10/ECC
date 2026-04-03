@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Tests\Feature\Auctions\AuctionTerminalValueCaptureTest" file="C:\Users\USER\Desktop\projects\Executive Cricket Club\tests\Feature\Auctions\AuctionTerminalValueCaptureTest.php" tests="1" assertions="0" errors="1" failures="0" skipped="0" time="1.373266">
+    <testcase name="auction_ends_at_authorized_max_with_single_auto_bidder" file="C:\Users\USER\Desktop\projects\Executive Cricket Club\tests\Feature\Auctions\AuctionTerminalValueCaptureTest.php" line="67" class="Tests\Feature\Auctions\AuctionTerminalValueCaptureTest" classname="Tests.Feature.Auctions.AuctionTerminalValueCaptureTest" assertions="0" time="1.373266">
+      <error type="Exception">Tests\Feature\Auctions\AuctionTerminalValueCaptureTest::auction_ends_at_authorized_max_with_single_auto_bidder&#13;
+Exception: Auction has ended.
+&#13;
+C:\Users\USER\Desktop\projects\Executive Cricket Club\app\Services\Auctions\AuctionBiddingService.php:45
+C:\Users\USER\Desktop\projects\Executive Cricket Club\vendor\laravel\framework\src\Illuminate\Database\Concerns\ManagesTransactions.php:32
+C:\Users\USER\Desktop\projects\Executive Cricket Club\vendor\laravel\framework\src\Illuminate\Database\DatabaseManager.php:495
+C:\Users\USER\Desktop\projects\Executive Cricket Club\vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:361
+C:\Users\USER\Desktop\projects\Executive Cricket Club\app\Services\Auctions\AuctionBiddingService.php:36
+C:\Users\USER\Desktop\projects\Executive Cricket Club\app\Services\Auctions\AuctionTerminalValueCaptureService.php:132
+C:\Users\USER\Desktop\projects\Executive Cricket Club\vendor\laravel\framework\src\Illuminate\Database\Concerns\ManagesTransactions.php:32
+C:\Users\USER\Desktop\projects\Executive Cricket Club\vendor\laravel\framework\src\Illuminate\Database\DatabaseManager.php:495
+C:\Users\USER\Desktop\projects\Executive Cricket Club\vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:361
+C:\Users\USER\Desktop\projects\Executive Cricket Club\app\Services\Auctions\AuctionTerminalValueCaptureService.php:26
+C:\Users\USER\Desktop\projects\Executive Cricket Club\app\Services\Auctions\AuctionLifecycleService.php:66
+C:\Users\USER\Desktop\projects\Executive Cricket Club\vendor\laravel\framework\src\Illuminate\Database\Concerns\ManagesTransactions.php:32
+C:\Users\USER\Desktop\projects\Executive Cricket Club\vendor\laravel\framework\src\Illuminate\Database\DatabaseManager.php:495
+C:\Users\USER\Desktop\projects\Executive Cricket Club\vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:361
+C:\Users\USER\Desktop\projects\Executive Cricket Club\app\Services\Auctions\AuctionLifecycleService.php:64
+C:\Users\USER\Desktop\projects\Executive Cricket Club\tests\Feature\Auctions\AuctionTerminalValueCaptureTest.php:88</error>
+    </testcase>
+  </testsuite>
+</testsuites>

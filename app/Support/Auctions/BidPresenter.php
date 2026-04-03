@@ -22,16 +22,25 @@ class BidPresenter
         // - Personal broadcast (AuctionBidPlacedPersonal) passes viewerUserId -> isMe = (userId == viewerId).
         $isMe = ($viewerUserId !== null) && ((int)$viewerUserId === (int)$userId); 
 
+        $label = $isMe ? 'You' : $mask['label'];
+        $badge = $mask['badge'];
+
+        // Terminal Escalation Override
+        if ($bid->source === 'system_terminal') {
+            $label = 'ECC System';
+            $badge = 'EC';
+        }
+
         return [
             'amount' => (string) $bid->amount,
             'time' => $bid->placed_at->toIso8601String(),
             'time_human' => $bid->placed_at->diffForHumans(),
             'is_me' => $isMe,
-            'is_auto' => false, // Hardcoded false to match AuctionController::transformBids behavior
-            'is_highest_bid' => true, // New bids broadcasted are always the highest
-            'bidder_label' => $isMe ? 'You' : $mask['label'], // Adjusted to show 'You' if isMe is true (consistent with API)
+            'is_auto' => $bid->is_auto, 
+            'is_highest_bid' => true, 
+            'bidder_label' => $label, 
             'bidder_code' => $mask['code'],
-            'bidder_badge' => $mask['badge'],
+            'bidder_badge' => $badge,
         ];
     }
 

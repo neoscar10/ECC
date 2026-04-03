@@ -746,10 +746,10 @@ class Index extends Component
             
         return [
             'id' => $lot->id, 
-            'name' => "Lot " . $lot->lot_no . " - " . $lot->title,
+            'title' => "Lot " . $lot->lot_no . " - " . $lot->title,
             'status' => $lot->status, // live, upcoming, ended
             'price' => $price,
-            'image' => $lot->images->first()?->path // relationship
+            'image' => $lot->images->first()?->path ? \Illuminate\Support\Facades\Storage::url($lot->images->first()->path) : null
         ];
     }
     
@@ -773,10 +773,12 @@ class Index extends Component
             }
 
             if ($item) {
-                // Ensure name is clean
-                if (!isset($item['name']) && isset($item['title'])) $item['name'] = $item['title'];
-                
-                $this->selectedSliderItems[] = $item;
+                $this->selectedSliderItems[] = [
+                    'id' => $item['id'],
+                    'title' => $item['title'] ?? ($item['name'] ?? 'Untitled'),
+                    'image' => $item['image'] ?? null,
+                    'price' => $item['price'] ?? ($item['meta'] ?? null),
+                ];
                 $this->updateCategoryPreview(); // Trigger preview update
             }
         }
@@ -805,20 +807,66 @@ class Index extends Component
         $this->updateCategoryPreview(); // Trigger preview update
     }
 
-    // Deprecated / Manual old search (kept for safety if Manual mode uses it)
+    // Real search for Manual Slider Items
     public function updatedItemSearchQuery()
     {
-        if (strlen($this->itemSearchQuery) > 2) {
-             $query = $this->itemSearchQuery;
-             // ... old logic ...
-             if ($this->sliderMode === 'manual') {
-                 // Mock Search for Manual Items
-                 $this->searchResults = [
-                     ['id' => 101, 'name' => 'Suggest: ' . $query . ' (1)', 'image' => null],
-                     ['id' => 102, 'name' => 'Suggest: ' . $query . ' (2)', 'image' => null],
-                 ];
-             }
+        if (strlen($this->itemSearchQuery) < 2) {
+            $this->searchResults = [];
+            return;
         }
+
+        $query = $this->itemSearchQuery;
+        $results = [];
+
+        if ($this->sliderSource === 'shop') {
+            $products = \App\Models\Shop\ShopProduct::with('images')
+                ->where('title', 'like', "%{$query}%")
+                ->orWhere('sku', 'like', "%{$query}%")
+                ->limit(15)
+                ->get();
+            foreach ($products as $prod) {
+                $img = $prod->images->first()?->image_path ? \Illuminate\Support\Facades\Storage::url($prod->images->first()->image_path) : null;
+                $results[] = [
+                    'id' => $prod->id,
+                    'title' => $prod->title,
+                    'image' => $img,
+                    'price' => $prod->price > 0 ? 'INR ' . number_format($prod->price) : 'No Price'
+                ];
+            }
+        } elseif ($this->sliderSource === 'archive') {
+            $products = \App\Models\Archive\ArchiveProduct::with('images')
+                ->where('title', 'like', "%{$query}%")
+                ->orWhere('code', 'like', "%{$query}%")
+                ->limit(15)
+                ->get();
+            foreach ($products as $prod) {
+                $img = $prod->images->first()?->image_path ? \Illuminate\Support\Facades\Storage::url($prod->images->first()->image_path) : null;
+                $results[] = [
+                    'id' => $prod->id,
+                    'title' => $prod->title,
+                    'image' => $img,
+                    'price' => $prod->code ?: 'Archive Item'
+                ];
+            }
+        } elseif ($this->sliderSource === 'auctions') {
+            $lots = \App\Models\Auctions\AuctionLot::with('images')
+                ->where('title', 'like', "%{$query}%")
+                ->orWhere('lot_no', 'like', "%{$query}%")
+                ->limit(15)
+                ->get();
+            foreach ($lots as $lot) {
+                $price = $lot->current_highest_bid > 0 ? $lot->current_highest_bid : $lot->starting_price;
+                $img = $lot->images->first()?->path ? \Illuminate\Support\Facades\Storage::url($lot->images->first()->path) : null;
+                $results[] = [
+                    'id' => $lot->id,
+                    'title' => 'Lot ' . $lot->lot_no . ' - ' . $lot->title,
+                    'image' => $img,
+                    'price' => 'INR ' . number_format((float)$price)
+                ];
+            }
+        }
+
+        $this->searchResults = $results;
     }
 
     public function addSlide()

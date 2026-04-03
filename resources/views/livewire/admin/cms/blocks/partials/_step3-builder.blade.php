@@ -1,4 +1,3 @@
-
 @push('styles')
 <style>
     @media (min-width: 992px) {
@@ -166,7 +165,7 @@
                                                         @if($isSelected) disabled @endif
                                                      >
                                                          <div>
-                                                             <div class="fw-semibold text-truncate" style="max-width: 250px;">{{ $item['name'] }}</div>
+                                                             <div class="fw-semibold text-truncate" style="max-width: 250px;">{{ $item['title'] }}</div>
                                                              <div class="small text-muted d-flex gap-2">
                                                                  <span class="badge bg-light text-dark border">{{ ucfirst($item['status']) }}</span>
                                                                  <span>{{ $item['price'] }}</span>
@@ -193,7 +192,7 @@
                                              <li class="list-group-item d-flex justify-content-between align-items-center" wire:sortable.item="{{ $item['id'] }}" draggable="true">
                                                  <div class="d-flex align-items-center gap-2">
                                                      <i class="ri-drag-move-2-line text-muted handle" wire:sortable.handle style="cursor: grab;"></i>
-                                                     <span>{{ $item['name'] }}</span>
+                                                     <span>{{ $item['title'] ?? ($item['name'] ?? 'Item') }}</span>
                                                  </div>
                                                  <button type="button" class="btn btn-sm btn-icon btn-ghost-danger" wire:click="removeSliderItem({{ $index }})"><i class="ri-delete-bin-line"></i></button>
                                              </li>
@@ -226,35 +225,86 @@
                     
                     <!-- Manual Mode -->
                     @elseif($sliderMode === 'manual')
-                        <div class="mt-3">
-                            <label class="form-label">Select Items</label>
-                             {{-- Search/Select Component Mock --}}
-                             <div class="input-group mb-2">
-                                 <span class="input-group-text"><i class="ri-search-line"></i></span>
-                                 <input type="text" class="form-control" placeholder="Search items..." wire:model.live.debounce.300ms="itemSearchQuery">
-                             </div>
+                        <div class="mt-3" x-data="{ 
+                            open: @entangle('lotsDropdownOpen'), 
+                            closeDropdown() { this.open = false; } 
+                        }" @click.outside="closeDropdown()">
+                            <label class="form-label">Select Items <span class="text-danger">*</span></label>
+                            <p class="text-muted text-xs">Search and select items from the current source ({{ ucfirst($sliderSource ?: 'none') }}).</p>
                              
-                             <div class="list-group mb-3" style="max-height: 200px; overflow-y: auto;">
-                                 @foreach($searchResults as $item)
-                                     <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" wire:click="addSliderItem({{ $item['id'] }})">
-                                         <span>{{ $item['name'] }}</span>
-                                         <i class="ri-add-circle-line"></i>
-                                     </button>
-                                 @endforeach
-                             </div>
+                            <div class="position-relative">
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text"><i class="ri-search-line"></i></span>
+                                    <input type="text" class="form-control" 
+                                        placeholder="Search {{ $sliderSource ?: 'items' }}..." 
+                                        wire:model.live.debounce.300ms="itemSearchQuery"
+                                        wire:focus="$set('lotsDropdownOpen', true)"
+                                        @keydown.escape="closeDropdown()"
+                                    >
+                                </div>
+                                
+                                <!-- Search Result Dropdown -->
+                                <div x-show="open" x-transition 
+                                     class="position-absolute w-100 bg-white border shadow rounded mt-1 z-3" 
+                                     style="max-height: 260px; overflow-y: auto; display: none;">
+                                     
+                                     @if(count($searchResults) > 0)
+                                        <div class="list-group list-group-flush">
+                                            @foreach($searchResults as $item)
+                                                @php
+                                                    $isSelected = collect($selectedSliderItems)->contains('id', $item['id']);
+                                                @endphp
+                                                <button type="button" 
+                                                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {{ $isSelected ? 'bg-light text-muted' : '' }}" 
+                                                   wire:click="addSliderItem({{ $item['id'] }})"
+                                                   @if($isSelected) disabled @endif
+                                                >
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <img src="{{ $item['image'] ?? 'https://placehold.co/40x40/f3f3f9/adb5bd?text=img' }}" 
+                                                             class="rounded" style="width:32px;height:32px;object-fit:cover;">
+                                                        <div style="min-width: 0;">
+                                                            <div class="fw-semibold text-truncate" style="max-width: 250px;">{{ $item['title'] }}</div>
+                                                            <div class="small text-muted">{{ $item['price'] }}</div>
+                                                        </div>
+                                                    </div>
+                                                    @if(!$isSelected)
+                                                       <span class="badge bg-primary-subtle text-primary">Add</span>
+                                                    @else
+                                                       <span class="badge bg-light text-muted"><i class="ri-check-line"></i></span>
+                                                    @endif
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                     @elseif(strlen($itemSearchQuery) > 1)
+                                        <div class="p-3 text-center text-muted small">No items found matching "{{ $itemSearchQuery }}"</div>
+                                     @else
+                                        <div class="p-3 text-center text-muted small">Type to search for items...</div>
+                                     @endif
+                                </div>
+                            </div>
 
-                             <label class="form-label">Selected Items (Drag to reorder)</label>
-                             <ul class="list-group" wire:sortable="updateSliderItemOrder">
-                                 @foreach($selectedSliderItems as $index => $item)
-                                     <li class="list-group-item d-flex justify-content-between align-items-center" wire:sortable.item="{{ $item['id'] }}" draggable="true">
-                                         <div class="d-flex align-items-center gap-2">
-                                             <i class="ri-drag-move-2-line text-muted handle" wire:sortable.handle></i>
-                                         </div>
-                                         <button type="button" class="btn btn-sm btn-icon btn-ghost-danger" wire:click="removeSliderItem({{ $index }})"><i class="ri-delete-bin-line"></i></button>
-                                     </li>
-                                 @endforeach
-                             </ul>
-                             @error('selectedSliderItems') <span class="text-danger small">{{ $message }}</span> @enderror
+                            <label class="form-label mt-3">Selected Items (Drag to reorder)</label>
+                            @if(count($selectedSliderItems) > 0)
+                                <ul class="list-group mb-0" wire:sortable="updateSliderItemOrder">
+                                    @foreach($selectedSliderItems as $index => $item)
+                                        <li class="list-group-item d-flex justify-content-between align-items-center" wire:sortable.item="{{ $item['id'] }}" draggable="true">
+                                            <div class="d-flex align-items-center gap-2 w-100 overflow-hidden">
+                                                <i class="ri-drag-move-2-line text-muted handle" wire:sortable.handle style="cursor: grab;"></i>
+                                                <img src="{{ $item['image'] ?? 'https://placehold.co/40x40/f3f3f9/adb5bd?text=img' }}" 
+                                                     class="rounded" style="width:28px;height:28px;object-fit:cover;">
+                                                <div class="text-truncate">
+                                                    <span class="fw-medium">{{ $item['title'] ?? ($item['name'] ?? 'Item') }}</span>
+                                                    <small class="text-muted d-block fs-10">{{ $item['price'] ?? ($item['meta'] ?? '') }}</small>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-icon btn-ghost-danger flex-shrink-0" wire:click="removeSliderItem({{ $index }})"><i class="ri-delete-bin-line"></i></button>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <div class="alert alert-light border border-dashed text-center text-muted mb-0">No items selected yet.</div>
+                            @endif
+                            @error('selectedSliderItems') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                         </div>
 
                     <!-- Images Mode -->

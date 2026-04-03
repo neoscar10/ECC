@@ -182,8 +182,14 @@ class ContentBlockMobileResolver
                  $sliderData['items'] = $this->resolveAuctionLots($config['items'] ?? [], $user, $userTier); 
              }
         } elseif ($mode === 'manual') {
-             // Manual items not fully supported in requested scope, returning empty or could implement via IDs
-             // $ids = collect($config['items'] ?? [])->pluck('id')->toArray();
+             $itemIds = collect($config['items'] ?? [])->pluck('id')->filter()->toArray();
+             if ($source === 'shop') {
+                 $sliderData['items'] = $this->resolveShopItems(null, $sliderData['item_limit'], $user, $userTier, $itemIds);
+             } elseif ($source === 'archive') {
+                 $sliderData['items'] = $this->resolveArchiveItems(null, $sliderData['item_limit'], $user, $userTier, $itemIds);
+             } elseif ($source === 'auctions') {
+                 $sliderData['items'] = $this->resolveAuctionLots($config['items'] ?? [], $user, $userTier); 
+             }
         }
 
         return $sliderData;
@@ -203,14 +209,17 @@ class ContentBlockMobileResolver
         })->toArray();
     }
 
-    protected function resolveShopItems(?int $categoryId, int $limit, ?User $user = null, ?\App\Models\MembershipTier $userTier = null): array
+    protected function resolveShopItems(?int $categoryId, int $limit, ?User $user = null, ?\App\Models\MembershipTier $userTier = null, array $ids = []): array
     {
-        if (!$categoryId) return [];
+        if (!$categoryId && empty($ids)) return [];
 
-        $query = ShopProduct::active()
-            ->whereHas('categories', fn($q) => $q->where('shop_categories.id', $categoryId))
-            ->with(['images'])
-            ->take($limit);
+        $query = ShopProduct::active()->with(['images']);
+        
+        if (!empty($ids)) {
+            $query->whereIn('id', $ids);
+        } else {
+            $query->whereHas('categories', fn($q) => $q->where('shop_categories.id', $categoryId))->take($limit);
+        }
             
         return $query->get()->map(function($product) {
             return [
@@ -234,14 +243,17 @@ class ContentBlockMobileResolver
         })->toArray();
     }
 
-    protected function resolveArchiveItems(?int $categoryId, int $limit, ?User $user = null, ?\App\Models\MembershipTier $userTier = null): array
+    protected function resolveArchiveItems(?int $categoryId, int $limit, ?User $user = null, ?\App\Models\MembershipTier $userTier = null, array $ids = []): array
     {
-        if (!$categoryId) return [];
+        if (!$categoryId && empty($ids)) return [];
 
-        $query = ArchiveProduct::where('archive_category_id', $categoryId)
-            ->visibleTo($user, $userTier)
-            ->with(['images'])
-            ->take($limit);
+        $query = ArchiveProduct::visibleTo($user, $userTier)->with(['images']);
+            
+        if (!empty($ids)) {
+            $query->whereIn('id', $ids);
+        } else {
+            $query->where('archive_category_id', $categoryId)->take($limit);
+        }
 
         $accessResolver = app(\App\Services\Archive\ArchiveAccessResolver::class);
 

@@ -31,9 +31,9 @@ class AuctionBiddingService
      * @return AuctionLot
      * @throws \Exception
      */
-    public function placeBid(AuctionLot $lot, User $user, float $amount, string $source = 'web', bool $isAuto = false): AuctionLot
+    public function placeBid(AuctionLot $lot, User $user, float $amount, string $source = 'web', bool $isAuto = false, bool $skipTerminalResolution = false): AuctionLot
     {
-        return DB::transaction(function () use ($lot, $user, $amount, $source, $isAuto) {
+        return DB::transaction(function () use ($lot, $user, $amount, $source, $isAuto, $skipTerminalResolution) {
             // 1. Lock Row
             $lot = AuctionLot::lockForUpdate()->find($lot->id);
 
@@ -163,7 +163,7 @@ class AuctionBiddingService
                 ]);
 
                 foreach ($subscribers as $subUserId) {
-                    dispatch_sync(new \App\Jobs\Notifications\SendFcmToUserJob(
+                    dispatch(new \App\Jobs\Notifications\SendFcmToUserJob(
                         $subUserId,
                         $title,
                         $body,
@@ -190,7 +190,7 @@ class AuctionBiddingService
                     $autoEventId = "auto_bid_executed:{$bid->id}";
                     $autoPayload = $formatter->buildPayload($lot, 'auto_bid_executed', $autoExtra, $autoEventId);
 
-                    dispatch_sync(new \App\Jobs\Notifications\SendFcmToUserJob(
+                    dispatch(new \App\Jobs\Notifications\SendFcmToUserJob(
                         $user->id,
                         $autoTitle,
                         $autoBody,
@@ -203,7 +203,15 @@ class AuctionBiddingService
                 \Illuminate\Support\Facades\Log::error("Auction Notification Error (Bid): " . $e->getMessage());
             }
 
+            // 10. Terminal Endgame Proxy Resolution
+            // If this is the "Endgame", we immediately resolve all other proxy headroom
+            // to ensure the strongest bidder wins at the minimum required price.
+            if (!$skipTerminalResolution && $lot->isTerminalState()) {
+                app(AuctionTerminalValueCaptureService::class)->capture($lot);
+            }
+
             return $lot;
         });
     }
+
 }
