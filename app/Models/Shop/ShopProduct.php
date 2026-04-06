@@ -49,9 +49,35 @@ class ShopProduct extends Model
     }
 
     // Variation Groups
-    public function variationGroups(): HasMany
+    public function variationGroups()
     {
-        return $this->hasMany(ShopProductVariationGroup::class, 'shop_product_id')->orderBy('sort_order', 'asc');
+        return $this->hasMany(ShopProductVariationGroup::class, 'shop_product_id');
+    }
+
+    public function variants()
+    {
+        return $this->hasMany(ShopProductVariant::class, 'shop_product_id');
+    }
+
+    public function getPriceMinAmountAttribute()
+    {
+        if ($this->variants()->exists()) {
+            return $this->variants()->min('price');
+        }
+        return $this->base_price;
+    }
+
+    public function getPriceMaxAmountAttribute()
+    {
+        if ($this->variants()->exists()) {
+            return $this->variants()->max('price');
+        }
+        return $this->base_price;
+    }
+
+    public function getPriceAttribute()
+    {
+        return $this->base_price;
     }
 
     // Flattened Variation Values (useful for eager loading or counting)
@@ -76,12 +102,14 @@ class ShopProduct extends Model
     public function scopeInStock(Builder $query): Builder
     {
         return $query->where(function ($q) {
-            // Include products that have at least one variation with stock > 0
-            $q->whereHas('variationValues', function ($v) {
+            // Include products that have at least one variant with stock > 0
+            $q->whereHas('variants', function ($v) {
                 $v->where('stock_qty', '>', 0);
             })
-            // OR products that have NO variation groups (Simple products, assumed infinite stock)
-            ->orWhereDoesntHave('variationGroups');
+            // OR products that have NO variation groups (Simple products)
+            ->orWhere(function($sub) {
+                $sub->whereDoesntHave('variationGroups')->where('stock_qty', '>', 0);
+            });
         });
     }
 
@@ -89,33 +117,13 @@ class ShopProduct extends Model
 
     public function getComputedStockAttribute(): int
     {
-        // 1. Simple Product
-        if ($this->relationLoaded('variationGroups') && $this->variationGroups->isEmpty()) {
-            return (int) $this->stock_qty;
-        }
-        
-        // If relations not loaded (fallback), we assume simple if stock_qty is set? 
-        // Safer to rely on the eager load which we will enforce in Index.
-        if (!$this->relationLoaded('variationGroups')) {
-             return (int) $this->stock_qty; 
+        // 1. Variable Product
+        if ($this->variants()->exists()) {
+            return (int) $this->variants()->sum('stock_qty');
         }
 
-        // 2. Variable Product
-        // Effective Stock = MIN( Sum of stock for each group )
-        // e.g. Group A has 10 total, Group B has 100 total. We can only sell 10 units.
-        
-        $minGroupStock = null;
-        
-        foreach ($this->variationGroups as $group) {
-            // Ensure values are loaded or lazy load
-            $currentGroupStock = $group->values->sum('stock_qty');
-            
-            if ($minGroupStock === null || $currentGroupStock < $minGroupStock) {
-                $minGroupStock = $currentGroupStock;
-            }
-        }
-        
-        return (int) ($minGroupStock ?? 0);
+        // 2. Simple Product
+        return (int) ($this->stock_qty ?? 0);
     }
 
     public function getDisplayIdAttribute(): string

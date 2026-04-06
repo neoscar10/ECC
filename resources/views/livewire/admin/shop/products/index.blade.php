@@ -187,29 +187,46 @@
 @push('scripts')
 <script>
     window.addEventListener('show-create-modal', event => {
-        var myModal = new bootstrap.Modal(document.getElementById('createProductModal'));
-        myModal.show();
+        let el = document.getElementById('createProductModal');
+        let modal = bootstrap.Modal.getOrCreateInstance(el);
+        modal.show();
     });
 
     window.addEventListener('hide-create-modal', event => {
-        var myModalEl = document.getElementById('createProductModal');
-        var modal = bootstrap.Modal.getInstance(myModalEl);
+        let el = document.getElementById('createProductModal');
+        let modal = bootstrap.Modal.getInstance(el);
         if (modal) {
             modal.hide();
         }
+        // Force backdrop cleanup
+        setTimeout(() => {
+            if (!document.querySelector('.modal.show')) {
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }
+        }, 350); // Wait for transition
     });
 
     window.addEventListener('show-product-delete-modal', event => {
-        var myModal = new bootstrap.Modal(document.getElementById('deleteProductModal'));
-        myModal.show();
+        let el = document.getElementById('deleteProductModal');
+        let modal = bootstrap.Modal.getOrCreateInstance(el);
+        modal.show();
     });
 
     window.addEventListener('hide-product-delete-modal', event => {
-        var myModalEl = document.getElementById('deleteProductModal');
-        var modal = bootstrap.Modal.getInstance(myModalEl);
+        let el = document.getElementById('deleteProductModal');
+        let modal = bootstrap.Modal.getInstance(el);
         if (modal) {
             modal.hide();
         }
+        setTimeout(() => {
+            if (!document.querySelector('.modal.show')) {
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+            }
+        }, 350);
     });
 </script>
 @endpush

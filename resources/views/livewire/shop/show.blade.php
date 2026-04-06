@@ -997,16 +997,17 @@
                                                         @php
                                                             $valueId = $value['id'];
                                                             $label = $value['caption'] ?? 'Option';
-                                                            $stock = (int)($value['stock_qty'] ?? 0);
-                                                            $disabled = $stock <= 0;
+                                                            // Combination-aware availability
+                                                            $isAvailable = in_array((int)$valueId, $availableOptions[$groupId] ?? []);
+                                                            $disabled = !$isAvailable;
                                                             $isActive = (string)$selectedValueId === (string)$valueId;
                                                             $colorHex = $value['color_hex'] ?? '#ffffff';
                                                         @endphp
                                                         <button
                                                             type="button"
                                                             class="shop-detail-swatch {{ $isActive ? 'active' : '' }}"
-                                                            style="background-color: transparent;"
-                                                            title="{{ $label }}{{ $disabled ? ' (Out of stock)' : '' }}"
+                                                            style="background-color: transparent; {{ $disabled ? 'opacity: 0.3; cursor: not-allowed;' : '' }}"
+                                                            title="{{ $label }}{{ $disabled ? ' (Unavailable)' : '' }}"
                                                             wire:click="selectVariationValue({{ $groupId }}, {{ $valueId }})"
                                                             @if($disabled) disabled @endif
                                                         >
@@ -1020,8 +1021,9 @@
                                                         @php
                                                             $valueId = $value['id'];
                                                             $label = $value['caption'] ?? 'Option';
-                                                            $stock = (int)($value['stock_qty'] ?? 0);
-                                                            $disabled = $stock <= 0;
+                                                            // Combination-aware availability
+                                                            $isAvailable = in_array((int)$valueId, $availableOptions[$groupId] ?? []);
+                                                            $disabled = !$isAvailable;
                                                             $isActive = (string)$selectedValueId === (string)$valueId;
                                                         @endphp
 
@@ -1030,6 +1032,7 @@
                                                             class="shop-detail-size-btn {{ $isActive ? 'active' : '' }} {{ $disabled ? 'disabled' : '' }}"
                                                             wire:click="selectVariationValue({{ $groupId }}, {{ $valueId }})"
                                                             @disabled($disabled)
+                                                            title="{{ $disabled ? 'Unavailable for current selection' : '' }}"
                                                         >
                                                             {{ $label }}
                                                         </button>

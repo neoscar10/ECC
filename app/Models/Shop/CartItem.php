@@ -19,6 +19,7 @@ class CartItem extends Model
         'unit_price',
         'currency',
         'selection_signature',
+        'shop_product_variant_id',
     ];
 
     protected $casts = [
@@ -42,6 +43,14 @@ class CartItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(ShopProduct::class, 'shop_product_id');
+    }
+
+    /**
+     * Get the specific combination (variant) for this item.
+     */
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ShopProductVariant::class, 'shop_product_variant_id');
     }
 
     /**

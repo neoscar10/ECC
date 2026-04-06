@@ -48,11 +48,19 @@
                                 <span class="step-label d-none d-sm-block">Variations</span>
                             </button>
                         </div>
-                        <!-- Step 5: Review -->
+                        <!-- Step 5: Combinations (NEW) -->
                         <div class="sp-step">
                             <button class="sp-pill btn {{ $createStep === 5 ? 'active' : '' }} {{ $createStep > 5 ? 'done' : '' }}" 
                                 wire:click="$set('createStep', 5)" type="button" @if(!$isEditMode && $createStep < 5) disabled @endif>
                                 <span class="step-icon">@if($createStep > 5) <i class="ri-check-line"></i> @else 5 @endif</span>
+                                <span class="step-label d-none d-sm-block">Combinations</span>
+                            </button>
+                        </div>
+                        <!-- Step 6: Review -->
+                        <div class="sp-step">
+                            <button class="sp-pill btn {{ $createStep === 6 ? 'active' : '' }} {{ $createStep > 6 ? 'done' : '' }}" 
+                                wire:click="$set('createStep', 6)" type="button" @if(!$isEditMode && $createStep < 6) disabled @endif>
+                                <span class="step-icon">@if($createStep > 6) <i class="ri-check-line"></i> @else 6 @endif</span>
                                 <span class="step-label d-none d-sm-block">Review</span>
                             </button>
                         </div>
@@ -102,10 +110,17 @@
                             </div>
                         @endif
 
-                        <!-- Step 5: Review -->
+                        <!-- Step 5: Combinations -->
                         @if($createStep === 5)
                             <div class="tab-pane active fade show" id="step5">
-                                @include('livewire.admin.shop.products.partials.steps._step5-review')
+                                @include('livewire.admin.shop.products.partials.steps._step5-combinations')
+                            </div>
+                        @endif
+
+                        <!-- Step 6: Review -->
+                        @if($createStep === 6)
+                            <div class="tab-pane active fade show" id="step6">
+                                @include('livewire.admin.shop.products.partials.steps._step6-review')
                             </div>
                         @endif
                     </div>
@@ -118,9 +133,23 @@
                 </button>
 
                 @if($variationsOnlyMode)
-                     <button type="button" class="btn btn-success" wire:click="saveVariationsOnly">
-                        <i class="ri-save-line align-bottom me-1"></i> Save Changes
-                    </button>
+                    <div class="d-flex gap-2 w-100 justify-content-end">
+                        @if($createStep === 5)
+                            <button type="button" class="btn btn-light" wire:click="prevStep">
+                                <i class="ri-arrow-left-line align-middle me-1"></i> Back to Variations
+                            </button>
+                        @endif
+
+                        @if($createStep === 4 && $has_variants)
+                             <button type="button" class="btn btn-primary" wire:click="nextStep">
+                                Configure Stock & Price <i class="ri-arrow-right-line align-middle ms-1"></i>
+                            </button>
+                        @endif
+
+                         <button type="button" class="btn btn-success" wire:click="saveVariationsOnly">
+                            <i class="ri-save-line align-bottom me-1"></i> Save Changes
+                        </button>
+                    </div>
                 @else
                     <div class="d-flex gap-2">
                         {{-- Show Back from step 2+ only --}}
@@ -130,7 +159,7 @@
                             </button>
                         @endif
 
-                        @if($createStep < 5)
+                        @if($createStep < 6)
                             <button type="button" class="btn btn-primary" wire:click="nextStep" wire:loading.attr="disabled">
                                 Next Step <i class="ri-arrow-right-line align-middle ms-1"></i>
                             </button>

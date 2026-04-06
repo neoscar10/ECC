@@ -27,11 +27,14 @@ class CartItemResource extends JsonResource
             ];
         });
 
-        // Determine limits based on selected variations
-        // Find min stock among selected variations
-        $minStock = $this->selectedVariations->min('stock_qty');
-        // If no variations, simple product -> infinite?
-        $maxAvailable = $this->selectedVariations->isEmpty() ? 999 : $minStock;
+        // Determine limits based on combination or simple product stock
+        $maxAvailable = 0;
+        if ($this->shop_product_variant_id && $this->variant) {
+            $maxAvailable = $this->variant->stock_qty;
+        } else {
+            // Simple product stock or fallback to basic check
+            $maxAvailable = $product->stock_qty;
+        }
         
         return [
             'cart_item_id' => $this->id,

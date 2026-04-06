@@ -38,7 +38,12 @@
             @endif
         </div>
         
-        @if(!$has_variants)
+        @if($has_variants)
+            <div class="alert alert-info bg-soft-info border-0 mt-3 mb-0" role="alert">
+                <i class="ri-information-line me-1 align-middle"></i> 
+                <strong>Note:</strong> Pricing and stock for each combination will be configured in the <strong>next step</strong> once you define your variations here.
+            </div>
+        @else
             <div class="alert alert-info bg-soft-info border-0 mt-3 mb-0" role="alert">
                 <i class="ri-information-line me-1 align-middle"></i> If you need Size/Color options, turn on variations above.
             </div>
@@ -97,8 +102,6 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Value</th>
-                                            <th style="width: 120px;">Price</th>
-                                            <th style="width: 100px;">Stock</th>
                                             @if($group['presentation_type'] == 'color') <th style="width: 80px;">Color</th> @endif
                                             @if($group['presentation_type'] == 'image') <th style="width: 80px;">Thumbnail</th> @endif
                                             @if($group['has_images']) <th>Gallery</th> @endif
@@ -112,14 +115,6 @@
                                                 <td>
                                                     <input type="text" class="form-control form-control-sm" 
                                                         wire:model="variationGroups.{{ $gIndex }}.values.{{ $vIndex }}.caption" placeholder="Label">
-                                                </td>
-                                                <td>
-                                                    <input type="number" step="0.01" class="form-control form-control-sm" 
-                                                        wire:model="variationGroups.{{ $gIndex }}.values.{{ $vIndex }}.price" placeholder="Override">
-                                                </td>
-                                                <td>
-                                                    <input type="number" class="form-control form-control-sm" 
-                                                        wire:model="variationGroups.{{ $gIndex }}.values.{{ $vIndex }}.stock_qty" placeholder="Qty">
                                                 </td>
                                                 @if($group['presentation_type'] == 'color')
                                                     <td>

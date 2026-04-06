@@ -19,6 +19,7 @@ class Show extends Component
     // Dynamic Variant State
     public $selectedVariationValues = []; // keyed by group_id -> value_id
     public $variationGroups = [];
+    public $availableOptions = []; // groupId -> [valueIds]
     public $currentGallery = [];
     public $computedPriceDisplay = null;
     public $availabilityLabel = null;
@@ -38,7 +39,8 @@ class Show extends Component
             'images', 
             'categories.parent', 
             'tags.group', 
-            'variationGroups.values.images'
+            'variationGroups.values.images',
+            'variants.optionValues' // Added variants for combination-aware logic
         ])->active()->where('slug', $this->slug)->firstOrFail();
 
         // Standardize groups for view
@@ -46,14 +48,12 @@ class Show extends Component
         $this->selectedVariationValues = [];
 
         // Evaluate Defaults
-        $defaultValues = collect();
         foreach ($this->product->variationGroups as $group) {
             $def = $group->values->where('is_default', true)->first();
             if (!$def && $group->values->isNotEmpty()) {
                 $def = $group->values->first();
             }
             if ($def) {
-                $defaultValues->put($group->id, $def);
                 $this->selectedVariationValues[$group->id] = $def->id;
             }
         }
@@ -64,15 +64,16 @@ class Show extends Component
     public function selectVariationValue($groupId, $valueId)
     {
         // Don't allow selecting disabled options
-        $group = collect($this->variationGroups)->firstWhere('id', $groupId);
-        if ($group) {
-            $value = collect($group['values'])->firstWhere('id', $valueId);
-            if ($value && ($value['stock_qty'] ?? 0) <= 0) {
-                return; // Disabled
-            }
+        if (isset($this->availableOptions[$groupId]) && !in_array($valueId, $this->availableOptions[$groupId])) {
+            return;
         }
 
         $this->selectedVariationValues[$groupId] = $valueId;
+        
+        // After changing one variation, we must ensure other selections are still valid.
+        // If not, they will be cleared in recomputeDynamicState or we can do it here.
+        // recomputeDynamicState will handle the "availableOptions" map.
+        
         $this->recomputeDynamicState();
     }
 
@@ -85,37 +86,73 @@ class Show extends Component
 
     protected function recomputeDynamicState()
     {
-        $selectedModels = collect();
-        $maxPrice = (float) $this->product->base_price;
-        $allInStock = true;
+        $allVariants = $this->product->variants->where('is_active', true);
+        $inStockVariants = $allVariants->where('stock_qty', '>', 0);
+        
+        $groups = $this->product->variationGroups;
+        $this->availableOptions = [];
 
-        // 1. Resolve Pricing and Stock Constraints
-        foreach ($this->product->variationGroups as $group) {
-            if (isset($this->selectedVariationValues[$group->id])) {
-                $selectedId = $this->selectedVariationValues[$group->id];
-                $val = $group->values->firstWhere('id', $selectedId);
-                if ($val) {
-                    $selectedModels->push($val);
-                    if ((float) $val->price > $maxPrice) {
-                        $maxPrice = (float) $val->price;
-                    }
-                    if ($val->stock_qty <= 0) {
-                        $allInStock = false;
+        // 1. Calculate Available Options per Group
+        // An option is available if it belongs to at least one active, in-stock variant 
+        // that matches all CURRENT selections in OTHER groups.
+        foreach ($groups as $group) {
+            $otherSelections = collect($this->selectedVariationValues)->forget($group->id);
+            
+            $availableInThisGroup = $inStockVariants->filter(function($variant) use ($otherSelections) {
+                $variantOptionIds = $variant->optionValues->pluck('id')->toArray();
+                foreach ($otherSelections as $otherGroupId => $otherValueId) {
+                    if (!in_array($otherValueId, $variantOptionIds)) {
+                        return false;
                     }
                 }
+                return true;
+            })->flatMap(function($variant) {
+                return $variant->optionValues;
+            })->where('group_id', $group->id)->pluck('id')->unique()->values()->toArray();
+            
+            $this->availableOptions[$group->id] = $availableInThisGroup;
+        }
+
+        // 2. Validate current selections
+        // If a currently selected value is no longer "available" (compatible with other choices), 
+        // we keep it selected but it will mark the whole thing as Out of Stock, 
+        // OR we can clear it. Clearing is better for "constraint" UX.
+        // However, the user flow usually blocks clicking disabled ones anyway.
+        
+        // 3. Resolve the Specific Variant for Price and Stock
+        $selectedCount = count($this->selectedVariationValues);
+        $totalGroupCount = count($groups);
+        $matchedVariant = null;
+
+        if ($selectedCount === $totalGroupCount && $totalGroupCount > 0) {
+            $selectedIds = collect($this->selectedVariationValues)->values()->sort()->values()->toArray();
+            
+            $matchedVariant = $allVariants->filter(function($v) use ($selectedIds) {
+                $vIds = $v->optionValues->pluck('id')->sort()->values()->toArray();
+                return $vIds === $selectedIds;
+            })->first();
+        }
+
+        // 4. Update Display State
+        if ($matchedVariant) {
+            $this->computedPriceDisplay = number_format($matchedVariant->price ?? $this->product->base_price, 2, '.', '');
+            $this->inStock = $matchedVariant->stock_qty > 0;
+            $this->availabilityLabel = $this->inStock ? null : 'Out of Stock';
+        } else {
+            // Partial selection or no variations
+            if ($totalGroupCount > 0) {
+                $this->computedPriceDisplay = number_format($this->product->base_price, 2, '.', '');
+                $this->inStock = false; // Cannot add to cart until full selection
+                $this->availabilityLabel = 'Select options';
+            } else {
+                // Simple product
+                $this->computedPriceDisplay = number_format($this->product->base_price, 2, '.', '');
+                $this->inStock = $this->product->stock_qty > 0;
+                $this->availabilityLabel = $this->inStock ? null : 'Out of Stock';
             }
         }
 
-        $this->computedPriceDisplay = number_format($maxPrice, 2, '.', '');
-        $this->inStock = $allInStock;
-        
-        if (!$this->inStock) {
-            $this->availabilityLabel = 'Out of Stock';
-        } else {
-            $this->availabilityLabel = null; 
-        }
-
-        // 2. Resolve Gallery Control Rules
+        // 5. Resolve Gallery Control Rules
         $galleryControlGroup = $this->product->variationGroups->where('has_images', true)->first();
         $newGallery = [];
 

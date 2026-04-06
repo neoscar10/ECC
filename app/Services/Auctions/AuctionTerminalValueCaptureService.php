@@ -123,7 +123,7 @@ class AuctionTerminalValueCaptureService
             // Use User ID 1 (Super Admin) as the proxy actor for Platform Pressure.
             $systemUser = User::find(1);
             if ($systemUser) {
-                $biddingService->placeBid($lot, $systemUser, $pressureAmount, 'system_terminal', true, true);
+                $biddingService->placeBid($lot, $systemUser, $pressureAmount, 'system_terminal', true, true, true);
                 $lot->refresh(); // Sync state after system bid
             }
         }
@@ -131,7 +131,7 @@ class AuctionTerminalValueCaptureService
         // Step B: Final Winning Bid for the User
         $winner = User::find($targetWinnerId);
         if ($winner) {
-            $biddingService->placeBid($lot, $winner, $targetWinnerMax, 'system', true, true);
+            $biddingService->placeBid($lot, $winner, $targetWinnerMax, 'system', true, true, true);
         }
     }
 }

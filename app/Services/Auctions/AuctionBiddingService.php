@@ -31,9 +31,9 @@ class AuctionBiddingService
      * @return AuctionLot
      * @throws \Exception
      */
-    public function placeBid(AuctionLot $lot, User $user, float $amount, string $source = 'web', bool $isAuto = false, bool $skipTerminalResolution = false): AuctionLot
+    public function placeBid(AuctionLot $lot, User $user, float $amount, string $source = 'web', bool $isAuto = false, bool $skipTerminalResolution = false, bool $allowPastEnd = false): AuctionLot
     {
-        return DB::transaction(function () use ($lot, $user, $amount, $source, $isAuto, $skipTerminalResolution) {
+        return DB::transaction(function () use ($lot, $user, $amount, $source, $isAuto, $skipTerminalResolution, $allowPastEnd) {
             // 1. Lock Row
             $lot = AuctionLot::lockForUpdate()->find($lot->id);
 
@@ -41,7 +41,9 @@ class AuctionBiddingService
             if (!$this->accessResolver->isBiddingOpenForUser($lot, $user)) {
                 throw new \Exception("Bidding is not open for this item yet.");
             }
-            if ($lot->ends_at && now()->gt($lot->ends_at)) {
+            
+            // Time Guard: Allowed after ends_at only if allowPastEnd is true (system closing path)
+            if (!$allowPastEnd && $lot->ends_at && now()->gt($lot->ends_at)) {
                 throw new \Exception("Auction has ended.");
             }
 

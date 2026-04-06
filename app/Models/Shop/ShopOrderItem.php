@@ -19,6 +19,7 @@ class ShopOrderItem extends Model
         'unit_price',
         'line_total',
         'selection_signature',
+        'shop_product_variant_id',
     ];
 
     protected $casts = [
@@ -35,6 +36,11 @@ class ShopOrderItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(ShopProduct::class, 'shop_product_id');
+    }
+
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ShopProductVariant::class, 'shop_product_variant_id');
     }
 
     public function variationValues(): BelongsToMany

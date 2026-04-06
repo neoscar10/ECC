@@ -94,11 +94,23 @@ class Index extends Component
 
     // Wizard State
     public $createStep = 1;
+    public $combinations = []; // [ 'id_1-id_2' => [ 'sku' => ..., 'price' => ..., 'stock' => ..., 'is_active' => ..., 'is_default' => ... ] ]
     
     // Deletion
     public $productToDeleteId = null;
 
     // --- Render & Computed Props ---
+
+    protected $listeners = [
+        'set-combo-default' => 'setComboDefault'
+    ];
+
+    public function setComboDefault($key)
+    {
+        foreach ($this->combinations as $k => $combo) {
+            $this->combinations[$k]['is_default'] = ($k === $key);
+        }
+    }
 
     public function render()
     {
@@ -212,9 +224,12 @@ class Index extends Component
 
     public function nextStep()
     {
-        if ($this->createStep < 5) {
+        if ($this->createStep < 6) {
             $this->createStep++;
             if ($this->createStep === 5) {
+                $this->generateCombinations();
+            }
+            if ($this->createStep === 6) {
                 $this->buildReviewData();
             }
         }
@@ -230,6 +245,9 @@ class Index extends Component
     public function updatedCreateStep($value)
     {
         if ($value === 5) {
+            $this->generateCombinations();
+        }
+        if ($value === 6) {
             $this->buildReviewData();
         }
     }
@@ -384,7 +402,6 @@ class Index extends Component
             ];
 
             foreach ($group->values as $val) {
-                // Load gallery images for this value if any
                 // Load existing gallery images for the value
                 $existingGallery = DB::table('shop_variation_value_images')
                     ->where('shop_product_variation_value_id', $val->id)
@@ -395,6 +412,7 @@ class Index extends Component
                 $gData['values'][] = [
                     'id' => $val->id,
                     'caption' => $val->caption,
+                    // Price and stock are now deprecated at this level, but we keep them for logic compatibility if needed
                     'price' => $val->price,
                     'stock_qty' => $val->stock_qty,
                     'is_default' => (bool)$val->is_default,
@@ -406,6 +424,23 @@ class Index extends Component
                 ];
             }
             $this->variationGroups[] = $gData;
+        }
+
+        // Hydrate Combinations (ShopProductVariant)
+        $this->combinations = [];
+        $variants = \App\Models\Shop\ShopProductVariant::with('optionValues')->where('shop_product_id', $id)->get();
+        foreach ($variants as $variant) {
+            $valueIds = $variant->optionValues->pluck('id')->sort()->values()->all();
+            $key = implode('-', $valueIds);
+            
+            $this->combinations[$key] = [
+                'id' => $variant->id,
+                'sku' => $variant->sku,
+                'price' => (float)$variant->price,
+                'stock' => $variant->stock_qty,
+                'is_active' => (bool)$variant->is_active,
+                'is_default' => (bool)$variant->is_default,
+            ];
         }
 
         $this->showCreateModal = true;
@@ -581,16 +616,94 @@ class Index extends Component
         }
     }
 
+    public function generateCombinations()
+    {
+        if (empty($this->variationGroups)) {
+            $this->combinations = [];
+            return;
+        }
+
+        $allValues = [];
+        $groupNames = [];
+        foreach ($this->variationGroups as $group) {
+            // Filter out empty values or values with empty captions
+            $validValues = collect($group['values'] ?? [])
+                ->filter(fn($v) => !empty(trim($v['caption'] ?? '')))
+                ->values()
+                ->all();
+
+            if (empty($validValues)) continue;
+            
+            $allValues[] = $validValues;
+            $groupNames[] = $group['name'];
+        }
+
+        if (empty($allValues)) {
+            $this->combinations = [];
+            return;
+        }
+
+        $combinations = [[]];
+        foreach ($allValues as $values) {
+            $tmp = [];
+            foreach ($combinations as $combination) {
+                foreach ($values as $value) {
+                    $tmp[] = array_merge($combination, [$value]);
+                }
+            }
+            $combinations = $tmp;
+        }
+
+        $newCombinationsState = [];
+        foreach ($combinations as $combo) {
+            $ids = collect($combo)->pluck('id')->filter()->sort()->values()->all();
+            
+            // If IDs are missing (unsaved new values), we use a temporary key based on captions
+            // But usually we save groups/values pulse before generating.
+            // If ID is missing, we use index hash.
+            if (count($ids) < count($allValues)) {
+                $ids = collect($combo)->map(fn($v, $k) => $v['caption'] ?? "new-{$k}")->sort()->values()->all();
+            }
+            
+            $key = implode('-', $ids);
+            
+            // Preserve existing data if key matches
+            if (isset($this->combinations[$key])) {
+                $newCombinationsState[$key] = $this->combinations[$key];
+            } else {
+                $newCombinationsState[$key] = [
+                    'id' => null,
+                    'sku' => '',
+                    'price' => $this->base_price,
+                    'stock' => 0,
+                    'is_active' => true,
+                    'is_default' => false,
+                ];
+            }
+            
+            // Store display labels
+            $newCombinationsState[$key]['labels'] = collect($combo)->pluck('caption')->all();
+        }
+
+        // Handle Default: if no default set, pick the first one
+        if (!collect($newCombinationsState)->contains('is_default', true) && !empty($newCombinationsState)) {
+            $firstKey = array_key_first($newCombinationsState);
+            $newCombinationsState[$firstKey]['is_default'] = true;
+        }
+
+        $this->combinations = $newCombinationsState;
+    }
+
     public function addVariationGroup()
     {
         array_unshift($this->variationGroups, [
             'name' => '',
             'presentation_type' => 'text',
             'has_images' => false,
-            'sort_order' => 0, // Will be recalculated on save
+            'sort_order' => 0, 
             'values' => [
                 [
-                    'caption' => '', 'price' => 0, 'stock_qty' => 0, 'is_default' => true, 'color_hex' => null, 
+                    'caption' => '', 'is_default' => true, 'color_hex' => null, 
                     'presentation_image' => null,
                     'presentation_image_url' => null,
                     'new_gallery_images' => [],
@@ -610,7 +723,7 @@ class Index extends Component
     {
         $default = count($this->variationGroups[$groupIndex]['values']) === 0;
         $this->variationGroups[$groupIndex]['values'][] = [
-            'caption' => '', 'price' => 0, 'stock_qty' => 0, 'is_default' => $default, 'color_hex' => null, 
+            'caption' => '', 'is_default' => $default, 'color_hex' => null, 
             'presentation_image' => null,
             'presentation_image_url' => null,
             'new_gallery_images' => [],
@@ -686,8 +799,6 @@ class Index extends Component
                 foreach ($groupData['values'] as $valData) {
                     $variationValue = $group->values()->create([
                         'caption' => $valData['caption'],
-                        'price' => $valData['price'],
-                        'stock_qty' => $valData['stock_qty'],
                         'is_default' => $valData['is_default'],
                         'color_hex' => $valData['color_hex'],
                     ]);
@@ -773,8 +884,14 @@ class Index extends Component
                 break;
             case 4:
                 $this->saveVariations($product);
+                if ($this->has_variants) {
+                    $this->generateCombinations();
+                }
                 break;
             case 5:
+                $this->saveCombinations($product);
+                break;
+            case 6:
                 $this->updateProduct(); // Full save on review
                 return; // updateProduct handles notification
         }
@@ -964,11 +1081,9 @@ class Index extends Component
 
             // Values
             $currentValueIds = [];
-            foreach (($gData['values'] ?? []) as $vData) {
+            foreach (($gData['values'] ?? []) as $vIndex => $vData) {
                 $valAttributes = [
                     'caption' => $vData['caption'],
-                    'price' => $vData['price'],
-                    'stock_qty' => $vData['stock_qty'],
                     'is_default' => $vData['is_default'],
                     'color_hex' => $vData['color_hex'],
                 ];
@@ -982,6 +1097,9 @@ class Index extends Component
                     $val = $group->values()->create($valAttributes);
                 }
                 $currentValueIds[] = $val->id;
+
+                // Sync the ID back to variationGroups for generateCombinations to work
+                $this->variationGroups[$gIndex]['values'][$vIndex]['id'] = $val->id;
 
                 // Process Gallery Images (New Uploads Only)
                 if (!empty($vData['new_gallery_images'])) {
@@ -1017,6 +1135,43 @@ class Index extends Component
         }
     }
 
+    private function saveCombinations(ShopProduct $product)
+    {
+        if (!$this->has_variants || empty($this->combinations)) {
+            return;
+        }
+
+        $currentVariantIds = [];
+
+        foreach ($this->combinations as $key => $data) {
+            $variant = $product->variants()->updateOrCreate(
+                ['id' => $data['id'] ?? null],
+                [
+                    'sku' => $data['sku'] ?: null,
+                    'price' => $data['price'],
+                    'stock_qty' => $data['stock'],
+                    'is_active' => $data['is_active'] ?? true,
+                    'is_default' => $data['is_default'] ?? false,
+                ]
+            );
+
+            $currentVariantIds[] = $variant->id;
+            $this->combinations[$key]['id'] = $variant->id; // Update state with ID
+
+            // Sync Options
+            $valueIds = explode('-', $key);
+            // Verify IDs are integers
+            $valueIds = array_filter(array_map('intval', $valueIds));
+            
+            if (count($valueIds) > 0) {
+                $variant->optionValues()->sync($valueIds);
+            }
+        }
+
+        // Cleanup stale variants (those not in the current combinations list)
+        $product->variants()->whereNotIn('id', $currentVariantIds)->delete();
+    }
+
     public function openVariationsOnly($id)
     {
         $this->resetForm();
@@ -1046,9 +1201,13 @@ class Index extends Component
                  $product->update(['stock_qty' => null]);
             }
 
-            // 2. Save Variations
-            // We can reuse saveVariations($product) from the class.
+            // 2. Save Variations (Metadata)
             $this->saveVariations($product);
+
+            // 3. Save Combinations (New Logic)
+            if ($this->has_variants) {
+                $this->saveCombinations($product);
+            }
         });
 
         $this->closeModal();

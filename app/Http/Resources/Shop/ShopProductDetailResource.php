@@ -91,21 +91,12 @@ class ShopProductDetailResource extends JsonResource
                         'values' => $group->values->map(function ($val) use ($group) {
                             
                             $gallery = [];
-                            // If this group controls gallery, load images for this value
-                            if ($group->has_images) {
-                                // Assuming 'images' relation exists on Value model (via `shop_variation_value_images`)
-                                // Index::edit() used DB::table query. 
-                                // We need to check if the relation exists in the Model.
-                                // If not, we might need to rely on the eager loaded `images` relation we added in Controller show()
-                                if ($val->relationLoaded('images')) {
-                                    $gallery = $val->images->map(fn($i) => [
-                                        'id' => $i->id ?? 0, // Pivot/Table usually has ID?
-                                        // If it's the custom table, it might not have ID model?
-                                        // Let's assume standard object structure
-                                        'url' => url('storage/' . $i->image_path),
-                                        'thumb_url' => url('storage/' . $i->image_path)
-                                    ]);
-                                }
+                            if ($group->has_images && $val->relationLoaded('images')) {
+                                $gallery = $val->images->map(fn($i) => [
+                                    'id' => $i->id ?? 0,
+                                    'url' => url('storage/' . $i->image_path),
+                                    'thumb_url' => url('storage/' . $i->image_path)
+                                ]).values();
                             }
 
                             return [
@@ -125,14 +116,25 @@ class ShopProductDetailResource extends JsonResource
                         }),
                     ];
                 }),
+                'variants' => $this->variants->map(function($v) {
+                    return [
+                        'id' => $v->id,
+                        'sku' => $v->sku,
+                        'price' => number_format($v->price, 2, '.', ''),
+                        'stock' => $v->stock_qty,
+                        'is_active' => (bool)$v->is_active,
+                        'is_default' => (bool)$v->is_default,
+                        'option_value_ids' => $v->optionValues->pluck('id')->sort()->values()->all(),
+                    ];
+                }),
             ],
 
             'defaults' => [
                 'selected_values' => $defaultValues->mapWithKeys(function($val, $groupId) {
                     return [$groupId => $val->id];
                 }),
-                'default_computed_price' => number_format($defaultPrice, 2, '.', ''),
-                'rule' => 'MAX_SELECTED_VARIATION_PRICE',
+                'default_computed_price' => number_format($this->variants->where('is_default', true)->first()->price ?? $defaultPrice, 2, '.', ''),
+                'rule' => 'VARIANT_COMBINATION_DEFAULT',
             ],
 
             'created_at' => $this->created_at->toIso8601String(),

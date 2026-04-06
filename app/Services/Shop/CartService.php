@@ -6,6 +6,7 @@ use App\Models\Shop\Cart;
 use App\Models\Shop\CartItem;
 use App\Models\Shop\CartItemVariationValue;
 use App\Models\Shop\ShopProduct;
+use App\Models\Shop\ShopProductVariant;
 use App\Models\Shop\ShopProductVariationValue;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -31,16 +32,7 @@ class CartService
                 'user_id' => $user->id,
                 'last_activity_at' => now(),
             ]);
-        } else {
-            // Update activity timestamp if we accessed it? 
-            // Requirement: "Reading cart in admin must NOT update last_activity_at."
-            // But reading for the USER likely ensures it's active. 
-            // I'll leave strictly reading (getCart) as passive, but mutations update it.
-            // If the user "views" the cart, the controller might convert it to resource without mutating. 
-            // However, typical session expiry logic implies activity = any interaction.
-            // For now, I will NOT update strictly on get, to distinguish "viewing" from "active shopping" if needed.
-            // But usually viewing is activity. I'll stick to mutating methods updating it.
-        }
+        } 
 
         return $cart;
     }
@@ -66,9 +58,10 @@ class CartService
             // 2. Validate Stock
             $this->validateStock($product, $selectedValues, $quantity);
 
-            // 3. Compute Signature & Price
+            // 3. Compute Signature, Price & Variant
             $signature = $this->computeSignature($selectedValues);
-            $unitPrice = $this->computePrice($product, $selectedValues);
+            $variant = $this->findVariant($product, $selectedValues);
+            $unitPrice = $this->computePrice($product, $selectedValues, $variant);
 
             // 4. Merge or Create
             // Check if item with exact same signature exists in this cart
@@ -81,11 +74,12 @@ class CartService
                 // Merge
                 $newQty = $existingItem->quantity + $quantity;
                 // Re-validate stock for total qty
-                $this->validateStock($product, $selectedValues, $newQty); // Optimization: avoid re-fetching
+                $this->validateStock($product, $selectedValues, $newQty, $variant); 
                 
                 $existingItem->update([
                     'quantity' => $newQty,
-                    'unit_price' => $unitPrice, // Update price in case it changed in DB
+                    'unit_price' => $unitPrice,
+                    'shop_product_variant_id' => $variant?->id,
                     'updated_at' => now(),
                 ]);
             } else {
@@ -97,6 +91,7 @@ class CartService
                     'unit_price' => $unitPrice,
                     'currency' => $product->currency,
                     'selection_signature' => $signature,
+                    'shop_product_variant_id' => $variant?->id,
                 ]);
 
                 // Attach Pivot
@@ -122,18 +117,11 @@ class CartService
     {
         return DB::transaction(function () use ($user, $cartItemId, $quantity, $variationValueIds) {
             $cart = $this->getCart($user);
-            $item = $cart->items()->where('id', $cartItemId)->firstOrFail(); // Ensure item belongs to user's cart
+            $item = $cart->items()->where('id', $cartItemId)->firstOrFail(); 
 
-            $product = $item->product; // Lazy load if needed
+            $product = $item->product; 
 
-            // Determine Target State
             $targetQty = $quantity !== null ? $quantity : $item->quantity;
-            
-            // If variations strictly provided (even empty array means clear/reset? Or means "no change"? 
-            // API spec: "PATCH... optional... If variations change, re-validate".
-            // If key is present in payload, we update. If null, keep existing? 
-            // I'll assume if passed as argument it's intended to be the new set.
-            // But controller might pass null if not in request.
             $changingVariations = $variationValueIds !== null;
             
             if ($targetQty < 1) {
@@ -144,10 +132,10 @@ class CartService
                 // Full re-resolution based on new IDs
                 $selectedValues = $this->resolveVariations($product, $variationValueIds);
                 $signature = $this->computeSignature($selectedValues);
-                $unitPrice = $this->computePrice($product, $selectedValues);
+                $variant = $this->findVariant($product, $selectedValues);
+                $unitPrice = $this->computePrice($product, $selectedValues, $variant);
                 
-                // Check Merge Conflict (if changing signature to something that already exists)
-                // Excluding self
+                // Check Merge Conflict 
                 $mergeTarget = $cart->items()
                     ->where('shop_product_id', $product->id)
                     ->where('selection_signature', $signature)
@@ -157,11 +145,12 @@ class CartService
                 if ($mergeTarget) {
                     // Merge current item INTO mergeTarget
                     $newTotalQty = $mergeTarget->quantity + $targetQty;
-                    $this->validateStock($product, $selectedValues, $newTotalQty);
+                    $this->validateStock($product, $selectedValues, $newTotalQty, $variant);
                     
                     $mergeTarget->update([
                         'quantity' => $newTotalQty,
                         'unit_price' => $unitPrice,
+                        'shop_product_variant_id' => $variant?->id,
                         'updated_at' => now(),
                     ]);
                     
@@ -169,12 +158,13 @@ class CartService
                     $item->delete();
                 } else {
                     // No merge, just update this item
-                    $this->validateStock($product, $selectedValues, $targetQty);
+                    $this->validateStock($product, $selectedValues, $targetQty, $variant);
                     
                     $item->update([
                         'quantity' => $targetQty,
                         'unit_price' => $unitPrice,
                         'selection_signature' => $signature,
+                        'shop_product_variant_id' => $variant?->id,
                         'updated_at' => now(),
                     ]);
                     
@@ -189,7 +179,8 @@ class CartService
                 }
             } else {
                 // Only Quantity Change
-                $this->validateStock($product, $item->selectedVariations, $targetQty);
+                $variant = $item->shop_product_variant_id ? $item->variant : null;
+                $this->validateStock($product, $item->variationValues, $targetQty, $variant);
                 $item->update(['quantity' => $targetQty, 'updated_at' => now()]);
             }
 
@@ -224,14 +215,8 @@ class CartService
         $resolved = collect();
 
         foreach ($groups as $group) {
-            // Find input ID belonging to this group
-            // We need to know which group a value belongs to. 
-            // Efficient way: Fetch all input values from DB to check their group_id.
-            // But we can just iterate the loaded product->variationGroups->values to look for match.
-            
             $match = null;
             foreach ($inputIds as $id) {
-                // Check if this $id exists in $group->values collection
                 $found = $group->values->firstWhere('id', $id);
                 if ($found) {
                     if ($match) {
@@ -242,13 +227,8 @@ class CartService
             }
 
             if (!$match) {
-                // Try Default
                 $match = $group->values->firstWhere('is_default', true);
                 if (!$match) {
-                    // Fallback to first? Or Error?
-                    // "If variation_value_ids not provided, auto-select defaults"
-                    // If no default set, usually picking first is standard shop behavior, OR required.
-                    // Given existing logic, I'll pick first.
                     $match = $group->values->first();
                 }
             }
@@ -261,61 +241,67 @@ class CartService
         return $resolved;
     }
 
-    private function validateStock(ShopProduct $product, Collection $selectedValues, int $quantity)
+    private function validateStock(ShopProduct $product, Collection $selectedValues, int $quantity, ?ShopProductVariant $variant = null)
     {
-        // 1. Check Variation Stock
-        // "If selected variation value stock is 0, it must be unselectable"
-        // "If requested qty > stock => return 409"
-        
-        // Logic: Checks each selected variation value. If ANY has stock < qty, fail.
-        // Usually, a distinct physical item is 1 variation combo => 1 SKU with 1 stock count.
-        // But here, stock is on VALUES (e.g. Size M has 10, Color Red has 5).
-        // This suggests "Component Stock" model? Or just Simplified model?
-        // E.g. T-Shirt (Red [10], Blue [5]) and (S, M, L).
-        // If Model is: Value-based stock, then "Red" limits total Red items regardless of size.
-        // This is unusual for apparel (SKU is Red-M).
-        // BUT, looking at `ShopProductVariationValue` table, it has `stock_qty`.
-        // `ShopProduct` does NOT have stock.
-        // And there is no "VariationCombination/SKU" table.
-        // So yes, stock is tracked per VALUE.
-        // So if I buy Red-M, I need 1 Red and 1 M.
-        // So Red must have stock >= qty AND M must have stock >= qty.
-        // This is the implementation implied by the schema.
+        if ($product->variants()->exists()) {
+            if (!$variant && $selectedValues->isNotEmpty()) {
+                $variant = $this->findVariant($product, $selectedValues);
+            }
 
-        foreach ($selectedValues as $value) {
-            if ($value->stock_qty < $quantity) {
-                 // Throw specific exception caught by controller
-                 throw new Exception("Insufficient stock for {$value->caption}. Available: {$value->stock_qty}", 409);
+            if ($variant) {
+                if ($variant->stock_qty < $quantity) {
+                    $labels = $variant->optionValues->pluck('caption')->implode(' / ');
+                    throw new Exception("Insufficient stock for {$labels}. Requested: {$quantity}, Available: {$variant->stock_qty}", 409);
+                }
+                return; 
+            }
+            
+            if ($selectedValues->isNotEmpty()) {
+                throw new Exception("This combination ({$selectedValues->pluck('caption')->implode(' / ')}) is currently unavailable.", 404);
             }
         }
 
-        // 2. Check Product Stock (if simple product)
-        if ($selectedValues->isEmpty()) {
-            // Simple product. "validate stock based on product stock".
-            // But ShopProduct HAS NO STOCK COLUMN.
-            // Thus, assume infinite.
-            // PASS.
+        if (!$product->variants()->exists()) {
+            if ($product->stock_qty < $quantity) {
+                 throw new Exception("Insufficient stock for {$product->title}. Available: {$product->stock_qty}", 409);
+            }
         }
     }
 
     private function computeSignature(Collection $selectedValues): string
     {
-        // "sorted ids join '-', then sha1" or just raw string
         $ids = $selectedValues->pluck('id')->sort()->values()->all();
         $str = implode('-', $ids);
-        // Using hash to keep column length predictable/short if many variations
         return $str === '' ? 'standard' : $str; 
-        // Note: I am NOT hashing it here to make debugging easier, unless it gets too long.
-        // Table column is string (255).
-        // "123-456-789" is short.
-        // I will keep it plain text provided it fits. 
-        // Plan said "hash/signature".
     }
 
-    private function computePrice(ShopProduct $product, Collection $selectedValues): float
+    private function computePrice(ShopProduct $product, Collection $selectedValues, ?ShopProductVariant $variant = null): float
     {
-        // "unit_price = max(product.base_price, max(selected_variation_value.price))"
+        if ($product->variants()->exists()) {
+             if (!$variant && $selectedValues->isNotEmpty()) {
+                 $variant = $this->findVariant($product, $selectedValues);
+             }
+
+            if ($variant) {
+                return (float)$variant->price;
+            }
+        }
+
         $maxValPrice = $selectedValues->max('price');
         return max((float)$product->base_price, (float)$maxValPrice);
+    }
+
+    private function findVariant(ShopProduct $product, Collection $selectedValues): ?ShopProductVariant
+    {
+        if ($selectedValues->isEmpty()) return null;
+
+        $valueIds = $selectedValues->pluck('id')->sort()->values()->all();
+        
+        return $product->variants()
+            ->with('optionValues')
+            ->whereHas('optionValues', function($q) use ($valueIds) {
+                $q->whereIn('shop_product_variation_values.id', $valueIds);
+            }, '=', count($valueIds))
+            ->first();
     }
 }

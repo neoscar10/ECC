@@ -45,12 +45,22 @@ class CheckoutService
             
             $lineTotal = $item->quantity * $item->unit_price;
             $subtotal += $lineTotal;
-            $currency = $item->currency; // Assume matches across cart
+            $currency = $item->currency;
 
             $stockIssues = [];
-            foreach ($item->variationValues as $val) {
-                if ($val->stock_qty < $item->quantity) {
-                    $stockIssues[] = "Insufficient stock for {$val->caption} (Available: {$val->stock_qty})";
+            
+            // Combination-aware Stock Check
+            if ($item->shop_product_variant_id) {
+                $variant = $item->variant;
+                if (!$variant || $variant->stock_qty < $item->quantity) {
+                    $labels = $item->variationValues->pluck('caption')->implode(' / ');
+                    $available = $variant ? $variant->stock_qty : 0;
+                    $stockIssues[] = "Insufficient stock for {$labels} (Available: {$available})";
+                }
+            } else {
+                // Simple Product or Legacy Check
+                if ($item->product->stock_qty < $item->quantity) {
+                    $stockIssues[] = "Insufficient stock for {$item->product->title} (Available: {$item->product->stock_qty})";
                 }
             }
 
@@ -119,43 +129,39 @@ class CheckoutService
             $orderItemsData = [];
             $currency = 'INR';
 
-            // 1. Process Items & Deduct Stock
-            foreach ($cart->items as $item) {
-                // Lock selected variations for stock check
-                $variationIds = $item->variationValues->pluck('id')->toArray();
-                
-                if (empty($variationIds)) {
-                    // Simple Product Logic
-                    $product = $item->product()->lockForUpdate()->first();
-                    
-                    if (!$product) {
-                        throw new Exception("Product not found or unavailable.", 404);
-                    }
-                    
-                    $currentStock = (int) $product->stock_qty;
-                    
-                    if ($currentStock < $item->quantity) {
-                         throw new Exception("Insufficient stock for {$product->title}. Requested: {$item->quantity}, Available: {$currentStock}", 409);
-                    }
-                    
-                    $product->decrement('stock_qty', $item->quantity);
-                    
-                } else {
-                    // Variant Product Logic
-                    sort($variationIds); 
-                    
-                    $lockedVariations = ShopProductVariationValue::whereIn('id', $variationIds)
-                        ->lockForUpdate()
-                        ->get();
-                    
-                    foreach ($lockedVariations as $val) {
-                        if ($val->stock_qty < $item->quantity) {
-                             throw new Exception("Insufficient stock for {$val->caption}. Requested: {$item->quantity}, Available: {$val->stock_qty}", 409);
+                // 1. Process Items & Deduct Stock
+                foreach ($cart->items as $item) {
+                    if ($item->shop_product_variant_id) {
+                        // Variant Product Logic (Lock the specific combination)
+                        $variant = \App\Models\Shop\ShopProductVariant::where('id', $item->shop_product_variant_id)
+                            ->lockForUpdate()
+                            ->first();
+                        
+                        if (!$variant) {
+                            throw new Exception("Variant combination not found.", 404);
                         }
                         
-                        $val->decrement('stock_qty', $item->quantity);
+                        if ($variant->stock_qty < $item->quantity) {
+                            $labels = $item->variationValues->pluck('caption')->implode(' / ');
+                            throw new Exception("Insufficient stock for {$labels}. Requested: {$item->quantity}, Available: {$variant->stock_qty}", 409);
+                        }
+                        
+                        $variant->decrement('stock_qty', $item->quantity);
+                        
+                    } else {
+                        // Simple Product Logic
+                        $product = $item->product()->lockForUpdate()->first();
+                        
+                        if (!$product) {
+                            throw new Exception("Product not found or unavailable.", 404);
+                        }
+                        
+                        if ($product->stock_qty < $item->quantity) {
+                             throw new Exception("Insufficient stock for {$product->title}. Requested: {$item->quantity}, Available: {$product->stock_qty}", 409);
+                        }
+                        
+                        $product->decrement('stock_qty', $item->quantity);
                     }
-                }
 
                 $lineTotal = $item->quantity * $item->unit_price;
                 $subtotal += $lineTotal;
@@ -168,7 +174,8 @@ class CheckoutService
                     'unit_price' => $item->unit_price,
                     'line_total' => $lineTotal,
                     'selection_signature' => $item->selection_signature,
-                    'variation_value_ids' => $variationIds,
+                    'shop_product_variant_id' => $item->shop_product_variant_id,
+                    'variation_value_ids' => $item->variationValues->pluck('id')->toArray(),
                 ];
             }
 
@@ -202,6 +209,7 @@ class CheckoutService
                     'unit_price' => $itemData['unit_price'],
                     'line_total' => $itemData['line_total'],
                     'selection_signature' => $itemData['selection_signature'],
+                    'shop_product_variant_id' => $itemData['shop_product_variant_id'],
                 ]);
 
                 $orderItem->variationValues()->attach($itemData['variation_value_ids']);
@@ -253,14 +261,10 @@ class CheckoutService
             $order->load(['items.variationValues']);
 
             foreach ($order->items as $item) {
-                if ($item->variationValues->isNotEmpty()) {
-                    foreach ($item->variationValues as $val) {
-                        $val->increment('stock_qty', $item->quantity);
-                    }
-                } else {
-                    if ($item->product) {
-                        $item->product()->increment('stock_qty', $item->quantity);
-                    }
+                if ($item->shop_product_variant_id) {
+                    $item->variant()->increment('stock_qty', $item->quantity);
+                } else if ($item->product) {
+                    $item->product()->increment('stock_qty', $item->quantity);
                 }
             }
 
@@ -291,14 +295,10 @@ class CheckoutService
             // Restore Stock
             // Restore Stock
             foreach ($order->items as $item) {
-                if ($item->variationValues->isNotEmpty()) {
-                    foreach ($item->variationValues as $val) {
-                        $val->increment('stock_qty', $item->quantity);
-                    }
-                } else {
-                     if ($item->product) {
-                        $item->product()->increment('stock_qty', $item->quantity);
-                    }
+                if ($item->shop_product_variant_id) {
+                    $item->variant()->increment('stock_qty', $item->quantity);
+                } else if ($item->product) {
+                    $item->product()->increment('stock_qty', $item->quantity);
                 }
             }
 
