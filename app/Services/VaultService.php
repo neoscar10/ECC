@@ -90,9 +90,9 @@ class VaultService
     }
 
     /**
-     * Create a removal request for a vault item.
+     * Create a removal (physical delivery) request for a vault item.
      */
-    public function requestRemoval(UserVaultItem $item, User $user, ?string $message = null): \App\Models\VaultRemovalRequest
+    public function requestRemoval(UserVaultItem $item, User $user, ?string $message = null, $addressId = null, $addressData = null): \App\Models\VaultRemovalRequest
     {
         // 1. Authorization
         if ($item->user_id !== $user->id) {
@@ -112,14 +112,71 @@ class VaultService
             throw new \Exception("A removal request for this item is already in progress.");
         }
 
-        // 3. Create request
-        return \App\Models\VaultRemovalRequest::create([
+        // 3. Address resolution
+        $resolvedAddressId = null;
+        $snapshot = [];
+
+        if ($addressId) {
+            $userAddress = $user->addresses()->find($addressId);
+            if (!$userAddress) {
+                throw new \Exception("The selected address is invalid or does not belong to you.");
+            }
+            $resolvedAddressId = $userAddress->id;
+            $snapshot = [
+                'delivery_name' => $userAddress->full_name,
+                'delivery_phone' => $userAddress->phone,
+                'delivery_line1' => $userAddress->line1,
+                'delivery_line2' => $userAddress->line2,
+                'delivery_city' => $userAddress->city,
+                'delivery_state' => $userAddress->state,
+                'delivery_postal_code' => $userAddress->postal_code,
+                'delivery_country' => $userAddress->country,
+            ];
+        } elseif ($addressData && is_array($addressData)) {
+            // Save new address to user's address book
+            $userAddress = $user->addresses()->create([
+                'label' => $addressData['label'] ?? 'Delivery Address',
+                'full_name' => $addressData['full_name'],
+                'phone' => $addressData['phone'],
+                'line1' => $addressData['line1'],
+                'line2' => $addressData['line2'] ?? null,
+                'city' => $addressData['city'],
+                'state' => $addressData['state'],
+                'postal_code' => $addressData['postal_code'],
+                'country' => $addressData['country'] ?? 'India',
+                'is_default' => $addressData['is_default'] ?? false,
+                'type' => 'shipping',
+            ]);
+
+            if (!empty($addressData['is_default'])) {
+                $user->addresses()->where('id', '!=', $userAddress->id)->update(['is_default' => false]);
+            }
+
+            $resolvedAddressId = $userAddress->id;
+            $snapshot = [
+                'delivery_name' => $userAddress->full_name,
+                'delivery_phone' => $userAddress->phone,
+                'delivery_line1' => $userAddress->line1,
+                'delivery_line2' => $userAddress->line2,
+                'delivery_city' => $userAddress->city,
+                'delivery_state' => $userAddress->state,
+                'delivery_postal_code' => $userAddress->postal_code,
+                'delivery_country' => $userAddress->country,
+            ];
+        } else {
+             // In a perfect world we throw exception here. But to gracefully not break
+             // completely legacy calls, it's optional, though the UI will enforce it.
+        }
+
+        // 4. Create request
+        return \App\Models\VaultRemovalRequest::create(array_merge([
             'user_id' => $user->id,
             'vault_item_id' => $item->id,
             'status' => \App\Models\VaultRemovalRequest::STATUS_PENDING,
             'message' => $message,
             'requested_at' => now(),
-        ]);
+            'address_id' => $resolvedAddressId,
+        ], $snapshot));
     }
 
     /**

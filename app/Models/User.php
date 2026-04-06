@@ -14,6 +14,36 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable, HasRoles, SoftDeletes;
 
+    protected static function booted()
+    {
+        static::deleted(function (User $user) {
+            if ($user->isForceDeleting()) {
+                return;
+            }
+
+            // Anonymize email and phone to free up constraints
+            $prefix = 'del_' . time() . '_' . $user->id . '_';
+            $updates = [];
+            
+            if ($user->email && !str_starts_with($user->email, 'del_')) {
+                $maxEmailLength = 255 - strlen($prefix);
+                $updates['email'] = $prefix . substr($user->email, 0, $maxEmailLength);
+                $user->email = $updates['email']; // keep memory model in sync
+            }
+            
+            if ($user->phone && !str_starts_with($user->phone, 'del_')) {
+                $maxPhoneLength = 255 - strlen($prefix);
+                $updates['phone'] = $prefix . substr($user->phone, 0, $maxPhoneLength);
+                $user->phone = $updates['phone']; // keep memory model in sync
+            }
+
+            if (!empty($updates)) {
+                // Raw update to save directly without triggering loops
+                User::withTrashed()->where('id', $user->id)->update($updates);
+            }
+        });
+    }
+
     /**
      * The attributes that are mass assignable.
      *

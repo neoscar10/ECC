@@ -268,7 +268,7 @@
                                         </div>
                                     @else
                                         <button class="btn ecc-vault-btn-outline w-100" wire:click="openRemovalModal">
-                                            REQUEST REMOVAL
+                                            REQUEST PHYSICAL DELIVERY
                                         </button>
                                     @endif
                                 </div>
@@ -286,18 +286,114 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content ecc-vault-modal-content border-warning-subtle">
                     <div class="modal-header border-0">
-                        <h5 class="modal-title text-white fw-bold">REQUEST REMOVAL</h5>
+                        <h5 class="modal-title text-white fw-bold">REQUEST PHYSICAL DELIVERY</h5>
                         <button type="button" class="btn-close btn-close-white ms-auto" wire:click="$set('showRemovalModal', false)"></button>
                     </div>
                     <div class="modal-body p-4 pt-1">
                         <div class="alert alert-warning-subtle border-0 rounded-3 mb-4 fs-13 lh-base">
                             <i class="ri-error-warning-line me-2 fs-16 align-middle"></i>
-                            Removal requests are subject to review by the ECC administration. Once approved, the item will be released from your digital vault for physical retrieval or transfer.
+                            Delivery requests are subject to review by the ECC administration. Once approved, the item will be prepared for physical dispatch to your designated address.
+                        </div>
+
+                        <!-- Address Section -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-end mb-3">
+                                <label class="ecc-vault-standing-label mb-0">DELIVERY ADDRESS</label>
+                                @if(count($addresses) > 0)
+                                    <button type="button" class="btn btn-link p-0 text-white-50 fs-12 text-decoration-none fw-semibold" wire:click="toggleAddressForm">
+                                        {{ $showAddressForm ? 'Choose Saved Address' : '+ Add New Address' }}
+                                    </button>
+                                @endif
+                            </div>
+
+                            @if(!$showAddressForm && count($addresses) > 0)
+                                <div class="ecc-address-selector">
+                                    <div class="row g-2">
+                                        @foreach($addresses as $addr)
+                                            <div class="col-12">
+                                                <label class="ecc-address-card w-100 m-0">
+                                                    <input type="radio" wire:model="selectedAddressId" value="{{ $addr->id }}" class="btn-check">
+                                                    <div class="ecc-address-card-inner p-3 rounded-3 border border-white-5 bg-white-5 position-relative c-pointer transition-all">
+                                                        <div class="d-flex align-items-start gap-3">
+                                                            <div class="pt-1">
+                                                                <div class="custom-radio-dot {{ $selectedAddressId == $addr->id ? 'is-checked' : '' }}"></div>
+                                                            </div>
+                                                            <div class="flex-grow-1">
+                                                                <div class="d-flex align-items-center gap-2 mb-1">
+                                                                    <h6 class="text-white mb-0 fs-14 fw-bold">{{ $addr->full_name }}</h6>
+                                                                    <span class="badge bg-white-5 text-white-50 fw-semibold px-2 py-0 fs-10 border border-white-5">{{ $addr->label }}</span>
+                                                                    @if($addr->is_default)
+                                                                        <span class="badge bg-gold-subtle text-gold fw-semibold px-2 py-0 fs-10">Default</span>
+                                                                    @endif
+                                                                </div>
+                                                                <div class="text-white-50 fs-13 lh-sm">
+                                                                    {{ $addr->line1 }}{{ $addr->line2 ? ', '.$addr->line2 : '' }}<br>
+                                                                    {{ $addr->city }}, {{ $addr->state }} {{ $addr->postal_code }}<br>
+                                                                    Ph: {{ $addr->phone }}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <div class="ecc-address-form row g-3 bg-white-5 border border-white-5 rounded-3 p-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-12 text-white-50 mb-1">Full Name</label>
+                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.full_name">
+                                        @error('addressForm.full_name') <span class="text-danger fs-11">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-12 text-white-50 mb-1">Phone</label>
+                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.phone">
+                                        @error('addressForm.phone') <span class="text-danger fs-11">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fs-12 text-white-50 mb-1">Address Line 1</label>
+                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.line1">
+                                        @error('addressForm.line1') <span class="text-danger fs-11">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-12 text-white-50 mb-1">City</label>
+                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.city">
+                                        @error('addressForm.city') <span class="text-danger fs-11">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-12 text-white-50 mb-1">State</label>
+                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.state">
+                                        @error('addressForm.state') <span class="text-danger fs-11">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-12 text-white-50 mb-1">Postal Code</label>
+                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.postal_code">
+                                        @error('addressForm.postal_code') <span class="text-danger fs-11">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-12 text-white-50 mb-1">Label</label>
+                                        <select class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.label">
+                                            <option value="Home">Home</option>
+                                            <option value="Office">Office</option>
+                                            <option value="Courier">Delivery Center</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check custom-checkbox-white mt-1">
+                                            <input class="form-check-input" type="checkbox" id="saveDef" wire:model="addressForm.is_default">
+                                            <label class="form-check-label fs-13 text-white-50" for="saveDef">
+                                                Save as default address
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
 
                         <div class="mb-4">
-                            <label class="ecc-vault-standing-label mb-2">REASON FOR REMOVAL (OPTIONAL)</label>
-                            <textarea wire:model="removalMessage" class="form-control ecc-vault-input" rows="3" placeholder="Explain why you wish to remove this asset..."></textarea>
+                            <label class="ecc-vault-standing-label mb-2">ADDITIONAL INSTRUCTIONS (OPTIONAL)</label>
+                            <textarea wire:model="removalMessage" class="form-control ecc-vault-input" rows="2" placeholder="Delivery notes or special instructions..."></textarea>
                         </div>
 
                         <div class="d-flex gap-3 mt-4">
@@ -786,6 +882,30 @@
 
     .ecc-vault-valuation-line {
         background: linear-gradient(90deg, rgba(212,175,55,0.05), transparent);
+    }
+    
+    .c-pointer { cursor: pointer; }
+    .transition-all { transition: all 0.2s ease; }
+    
+    .ecc-address-card input:checked + .ecc-address-card-inner {
+        border-color: rgba(212,175,55,0.6) !important;
+        background: rgba(212,175,55,0.05) !important;
+    }
+    .custom-radio-dot {
+        width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);
+        position: relative; transition: all 0.2s ease;
+    }
+    .custom-radio-dot.is-checked { border-color: #d4af37; }
+    .custom-radio-dot.is-checked::after {
+        content: ''; position: absolute; inset: 2px; border-radius: 50%; background: #d4af37;
+    }
+    .bg-gold-subtle { background: rgba(212,175,55,0.1) !important; }
+    .text-gold { color: #d4af37 !important; }
+    .custom-checkbox-white .form-check-input {
+        background-color: transparent; border-color: rgba(255,255,255,0.2);
+    }
+    .custom-checkbox-white .form-check-input:checked {
+        background-color: #d4af37; border-color: #d4af37;
     }
 </style>
 @endpush

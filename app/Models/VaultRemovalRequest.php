@@ -37,4 +37,9 @@ class VaultRemovalRequest extends Model
     {
         return $this->belongsTo(User::class, 'reviewed_by_admin_id');
     }
+
+    public function address()
+    {
+        return $this->belongsTo(\App\Models\Shop\UserAddress::class, 'address_id');
+    }
 }

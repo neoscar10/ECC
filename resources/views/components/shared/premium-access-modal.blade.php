@@ -29,6 +29,11 @@
               <div class="text-end">
                   <span style="color: #fceec5; font-size: 18px; font-weight: 800;">{{ $modalData['price_formatted'] }}</span>
                   <span style="color: #cbbc90; font-size: 11px; text-transform: uppercase;">/ {{ $modalData['duration_label'] }}</span>
+                  @auth
+                    @if(auth()->user()->hasActiveMembership())
+                      <div style="color: #4ade80; font-size: 10px; margin-top: 2px; font-weight: 600; letter-spacing: 0.04em;">Prorated credit applies at checkout</div>
+                    @endif
+                  @endauth
               </div>
             </div>
 
@@ -75,7 +80,15 @@
 
           {{-- CTA --}}
           <button class="btn w-100 py-3 mb-3 fw-bold text-uppercase" wire:click="proceedToSubscribe" onclick="document.getElementById('premiumAccessModal').style.display='none'" style="background: linear-gradient(135deg, #D4AF37 0%, #B8961E 100%); color: #000; border: none; border-radius: 8px; letter-spacing: 0.05em; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2); transition: all 0.3s ease;" onmouseover="this.style.boxShadow='0 6px 20px rgba(212, 175, 55, 0.4)';" onmouseout="this.style.boxShadow='0 4px 15px rgba(212, 175, 55, 0.2)';">
-            Proceed to Subscribe
+            @auth
+              @if(auth()->user()->hasActiveMembership())
+                Upgrade Membership
+              @else
+                Proceed to Subscribe
+              @endif
+            @else
+              Proceed to Subscribe
+            @endauth
           </button>
           <button class="btn btn-link text-decoration-none p-0" wire:click="closeAccessModal" onclick="document.getElementById('premiumAccessModal').style.display='none'" style="color: #cbbc90; font-size: 13px;">Not now, return</button>
         </div>

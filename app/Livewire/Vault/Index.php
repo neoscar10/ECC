@@ -17,6 +17,16 @@ class Index extends Component
     public bool $showAccessModal = false;
     public ?array $modalData = null;
 
+    // Address State
+    public $addresses = [];
+    public $selectedAddressId = null;
+    public $showAddressForm = false;
+    public $addressForm = [
+        'full_name' => '', 'phone' => '', 'line1' => '', 'line2' => '',
+        'city' => '', 'state' => '', 'postal_code' => '', 'country' => 'India',
+        'label' => 'Home', 'is_default' => false,
+    ];
+
     public function setVaultView(string $mode)
     {
         $this->vaultViewMode = in_array($mode, ['grid', 'list']) ? $mode : 'grid';
@@ -39,6 +49,17 @@ class Index extends Component
         // Trigger upgrade prompt if access is denied via the exact same modal system
         if (!$user->has_vault_access) {
             $this->triggerAccessModal($access, $tierResolver);
+        } else {
+            $this->loadAddresses($user);
+        }
+    }
+
+    public function loadAddresses($user)
+    {
+        $this->addresses = $user->addresses()->latest()->get();
+        if ($this->addresses->count() > 0 && is_null($this->selectedAddressId)) {
+            $default = $this->addresses->where('is_default', true)->first() ?? $this->addresses->first();
+            $this->selectedAddressId = $default->id;
         }
     }
 
@@ -127,12 +148,29 @@ class Index extends Component
         $this->selectedArtifact = null;
         $this->removalMessage = '';
         $this->showRemovalModal = false;
+        $this->showAddressForm = false;
+        $this->resetValidation();
     }
 
     public function openRemovalModal()
     {
         if (!$this->selectedArtifact) return;
         $this->showRemovalModal = true;
+        if(empty($this->addresses) && auth('web')->check()) {
+            $this->showAddressForm = true;
+        }
+    }
+
+    public function toggleAddressForm()
+    {
+        $this->showAddressForm = !$this->showAddressForm;
+        if($this->showAddressForm) {
+            $this->selectedAddressId = null;
+        } else {
+            if ($this->addresses->count() > 0) {
+                $this->selectedAddressId = $this->addresses->first()->id;
+            }
+        }
     }
 
     public function submitRemovalRequest(\App\Services\VaultService $service)
@@ -144,10 +182,30 @@ class Index extends Component
 
         if (!$item) return;
 
+        if (!$this->selectedAddressId && !$this->showAddressForm) {
+            session()->flash('error', 'Please select or provide a delivery address.');
+            return;
+        }
+
         try {
-            $service->requestRemoval($item, $user, $this->removalMessage);
-            session()->flash('success', 'Removal request submitted successfully. Our team will review it shortly.');
+            if ($this->showAddressForm) {
+                $this->validate([
+                    'addressForm.full_name' => 'required|string|max:255',
+                    'addressForm.phone' => 'required|string|max:20',
+                    'addressForm.line1' => 'required|string|max:255',
+                    'addressForm.city' => 'required|string|max:100',
+                    'addressForm.state' => 'required|string|max:100',
+                    'addressForm.postal_code' => 'required|string|max:20',
+                    'addressForm.country' => 'required|string|max:100',
+                ]);
+                $service->requestRemoval($item, $user, $this->removalMessage, null, $this->addressForm);
+            } else {
+                $service->requestRemoval($item, $user, $this->removalMessage, $this->selectedAddressId);
+            }
+
+            session()->flash('success', 'Physical delivery request submitted successfully. Our team will review it shortly.');
             $this->closeArtifactModal();
+            $this->loadAddresses($user); // Refresh addresses in case a new one was added
         } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());
         }

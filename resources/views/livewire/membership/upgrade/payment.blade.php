@@ -39,10 +39,28 @@
             <div class="ecc-mini text-uppercase">Upgrade Tier</div>
             <div class="ecc-tier-title">{{ $tierName }}</div>
 
-            <div class="mt-2">
-              <div class="ecc-mini">Total Amount</div>
-              <div class="ecc-amount">{{ $amountFormatted }}</div>
-            </div>
+            @if(!empty($quoteData) && $quoteData['unused_credit'] > 0)
+              <div class="mt-2 d-flex flex-column gap-1">
+                <div class="d-flex justify-content-between align-items-center opacity-75">
+                  <div class="ecc-mini" style="font-size:10px;">Full Tier Price</div>
+                  <div class="ecc-amount" style="font-size:14px; font-weight:600;">INR {{ number_format($quoteData['target_tier_price'], 2) }}</div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center opacity-90" style="color: #4ade80;">
+                  <div class="ecc-mini" style="color: inherit; font-size:10px;">Unused Credit Applied</div>
+                  <div class="ecc-amount" style="color: inherit; font-size:14px; font-weight:600;">- INR {{ number_format($quoteData['unused_credit'], 2) }}</div>
+                </div>
+                <hr class="my-1" style="border-color: rgba(212,175,55,0.3);">
+                <div class="d-flex justify-content-between align-items-center mt-1">
+                  <div class="ecc-mini">Total Payable Now</div>
+                  <div class="ecc-amount">{{ $amountFormatted }}</div>
+                </div>
+              </div>
+            @else
+              <div class="mt-2">
+                <div class="ecc-mini">Total Payable</div>
+                <div class="ecc-amount">{{ $amountFormatted }}</div>
+              </div>
+            @endif
           </div>
 
           <div class="ecc-tier-img" aria-label="Luxury bokeh image"></div>

@@ -94,15 +94,45 @@ class VaultController extends Controller
             ], 404);
         }
 
+        $request->validate([
+            'message' => 'nullable|string|max:1000',
+            'address_id' => 'required_without:address|nullable|integer',
+            'address' => 'required_without:address_id|nullable|array',
+            'address.full_name' => 'required_with:address|string|max:255',
+            'address.phone' => 'required_with:address|string|max:20',
+            'address.line1' => 'required_with:address|string|max:255',
+            'address.city' => 'required_with:address|string|max:100',
+            'address.state' => 'required_with:address|string|max:100',
+            'address.postal_code' => 'required_with:address|string|max:20',
+            'address.country' => 'nullable|string|max:100',
+            'address.label' => 'nullable|string|max:50',
+            'address.is_default' => 'nullable|boolean',
+        ]);
+
         try {
-            $removalRequest = $service->requestRemoval($item, $user, $request->input('message'));
+            $removalRequest = $service->requestRemoval(
+                $item, 
+                $user, 
+                $request->input('message'),
+                $request->input('address_id'),
+                $request->input('address')
+            );
 
             return response()->json([
                 'success' => true,
-                'message' => 'Removal request submitted successfully.',
+                'message' => 'Physical delivery request submitted successfully.',
                 'data' => [
                     'request_id' => $removalRequest->id,
-                    'status' => $removalRequest->status
+                    'status' => $removalRequest->status,
+                    'delivery_address' => [
+                        'name' => $removalRequest->delivery_name,
+                        'phone' => $removalRequest->delivery_phone,
+                        'line1' => $removalRequest->delivery_line1,
+                        'city' => $removalRequest->delivery_city,
+                        'state' => $removalRequest->delivery_state,
+                        'postal_code' => $removalRequest->delivery_postal_code,
+                        'country' => $removalRequest->delivery_country,
+                    ]
                 ]
             ], 201);
         } catch (\Exception $e) {

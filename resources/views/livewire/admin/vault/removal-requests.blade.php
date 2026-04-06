@@ -46,6 +46,7 @@
                                 <tr>
                                     <th>Member & Date</th>
                                     <th>Asset Details</th>
+                                    <th>Delivery Destination</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
@@ -71,6 +72,18 @@
                                                     <p class="text-muted mb-0 fs-11">{{ $request->vaultItem->item_ref }} • {{ $request->vaultItem->quantity }} qty</p>
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td>
+                                            @if($request->delivery_name)
+                                                <div class="fs-13 mb-1">{{ $request->delivery_name }}</div>
+                                                <div class="text-muted fs-11 lh-1">
+                                                    {{ $request->delivery_line1 }}<br>
+                                                    {{ $request->delivery_city }}, {{ $request->delivery_state }} {{ $request->delivery_postal_code }}<br>
+                                                    Ph: {{ $request->delivery_phone }}
+                                                </div>
+                                            @else
+                                                <span class="text-muted fs-11 fst-italic">Legacy Removal / No Address</span>
+                                            @endif
                                         </td>
                                         <td>
                                             @php

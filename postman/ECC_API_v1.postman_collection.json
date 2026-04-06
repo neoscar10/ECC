@@ -4214,6 +4214,185 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "Membership Upgrade",
+            "description": "Prorated membership upgrade flow.\n\n**How it works:**\n1. Call **Get Upgrade Quote** to calculate the prorated payable amount based on the user's remaining credit on their current tier.\n2. Call **Execute Upgrade** with payment details — the system charges the prorated amount, activates the new tier, and sets the correct `expires_at`.\n\n**Auth:** Bearer Token (`{{jwt_token}}`)\n\n**Formula:**\n```\nunused_credit = (current_tier_price / total_duration_days) × remaining_days\npayable_amount = max(0, target_tier_price - unused_credit)\n```",
+            "item": [
+                {
+                    "name": "01 Get Upgrade Quote",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success && jsonData.data) {",
+                                    "    pm.environment.set(\"upgrade_tier_id\", jsonData.data.target_tier.id);",
+                                    "    pm.environment.set(\"upgrade_payable_amount\", jsonData.data.payable_amount);",
+                                    "    pm.environment.set(\"upgrade_unused_credit\", jsonData.data.unused_credit);",
+                                    "    console.log('Payable: ' + jsonData.data.payable_amount + ' (Credit applied: ' + jsonData.data.unused_credit + ')');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/membership/upgrade-quote?tier_id={{upgrade_tier_id}}",
+                            "host": ["{{base_url}}"],
+                            "path": ["{{api_prefix}}", "membership", "upgrade-quote"],
+                            "query": [
+                                {
+                                    "key": "tier_id",
+                                    "value": "{{upgrade_tier_id}}",
+                                    "description": "ID of the target MembershipTier to upgrade to"
+                                }
+                            ]
+                        },
+                        "description": "Calculate the prorated upgrade cost for the authenticated user.\n\n**Auth:** Bearer Token Required\n\n**Query Params:**\n- `tier_id` (required): The target `MembershipTier` ID.\n\n**Logic:**\n- If user has an active membership with a valid `expires_at`, unused credit is calculated and deducted.\n- If no active membership, full tier price is returned.\n- Downgrade/same-tier returns `is_eligible: false`.\n\n**Response fields:**\n- `current_tier` — current tier summary (null if no membership)\n- `target_tier` — target tier summary\n- `current_tier_price` — current tier full price\n- `target_tier_price` — target tier full price\n- `total_duration_days` — current tier validity period\n- `remaining_days` — days left on current membership\n- `unused_credit` — INR credit to be applied\n- `payable_amount` — what the user actually pays (= target_price - unused_credit, floored at 0)\n- `is_eligible` — whether this upgrade is allowed\n- `reason` — set when `is_eligible: false`"
+                    },
+                    "response": [
+                        {
+                            "name": "200 — Active Member (Prorated)",
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "header": [{"key": "Content-Type", "value": "application/json"}],
+                            "cookie": [],
+                            "body": "{\n    \"success\": true,\n    \"message\": \"Upgrade quote generated successfully.\",\n    \"data\": {\n        \"current_tier\": {\"id\": 1, \"name\": \"Pavilion\"},\n        \"target_tier\": {\"id\": 2, \"name\": \"Sovereign\"},\n        \"current_membership_id\": 5,\n        \"current_tier_price\": 9999.00,\n        \"target_tier_price\": 24999.00,\n        \"current_membership_start\": \"2025-06-01T00:00:00+00:00\",\n        \"current_membership_expiry\": \"2026-06-01T00:00:00+00:00\",\n        \"total_duration_days\": 365,\n        \"remaining_days\": 240,\n        \"unused_credit\": 6573.97,\n        \"payable_amount\": 18425.03,\n        \"currency\": \"INR\",\n        \"is_eligible\": true,\n        \"reason\": null\n    },\n    \"meta\": null,\n    \"errors\": null\n}"
+                        },
+                        {
+                            "name": "200 — No Membership (Full Price)",
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "header": [{"key": "Content-Type", "value": "application/json"}],
+                            "cookie": [],
+                            "body": "{\n    \"success\": true,\n    \"message\": \"Upgrade quote generated successfully.\",\n    \"data\": {\n        \"current_tier\": null,\n        \"target_tier\": {\"id\": 2, \"name\": \"Sovereign\"},\n        \"current_membership_id\": null,\n        \"current_tier_price\": 0.0,\n        \"target_tier_price\": 24999.00,\n        \"current_membership_start\": null,\n        \"current_membership_expiry\": null,\n        \"total_duration_days\": 0,\n        \"remaining_days\": 0,\n        \"unused_credit\": 0.0,\n        \"payable_amount\": 24999.00,\n        \"currency\": \"INR\",\n        \"is_eligible\": true,\n        \"reason\": null\n    },\n    \"meta\": null,\n    \"errors\": null\n}"
+                        },
+                        {
+                            "name": "400 — Not Eligible (Same / Lower Tier)",
+                            "status": "Bad Request",
+                            "code": 400,
+                            "_postman_previewlanguage": "json",
+                            "header": [{"key": "Content-Type", "value": "application/json"}],
+                            "cookie": [],
+                            "body": "{\n    \"success\": false,\n    \"message\": \"Cannot upgrade to a tier identical or lower than the current tier.\",\n    \"data\": null,\n    \"meta\": null,\n    \"errors\": null\n}"
+                        },
+                        {
+                            "name": "422 — Validation Error (missing tier_id)",
+                            "status": "Unprocessable Content",
+                            "code": 422,
+                            "_postman_previewlanguage": "json",
+                            "header": [{"key": "Content-Type", "value": "application/json"}],
+                            "cookie": [],
+                            "body": "{\n    \"success\": false,\n    \"message\": \"Validation failed\",\n    \"data\": null,\n    \"meta\": null,\n    \"errors\": {\n        \"tier_id\": [\"The tier id field is required.\"]\n    }\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "02 Execute Upgrade",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success && jsonData.data && jsonData.data.new_membership) {",
+                                    "    pm.environment.set(\"new_membership_id\", jsonData.data.new_membership.id);",
+                                    "    console.log('New membership expires_at: ' + jsonData.data.new_membership.expires_at);",
+                                    "    console.log('Upgrade complete. Old membership ID: ' + (jsonData.data.old_membership ? jsonData.data.old_membership.id : 'n/a'));",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"tier_id\": {{upgrade_tier_id}},\n    \"method\": \"card\",\n    \"card_number\": \"4111 1111 1111 1111\",\n    \"expiry\": \"12/27\",\n    \"cvv\": \"123\",\n    \"cardholder_name\": \"Test Member\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/{{api_prefix}}/membership/upgrade",
+                            "host": ["{{base_url}}"],
+                            "path": ["{{api_prefix}}", "membership", "upgrade"]
+                        },
+                        "description": "Execute a prorated membership upgrade and process payment.\n\n**Auth:** Bearer Token Required\n\n**Important:** Always call **Get Upgrade Quote** first to confirm eligibility and the payable amount.\n\nThe server re-calculates the quote at submission time — the authoritative amount is always server-side.\n\n**Body (card method):**\n- `tier_id` (required): Target MembershipTier ID\n- `method` (required): `card` or `wallet`\n- `card_number` (required for card): e.g. `4111 1111 1111 1111`\n- `expiry` (required for card): `MM/YY` format\n- `cvv` (required for card): 3–4 digits\n- `cardholder_name` (required for card): Full name\n\n**Body (wallet method):**\n- `tier_id` (required)\n- `method`: `wallet`\n\n**What happens on success:**\n1. Quote is re-computed server-side (authoritative)\n2. Payment is recorded with full proration audit trail in `meta_json`\n3. Old membership is expired (`status = expired`, `expires_at = now`)\n4. New membership is activated (`status = active`, `expires_at = now + tier.duration_days`)\n5. Draft application is marked `upgrade_completed`\n\n**Payment meta_json includes:**\n- `upgrade_context.current_tier_price`\n- `upgrade_context.target_tier_price`\n- `upgrade_context.unused_credit`\n- `upgrade_context.payable_amount`\n- `upgrade_context.remaining_days`\n- `upgrade_context.is_prorated`\n- `upgrade_context.calculated_at`"
+                    },
+                    "response": [
+                        {
+                            "name": "200 — Upgrade Successful",
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "header": [{"key": "Content-Type", "value": "application/json"}],
+                            "cookie": [],
+                            "body": "{\n    \"success\": true,\n    \"message\": \"Membership upgraded successfully.\",\n    \"data\": {\n        \"old_membership\": {\n            \"id\": 5,\n            \"user_id\": 1,\n            \"membership_tier_id\": 1,\n            \"status\": \"expired\",\n            \"started_at\": \"2025-06-01T00:00:00.000000Z\",\n            \"expires_at\": \"2026-04-06T00:00:00.000000Z\",\n            \"approved_at\": \"2025-06-01T00:00:00.000000Z\"\n        },\n        \"new_membership\": {\n            \"id\": 6,\n            \"user_id\": 1,\n            \"membership_tier_id\": 2,\n            \"status\": \"active\",\n            \"started_at\": \"2026-04-06T00:00:00.000000Z\",\n            \"expires_at\": \"2027-04-06T00:00:00.000000Z\",\n            \"approved_at\": \"2026-04-06T00:00:00.000000Z\"\n        }\n    },\n    \"meta\": null,\n    \"errors\": null\n}"
+                        },
+                        {
+                            "name": "400 — Not Eligible",
+                            "status": "Bad Request",
+                            "code": 400,
+                            "_postman_previewlanguage": "json",
+                            "header": [{"key": "Content-Type", "value": "application/json"}],
+                            "cookie": [],
+                            "body": "{\n    \"success\": false,\n    \"message\": \"Cannot upgrade to a tier identical or lower than the current tier.\",\n    \"data\": null,\n    \"meta\": null,\n    \"errors\": null\n}"
+                        },
+                        {
+                            "name": "422 — Validation Error",
+                            "status": "Unprocessable Content",
+                            "code": 422,
+                            "_postman_previewlanguage": "json",
+                            "header": [{"key": "Content-Type", "value": "application/json"}],
+                            "cookie": [],
+                            "body": "{\n    \"success\": false,\n    \"message\": \"Validation failed\",\n    \"data\": null,\n    \"meta\": null,\n    \"errors\": {\n        \"tier_id\": [\"The tier id field is required.\"],\n        \"card_number\": [\"The card number field is required when method is card.\"],\n        \"expiry\": [\"The expiry field is required when method is card.\"],\n        \"cvv\": [\"The cvv field is required when method is card.\"],\n        \"cardholder_name\": [\"The cardholder name field is required when method is card.\"]\n    }\n}"
+                        },
+                        {
+                            "name": "500 — Upgrade Failed",
+                            "status": "Internal Server Error",
+                            "code": 500,
+                            "_postman_previewlanguage": "json",
+                            "header": [{"key": "Content-Type", "value": "application/json"}],
+                            "cookie": [],
+                            "body": "{\n    \"success\": false,\n    \"message\": \"Upgrade failed: Cannot downgrade tier during an upgrade flow.\",\n    \"data\": null,\n    \"meta\": null,\n    \"errors\": null\n}"
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

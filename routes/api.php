@@ -73,6 +73,11 @@ Route::prefix('v1')->group(function () {
             Route::post('/payment/confirm', [App\Http\Controllers\Api\V1\MembershipApplicationController::class, 'confirmPayment']);
             Route::post('/submit', [App\Http\Controllers\Api\V1\MembershipApplicationController::class, 'submitApplication']);
         });
+
+        Route::prefix('membership')->group(function () {
+            Route::get('upgrade-quote', [App\Http\Controllers\Api\V1\MembershipUpgradeController::class, 'quote']);
+            Route::post('upgrade', [App\Http\Controllers\Api\V1\MembershipUpgradeController::class, 'upgrade']);
+        });
     });
 
     // Membership Status (Flutter Check)

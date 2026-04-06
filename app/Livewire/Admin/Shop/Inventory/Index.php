@@ -39,21 +39,19 @@ class Index extends Component
 
     public function openAdjustStockModal($productId)
     {
-        $this->editingProduct = ShopProduct::with(['variationGroups.values'])->findOrFail($productId);
+        $this->editingProduct = ShopProduct::with(['variants.optionValues'])->findOrFail($productId);
         
         // Reset state
         $this->editingStockQty = 0;
         $this->editingVariationStock = [];
 
-        if ($this->editingProduct->variationGroups->isEmpty()) {
+        if ($this->editingProduct->variants->isEmpty()) {
             // Simple
             $this->editingStockQty = $this->editingProduct->stock_qty ?? 0;
         } else {
             // Variant
-            foreach ($this->editingProduct->variationGroups as $group) {
-                foreach ($group->values as $val) {
-                    $this->editingVariationStock[$val->id] = $val->stock_qty ?? 0;
-                }
+            foreach ($this->editingProduct->variants as $variant) {
+                $this->editingVariationStock[$variant->id] = $variant->stock_qty ?? 0;
             }
         }
 
@@ -73,7 +71,7 @@ class Index extends Component
     {
         if (!$this->editingProduct) return;
 
-        $isVariant = $this->editingProduct->variationGroups->isNotEmpty();
+        $isVariant = $this->editingProduct->variants->isNotEmpty();
 
         if ($isVariant) {
             $this->validate([
@@ -82,7 +80,7 @@ class Index extends Component
 
             DB::transaction(function () {
                 foreach ($this->editingVariationStock as $id => $qty) {
-                    ShopProductVariationValue::where('id', $id)->update(['stock_qty' => $qty]);
+                    \App\Models\Shop\ShopProductVariant::where('id', $id)->update(['stock_qty' => $qty]);
                 }
                 $this->editingProduct->touch();
             });
@@ -104,7 +102,7 @@ class Index extends Component
         $query = ShopProduct::query();
 
         // 1. Eager load sum of variation stock for performance AND count for type detection
-        $query->withSum('variationValues', 'stock_qty')
+        $query->withSum('variants', 'stock_qty')
               ->withCount('variationGroups');
 
         // 2. Search
@@ -125,9 +123,8 @@ class Index extends Component
         // 4. Total Stock Calculation for Sorting/Listing
         $query->addSelect(['total_computed_stock' => function ($sub) {
             $sub->selectRaw('COALESCE(
-                (SELECT SUM(stock_qty) FROM shop_product_variation_values 
-                 INNER JOIN shop_product_variation_groups ON shop_product_variation_groups.id = shop_product_variation_values.group_id
-                 WHERE shop_product_variation_groups.shop_product_id = shop_products.id),
+                (SELECT SUM(stock_qty) FROM shop_product_variants 
+                 WHERE shop_product_variants.shop_product_id = shop_products.id),
                 stock_qty, 
                 0
             )');
