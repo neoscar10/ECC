@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Services\Vault\VaultAccessResolver;
 use App\Services\Membership\MembershipTierResolver;
+use App\Services\Membership\MembershipUpgradeService;
 use App\Services\Membership\ApplicationWizardService;
 
 class GlobalAccessModal extends Component
@@ -14,7 +15,7 @@ class GlobalAccessModal extends Component
     public ?array $modalData = null;
 
     #[On('open-vault-modal')]
-    public function openModal(VaultAccessResolver $resolver, MembershipTierResolver $tierResolver)
+    public function openModal(VaultAccessResolver $resolver, MembershipTierResolver $tierResolver, MembershipUpgradeService $upgradeSvc)
     {
         $user = auth('web')->user();
 
@@ -55,15 +56,27 @@ class GlobalAccessModal extends Component
             return;
         }
 
+        // Fetch prorated quote so the modal can show the real payable amount
+        $quote = $upgradeSvc->getUpgradeQuote($user, $targetTierId);
+        $unusedCredit  = $quote['unused_credit'] ?? 0.0;
+        $payableAmount = $quote['payable_amount'] ?? (float)$targetTierModel->price;
+        $isProrated    = $unusedCredit > 0;
+
         $this->modalData = [
-            'tier_id' => $targetTierModel->id,
-            'tier_name' => $targetTierModel->name,
-            'price_formatted' => $targetTierModel->price > 0 ? 'INR ' . number_format($targetTierModel->price) : 'Free',
-            'duration_label' => 'Year',
-            'icon' => \App\Support\Archive\AccessIconNormalizer::normalize($access['reason'] ?? 'vault_access_required', $access['view_mode'] ?? 'blocked'),
-            'privileges' => $targetTierModel->privileges->toArray(),
-            'features' => $targetTierModel->features->toArray(),
-            'product_title' => 'The Vault',
+            'tier_id'           => $targetTierModel->id,
+            'tier_name'         => $targetTierModel->name,
+            'price_formatted'   => $targetTierModel->price > 0 ? 'INR ' . number_format($targetTierModel->price) : 'Free',
+            'duration_label'    => 'Year',
+            'icon'              => \App\Support\Archive\AccessIconNormalizer::normalize($access['reason'] ?? 'vault_access_required', $access['view_mode'] ?? 'blocked'),
+            'privileges'        => $targetTierModel->privileges->toArray(),
+            'features'          => $targetTierModel->features->toArray(),
+            'product_title'     => 'The Vault',
+            // Prorated quote fields
+            'is_prorated'       => $isProrated,
+            'unused_credit'     => $unusedCredit,
+            'payable_amount'    => $payableAmount,
+            'payable_formatted' => 'INR ' . number_format($payableAmount, 2),
+            'credit_formatted'  => 'INR ' . number_format($unusedCredit, 2),
         ];
 
         $this->showAccessModal = true;

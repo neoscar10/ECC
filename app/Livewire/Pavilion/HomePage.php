@@ -3,6 +3,7 @@
 namespace App\Livewire\Pavilion;
 
 use App\Services\Cms\CmsBlockWebService;
+use App\Services\Membership\MembershipUpgradeService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
@@ -25,7 +26,7 @@ class HomePage extends Component
         $this->exploreBlocks = $cmsService->resolveBlocksForPlacement('explore', $user)->toArray();
     }
 
-    public function openAccessModal(?int $targetTierId, string $title, string $icon, \App\Services\Membership\MembershipTierResolver $tierResolver)
+    public function openAccessModal(?int $targetTierId, string $title, string $icon, \App\Services\Membership\MembershipTierResolver $tierResolver, MembershipUpgradeService $upgradeSvc)
     {
         if (!$targetTierId) {
             return redirect('/membership/apply-intro');
@@ -37,15 +38,28 @@ class HomePage extends Component
             return redirect('/membership/apply-intro');
         }
 
+        $user = Auth::user();
+        // Fetch prorated quote so the modal can show the real payable amount
+        $quote = $user ? $upgradeSvc->getUpgradeQuote($user, $targetTierId) : null;
+        $unusedCredit  = $quote['unused_credit'] ?? 0.0;
+        $payableAmount = $quote['payable_amount'] ?? (float)$targetTierModel->price;
+        $isProrated    = $unusedCredit > 0;
+
         $this->modalData = [
-            'tier_id' => $targetTierModel->id,
-            'tier_name' => $targetTierModel->name,
-            'price_formatted' => $targetTierModel->price > 0 ? 'INR ' . number_format($targetTierModel->price) : 'Free',
-            'duration_label' => 'Year',
-            'icon' => $icon,
-            'privileges' => $targetTierModel->privileges->toArray(),
-            'features' => $targetTierModel->features->toArray(),
-            'product_title' => $title,
+            'tier_id'           => $targetTierModel->id,
+            'tier_name'         => $targetTierModel->name,
+            'price_formatted'   => $targetTierModel->price > 0 ? 'INR ' . number_format($targetTierModel->price) : 'Free',
+            'duration_label'    => 'Year',
+            'icon'              => $icon,
+            'privileges'        => $targetTierModel->privileges->toArray(),
+            'features'          => $targetTierModel->features->toArray(),
+            'product_title'     => $title,
+            // Prorated quote fields
+            'is_prorated'       => $isProrated,
+            'unused_credit'     => $unusedCredit,
+            'payable_amount'    => $payableAmount,
+            'payable_formatted' => 'INR ' . number_format($payableAmount, 2),
+            'credit_formatted'  => 'INR ' . number_format($unusedCredit, 2),
         ];
 
         $this->showAccessModal = true;

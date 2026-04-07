@@ -4,6 +4,7 @@ namespace App\Livewire\Auctions;
 
 use App\Models\Auctions\AuctionLot;
 use App\Services\Auctions\AuctionAccessResolverService;
+use App\Services\Membership\MembershipUpgradeService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -42,7 +43,7 @@ class Index extends Component
         $this->perPage += 20;
     }
 
-    public function openAccessModal(int $lotId, AuctionAccessResolverService $resolver, \App\Services\Membership\MembershipTierResolver $tierResolver)
+    public function openAccessModal(int $lotId, AuctionAccessResolverService $resolver, \App\Services\Membership\MembershipTierResolver $tierResolver, MembershipUpgradeService $upgradeSvc)
     {
         $user = Auth::user();
         $tier = $tierResolver->resolveForUser($user);
@@ -73,15 +74,27 @@ class Index extends Component
             return redirect('/membership/apply-intro');
         }
 
+        // Fetch prorated quote so the modal can show the real payable amount
+        $quote = $user ? $upgradeSvc->getUpgradeQuote($user, $targetTierId) : null;
+        $unusedCredit  = $quote['unused_credit'] ?? 0.0;
+        $payableAmount = $quote['payable_amount'] ?? (float)$targetTierModel->price;
+        $isProrated    = $unusedCredit > 0;
+
         $this->modalData = [
-            'tier_id' => $targetTierModel->id,
-            'tier_name' => $targetTierModel->name,
-            'price_formatted' => $targetTierModel->price > 0 ? 'INR ' . number_format($targetTierModel->price) : 'Free',
-            'duration_label' => 'Year',
-            'icon' => \App\Support\Archive\AccessIconNormalizer::normalize($access['reason'] ?? null, $access['view_mode'] ?? 'blocked'),
-            'privileges' => $targetTierModel->privileges->toArray(),
-            'features' => $targetTierModel->features->toArray(),
-            'product_title' => $lot->title,
+            'tier_id'           => $targetTierModel->id,
+            'tier_name'         => $targetTierModel->name,
+            'price_formatted'   => $targetTierModel->price > 0 ? 'INR ' . number_format($targetTierModel->price) : 'Free',
+            'duration_label'    => 'Year',
+            'icon'              => \App\Support\Archive\AccessIconNormalizer::normalize($access['reason'] ?? null, $access['view_mode'] ?? 'blocked'),
+            'privileges'        => $targetTierModel->privileges->toArray(),
+            'features'          => $targetTierModel->features->toArray(),
+            'product_title'     => $lot->title,
+            // Prorated quote fields
+            'is_prorated'       => $isProrated,
+            'unused_credit'     => $unusedCredit,
+            'payable_amount'    => $payableAmount,
+            'payable_formatted' => 'INR ' . number_format($payableAmount, 2),
+            'credit_formatted'  => 'INR ' . number_format($unusedCredit, 2),
         ];
 
         $this->showAccessModal = true;

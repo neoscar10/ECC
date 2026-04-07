@@ -24,18 +24,25 @@
 
           {{-- Required Tier Card --}}
           <div class="ecc-tier-card text-start p-4 mb-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-start mb-3">
               <h4 style="color: #D4AF37; font-size: 16px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">{{ $modalData['tier_name'] }}</h4>
               <div class="text-end">
+                @if(!empty($modalData['is_prorated']) && $modalData['is_prorated'])
+                  {{-- User has an active membership — show the prorated breakdown --}}
+                  <div style="color: #888; font-size: 13px; text-decoration: line-through; font-weight: 400; line-height: 1.2;">{{ $modalData['price_formatted'] }} / {{ $modalData['duration_label'] }}</div>
+                  <div style="display: flex; align-items: center; gap: 6px; justify-content: flex-end; margin-top: 3px;">
+                    <span style="background: rgba(74,222,128,0.12); color: #4ade80; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; letter-spacing: 0.04em; white-space: nowrap;">- {{ $modalData['credit_formatted'] }} credit</span>
+                  </div>
+                  <div style="color: #fceec5; font-size: 22px; font-weight: 900; margin-top: 4px; line-height: 1.1;">{{ $modalData['payable_formatted'] }}</div>
+                  <div style="color: #4ade80; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; margin-top: 1px;">Your upgrade price</div>
+                @else
+                  {{-- No active membership — full price --}}
                   <span style="color: #fceec5; font-size: 18px; font-weight: 800;">{{ $modalData['price_formatted'] }}</span>
                   <span style="color: #cbbc90; font-size: 11px; text-transform: uppercase;">/ {{ $modalData['duration_label'] }}</span>
-                  @auth
-                    @if(auth()->user()->hasActiveMembership())
-                      <div style="color: #4ade80; font-size: 10px; margin-top: 2px; font-weight: 600; letter-spacing: 0.04em;">Prorated credit applies at checkout</div>
-                    @endif
-                  @endauth
+                @endif
               </div>
             </div>
+
 
             <div class="row text-start mt-2">
               @php 
