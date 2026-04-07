@@ -313,10 +313,10 @@ class Index extends Component
             foreach (($g['values'] ?? []) as $v) {
                 $totalStock += (int)($v['stock_qty'] ?? 0);
                 $valsFormatted[] = [
-                    'label' => $v['caption'],
-                    'price' => $v['price'],
-                    'stock' => $v['stock_qty'],
-                    'is_default' => $v['is_default'],
+                    'label' => $v['caption'] ?? 'No Label',
+                    'price' => $v['price'] ?? $this->base_price,
+                    'stock' => $v['stock_qty'] ?? 0,
+                    'is_default' => $v['is_default'] ?? false,
                 ];
             }
             
@@ -330,6 +330,18 @@ class Index extends Component
             ];
         }
         $this->reviewData['variations'] = $vars;
+        
+        // 6. Combinations
+        $this->reviewData['combinations'] = collect($this->combinations)->map(function($c, $k) {
+            return [
+                'labels' => $c['labels'] ?? explode('-', $k),
+                'sku' => $c['sku'] ?? 'N/A',
+                'price' => $c['price'],
+                'stock' => $c['stock'],
+                'is_active' => $c['is_active'],
+                'is_default' => $c['is_default'],
+            ];
+        })->values()->toArray();
         
         // Checklist
         $this->reviewData['checklist'] = [
@@ -666,10 +678,16 @@ class Index extends Component
             }
             
             $key = implode('-', $ids);
+            $captionKey = implode('-', collect($combo)->pluck('caption')->all());
             
-            // Preserve existing data if key matches
+            // Preserve existing data
+            // Match #1: Exact Key (ID-based or Caption-based)
+            // Match #2: Caption-based key (fallback for new products after values get IDs)
             if (isset($this->combinations[$key])) {
                 $newCombinationsState[$key] = $this->combinations[$key];
+            } elseif (isset($this->combinations[$captionKey])) {
+                $newCombinationsState[$key] = $this->combinations[$captionKey];
+                // Also update the key in the state if matching by caption
             } else {
                 $newCombinationsState[$key] = [
                     'id' => null,
@@ -703,7 +721,11 @@ class Index extends Component
             'sort_order' => 0, 
             'values' => [
                 [
-                    'caption' => '', 'is_default' => true, 'color_hex' => null, 
+                    'caption' => '', 
+                    'is_default' => true, 
+                    'color_hex' => null, 
+                    'price' => $this->base_price,
+                    'stock_qty' => 0,
                     'presentation_image' => null,
                     'presentation_image_url' => null,
                     'new_gallery_images' => [],
@@ -723,7 +745,11 @@ class Index extends Component
     {
         $default = count($this->variationGroups[$groupIndex]['values']) === 0;
         $this->variationGroups[$groupIndex]['values'][] = [
-            'caption' => '', 'is_default' => $default, 'color_hex' => null, 
+            'caption' => '', 
+            'is_default' => $default, 
+            'color_hex' => null, 
+            'price' => $this->base_price,
+            'stock_qty' => 0,
             'presentation_image' => null,
             'presentation_image_url' => null,
             'new_gallery_images' => [],
@@ -822,6 +848,14 @@ class Index extends Component
                     }
                 }
             }
+
+            // 5. Save Combinations (ShopProductVariant)
+            if ($this->has_variants) {
+                // IMPORTANT: Re-run generation so keys switch from 'Caption-based' to 'ID-based'
+                // after the variation values have been saved and assigned IDs in step 4.
+                $this->generateCombinations();
+                $this->saveCombinations($product);
+            }
         });
 
         $this->closeModal();
@@ -850,8 +884,6 @@ class Index extends Component
         $this->showVariationGalleryModal = false;
         $this->activeVariationGroupIndex = null;
         $this->activeVariationValueIndex = null;
-        
-        $this->createStep = 1;
         
         $this->createStep = 1;
         
@@ -919,6 +951,11 @@ class Index extends Component
             $this->saveAttributes($product);
             $this->saveMedia($product);
             $this->saveVariations($product);
+            if ($this->has_variants) {
+                // Re-sync combinations state to use real IDs instead of temporary caption keys
+                $this->generateCombinations(); 
+                $this->saveCombinations($product);
+            }
         });
 
         $this->closeModal();
