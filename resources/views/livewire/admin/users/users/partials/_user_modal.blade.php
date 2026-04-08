@@ -63,7 +63,49 @@
                                 </table>
                             </div>
                         @else
-                            <p class="text-muted mb-0">No active membership found.</p>
+                            <div class="alert alert-warning mb-0">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="ri-error-warning-line fs-16 align-middle me-2"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="alert-heading fs-14">Registration Incomplete</h6>
+                                        <p class="mb-2 fs-13">This user has not completed their registration wizard or tier selection.</p>
+                                        
+                                        <hr class="border-warning-subtle opacity-50 my-2">
+                                        
+                                        <h6 class="fs-12 text-uppercase fw-bold mb-2">Complete Manually</h6>
+                                        <div class="row g-2">
+                                            <div class="col-12">
+                                                <select class="form-select form-select-sm @error('complete_tier_id') is-invalid @enderror" wire:model="complete_tier_id">
+                                                    <option value="">Select Membership Tier...</option>
+                                                    @foreach(\App\Models\MembershipTier::all() as $tier)
+                                                        <option value="{{ $tier->id }}">{{ $tier->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                @error('complete_tier_id') <div class="invalid-feedback fs-11">{{ $message }}</div> @enderror
+                                            </div>
+                                            <div class="col-12">
+                                                <input type="date" class="form-control form-control-sm @error('complete_expires_at') is-invalid @enderror" 
+                                                       wire:model="complete_expires_at" placeholder="Expiry Date (Optional)">
+                                                <div class="form-text fs-10 text-muted">Expiry Date (Optional)</div>
+                                                @error('complete_expires_at') <div class="invalid-feedback fs-11">{{ $message }}</div> @enderror
+                                            </div>
+                                            <div class="col-12 mt-2">
+                                                <button type="button" class="btn btn-primary btn-sm w-100" wire:click="completeRegistration" wire:loading.attr="disabled">
+                                                    <span wire:loading.remove wire:target="completeRegistration">Complete Registration</span>
+                                                    <span wire:loading wire:target="completeRegistration">Processing...</span>
+                                                </button>
+                                            </div>
+                                            @error('complete_registration_error')
+                                                <div class="col-12 mt-2">
+                                                    <div class="text-danger fs-11 text-center">{{ $message }}</div>
+                                                </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         @endif
                     </div>
                 </div>

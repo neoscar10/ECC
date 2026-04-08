@@ -11,7 +11,6 @@ use App\Livewire\User\Auth\UserLoginPage;
 use App\Livewire\Club\ClubPage;
 
 Route::middleware(['auth', 'ensure_registration_complete'])->group(function () {
-    Route::get('/home', \App\Livewire\Pavilion\HomePage::class)->name('home');
     Route::get('/content/blocks/{id}', \App\Livewire\Pavilion\ContentBlockDetailPage::class)->name('content.block.detail');
     Route::get('/archive', \App\Livewire\Archive\ArchiveBrowse::class)->name('archive.index');
     Route::get('/vault', \App\Livewire\Vault\Index::class)->name('vault.index');
@@ -31,6 +30,10 @@ Route::middleware(['auth', 'ensure_registration_complete'])->group(function () {
     Route::get('/order-success/{orderId}', \App\Livewire\Shop\OrderSuccessPage::class)->name('shop.order-success');
     Route::get('/shop/{slug}', \App\Livewire\Shop\Show::class)->name('shop.show');
 });
+Route::get('/home', \App\Livewire\Pavilion\HomePage::class)
+    ->middleware(['ensure_registration_complete'])
+    ->name('home');
+
 Route::get('/welcome', WelcomePage::class)->name('welcome');
 Route::get('/gated-entry', GatedEntryPage::class)->name('gated.entry');
 

@@ -30,6 +30,8 @@ class UsersIndex extends Component
     // View Modal Enhancements
     public $tierInfo;
     public $applications;
+    public $complete_tier_id;
+    public $complete_expires_at;
 
     // --- Create User Wizard Properties ---
     public $createStep = 1;
@@ -332,6 +334,29 @@ class UsersIndex extends Component
             ->get();
         
         $this->dispatch('show-modal', id: 'userModal');
+    }
+
+    public function completeRegistration(\App\Services\Admin\MembershipAdminService $service)
+    {
+        $this->validate([
+            'complete_tier_id' => 'required|exists:membership_tiers,id',
+            'complete_expires_at' => 'nullable|date|after:today',
+        ], [], [
+            'complete_tier_id' => 'membership tier',
+            'complete_expires_at' => 'expiry date',
+        ]);
+
+        try {
+            $user = User::findOrFail($this->userId);
+            $service->completeUserRegistration($user, $this->complete_tier_id, $this->complete_expires_at);
+
+            session()->flash('success', 'Registration completed and membership assigned successfully.');
+            $this->loadUser($this->userId); // Refresh data
+            $this->reset(['complete_tier_id', 'complete_expires_at']);
+            
+        } catch (\Exception $e) {
+            $this->addError('complete_registration_error', $e->getMessage());
+        }
     }
 
     public function closeModal()

@@ -32,14 +32,8 @@ class GatedEntryPage extends Component
             ? route('login')
             : url('/login');
 
-        // Guest preview (prefer named route if exists)
-        if (Route::has('guest.preview')) {
-            $this->previewUrl = route('guest.preview');
-        } elseif (Route::has('archive.index')) {
-            $this->previewUrl = route('archive.index') . '?guest=1';
-        } else {
-            $this->previewUrl = url('/preview');
-        }
+        // Guest preview
+        $this->previewUrl = route('home');
     }
 
     public function render()
