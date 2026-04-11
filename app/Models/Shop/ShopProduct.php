@@ -104,7 +104,7 @@ class ShopProduct extends Model
         return $query->where(function ($q) {
             // Include products that have at least one variant with stock > 0
             $q->whereHas('variants', function ($v) {
-                $v->where('stock_qty', '>', 0);
+                $v->where('is_active', true)->where('stock_qty', '>', 0);
             })
             // OR products that have NO variation groups (Simple products)
             ->orWhere(function($sub) {
@@ -113,13 +113,32 @@ class ShopProduct extends Model
         });
     }
 
+    public function scopeWithComputedStock($query)
+    {
+        return $query->addSelect(['total_computed_stock' => function ($sub) {
+            $sub->selectRaw('COALESCE(
+                (SELECT SUM(stock_qty) FROM shop_product_variants 
+                 WHERE shop_product_variants.shop_product_id = shop_products.id 
+                 AND shop_product_variants.deleted_at IS NULL
+                 AND shop_product_variants.is_active = 1),
+                shop_products.stock_qty, 
+                0
+            )');
+        }]);
+    }
+
     // --- Accessors ---
 
     public function getComputedStockAttribute(): int
     {
-        // 1. Variable Product
+        // Use eager-loaded value if available
+        if (array_key_exists('total_computed_stock', $this->getAttributes())) {
+            return (int) $this->total_computed_stock;
+        }
+
+        // 1. Variable Product - Sum only active, non-deleted variants
         if ($this->variants()->exists()) {
-            return (int) $this->variants()->sum('stock_qty');
+             return (int) $this->variants()->where('is_active', true)->sum('stock_qty');
         }
 
         // 2. Simple Product

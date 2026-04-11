@@ -25,6 +25,16 @@ class UserLoginPage extends Component
     public ?string $adminCandidateRoleLabel = null;
     public ?string $adminModalError = null;
 
+    // Web-specific state management
+    public string $mode = 'password'; // password, forgot, otp
+    public int $step = 1;
+    public string $otp = '';
+    public string $newPassword = '';
+    public string $newPassword_confirmation = '';
+    public ?string $otpIdentifier = null;
+    public int $otpTtl = 0;
+    public bool $showResetPassword = false;
+
     public function mount(\App\Services\Membership\ApplicationResumeService $resumeService): void
     {
         if (Auth::guard('web')->check()) {
@@ -43,6 +53,113 @@ class UserLoginPage extends Component
     public function togglePassword(): void
     {
         $this->showPassword = !$this->showPassword;
+    }
+
+    public function setMode(string $mode): void
+    {
+        $this->reset(['mode', 'step', 'otp', 'newPassword', 'newPassword_confirmation', 'otpIdentifier', 'errorMessage', 'showResetPassword']);
+        $this->mode = $mode;
+    }
+
+    public function toggleResetPassword(): void
+    {
+        $this->showResetPassword = !$this->showResetPassword;
+    }
+
+    /**
+     * --- FORGOT PASSWORD FLOW ---
+     */
+    public function requestResetOtp(\App\Services\Otp\OtpService $otpService): void
+    {
+        $this->validate([
+            'identity' => ['required', 'string', 'max:255'],
+        ]);
+
+        $user = $this->resolveUserByIdentity($this->identity);
+        
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'identity' => 'We could not find a member account with that email or phone.',
+            ]);
+        }
+
+        $data = $otpService->requestPasswordResetOtp($user, $this->identity);
+        $this->otpTtl = $data['ttl_minutes'];
+        $this->otpIdentifier = $this->identity;
+
+        $this->step = 2;
+        $this->errorMessage = null;
+    }
+
+    public function verifyResetOtp(\App\Services\Otp\OtpService $otpService): void
+    {
+        $this->validate([
+            'otp' => ['required', 'string', 'size:6'],
+            'newPassword' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        if (!$this->otpIdentifier) {
+            $this->setMode('forgot');
+            return;
+        }
+
+        $user = $this->resolveUserByIdentity($this->otpIdentifier);
+
+        if (!$user || !$otpService->verifyPasswordResetOtp($user, $this->otpIdentifier, $this->otp)) {
+            $this->addError('otp', 'Invalid or expired OTP.');
+            return;
+        }
+
+        // Reset Password
+        $user->password = \Illuminate\Support\Facades\Hash::make($this->newPassword);
+        $user->save();
+
+        session()->flash('success', 'Your password has been reset successfully. Please log in with your new password.');
+        $this->setMode('login');
+    }
+
+    /**
+     * --- LOGIN WITH OTP FLOW ---
+     */
+    public function requestLoginOtp(AuthService $authService): void
+    {
+        $this->validate([
+            'identity' => ['required', 'string', 'max:255'],
+        ]);
+
+        $data = $authService->requestOtp($this->identity);
+
+        if (!$data) {
+            throw ValidationException::withMessages([
+                'identity' => 'No member account was found for that identity.',
+            ]);
+        }
+
+        $this->otpIdentifier = $this->identity;
+        $this->otpTtl = $data['ttl_minutes'];
+        $this->step = 2;
+        $this->errorMessage = null;
+    }
+
+    public function verifyLoginOtp(AuthService $authService, \App\Services\Membership\ApplicationResumeService $resumeService): void
+    {
+        $this->validate([
+            'otp' => ['required', 'string', 'size:6'],
+        ]);
+
+        $user = $authService->verifyOtp($this->otpIdentifier, $this->otp);
+
+        if (!$user) {
+            $this->addError('otp', 'Invalid or expired OTP.');
+            return;
+        }
+
+        // Attempt session login using web guard
+        Auth::guard('web')->login($user, false);
+        request()->session()->regenerate();
+
+        $nextRoute = $resumeService->nextRouteForUser($user);
+        $this->redirect($nextRoute ?: (Route::has('home') ? route('home') : url('/home')), navigate: false);
     }
 
     public function submit(AuthService $authService, \App\Services\Membership\ApplicationResumeService $resumeService): void

@@ -38,29 +38,33 @@ class AuthService
     }
 
     /**
-     * Request an OTP for a phone number.
+     * Request an OTP for a user identifier (email/phone).
      */
-    public function requestOtp(string $phone): ?User
+    public function requestOtp(string $identifier): ?array
     {
-        $normalizedPhone = $this->normalizePhone($phone);
-        return User::where('phone', $normalizedPhone)->first();
+        $user = $this->resolveUser($identifier);
+        
+        if (!$user) {
+            return null;
+        }
+
+        return app(\App\Services\Otp\OtpService::class)->requestLoginOtp($user, $identifier);
     }
 
     /**
-     * Verify an OTP for a phone number.
+     * Verify an OTP for a user identifier.
      */
-    public function verifyOtp(string $phone, string $otp): ?User
+    public function verifyOtp(string $identifier, string $otp): ?User
     {
-        $normalizedPhone = $this->normalizePhone($phone);
-        $user = User::where('phone', $normalizedPhone)->first();
+        $user = $this->resolveUser($identifier);
 
         if (!$user) {
             return null;
         }
 
-        // Dummy Verification: Any 6-digit OTP is accepted if user exists.
-        // In a real app, check DB/Cache here.
-        return $user;
+        $isValid = app(\App\Services\Otp\OtpService::class)->verifyLoginOtp($user, $identifier, $otp);
+
+        return $isValid ? $user : null;
     }
 
     /**

@@ -115,6 +115,7 @@ class Index extends Component
     public function render()
     {
         $products = ShopProduct::query()
+            ->withComputedStock()
             ->with([
                 'categories', 
                 'tags', 

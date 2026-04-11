@@ -101,9 +101,10 @@ class Index extends Component
     {
         $query = ShopProduct::query();
 
-        // 1. Eager load sum of variation stock for performance AND count for type detection
-        $query->withSum('variants', 'stock_qty')
-              ->withCount('variationGroups');
+        // 1. Centralized stock calculation (handles versions, soft deletes, and active status)
+        $query->withComputedStock()
+              ->withCount('variationGroups')
+              ->with('images'); // Eager load for gallery
 
         // 2. Search
         if ($this->search) {
@@ -120,17 +121,7 @@ class Index extends Component
             $query->has('variationGroups');
         }
 
-        // 4. Total Stock Calculation for Sorting/Listing
-        $query->addSelect(['total_computed_stock' => function ($sub) {
-            $sub->selectRaw('COALESCE(
-                (SELECT SUM(stock_qty) FROM shop_product_variants 
-                 WHERE shop_product_variants.shop_product_id = shop_products.id),
-                stock_qty, 
-                0
-            )');
-        }]);
-
-        // 5. Filter Status
+        // 4. Filter Status (Uses standardized column)
         if ($this->filterStatus !== 'all') {
             if ($this->filterStatus === 'out_of_stock') {
                 $query->having('total_computed_stock', '=', 0);
@@ -142,7 +133,7 @@ class Index extends Component
             }
         }
 
-        // 6. Sorting
+        // 5. Sorting
         if ($this->sortField === 'stock') {
             $query->orderBy('total_computed_stock', $this->sortDirection);
         } else {

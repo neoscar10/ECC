@@ -301,6 +301,7 @@ class UsersIndex extends Component
     {
          $this->isEditMode = false;
          $this->loadUser($id);
+         $this->dispatch('show-modal', id: 'userModal');
     }
     
     private function loadUser($id)
@@ -332,8 +333,6 @@ class UsersIndex extends Component
                 'membership_tiers.name as tier_name'
             )
             ->get();
-        
-        $this->dispatch('show-modal', id: 'userModal');
     }
 
     public function completeRegistration(\App\Services\Admin\MembershipAdminService $service)

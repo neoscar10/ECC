@@ -15,99 +15,297 @@
 
             {{-- Title --}}
             <div class="text-center mb-4">
-                <div class="ecc-title text-uppercase">Member Login</div>
+                <div class="ecc-title text-uppercase">
+                    @if($mode === 'password') Member Login
+                    @elseif($mode === 'forgot') Reset Passcode
+                    @elseif($mode === 'otp') OTP Access
+                    @endif
+                </div>
                 <div class="ecc-subtext mx-auto">
-                    Access reserved for approved members
-                    <span class="d-none d-md-inline"> of Executive Cricket Club.</span>
-                    <span class="d-md-none"><br>of Executive Cricket Club.</span>
+                    @if($mode === 'password')
+                        Access reserved for approved members
+                        <span class="d-none d-md-inline"> of Executive Cricket Club.</span>
+                        <span class="d-md-none"><br>of Executive Cricket Club.</span>
+                    @elseif($mode === 'forgot')
+                        @if($step === 1) Enter your identity to receive a reset code.
+                        @else Verification code sent to {{ $otpIdentifier }}.
+                        @endif
+                    @elseif($mode === 'otp')
+                        @if($step === 1) Enter your identity to request secure access.
+                        @else Verification code sent to {{ $otpIdentifier }}.
+                        @endif
+                    @endif
                 </div>
             </div>
 
-            {{-- Errors --}}
+            {{-- Feedback --}}
             @if ($errorMessage)
                 <div class="alert alert-danger py-2 small mb-3">{{ $errorMessage }}</div>
             @endif
+            @if (session('success'))
+                <div class="alert alert-success py-2 small mb-3">{{ session('success') }}</div>
+            @endif
 
-            {{-- Form --}}
-            <form wire:submit.prevent="submit" class="ecc-form">
-                {{-- Identity --}}
-                <div class="ecc-field mb-3 mb-md-4">
-                    <label for="ecc_identity" class="ecc-label text-uppercase">Identity</label>
-                    <div class="position-relative">
-                        <span class="material-symbols-outlined ecc-input-icon">mail</span>
-                        <input
-                            id="ecc_identity"
-                            type="text"
-                            wire:model.defer="identity"
-                            class="form-control ecc-input ps-5"
-                            placeholder="Email / Registered Mobile Number"
-                            autocomplete="username"
-                        >
+            {{-- --- PASSWORD LOGIN MODE --- --}}
+            @if($mode === 'password')
+                <form wire:submit.prevent="submit" class="ecc-form">
+                    {{-- Identity --}}
+                    <div class="ecc-field mb-3 mb-md-4">
+                        <label for="ecc_identity" class="ecc-label text-uppercase">Identity</label>
+                        <div class="position-relative">
+                            <span class="material-symbols-outlined ecc-input-icon">mail</span>
+                            <input
+                                id="ecc_identity"
+                                type="text"
+                                wire:model="identity"
+                                class="form-control ecc-input ps-5"
+                                placeholder="Email / Registered Mobile Number"
+                                autocomplete="username"
+                            >
+                        </div>
+                        @error('identity') <div class="ecc-error mt-2">{{ $message }}</div> @enderror
                     </div>
-                    @error('identity') <div class="ecc-error mt-2">{{ $message }}</div> @enderror
-                </div>
 
-                {{-- Password --}}
-                <div class="ecc-field mb-3 mb-md-4">
-                    <label for="ecc_password" class="ecc-label text-uppercase">Passcode</label>
-                    <div class="position-relative">
-                        <span class="material-symbols-outlined ecc-input-icon">lock</span>
-                        <input
-                            id="ecc_password"
-                            type="{{ $showPassword ? 'text' : 'password' }}"
-                            wire:model.defer="password"
-                            class="form-control ecc-input ps-5 pe-5"
-                            placeholder="Password"
-                            autocomplete="current-password"
-                        >
-                        <button
-                            type="button"
-                            wire:click="togglePassword"
-                            class="ecc-eye-btn"
-                            aria-label="Toggle password visibility"
-                        >
-                            <span class="material-symbols-outlined">visibility</span>
+                    {{-- Password --}}
+                    <div class="ecc-field mb-3 mb-md-4">
+                        <label for="ecc_password" class="ecc-label text-uppercase">Passcode</label>
+                        <div class="position-relative">
+                            <span class="material-symbols-outlined ecc-input-icon">lock</span>
+                            <input
+                                id="ecc_password"
+                                type="{{ $showPassword ? 'text' : 'password' }}"
+                                wire:model="password"
+                                class="form-control ecc-input ps-5 pe-5"
+                                placeholder="Password"
+                                autocomplete="current-password"
+                            >
+                            <button
+                                type="button"
+                                wire:click="togglePassword"
+                                class="ecc-eye-btn"
+                                aria-label="Toggle password visibility"
+                            >
+                                <span class="material-symbols-outlined">{{ $showPassword ? 'visibility_off' : 'visibility' }}</span>
+                            </button>
+                        </div>
+                        @error('password') <div class="ecc-error mt-2">{{ $message }}</div> @enderror
+                    </div>
+
+                    {{-- Submit --}}
+                    <div class="pt-2">
+                        <button type="submit" class="ecc-submit-btn w-100" wire:loading.attr="disabled" wire:target="submit">
+                            <span class="ecc-btn-default d-inline-flex align-items-center justify-content-center gap-2" wire:loading.class="d-none" wire:target="submit">
+                                Enter The Club
+                                <span class="material-symbols-outlined ecc-arrow">arrow_forward</span>
+                            </span>
+                            <span class="ecc-btn-loading d-none align-items-center justify-content-center gap-2" wire:loading.delay.class.remove="d-none" wire:target="submit">
+                                Signing in...
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            </span>
                         </button>
                     </div>
-                    @error('password') <div class="ecc-error mt-2">{{ $message }}</div> @enderror
-                </div>
+                </form>
 
-                {{-- Submit --}}
-                <div class="pt-2">
-                    <button
-                        type="submit"
-                        class="ecc-submit-btn w-100"
-                        wire:loading.attr="disabled"
-                        wire:target="submit"
-                    >
-                        {{-- Default --}}
-                        <span
-                            class="ecc-btn-default d-inline-flex align-items-center justify-content-center gap-2"
-                            wire:loading.class="d-none"
-                            wire:target="submit"
-                        >
-                            Enter The Club
-                            <span class="material-symbols-outlined ecc-arrow">arrow_forward</span>
-                        </span>
-
-                        {{-- Loading (hidden by default, shows ONLY during submit) --}}
-                        <span
-                            class="ecc-btn-loading d-none align-items-center justify-content-center gap-2"
-                            wire:loading.delay.class.remove="d-none"
-                            wire:target="submit"
-                        >
-                            Signing in...
-                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        </span>
-                    </button>
-                </div>
-
-                {{-- Links --}}
+                {{-- Links outside form to prevent accidental submission --}}
                 <div class="d-flex justify-content-between align-items-center mt-4 px-1 flex-wrap gap-3">
-                    <a href="#" class="ecc-link text-uppercase">Forgot Password?</a>
-                    <a href="#" class="ecc-link text-uppercase">Login with OTP</a>
+                    <a href="javascript:void(0)" wire:click="setMode('forgot')" class="ecc-link text-uppercase">Forgot Password?</a>
+                    <a href="javascript:void(0)" wire:click="setMode('otp')" class="ecc-link text-uppercase">Login with OTP</a>
                 </div>
-            </form>
+
+            {{-- --- FORGOT PASSWORD MODE --- --}}
+            @elseif($mode === 'forgot')
+                @if($step === 1)
+                    {{-- Step 1: Request OTP --}}
+                    <form wire:submit.prevent="requestResetOtp" class="ecc-form">
+                        <div class="ecc-field mb-3 mb-md-4">
+                            <label for="forgot_identity" class="ecc-label text-uppercase">Account Identity</label>
+                            <div class="position-relative">
+                                <span class="material-symbols-outlined ecc-input-icon">person</span>
+                                <input
+                                    id="forgot_identity"
+                                    type="text"
+                                    wire:model="identity"
+                                    class="form-control ecc-input ps-5"
+                                    placeholder="Enter Email or Mobile"
+                                >
+                            </div>
+                            @error('identity') <div class="ecc-error mt-2">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" class="ecc-submit-btn w-100" wire:loading.attr="disabled" wire:target="requestResetOtp">
+                                <span class="ecc-btn-default d-inline-flex align-items-center justify-content-center gap-2" wire:loading.class="d-none" wire:target="requestResetOtp">
+                                    Send Verification Code
+                                    <span class="material-symbols-outlined ecc-arrow">send</span>
+                                </span>
+                                <span class="ecc-btn-loading d-none align-items-center justify-content-center gap-2" wire:loading.delay.class.remove="d-none" wire:target="requestResetOtp">
+                                    Processing...
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase">Back to Login</a>
+                        </div>
+                    </form>
+                @else
+                    {{-- Step 2: Verify & Reset --}}
+                    <form wire:submit.prevent="verifyResetOtp" class="ecc-form">
+                        <div class="ecc-field mb-3 mb-md-4 text-center">
+                            <label class="ecc-label text-uppercase d-block mb-3">Verification Code</label>
+                            <input
+                                type="text"
+                                wire:model="otp"
+                                class="form-control ecc-input text-center fs-2 fw-bold"
+                                placeholder="- - - - - -"
+                                maxlength="6"
+                                style="letter-spacing: 0.6em; padding-left: 0.6em; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 28px !important; height: 64px; border-color: rgba(242,185,13,.4);"
+                            >
+                            @error('otp') <div class="ecc-error mt-2 text-center">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="ecc-field mb-3">
+                            <label for="new_password" class="ecc-label text-uppercase">New Passcode</label>
+                            <div class="position-relative">
+                                <span class="material-symbols-outlined ecc-input-icon">lock_reset</span>
+                                <input
+                                    id="new_password"
+                                    type="{{ $showResetPassword ? 'text' : 'password' }}"
+                                    wire:model="newPassword"
+                                    class="form-control ecc-input ps-5 pe-5"
+                                    placeholder="Min 8 characters"
+                                >
+                                <button
+                                    type="button"
+                                    wire:click="toggleResetPassword"
+                                    class="ecc-eye-btn"
+                                    aria-label="Toggle password visibility"
+                                >
+                                    <span class="material-symbols-outlined">{{ $showResetPassword ? 'visibility_off' : 'visibility' }}</span>
+                                </button>
+                            </div>
+                            @error('newPassword') <div class="ecc-error mt-2">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="ecc-field mb-3 mb-md-4">
+                            <label for="new_password_confirmation" class="ecc-label text-uppercase">Confirm Passcode</label>
+                            <div class="position-relative">
+                                <span class="material-symbols-outlined ecc-input-icon">done_all</span>
+                                <input
+                                    id="new_password_confirmation"
+                                    type="{{ $showResetPassword ? 'text' : 'password' }}"
+                                    wire:model="newPassword_confirmation"
+                                    class="form-control ecc-input ps-5 pe-5"
+                                    placeholder="Repeat new password"
+                                >
+                                <button
+                                    type="button"
+                                    wire:click="toggleResetPassword"
+                                    class="ecc-eye-btn"
+                                    aria-label="Toggle password visibility"
+                                >
+                                    <span class="material-symbols-outlined">{{ $showResetPassword ? 'visibility_off' : 'visibility' }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" class="ecc-submit-btn w-100" wire:loading.attr="disabled" wire:target="verifyResetOtp">
+                                <span class="ecc-btn-default d-inline-flex align-items-center justify-content-center gap-2" wire:loading.class="d-none" wire:target="verifyResetOtp">
+                                    Update Password & Login
+                                    <span class="material-symbols-outlined ecc-arrow">verified_user</span>
+                                </span>
+                                <span class="ecc-btn-loading d-none align-items-center justify-content-center gap-2" wire:loading.delay.class.remove="d-none" wire:target="verifyResetOtp">
+                                    Finalizing...
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <a href="#" wire:click.prevent="requestResetOtp" class="ecc-link text-uppercase">Resend Code</a>
+                            <span class="mx-2 opacity-25">|</span>
+                            <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase">Back to Login</a>
+                        </div>
+                    </form>
+                @endif
+
+            {{-- --- OTP LOGIN MODE --- --}}
+            @elseif($mode === 'otp')
+                @if($step === 1)
+                    {{-- Step 1: Request OTP --}}
+                    <form wire:submit.prevent="requestLoginOtp" class="ecc-form">
+                        <div class="ecc-field mb-3 mb-md-4">
+                            <label for="otp_identity" class="ecc-label text-uppercase">Account Identity</label>
+                            <div class="position-relative">
+                                <span class="material-symbols-outlined ecc-input-icon">person</span>
+                                <input
+                                    id="otp_identity"
+                                    type="text"
+                                    wire:model="identity"
+                                    class="form-control ecc-input ps-5"
+                                    placeholder="Email or Registered Mobile"
+                                >
+                            </div>
+                            @error('identity') <div class="ecc-error mt-2">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" class="ecc-submit-btn w-100" wire:loading.attr="disabled" wire:target="requestLoginOtp">
+                                <span class="ecc-btn-default d-inline-flex align-items-center justify-content-center gap-2" wire:loading.class="d-none" wire:target="requestLoginOtp">
+                                    Request Access Code
+                                    <span class="material-symbols-outlined ecc-arrow">key</span>
+                                </span>
+                                <span class="ecc-btn-loading d-none align-items-center justify-content-center gap-2" wire:loading.delay.class.remove="d-none" wire:target="requestLoginOtp">
+                                    Requesting...
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase">Login with Password</a>
+                        </div>
+                    </form>
+                @else
+                    {{-- Step 2: Verify & Login --}}
+                    <form wire:submit.prevent="verifyLoginOtp" class="ecc-form">
+                        <div class="ecc-field mb-3 mb-md-4 text-center">
+                            <label class="ecc-label text-uppercase d-block mb-3">Verification Code</label>
+                            <input
+                                type="text"
+                                wire:model="otp"
+                                class="form-control ecc-input text-center fs-2 fw-bold"
+                                placeholder="- - - - - -"
+                                maxlength="6"
+                                style="letter-spacing: 0.6em; padding-left: 0.6em; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 28px !important; height: 64px; border-color: rgba(242,185,13,.4);"
+                            >
+                            @error('otp') <div class="ecc-error mt-2 text-center">{{ $message }}</div> @enderror
+                            <div class="mt-3 fs-11" style="color: rgba(242,185,13,.5);">Code expires in {{ $otpTtl }} minutes.</div>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" class="ecc-submit-btn w-100" wire:loading.attr="disabled" wire:target="verifyLoginOtp">
+                                <span class="ecc-btn-default d-inline-flex align-items-center justify-content-center gap-2" wire:loading.class="d-none" wire:target="verifyLoginOtp">
+                                    Verify & Access Club
+                                    <span class="material-symbols-outlined ecc-arrow">check_circle</span>
+                                </span>
+                                <span class="ecc-btn-loading d-none align-items-center justify-content-center gap-2" wire:loading.delay.class.remove="d-none" wire:target="verifyLoginOtp">
+                                    Verifying...
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <a href="#" wire:click.prevent="requestLoginOtp" class="ecc-link text-uppercase">Resend Code</a>
+                            <span class="mx-2 opacity-25">|</span>
+                            <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase">Back to Login</a>
+                        </div>
+                    </form>
+                @endif
+            @endif
 
             {{-- Footer --}}
             <div class="text-center mt-4 mt-lg-3">

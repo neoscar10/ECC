@@ -61,8 +61,14 @@
 
         document.addEventListener('show-modal', event => {
             var modalId = event.detail.id;
-            var myModal = new bootstrap.Modal(document.getElementById(modalId));
-            myModal.show();
+            var modalEl = document.getElementById(modalId);
+            if (modalEl) {
+                var myModal = bootstrap.Modal.getInstance(modalEl);
+                if (!myModal) {
+                    myModal = new bootstrap.Modal(modalEl);
+                }
+                myModal.show();
+            }
         });
         
         // SweetAlert for Delete Confirmation

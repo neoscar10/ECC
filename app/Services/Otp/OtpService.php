@@ -125,4 +125,53 @@ class OtpService
 
         return false;
     }
+
+    /**
+     * Request a Login OTP for the given user and identifier.
+     */
+    public function requestLoginOtp(User $user, string $identifier): array
+    {
+        $otp = '123456'; // Dummy OTP
+        $ttlMinutes = (int) config('ecc.otp.ttl_minutes', 10);
+        $key = 'login_otp:' . $user->id . ':' . sha1($identifier);
+
+        Cache::put($key, [
+            'otp' => $otp,
+            'identifier' => $identifier,
+            'created_at' => now(),
+        ], now()->addMinutes($ttlMinutes));
+
+        // Log for debugging
+        \Illuminate\Support\Facades\Log::info("Login OTP for User {$user->id} ({$identifier}): {$otp}");
+
+        return [
+            'ttl_minutes' => $ttlMinutes,
+            'message' => 'OTP sent successfully (Debugging: default is 123456)',
+        ];
+    }
+
+    /**
+     * Verify the Login OTP.
+     */
+    public function verifyLoginOtp(User $user, string $identifier, string $otp): bool
+    {
+        $key = 'login_otp:' . $user->id . ':' . sha1($identifier);
+        $cached = Cache::get($key);
+
+        if (!$cached) {
+            return false;
+        }
+
+        if ($cached['identifier'] !== $identifier) {
+            return false;
+        }
+
+        // Allow dummy OTP or real match
+        if ($otp === '123456' || $otp === $cached['otp']) {
+            Cache::forget($key);
+            return true;
+        }
+
+        return false;
+    }
 }

@@ -33,13 +33,15 @@ class AuthOtpController extends Controller
             return $this->error('Validation Error', 422, $validator->errors());
         }
 
-        $user = $this->authService->requestOtp($request->phone);
+        $otpData = $this->authService->requestOtp($request->phone);
 
-        if (!$user) {
+        if (!$otpData) {
             return $this->error('We could not find an account with that email/phone.', 404);
         }
 
-        return $this->success(null, 'OTP requested. Use any 6-digit code to continue.');
+        return $this->success([
+            'ttl_minutes' => $otpData['ttl_minutes']
+        ], $otpData['message']);
     }
 
     /**
