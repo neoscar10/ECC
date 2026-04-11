@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Domain\Membership\MembershipApplication;
+use App\Models\MembershipApplication;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
