@@ -148,9 +148,9 @@
                                             @endif
                                             <div class="dropdown-divider"></div>
                                             <li>
-                                                <a class="dropdown-item remove-item-btn" href="javascript:void(0);">
+                                                <button class="dropdown-item remove-item-btn" wire:click="confirmDelete({{ $product->id }})">
                                                     <i class="ri-delete-bin-fill align-bottom me-2 text-danger"></i> Delete
-                                                </a>
+                                                </button>
                                             </li>
                                         </ul>
                                     </div>
