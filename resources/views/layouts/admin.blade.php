@@ -63,7 +63,7 @@
             <div class="d-flex">
                 <!-- LOGO -->
                 <div class="navbar-brand-box horizontal-logo">
-                    <a href="index-2.html" class="logo logo-dark">
+                    <a href="{{ route('admin.dashboard') }}" class="logo logo-dark">
                         <span class="logo-sm">
                             <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
 
@@ -76,7 +76,7 @@
                         </span>
                     </a>
 
-                    <a href="index-2.html" class="logo logo-light">
+                    <a href="{{ route('admin.dashboard') }}" class="logo logo-light">
                         <span class="logo-sm">
                             <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
                               <h5 class="text-white pt-3">Executive Club Cricket</h3>
@@ -129,8 +129,7 @@
                     <div class="dropdown-menu dropdown-menu-end">
                         <!-- item-->
                         <h6 class="dropdown-header">Welcome!</h6>
-                        <a class="dropdown-item" href="#"><i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Profile</span></a>
-                        <a class="dropdown-item" href="#"><i class="mdi mdi-cog-outline text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Settings</span></a>
+
                         <div class="dropdown-divider"></div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -175,7 +174,7 @@
             <!-- LOGO -->
             <div class="navbar-brand-box">
                 <!-- Dark Logo-->
-                <a href="index-2.html" class="logo logo-dark">
+                <a href="{{ route('admin.dashboard') }}" class="logo logo-dark">
                     <span class="logo-sm">
                         <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
                           <h3 class="text-dark pt-2">Executive Club Cricket</h3>
@@ -186,7 +185,7 @@
                     </span>
                 </a>
                 <!-- Light Logo-->
-                <a href="index-2.html" class="logo logo-light">
+                <a href="{{ route('admin.dashboard') }}" class="logo logo-light">
                     <span class="logo-sm">
                         <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
                           <h5 class="text-white pt-2">Executive Club Cricket</h3>
@@ -444,7 +443,14 @@
                                 <i class="ri-pie-chart-line"></i> <span data-key="t-reports">Reports</span>
                             </a>
                         </li>
-                        <li class="nav-item"><a class="nav-link menu-link" href="#"><i class="ri-settings-3-line"></i> <span>Settings</span></a></li>
+                        <li class="nav-item">
+                            <form method="POST" action="{{ route('logout') }}" id="sidebar-logout-form" class="d-none">
+                                @csrf
+                            </form>
+                            <a class="nav-link menu-link" href="javascript:void(0);" onclick="event.preventDefault(); document.getElementById('sidebar-logout-form').submit();">
+                                <i class="ri-logout-box-line"></i> <span>Logout</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <!-- Sidebar -->

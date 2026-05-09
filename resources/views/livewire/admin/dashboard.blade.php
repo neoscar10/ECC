@@ -38,7 +38,7 @@
                 :value="$kpis['pending_applications'] ?? 0" 
                 icon="ri-file-list-3-line" 
                 color="warning" 
-                link="{{ route('admin.membership.applications') }}" 
+                link="{{ route('admin.membership.applications', ['statusFilter' => 'submitted']) }}" 
             />
         </div>
         <div class="col-xl-3 col-md-6">
@@ -47,7 +47,7 @@
                 :value="$kpis['new_enquiries'] ?? 0" 
                 icon="ri-chat-voice-line" 
                 color="danger" 
-                link="{{ route('admin.enquiries.index') }}" 
+                action="openEnquiriesModal" 
             />
         </div>
     </div>
@@ -79,7 +79,7 @@
                 <div class="card-header align-items-center d-flex">
                     <h4 class="card-title mb-0 flex-grow-1">Pending Applications</h4>
                     <div class="flex-shrink-0">
-                        <a href="{{ route('admin.membership.applications') }}" class="btn btn-soft-info btn-sm">View All</a>
+                        <a href="{{ route('admin.membership.applications', ['statusFilter' => 'submitted']) }}" class="btn btn-soft-info btn-sm">View All</a>
                     </div>
                 </div>
                 <div class="card-body">
@@ -102,7 +102,7 @@
                                         <td>{{ $app->membershipTier?->name }}</td>
                                         <td>{{ $app->created_at->format('d M, Y') }}</td>
                                         <td>
-                                            <a href="{{ route('admin.membership.applications') }}" class="btn btn-sm btn-soft-primary">Review</a>
+                                            <button type="button" wire:click="view({{ $app->id }})" class="btn btn-sm btn-soft-primary">Review</button>
                                         </td>
                                     </tr>
                                 @empty
@@ -209,6 +209,70 @@
             </div>
         </div>
     </div>
+
+    @include('livewire.admin.membership.applications.partials._view-modal')
+    @include('livewire.admin.membership.applications.partials._review-modals')
+
+    <!-- Enquiries Breakdown Modal -->
+    <div class="modal fade" id="enquiriesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header p-3 bg-light">
+                    <h5 class="modal-title">New Enquiries Breakdown</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a href="{{ route('admin.archive.enquiries', ['status' => 'new']) }}" class="list-group-item list-group-item-action d-flex align-items-center p-3">
+                            <div class="flex-shrink-0 avatar-xs">
+                                <div class="avatar-title bg-info-subtle text-info rounded-circle">
+                                    <i class="ri-archive-line"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1 fw-semibold">Archive Enquiries</h6>
+                                <p class="text-muted mb-0 small">Product and collection enquiries</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <span class="badge bg-info-subtle text-info fs-12">{{ $kpis['enquiry_breakdown']['archive'] ?? 0 }} New</span>
+                            </div>
+                        </a>
+                        <a href="{{ route('admin.auctions.enquiries', ['status' => 'new']) }}" class="list-group-item list-group-item-action d-flex align-items-center p-3">
+                            <div class="flex-shrink-0 avatar-xs">
+                                <div class="avatar-title bg-primary-subtle text-primary rounded-circle">
+                                    <i class="ri-auction-line"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1 fw-semibold">Auction Enquiries</h6>
+                                <p class="text-muted mb-0 small">Bidding and lot enquiries</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <span class="badge bg-primary-subtle text-primary fs-12">{{ $kpis['enquiry_breakdown']['auction'] ?? 0 }} New</span>
+                            </div>
+                        </a>
+                        <a href="{{ route('admin.enquiries.index', ['status' => 'new']) }}" class="list-group-item list-group-item-action d-flex align-items-center p-3">
+                            <div class="flex-shrink-0 avatar-xs">
+                                <div class="avatar-title bg-success-subtle text-success rounded-circle">
+                                    <i class="ri-chat-voice-line"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1 fw-semibold">General Enquiries</h6>
+                                <p class="text-muted mb-0 small">General contact and platform enquiries</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <span class="badge bg-success-subtle text-success fs-12">{{ $kpis['enquiry_breakdown']['general'] ?? 0 }} New</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer p-3 justify-content-center bg-light-subtle">
+                    <p class="text-muted mb-0 small text-center">Click on a section to view and manage enquiries.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
@@ -277,5 +341,16 @@
     }
 
     renderCharts();
+
+    document.addEventListener('livewire:initialized', () => {
+        window.addEventListener('open-enquiries-modal', event => {
+            var modalEl = document.getElementById('enquiriesModal');
+            if (modalEl) {
+                var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+            }
+        });
+    });
 </script>
+@include('livewire.admin.membership.applications.partials._scripts')
 @endpush

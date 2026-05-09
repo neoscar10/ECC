@@ -21,7 +21,7 @@ class AdminSidebarComposer
     {
         $counts = Cache::remember('admin.sidebar.counts', 30, function () {
             return [
-                'pendingMembershipApplicationsCount' => MembershipApplication::whereIn('status', ['pending', 'draft', 'submitted'])->count(),
+                'pendingMembershipApplicationsCount' => MembershipApplication::whereIn('status', ['submitted', 'under_review'])->count(),
                 'newAuctionEnquiriesCount' => AuctionEnquiry::where('status', 'new')->count(),
                 'newArchiveEnquiriesCount' => ArchiveProductEnquiry::where('status', 'new')->count(),
                 'newContactEnquiriesCount' => \App\Models\ContactEnquiry::where('status', 'new')->count(),

@@ -10,7 +10,8 @@
     'prefix' => '',
 ])
 
-<div class="card card-animate">
+<div class="card card-animate {{ ($action || $link) ? 'cursor-pointer' : '' }}" 
+     @if($action) wire:click="{{ $action }}" @elseif($link) onclick="window.location.href='{{ $link }}'" @endif>
     <div class="card-body">
         <div class="d-flex align-items-center">
             <div class="flex-grow-1 overflow-hidden">

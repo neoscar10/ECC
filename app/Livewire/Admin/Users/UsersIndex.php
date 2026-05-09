@@ -8,6 +8,8 @@ use Livewire\WithFileUploads;
 use App\Models\User;
 use App\Models\MembershipTier;
 use Livewire\Attributes\Title;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 #[Title('User Management')]
 class UsersIndex extends Component
@@ -385,7 +387,7 @@ class UsersIndex extends Component
         $filename = 'ecc_users_import_template.' . $format;
 
         if ($format === 'xlsx') {
-            return \Maatwebsite\Excel\Facades\Excel::download(
+            return Excel::download(
                 new \App\Exports\Admin\UserImportTemplateExport(), 
                 $filename
             );

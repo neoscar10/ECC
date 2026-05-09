@@ -21,16 +21,15 @@ class AdminDashboardMetricsService
      */
     public function getKpiMetrics(): array
     {
-        return Cache::remember('admin_dashboard_kpis', 900, function () { // 15 mins
-            return [
-                'total_sales' => $this->calculateTotalSales(),
-                'active_members' => Membership::where('status', 'active')->count(),
-                'pending_applications' => MembershipApplication::where('status', 'submitted')->count(),
-                'live_auctions' => AuctionLot::where('status', 'live')->count(),
-                'new_enquiries' => $this->calculateNewEnquiriesCount(),
-                'sales_trend' => $this->calculateSalesTrend(),
-            ];
-        });
+        return [
+            'total_sales' => $this->calculateTotalSales(),
+            'active_members' => Membership::where('status', 'active')->count(),
+            'pending_applications' => MembershipApplication::whereIn('status', ['submitted', 'under_review'])->count(),
+            'live_auctions' => AuctionLot::where('status', 'live')->count(),
+            'new_enquiries' => $this->calculateNewEnquiriesCount(),
+            'enquiry_breakdown' => $this->getEnquiryBreakdown(),
+            'sales_trend' => $this->calculateSalesTrend(),
+        ];
     }
 
     /**
@@ -40,7 +39,7 @@ class AdminDashboardMetricsService
     {
         return [
             'pending_applications' => MembershipApplication::with(['user' => fn($q) => $q->withTrashed(), 'membershipTier'])
-                ->where('status', 'submitted')
+                ->whereIn('status', ['submitted', 'under_review'])
                 ->latest()
                 ->limit(5)
                 ->get(),
@@ -58,7 +57,7 @@ class AdminDashboardMetricsService
      */
     private function calculateTotalSales(): float
     {
-        $shopSales = ShopOrder::where('status', 'paid')->sum('total_amount');
+        $shopSales = ShopOrder::where('payment_status', 'paid')->sum('total_amount');
         $otherSales = Order::whereNotNull('paid_at')->sum('subtotal_inr');
         
         return (float) ($shopSales + $otherSales);
@@ -82,15 +81,15 @@ class AdminDashboardMetricsService
     private function getLatestNewEnquiries(int $limit): \Illuminate\Support\Collection
     {
         $archive = ArchiveProductEnquiry::with(['user' => fn($q) => $q->withTrashed()])->where('status', 'new')->latest()->limit($limit)->get()
-            ->map(fn($e) => ['type' => 'Archive', 'subject' => $e->contact_name ?? $e->user?->name, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.archive.enquiries')])
+            ->map(fn($e) => ['type' => 'Archive', 'subject' => $e->contact_name ?? $e->user?->name, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.archive.enquiries', ['viewId' => $e->id])])
             ->toBase();
             
         $auction = AuctionEnquiry::with(['user' => fn($q) => $q->withTrashed()])->where('status', 'new')->latest()->limit($limit)->get()
-            ->map(fn($e) => ['type' => 'Auction', 'subject' => $e->contact_name ?? $e->user?->name, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.auctions.enquiries')])
+            ->map(fn($e) => ['type' => 'Auction', 'subject' => $e->contact_name ?? $e->user?->name, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.auctions.enquiries', ['viewId' => $e->id])])
             ->toBase();
             
         $contact = ContactEnquiry::with(['user' => fn($q) => $q->withTrashed()])->where('status', 'new')->latest()->limit($limit)->get()
-            ->map(fn($e) => ['type' => 'General', 'subject' => $e->subject, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.enquiries.index')])
+            ->map(fn($e) => ['type' => 'General', 'subject' => $e->subject, 'date' => $e->created_at, 'id' => $e->id, 'route' => route('admin.enquiries.index', ['viewId' => $e->id])])
             ->toBase();
 
         return $archive->concat($auction)->concat($contact)->sortByDesc('date')->take($limit);
@@ -123,6 +122,18 @@ class AdminDashboardMetricsService
         return [
             'labels' => $labels,
             'values' => $values,
+        ];
+    }
+
+    /**
+     * Get breakdown of new enquiries by source.
+     */
+    private function getEnquiryBreakdown(): array
+    {
+        return [
+            'archive' => ArchiveProductEnquiry::where('status', 'new')->count(),
+            'auction' => AuctionEnquiry::where('status', 'new')->count(),
+            'general' => ContactEnquiry::where('status', 'new')->count(),
         ];
     }
 

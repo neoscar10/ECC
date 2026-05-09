@@ -1,16 +1,27 @@
 <script>
     document.addEventListener('livewire:initialized', () => {
         Livewire.on('open-view-modal', () => {
-            var modal = new bootstrap.Modal(document.getElementById('viewModal'));
-            modal.show();
+            setTimeout(() => {
+                var modalEl = document.getElementById('viewModal');
+                if (modalEl) {
+                    var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.show();
+                }
+            }, 100);
         });
         Livewire.on('open-approve-modal', () => {
-            var modal = new bootstrap.Modal(document.getElementById('approveModal'));
-            modal.show();
+            var modalEl = document.getElementById('approveModal');
+            if (modalEl) {
+                var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+            }
         });
         Livewire.on('open-reject-modal', () => {
-            var modal = new bootstrap.Modal(document.getElementById('rejectModal'));
-            modal.show();
+            var modalEl = document.getElementById('rejectModal');
+            if (modalEl) {
+                var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+            }
         });
         Livewire.on('close-modals', () => {
             // Close all known modals

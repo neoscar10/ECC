@@ -17,10 +17,13 @@ class Index extends Component
     // Action properties
     public $selectedEnquiry = null;
     
+    public $viewId = null;
+    
     // Clean URL query string
     protected $queryString = [
         'search' => ['except' => ''],
         'status' => ['except' => ''],
+        'viewId' => ['except' => null],
     ];
 
     public function updatingSearch()
@@ -29,6 +32,11 @@ class Index extends Component
     }
 
     public function updatingStatus()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingViewId()
     {
         $this->resetPage();
     }
@@ -74,6 +82,10 @@ class Index extends Component
 
         if ($this->status) {
             $query->where('status', $this->status);
+        }
+
+        if ($this->viewId) {
+            $query->where('id', $this->viewId);
         }
 
         $enquiries = $query->paginate(10);

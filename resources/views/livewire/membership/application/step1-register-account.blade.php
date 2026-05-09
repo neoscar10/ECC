@@ -68,14 +68,24 @@
         </div>
 
         <div class="row g-3">
-          <div class="col-6">
+          <div class="col-6" x-data="{ show: false }">
             <label class="ecc-label">Password</label>
-            <input type="password" wire:model="password" class="form-control ecc-input">
+            <div class="position-relative">
+              <input :type="show ? 'text' : 'password'" wire:model="password" class="form-control ecc-input pe-5">
+              <button type="button" @click="show = !show" class="ecc-pass-toggle" style="color: #222;">
+                <span class="material-symbols-outlined fs-20" x-text="show ? 'visibility_off' : 'visibility'"></span>
+              </button>
+            </div>
             @error('password') <div class="ecc-err">{{ $message }}</div> @enderror
           </div>
-          <div class="col-6">
+          <div class="col-6" x-data="{ show: false }">
             <label class="ecc-label">Confirm Password</label>
-            <input type="password" wire:model="password_confirmation" class="form-control ecc-input">
+            <div class="position-relative">
+              <input :type="show ? 'text' : 'password'" wire:model="password_confirmation" class="form-control ecc-input pe-5">
+              <button type="button" @click="show = !show" class="ecc-pass-toggle">
+                <span class="material-symbols-outlined fs-20" x-text="show ? 'visibility_off' : 'visibility'"></span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -227,5 +237,22 @@
     font-family: "Newsreader", serif;
   }
   .ecc-continue:hover{ background: var(--ecc-primary-dark) !important; }
+
+  .ecc-pass-toggle{
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 0;
+    color: rgba(255,255,255,.30);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    transition: color .2s;
+    z-index: 4;
+  }
+  .ecc-pass-toggle:hover{ color: var(--ecc-primary); }
 </style>
 @endpush

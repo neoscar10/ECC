@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Membership\Applications;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use App\Models\MembershipApplication;
 use App\Models\Membership;
 use Illuminate\Support\Facades\Auth;
@@ -20,13 +21,24 @@ class Index extends Component
     use WithPagination;
 
     public $search = '';
+    #[Url]
     public $statusFilter = '';
+    #[Url]
+    public $applicationId = null;
     
     // Modal states
     public $selectedApplication = null;
     public $showViewModal = false;
     public $adminNote = '';
     public $rejectionReason = '';
+
+    public function mount()
+    {
+        if ($this->applicationId) {
+            $this->view($this->applicationId);
+            $this->applicationId = null;
+        }
+    }
 
     protected $paginationTheme = 'bootstrap';
 
