@@ -26,18 +26,51 @@ class Dashboard extends Component
     public $adminNote = '';
     public $rejectionReason = '';
 
+    // Chart filters
+    public $chartRange = 'today';
+    public $chartSource = 'all';
+    public $chartStartDate = null;
+    public $chartEndDate = null;
+
     public function mount(AdminDashboardMetricsService $service)
     {
-        try {
-            $this->loadData($service);
-        } catch (\Throwable $e) {
-            dd([
-                'msg' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => collect($e->getTrace())->take(10)
-            ]);
+        $this->loadData($service);
+    }
+
+    public function updatedChartRange(AdminDashboardMetricsService $service)
+    {
+        $this->updateChart($service);
+    }
+
+    public function updatedChartSource(AdminDashboardMetricsService $service)
+    {
+        $this->updateChart($service);
+    }
+
+    public function updatedChartStartDate(AdminDashboardMetricsService $service)
+    {
+        if ($this->chartEndDate) {
+            $this->updateChart($service);
         }
+    }
+
+    public function updatedChartEndDate(AdminDashboardMetricsService $service)
+    {
+        if ($this->chartStartDate) {
+            $this->updateChart($service);
+        }
+    }
+
+    public function updateChart(AdminDashboardMetricsService $service)
+    {
+        $this->kpis['sales_trend'] = $service->calculateSalesTrend(
+            $this->chartRange,
+            $this->chartStartDate,
+            $this->chartEndDate,
+            $this->chartSource
+        );
+        
+        $this->dispatch('chartDataUpdated', $this->kpis['sales_trend']);
     }
 
     public function refresh(AdminDashboardMetricsService $service)
@@ -48,7 +81,12 @@ class Dashboard extends Component
 
     private function loadData(AdminDashboardMetricsService $service)
     {
-        $this->kpis = $service->getKpiMetrics();
+        $this->kpis = $service->getKpiMetrics(
+            $this->chartRange,
+            $this->chartStartDate,
+            $this->chartEndDate,
+            $this->chartSource
+        );
         $this->queues = $service->getNeedsAttentionQueues();
     }
 

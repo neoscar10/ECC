@@ -56,17 +56,39 @@
         <!-- Sales Trend Placeholder -->
         <div class="col-xl-12">
             <div class="card">
-                <div class="card-header border-0 align-items-center d-flex">
+                <div class="card-header border-0 align-items-center d-flex flex-wrap gap-3">
                     <h4 class="card-title mb-0 flex-grow-1">Sales Overview</h4>
-                    <div>
-                        <button type="button" class="btn btn-soft-secondary btn-sm">ALL</button>
-                        <button type="button" class="btn btn-soft-secondary btn-sm">1M</button>
-                        <button type="button" class="btn btn-soft-primary btn-sm">6M</button>
+                    
+                    <!-- Source Selector -->
+                    <div class="flex-shrink-0">
+                        <select wire:model.live="chartSource" class="form-select form-select-sm border-0 bg-light">
+                            <option value="all">All Sources</option>
+                            <option value="shop">Shop Sales</option>
+                            <option value="other">Auctions & Archive</option>
+                        </select>
                     </div>
+
+                    <!-- Range Selector -->
+                    <div class="flex-shrink-0">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" wire:click="$set('chartRange', 'today')" class="btn {{ $chartRange == 'today' ? 'btn-primary' : 'btn-soft-primary' }}">Today</button>
+                            <button type="button" wire:click="$set('chartRange', '1w')" class="btn {{ $chartRange == '1w' ? 'btn-primary' : 'btn-soft-primary' }}">1W</button>
+                            <button type="button" wire:click="$set('chartRange', '1m')" class="btn {{ $chartRange == '1m' ? 'btn-primary' : 'btn-soft-primary' }}">1M</button>
+                            <button type="button" wire:click="$set('chartRange', 'custom')" class="btn {{ $chartRange == 'custom' ? 'btn-primary' : 'btn-soft-primary' }}">Custom</button>
+                        </div>
+                    </div>
+
+                    @if($chartRange == 'custom')
+                    <div class="flex-shrink-0 d-flex gap-2 align-items-center animate__animated animate__fadeIn">
+                        <input type="date" wire:model.live="chartStartDate" class="form-control form-control-sm border-0 bg-light" style="width: 140px;">
+                        <span class="text-muted">-</span>
+                        <input type="date" wire:model.live="chartEndDate" class="form-control form-control-sm border-0 bg-light" style="width: 140px;">
+                    </div>
+                    @endif
                 </div>
                 <div class="card-body p-0 pb-2">
-                    <div class="w-100">
-                        <div id="sales-overview-chart" data-colors='["--vz-primary", "--vz-success", "--vz-danger"]' class="apex-charts" dir="ltr" style="height: 370px;"></div>
+                    <div class="w-100" wire:ignore>
+                        <div id="sales-overview-chart" class="apex-charts" dir="ltr" style="height: 370px;"></div>
                     </div>
                 </div>
             </div>
@@ -277,6 +299,8 @@
 
 @push('scripts')
 <script>
+    var salesChart;
+    
     document.addEventListener('livewire:navigated', function () {
         renderCharts();
     });
@@ -293,11 +317,24 @@
                 type: 'line',
                 toolbar: {
                     show: false,
+                },
+                animations: {
+                    enabled: true,
+                    easing: 'easeinout',
+                    speed: 800,
+                    animateGradually: {
+                        enabled: true,
+                        delay: 150
+                    },
+                    dynamicAnimation: {
+                        enabled: true,
+                        speed: 350
+                    }
                 }
             },
             stroke: {
                 curve: 'smooth',
-                width: [2]
+                width: [3]
             },
             fill: {
                 type: 'gradient',
@@ -311,15 +348,45 @@
             },
             labels: @json($kpis['sales_trend']['labels'] ?? []),
             markers: {
-                size: 0
+                size: 0,
+                strokeWidth: 2,
+                hover: {
+                    size: 6,
+                }
             },
             xaxis: {
-                type: 'datetime'
+                type: '{{ ($kpis['sales_trend']['is_hourly'] ?? false) ? 'category' : 'datetime' }}',
+                tickAmount: 8,
+                axisBorder: {
+                    show: false,
+                },
+                axisTicks: {
+                    show: false,
+                }
             },
             yaxis: {
                 title: {
                     text: 'Revenue in ₹',
+                    style: {
+                        color: '#878a99',
+                        fontWeight: 500,
+                    }
                 },
+                labels: {
+                    formatter: function (y) {
+                        return "₹ " + y.toLocaleString();
+                    }
+                }
+            },
+            grid: {
+                show: true,
+                borderColor: '#f1f1f1',
+                padding: {
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    left: 10
+                }
             },
             tooltip: {
                 shared: true,
@@ -327,7 +394,7 @@
                 y: {
                     formatter: function (y) {
                         if (typeof y !== "undefined") {
-                            return "₹ " + y.toFixed(0);
+                            return "₹ " + y.toLocaleString();
                         }
                         return y;
                     }
@@ -336,13 +403,38 @@
             colors: ["#405189"]
         };
 
-        var chart = new ApexCharts(document.querySelector("#sales-overview-chart"), options);
-        chart.render();
+        if (salesChart) {
+            salesChart.destroy();
+        }
+        
+        var chartEl = document.querySelector("#sales-overview-chart");
+        if (chartEl) {
+            salesChart = new ApexCharts(chartEl, options);
+            salesChart.render();
+        }
     }
 
     renderCharts();
 
     document.addEventListener('livewire:initialized', () => {
+        // Handle chart data updates
+        Livewire.on('chartDataUpdated', (eventData) => {
+            var data = eventData[0];
+            if (salesChart) {
+                salesChart.updateOptions({
+                    xaxis: {
+                        type: data.is_hourly ? 'category' : 'datetime',
+                        categories: data.labels,
+                        tickAmount: 8
+                    },
+                    series: [{
+                        data: data.values
+                    }]
+                });
+            }
+        });
+
+        // Handle enquiries modal
         window.addEventListener('open-enquiries-modal', event => {
             var modalEl = document.getElementById('enquiriesModal');
             if (modalEl) {

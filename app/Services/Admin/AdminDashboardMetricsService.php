@@ -19,7 +19,7 @@ class AdminDashboardMetricsService
     /**
      * Get KPI metrics for the dashboard cards.
      */
-    public function getKpiMetrics(): array
+    public function getKpiMetrics(string $range = 'today', ?string $startDate = null, ?string $endDate = null, string $source = 'all'): array
     {
         return [
             'total_sales' => $this->calculateTotalSales(),
@@ -28,7 +28,7 @@ class AdminDashboardMetricsService
             'live_auctions' => AuctionLot::where('status', 'live')->count(),
             'new_enquiries' => $this->calculateNewEnquiriesCount(),
             'enquiry_breakdown' => $this->getEnquiryBreakdown(),
-            'sales_trend' => $this->calculateSalesTrend(),
+            'sales_trend' => $this->calculateSalesTrend($range, $startDate, $endDate, $source),
         ];
     }
 
@@ -96,32 +96,79 @@ class AdminDashboardMetricsService
     }
 
     /**
-     * Calculate sales trend for the last 30 days.
+     * Calculate sales trend based on range and source.
      */
-    private function calculateSalesTrend(): array
+    public function calculateSalesTrend(string $range = 'today', ?string $startDate = null, ?string $endDate = null, string $source = 'all'): array
     {
-        $days = 30;
         $labels = [];
         $values = [];
+        
+        // Define start and end dates based on range
+        $end = Carbon::now();
+        $start = match($range) {
+            'today' => Carbon::today(),
+            '1w' => Carbon::now()->subWeek(),
+            '1m' => Carbon::now()->subMonth(),
+            'custom' => ($startDate && $endDate) ? Carbon::parse($startDate) : Carbon::now()->subMonth(),
+            default => Carbon::now()->subMonth(),
+        };
 
-        for ($i = $days; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i)->format('Y-m-d');
-            $labels[] = $date;
-            
-            $shopSales = ShopOrder::where('payment_status', 'paid')
-                ->whereDate('paid_at', $date)
-                ->sum('total_amount');
+        if ($range === 'today') {
+            // Hourly breakdown for today
+            for ($i = 0; $i <= 23; $i++) {
+                $hour = $i;
+                $labels[] = sprintf('%02d:00', $hour);
                 
-            $otherSales = Order::whereNotNull('paid_at')
-                ->whereDate('paid_at', $date)
-                ->sum('subtotal_inr');
+                $shopSales = 0;
+                $otherSales = 0;
+
+                if ($source === 'all' || $source === 'shop') {
+                    $shopSales = ShopOrder::where('payment_status', 'paid')
+                        ->whereDate('paid_at', Carbon::today())
+                        ->whereRaw('HOUR(paid_at) = ?', [$hour])
+                        ->sum('total_amount');
+                }
                 
-            $values[] = (float) ($shopSales + $otherSales);
+                if ($source === 'all' || $source === 'other') {
+                    $otherSales = Order::whereNotNull('paid_at')
+                        ->whereDate('paid_at', Carbon::today())
+                        ->whereRaw('HOUR(paid_at) = ?', [$hour])
+                        ->sum('subtotal_inr');
+                }
+                
+                $values[] = (float) ($shopSales + $otherSales);
+            }
+        } else {
+            // Daily breakdown for other ranges
+            $current = $start->copy();
+            while ($current->lte($end)) {
+                $date = $current->format('Y-m-d');
+                $labels[] = $date;
+                
+                $shopSales = 0;
+                $otherSales = 0;
+
+                if ($source === 'all' || $source === 'shop') {
+                    $shopSales = ShopOrder::where('payment_status', 'paid')
+                        ->whereDate('paid_at', $date)
+                        ->sum('total_amount');
+                }
+                
+                if ($source === 'all' || $source === 'other') {
+                    $otherSales = Order::whereNotNull('paid_at')
+                        ->whereDate('paid_at', $date)
+                        ->sum('subtotal_inr');
+                }
+                
+                $values[] = (float) ($shopSales + $otherSales);
+                $current->addDay();
+            }
         }
 
         return [
             'labels' => $labels,
             'values' => $values,
+            'is_hourly' => $range === 'today'
         ];
     }
 
