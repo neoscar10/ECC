@@ -210,8 +210,11 @@ class Index extends Component
 
         if ($this->search) {
             $query->whereHas('user', function($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('email', 'like', '%' . $this->search . '%');
+                $q->withTrashed()
+                  ->where(function($sq) {
+                      $sq->where('name', 'like', '%' . $this->search . '%')
+                        ->orWhere('email', 'like', '%' . $this->search . '%');
+                  });
             });
         }
 
