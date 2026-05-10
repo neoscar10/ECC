@@ -23,6 +23,7 @@ class AdminDashboardMetricsService
     {
         return [
             'total_sales' => $this->calculateTotalSales(),
+            'revenue_breakdown' => $this->getRevenueBreakdown(),
             'active_members' => Membership::where('status', 'active')->count(),
             'pending_applications' => MembershipApplication::whereIn('status', ['submitted', 'under_review'])->count(),
             'live_auctions' => AuctionLot::where('status', 'live')->count(),
@@ -181,6 +182,18 @@ class AdminDashboardMetricsService
             'archive' => ArchiveProductEnquiry::where('status', 'new')->count(),
             'auction' => AuctionEnquiry::where('status', 'new')->count(),
             'general' => ContactEnquiry::where('status', 'new')->count(),
+        ];
+    }
+
+    /**
+     * Get breakdown of revenue by source.
+     */
+    private function getRevenueBreakdown(): array
+    {
+        return [
+            'shop' => (float) ShopOrder::where('payment_status', 'paid')->sum('total_amount'),
+            'archive' => (float) Order::whereNotNull('paid_at')->whereNotNull('archive_product_id')->sum('subtotal_inr'),
+            'auction' => (float) Order::whereNotNull('paid_at')->whereNotNull('auction_lot_id')->sum('subtotal_inr'),
         ];
     }
 

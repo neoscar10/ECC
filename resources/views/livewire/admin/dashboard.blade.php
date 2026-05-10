@@ -20,7 +20,7 @@
                 prefix="₹" 
                 icon="ri-money-dollar-circle-line" 
                 color="success" 
-                link="{{ route('admin.archive.orders.index') }}" 
+                action="openRevenueModal" 
             />
         </div>
         <div class="col-xl-3 col-md-6">
@@ -295,6 +295,67 @@
             </div>
         </div>
     </div>
+
+    <!-- Revenue Breakdown Modal -->
+    <div class="modal fade" id="revenueModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header p-3 bg-light">
+                    <h5 class="modal-title">Revenue Breakdown</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a href="{{ route('admin.shop.orders', ['filterPaymentStatus' => 'paid']) }}" class="list-group-item list-group-item-action d-flex align-items-center p-3">
+                            <div class="flex-shrink-0 avatar-xs">
+                                <div class="avatar-title bg-success-subtle text-success rounded-circle">
+                                    <i class="ri-shopping-cart-2-line"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1 fw-semibold">Shop Revenue</h6>
+                                <p class="text-muted mb-0 small">Direct platform sales</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <span class="badge bg-success-subtle text-success fs-14">₹ {{ number_format($kpis['revenue_breakdown']['shop'] ?? 0) }}</span>
+                            </div>
+                        </a>
+                        <a href="{{ route('admin.archive.orders.index', ['status' => 'completed']) }}" class="list-group-item list-group-item-action d-flex align-items-center p-3">
+                            <div class="flex-shrink-0 avatar-xs">
+                                <div class="avatar-title bg-info-subtle text-info rounded-circle">
+                                    <i class="ri-archive-line"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1 fw-semibold">Archive Revenue</h6>
+                                <p class="text-muted mb-0 small">Product enquiry conversions</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <span class="badge bg-info-subtle text-info fs-14">₹ {{ number_format($kpis['revenue_breakdown']['archive'] ?? 0) }}</span>
+                            </div>
+                        </a>
+                        <a href="{{ route('admin.auctions.orders.index', ['status' => 'completed']) }}" class="list-group-item list-group-item-action d-flex align-items-center p-3">
+                            <div class="flex-shrink-0 avatar-xs">
+                                <div class="avatar-title bg-primary-subtle text-primary rounded-circle">
+                                    <i class="ri-auction-line"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1 fw-semibold">Auction Revenue</h6>
+                                <p class="text-muted mb-0 small">Lot bidding successes</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <span class="badge bg-primary-subtle text-primary fs-14">₹ {{ number_format($kpis['revenue_breakdown']['auction'] ?? 0) }}</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer p-3 justify-content-center bg-light-subtle">
+                    <p class="text-muted mb-0 small text-center">Click on a source to view corresponding paid orders.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
@@ -437,6 +498,15 @@
         // Handle enquiries modal
         window.addEventListener('open-enquiries-modal', event => {
             var modalEl = document.getElementById('enquiriesModal');
+            if (modalEl) {
+                var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+            }
+        });
+
+        // Handle revenue modal
+        window.addEventListener('open-revenue-modal', event => {
+            var modalEl = document.getElementById('revenueModal');
             if (modalEl) {
                 var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
                 modal.show();

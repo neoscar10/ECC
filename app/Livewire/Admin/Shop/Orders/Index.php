@@ -16,6 +16,12 @@ class Index extends Component
     public $filterStatus = '';
     public $filterPaymentStatus = '';
 
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'filterStatus' => ['except' => ''],
+        'filterPaymentStatus' => ['except' => ''],
+    ];
+
     // Modal State
     public $showStatusModal = false;
     public $selectedOrderId = null;

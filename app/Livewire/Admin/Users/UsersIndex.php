@@ -387,7 +387,7 @@ class UsersIndex extends Component
         $filename = 'ecc_users_import_template.' . $format;
 
         if ($format === 'xlsx') {
-            return Excel::download(
+            return \Maatwebsite\Excel\Facades\Excel::download(
                 new \App\Exports\Admin\UserImportTemplateExport(), 
                 $filename
             );

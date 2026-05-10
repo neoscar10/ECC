@@ -194,6 +194,11 @@ class Dashboard extends Component
         $this->refresh($service);
     }
 
+    public function openRevenueModal()
+    {
+        $this->dispatch('open-revenue-modal');
+    }
+
     public function openEnquiriesModal()
     {
         Log::info('Dashboard: Opening Enquiries Modal');
