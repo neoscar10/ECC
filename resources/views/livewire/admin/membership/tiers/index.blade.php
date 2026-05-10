@@ -30,6 +30,7 @@
     </div>
 
     @include('livewire.admin.membership.tiers.partials._tier-modal')
+    @include('livewire.admin.membership.tiers.partials._migration-modal')
 
     @include('livewire.admin.membership.tiers.partials._scripts')
 </div>

@@ -21,7 +21,7 @@ class Index extends Component
     protected $queryString = [
         'search' => ['except' => ''],
         'tierFilter' => ['except' => ''],
-        'statusFilter' => ['except' => 'active'],
+        'statusFilter' => ['except' => ''],
     ];
     
     // Alerts
@@ -33,7 +33,7 @@ class Index extends Component
         $this->successMessage = $message;
     }
     public $tierFilter = '';
-    public $statusFilter = 'active'; // Default to active members
+    public $statusFilter = ''; // Default to all members
 
     // Modal States
     public $selectedMembership = null;

@@ -183,6 +183,18 @@ class UserLoginPage extends Component
             ]);
         }
 
+        // Check if user is suspended
+        if ($user->is_suspended) {
+            $config = \App\Models\ContactConfig::first();
+            $email = $config->support_email ?? 'support@executivecricketclub.com';
+            $phone = $config->concierge_phone ?? '';
+            $msg = "Your account has been suspended. Please contact support at {$email}" . ($phone ? " or call {$phone}" : "") . " to restore access.";
+            
+            throw ValidationException::withMessages([
+                'identity' => $msg,
+            ]);
+        }
+
         // Detect admin identity and open modal (no immediate login)
         if ($this->isAdminUser($user)) {
             $this->adminCandidateId = $user->id;

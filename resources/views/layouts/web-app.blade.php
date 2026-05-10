@@ -798,11 +798,27 @@
       $cartUrl = route('shop.cart');
 
       $isAwaitingApproval = false;
+      $isDeactivated = false;
+      $deactivationMessage = '';
       if ($user = auth('web')->user()) {
           $isAwaitingApproval = !$user->hasActiveMembership() && $user->memberships()->where('status', 'pending')->exists();
+          $isDeactivated = !$user->hasActiveMembership() && $user->memberships()->where('status', 'cancelled')->exists();
+          
+          if ($isDeactivated) {
+              $config = \App\Models\ContactConfig::first();
+              $email = $config->support_email ?? 'support@executivecricketclub.com';
+              $phone = $config->concierge_phone ?? '';
+              $deactivationMessage = "Membership Deactivated: Please contact support at {$email}" . ($phone ? " or call {$phone}" : "") . " to restore access.";
+          }
       }
     @endphp
     <div class="luxe-page-shell">
+        @if($isDeactivated)
+            <div class="deactivated-banner d-flex align-items-center justify-content-center py-2 px-3 text-white" style="background: linear-gradient(90deg, #842029 0%, #a52834 100%); font-size: 0.82rem; font-weight: 700; letter-spacing: 0.6px; border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 2000;">
+                <i class="mdi mdi-alert-circle-outline me-2 fs-6"></i>
+                <span class="text-uppercase">{{ $deactivationMessage }}</span>
+            </div>
+        @endif
         <header class="luxe-header">
             <div class="luxe-container py-3">
                 <div class="d-flex align-items-center justify-content-between gap-3">
@@ -821,7 +837,7 @@
                         <nav class="luxe-top-nav">
                             @foreach($mainItems as $it)
                                 @php
-                                    $disabled = $isAwaitingApproval && $it['key'] !== 'explore';
+                                    $disabled = ($isAwaitingApproval || $isDeactivated) && $it['key'] !== 'explore';
                                 @endphp
                                 <a href="{{ $disabled ? 'javascript:void(0)' : $it['href'] }}"
                                    class="luxe-top-link {{ $isOn($it['key']) ? 'active' : '' }}"

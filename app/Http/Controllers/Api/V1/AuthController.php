@@ -96,6 +96,16 @@ class AuthController extends Controller
             return $this->error('We could not find an account with that email/phone.', 404);
         }
 
+        // Check if user is suspended
+        if ($user->is_suspended) {
+            $config = \App\Models\ContactConfig::first();
+            $email = $config->support_email ?? 'support@executivecricketclub.com';
+            $phone = $config->concierge_phone ?? '';
+            $msg = "Your account has been suspended. Please contact support at {$email}" . ($phone ? " or call {$phone}" : "") . " to restore access.";
+            
+            return $this->error($msg, 403);
+        }
+
         try {
             // Determine credentials for attempt
             $credentials = [

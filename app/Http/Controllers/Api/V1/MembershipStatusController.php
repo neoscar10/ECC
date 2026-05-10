@@ -18,6 +18,9 @@ class MembershipStatusController extends Controller
         $membership = $user->currentMembership()->with('membershipTier.privileges')->first();
         // Check if there is a pending membership
         $pending = $user->memberships()->where('status', 'pending')->latest()->first();
+        
+        // Check for deactivation (cancelled status)
+        $isDeactivated = !$user->hasActiveMembership() && $user->memberships()->where('status', 'cancelled')->exists();
 
         // Get active application step if any
         $application = MembershipApplication::where('user_id', $user->id)
@@ -25,9 +28,26 @@ class MembershipStatusController extends Controller
             ->latest()
             ->first();
 
+        // Get contact details for the message
+        $contactConfig = \App\Models\ContactConfig::first();
+        $supportEmail = $contactConfig->support_email ?? 'support@executivecricketclub.com';
+        $supportPhone = $contactConfig->concierge_phone ?? '';
+
+        $statusMessage = "Your account has been deactivated. Please contact support at {$supportEmail}";
+        if ($supportPhone) {
+            $statusMessage .= " or call {$supportPhone}";
+        }
+        $statusMessage .= " to restore your membership privileges.";
+
         return $this->success([
             'has_active_membership' => $user->hasActiveMembership(),
-            'membership_status' => $membership ? 'active' : ($pending ? 'pending' : 'none'),
+            'is_deactivated' => $isDeactivated,
+            'membership_status' => $membership ? 'active' : ($pending ? 'pending' : ($isDeactivated ? 'deactivated' : 'none')),
+            'status_message' => $isDeactivated ? $statusMessage : null,
+            'contact_support' => [
+                'email' => $supportEmail,
+                'phone' => $supportPhone
+            ],
             'membership' => $membership,
             'pending_membership' => $pending ? $pending->load('membershipTier') : null,
             'application_step' => $application ? $application->current_step : null,

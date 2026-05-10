@@ -7,6 +7,8 @@ use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
 use App\Models\MembershipTier;
 use App\Models\Privilege;
+use App\Models\Membership;
+use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -41,6 +43,14 @@ class Index extends Component
     public $upgrade_from_id = null;
     public $description = null;
     public $features = []; // Dynamic list: [['id'=>?, 'title'=>string, 'sort_order'=>int]]
+    
+    // Migration Properties
+    public $showMigrationModal = false;
+    public $migrationTargetTierId = null;
+    public $membersOnTierCount = 0;
+    public $migrationMembers = []; // List of member details
+    public $selectedMembershipIds = [];
+    public $selectAll = false;
     
     // Privileges
     public $selectedPrivileges = [];
@@ -290,19 +300,123 @@ class Index extends Component
     public function confirmDelete($id)
     {
         $this->checkSuperAdmin();
-        // Guard rail: check relationships
         
+        $this->tierToDeleteId = $id;
+        $this->membersOnTierCount = Membership::where('membership_tier_id', $id)->where('status', 'active')->distinct('user_id')->count();
         $hasApps = MembershipApplication::where('selected_tier_id', $id)->orWhere('recommended_tier_id', $id)->exists();
-        $hasMemberships = \App\Models\Membership::where('membership_tier_id', $id)->exists();
 
-        if ($hasApps || $hasMemberships) {
-            session()->flash('error', 'Cannot delete tier: It is actively used by applications or members. Deactivate it instead.');
+        if ($this->membersOnTierCount > 0 || $hasApps) {
+            // Load unique members based on user_id to avoid visual duplicates
+            $this->migrationMembers = Membership::with('user')
+                ->where('membership_tier_id', $id)
+                ->where('status', 'active')
+                ->get()
+                ->unique('user_id')
+                ->map(function($m) {
+                    return [
+                        'id' => $m->id,
+                        'user_id' => $m->user_id,
+                        'name' => $m->user->name,
+                        'email' => $m->user->email,
+                    ];
+                })
+                ->toArray();
+            
+            $this->selectedMembershipIds = collect($this->migrationMembers)->pluck('id')->map(fn($id) => (string)$id)->toArray();
+            $this->selectAll = true;
+                
+            $this->showMigrationModal = true;
+            $this->dispatch('open-migration-modal');
             return;
         }
 
-        $this->tierToDeleteId = $id;
         $this->confirmingDeletion = true;
         $this->dispatch('open-delete-modal');
+    }
+
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selectedMembershipIds = collect($this->migrationMembers)->pluck('id')->map(fn($id) => (string)$id)->toArray();
+        } else {
+            $this->selectedMembershipIds = [];
+        }
+    }
+
+    public function executeMigration()
+    {
+        $this->checkSuperAdmin();
+        
+        if (empty($this->selectedMembershipIds)) {
+            session()->flash('error', 'Please select at least one member to migrate.');
+            return;
+        }
+
+        $this->validate([
+            'migrationTargetTierId' => 'required|exists:membership_tiers,id|different:tierToDeleteId'
+        ], [
+            'migrationTargetTierId.required' => 'Please select a destination tier for migration.',
+            'migrationTargetTierId.different' => 'Target tier must be different from the deleted tier.'
+        ]);
+
+        DB::transaction(function() {
+            // Get user IDs for the selected memberships
+            $userIds = Membership::whereIn('id', $this->selectedMembershipIds)->pluck('user_id')->unique();
+
+            // 1. Migrate ALL membership records for these users that are on the target tier
+            Membership::whereIn('user_id', $userIds)
+                ->where('membership_tier_id', $this->tierToDeleteId)
+                ->update(['membership_tier_id' => $this->migrationTargetTierId]);
+                
+            // 2. Update Applications
+            MembershipApplication::whereIn('user_id', $userIds)
+                ->where('selected_tier_id', $this->tierToDeleteId)
+                ->update(['selected_tier_id' => $this->migrationTargetTierId]);
+                
+            MembershipApplication::whereIn('user_id', $userIds)
+                ->where('recommended_tier_id', $this->tierToDeleteId)
+                ->update(['recommended_tier_id' => $this->migrationTargetTierId]);
+                
+            // Check if any members are left on this tier
+            $remainingCount = Membership::where('membership_tier_id', $this->tierToDeleteId)->count();
+            
+            if ($remainingCount === 0) {
+                // 3. Clear upgrade recommendations pointing to this tier ONLY if no one is left
+                MembershipTier::where('upgrade_from_id', $this->tierToDeleteId)
+                    ->update(['upgrade_from_id' => null]);
+            }
+        });
+
+        // Refresh count
+        $this->membersOnTierCount = Membership::where('membership_tier_id', $this->tierToDeleteId)->where('status', 'active')->distinct('user_id')->count();
+        
+        if ($this->membersOnTierCount === 0) {
+            $this->showMigrationModal = false;
+            // Now trigger delete confirmation since it's clean
+            $this->confirmingDeletion = true;
+            $this->dispatch('close-modals');
+            $this->dispatch('open-delete-modal');
+            session()->flash('success', 'All members migrated successfully. You can now delete the tier.');
+        } else {
+            // Update the list for remaining members
+            $this->migrationMembers = Membership::with('user')
+                ->where('membership_tier_id', $this->tierToDeleteId)
+                ->where('status', 'active')
+                ->get()
+                ->unique('user_id')
+                ->map(function($m) {
+                    return [
+                        'id' => $m->id,
+                        'user_id' => $m->user_id,
+                        'name' => $m->user->name,
+                        'email' => $m->user->email,
+                    ];
+                })
+                ->toArray();
+            $this->selectedMembershipIds = [];
+            $this->selectAll = false;
+            session()->flash('success', 'Selected members migrated successfully.');
+        }
     }
 
     public function delete()

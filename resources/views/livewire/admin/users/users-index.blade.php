@@ -71,6 +71,34 @@
             }
         });
         
+        // SweetAlert for Suspension Confirmation
+        document.addEventListener('show-suspension-confirmation', event => {
+            const detail = event.detail[0] || event.detail;
+            const isUnsuspending = detail.action === 'unsuspend';
+            
+            Swal.fire({
+                html: `<div class="mt-3">
+                    <lord-icon src="https://cdn.lordicon.com/tdrtiskw.json" trigger="loop" colors="primary:#f7b84b,secondary:#f06548" style="width:100px;height:100px"></lord-icon>
+                    <div class="mt-4 pt-2 fs-15 mx-5">
+                        <h4>${isUnsuspending ? 'Unsuspend' : 'Suspend'} User?</h4>
+                        <p class="text-muted mx-4 mb-0">Are you sure you want to ${detail.action} this user account?</p>
+                    </div>
+                </div>`,
+                showCancelButton: true,
+                customClass: {
+                    confirmButton: `btn ${isUnsuspending ? 'btn-success' : 'btn-warning'} w-xs me-2 mb-1`,
+                    cancelButton: 'btn btn-light w-xs mb-1'
+                },
+                confirmButtonText: `Yes, ${isUnsuspending ? 'Unsuspend' : 'Suspend'}!`,
+                buttonsStyling: false,
+                showCloseButton: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Livewire.dispatch('suspendUserConfirmed', { id: detail.id });
+                }
+            });
+        });
+
         // SweetAlert for Delete Confirmation
         document.addEventListener('show-delete-confirmation', event => {
             Swal.fire({

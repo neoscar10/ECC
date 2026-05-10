@@ -61,6 +61,7 @@ class User extends Authenticatable implements JWTSubject
         'city',
         'avatar_path',
         'gender', // If used
+        'is_suspended',
     ];
 
     /**

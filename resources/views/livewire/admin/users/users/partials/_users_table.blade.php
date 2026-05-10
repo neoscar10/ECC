@@ -17,6 +17,15 @@
                     </select>
                 </div>
             </div>
+            <div class="col-sm-2">
+                <div class="input-light">
+                    <select class="form-control" wire:model.live="suspensionFilter">
+                        <option value="">All Account Status</option>
+                        <option value="active">Active Accounts</option>
+                        <option value="suspended">Suspended Accounts</option>
+                    </select>
+                </div>
+            </div>
             <div class="col-sm-auto ms-auto d-flex gap-2">
                 <button type="button" class="btn btn-soft-info" wire:click="openTierCodesModal" wire:loading.attr="disabled">
                     <i class="ri-price-tag-3-line align-bottom me-1"></i> View Tier Codes
@@ -56,7 +65,12 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <h5 class="fs-14 m-0">{{ $user->name }}</h5>
+                                        <h5 class="fs-14 m-0">
+                                            {{ $user->name }}
+                                            @if($user->is_suspended)
+                                                <span class="badge bg-danger-subtle text-danger ms-1" style="font-size: 10px;">Suspended</span>
+                                            @endif
+                                        </h5>
                                         @if($user->full_name)
                                             <small class="text-muted">{{ $user->full_name }}</small>
                                         @endif
@@ -85,7 +99,17 @@
                                         @if($user->currentMembership)
                                             <li><a class="dropdown-item" href="#" wire:click.prevent="$dispatch('open-update-tier-modal', { membershipId: {{ $user->currentMembership->id }} })"><i class="mdi mdi-swap-vertical align-bottom me-2 text-muted"></i> Update Tier</a></li>
                                         @endif
-                                        <li><a class="dropdown-item remove-item-btn" wire:click="confirmDeleteUser({{ $user->id }})"><i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i> Delete</a></li>
+                                        @unless($user->hasRole('super_admin'))
+                                            <li>
+                                                <a class="dropdown-item remove-item-btn" wire:click="confirmSuspendUser({{ $user->id }})">
+                                                    @if($user->is_suspended)
+                                                        <i class="ri-refresh-line align-bottom me-2 text-muted"></i> Unsuspend
+                                                    @else
+                                                        <i class="ri-user-forbid-line align-bottom me-2 text-muted"></i> Suspend
+                                                    @endif
+                                                </a>
+                                            </li>
+                                        @endunless
                                     </ul>
                                 </div>
                             </td>

@@ -8,6 +8,7 @@ use Livewire\WithFileUploads;
 use App\Models\User;
 use App\Models\MembershipTier;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\On;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -20,6 +21,7 @@ class UsersIndex extends Component
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
     public $membershipFilter = '';
+    public $suspensionFilter = '';
     
     // User Modal properties
     public $isEditMode = false;
@@ -73,6 +75,12 @@ class UsersIndex extends Component
 
     protected $paginationTheme = 'bootstrap';
 
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'membershipFilter' => ['except' => ''],
+        'suspensionFilter' => ['except' => ''],
+    ];
+
     protected $listeners = [
         'close-modal' => 'closeModal',
         'deleteUserConfirmed' => 'deleteUser',
@@ -103,6 +111,13 @@ class UsersIndex extends Component
                 $query->whereHas('currentMembership', function ($q) {
                     $q->where('membership_tier_id', $this->membershipFilter);
                 });
+            })
+            ->when($this->suspensionFilter, function ($query) {
+                if ($this->suspensionFilter === 'suspended') {
+                    $query->where('is_suspended', true);
+                } elseif ($this->suspensionFilter === 'active') {
+                    $query->where('is_suspended', false);
+                }
             })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
@@ -279,14 +294,39 @@ class UsersIndex extends Component
         $this->resetPage();
     }
 
+    public function confirmSuspendUser($id)
+    {
+        $user = User::findOrFail($id);
+        $action = $user->is_suspended ? 'unsuspend' : 'suspend';
+        $this->dispatch('show-suspension-confirmation', action: $action, id: $id);
+    }
+    
+    #[On('suspendUserConfirmed')]
+    public function toggleSuspension($id)
+    {
+        if ($id == auth()->id()) {
+             session()->flash('error', 'You cannot suspend yourself.');
+             return;
+        }
+        
+        $user = User::findOrFail($id);
+
+        // Prevent suspending super admins
+        if ($user->hasRole('super_admin')) {
+            session()->flash('error', 'Super Admin accounts cannot be suspended.');
+            return;
+        }
+        
+        $user->is_suspended = !$user->is_suspended;
+        $user->save();
+        
+        $status = $user->is_suspended ? 'suspended' : 'activated';
+        session()->flash('success', "User account has been {$status} successfully.");
+    }
+
     public function confirmDeleteUser($id)
     {
         $this->dispatch('show-delete-confirmation', type: 'user', id: $id);
-    }
-    
-    public function deleteUser($id)
-    {
-        $this->delete($id);
     }
     
     public function delete($id)
