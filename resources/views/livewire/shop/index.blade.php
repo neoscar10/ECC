@@ -803,7 +803,7 @@
                             $rightPercent = (($selectedMax - $absoluteMin) / $rangeSpan) * 100;
                         @endphp
 
-                        <div class="shop-range-track">
+                        <div class="shop-range-track" onclick="handleTrackClick(event, this.closest('.shop-range-wrap'))">
                             <div
                                 class="shop-range-active"
                                 style="left: {{ max(0, min(100, $leftPercent)) }}%; width: {{ max(0, min(100, $rightPercent - $leftPercent)) }}%;"
@@ -911,19 +911,17 @@
 
         {{-- MOBILE FILTER OFFCANVAS --}}
         <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="shopFiltersCanvas" aria-labelledby="shopFiltersCanvasLabel" wire:ignore.self>
-            <div class="offcanvas-body position-relative">
-                {{-- Floating Close Button --}}
-                <button type="button" class="btn btn-icon btn-ghost-light position-absolute top-0 end-0 m-2 text-white opacity-75 hover-opacity-100" 
-                        data-bs-dismiss="offcanvas" aria-label="Close" style="z-index: 1070;">
-                    <i class="mdi mdi-close fs-22"></i>
-                </button>
-
-                <h5 class="fw-bold text-gold mb-4 mt-2">Filters & Sort</h5>
-                
+            <div class="offcanvas-body">
                 <div class="shop-filter-mobile-card p-3">
                     <div class="d-flex flex-column gap-4">
                         <section>
-                            <div class="shop-filter-block-title">Categories</div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="shop-filter-block-title mb-0">Categories</div>
+                                <button type="button" class="btn btn-icon btn-ghost-light text-white opacity-75 hover-opacity-100 p-0" 
+                                        data-bs-dismiss="offcanvas" aria-label="Close">
+                                    <i class="mdi mdi-close fs-22"></i>
+                                </button>
+                            </div>
 
                             <div class="shop-category-list">
                                 <button
@@ -972,7 +970,7 @@
                                     $rightPercent = (($selectedMax - $absoluteMin) / $rangeSpan) * 100;
                                 @endphp
 
-                                <div class="shop-range-track">
+                                <div class="shop-range-track" onclick="handleTrackClick(event, this.closest('.shop-range-wrap'))">
                                     <div
                                         class="shop-range-active"
                                         style="left: {{ max(0, min(100, $leftPercent)) }}%; width: {{ max(0, min(100, $rightPercent - $leftPercent)) }}%;"
@@ -1265,6 +1263,37 @@
         } else {
             minInput.style.zIndex = "2";
             maxInput.style.zIndex = "3";
+        }
+    };
+
+    // Click to move functionality
+    window.handleTrackClick = (e, wrap) => {
+        // Don't trigger if we clicked a thumb
+        if (e.target.classList.contains('shop-range-native') || e.target.classList.contains('shop-range-thumb-visual')) return;
+
+        const minInput = wrap.querySelector('.min-range');
+        const maxInput = wrap.querySelector('.max-range');
+        const track = wrap.querySelector('.shop-range-track');
+        if (!minInput || !maxInput || !track) return;
+
+        const rect = track.getBoundingClientRect();
+        const percent = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+        
+        const absMin = parseInt(minInput.min);
+        const absMax = parseInt(minInput.max);
+        const newValue = absMin + (percent * (absMax - absMin));
+        
+        const distMin = Math.abs(newValue - parseInt(minInput.value));
+        const distMax = Math.abs(newValue - parseInt(maxInput.value));
+        
+        if (distMin < distMax) {
+            minInput.value = newValue;
+            updateRangeUI(minInput);
+            minInput.dispatchEvent(new Event('change')); // Trigger Livewire
+        } else {
+            maxInput.value = newValue;
+            updateRangeUI(maxInput);
+            maxInput.dispatchEvent(new Event('change')); // Trigger Livewire
         }
     };
 
