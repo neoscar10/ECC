@@ -617,6 +617,49 @@ class Index extends Component
         }
     }
 
+    public function moveImage($id, $direction, $type = 'main')
+    {
+        if (!$this->productId) return;
+        $product = ArchiveProduct::find($this->productId);
+        if (!$product) return;
+
+        $query = ($type === 'main') ? $product->images() : $product->images360();
+        $images = $query->orderBy('sort_order')->get();
+        
+        $currentIndex = $images->search(fn($img) => $img->id == $id);
+        if ($currentIndex === false) return;
+
+        $targetIndex = ($direction === 'up') ? $currentIndex - 1 : $currentIndex + 1;
+        if ($targetIndex < 0 || $targetIndex >= $images->count()) return;
+
+        $imgA = $images[$currentIndex];
+        $imgB = $images[$targetIndex];
+
+        $orderA = $imgA->sort_order;
+        $orderB = $imgB->sort_order;
+
+        // Swap
+        $imgA->update(['sort_order' => $orderB]);
+        $imgB->update(['sort_order' => $orderA]);
+
+        $this->refreshMedia();
+    }
+
+    public function moveNewImage($index, $direction, $type = 'main')
+    {
+        $arrName = ($type === 'main') ? 'newImages' : 'new360Images';
+        $arr = $this->$arrName;
+
+        $targetIndex = ($direction === 'up') ? $index - 1 : $index + 1;
+        if ($targetIndex < 0 || $targetIndex >= count($arr)) return;
+
+        $temp = $arr[$index];
+        $arr[$index] = $arr[$targetIndex];
+        $arr[$targetIndex] = $temp;
+
+        $this->$arrName = $arr;
+    }
+
 
 
     // --- Early Access Config ---
