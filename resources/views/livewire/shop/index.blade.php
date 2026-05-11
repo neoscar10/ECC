@@ -147,6 +147,7 @@
             border-radius: 999px;
             background: rgba(255,255,255,.10);
             margin: 1rem 0 .75rem;
+            cursor: pointer;
         }
 
         .shop-range-active {
@@ -155,6 +156,7 @@
             height: 100%;
             border-radius: 999px;
             background: var(--luxe-gold);
+            cursor: pointer;
         }
 
         .shop-range-thumb-visual {
@@ -224,11 +226,13 @@
         .shop-range-native::-webkit-slider-runnable-track {
             height: 4px;
             background: transparent;
+            cursor: pointer;
         }
 
         .shop-range-native::-moz-range-track {
             height: 4px;
             background: transparent;
+            cursor: pointer;
         }
 
         .shop-range-native.min-range {
