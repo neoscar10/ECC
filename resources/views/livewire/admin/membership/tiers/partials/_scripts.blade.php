@@ -12,6 +12,10 @@
             var modal = new bootstrap.Modal(document.getElementById('migrationModal'));
             modal.show();
         });
+        Livewire.on('open-resolution-modal', () => {
+            var modal = new bootstrap.Modal(document.getElementById('resolutionModal'));
+            modal.show();
+        });
             Livewire.on('close-modals', () => {
             var modals = document.querySelectorAll('.modal.show');
             modals.forEach(function(modalEl) {

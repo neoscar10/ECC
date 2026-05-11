@@ -9,6 +9,10 @@ use App\Models\MembershipTier;
 use App\Models\Privilege;
 use App\Models\Membership;
 use App\Models\MembershipApplication;
+use App\Models\Auctions\AuctionLot;
+use App\Models\Archive\ArchiveProduct;
+use App\Models\Archive\ArchiveCategory;
+use App\Models\Cms\CmsBlock;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -51,6 +55,17 @@ class Index extends Component
     public $migrationMembers = []; // List of member details
     public $selectedMembershipIds = [];
     public $selectAll = false;
+    
+    // Migration Wizard
+    public $migrationStep = 1;
+    public $restrictionTargetTierId = null;
+    public $brokenRestrictions = [
+        'auctions' => 0,
+        'archive_products' => 0,
+        'archive_categories' => 0,
+        'cms_blocks' => 0,
+        'total' => 0
+    ];
     
     // Privileges
     public $selectedPrivileges = [];
@@ -302,10 +317,16 @@ class Index extends Component
         $this->checkSuperAdmin();
         
         $this->tierToDeleteId = $id;
+        $this->migrationStep = 1;
         $this->membersOnTierCount = Membership::where('membership_tier_id', $id)->where('status', 'active')->distinct('user_id')->count();
         $hasApps = MembershipApplication::where('selected_tier_id', $id)->orWhere('recommended_tier_id', $id)->exists();
 
-        if ($this->membersOnTierCount > 0 || $hasApps) {
+        // Check for product restrictions
+        $this->checkRestrictionDependencies($id);
+
+        if ($this->membersOnTierCount > 0 || $hasApps || $this->brokenRestrictions['total'] > 0) {
+            $this->migrationTargetTierId = null;
+            $this->restrictionTargetTierId = null;
             // Load unique members based on user_id to avoid visual duplicates
             $this->migrationMembers = Membership::with('user')
                 ->where('membership_tier_id', $id)
@@ -346,36 +367,43 @@ class Index extends Component
     public function executeMigration()
     {
         $this->checkSuperAdmin();
-        
-        if (empty($this->selectedMembershipIds)) {
-            session()->flash('error', 'Please select at least one member to migrate.');
-            return;
+
+
+        $rules = [
+            'restrictionTargetTierId' => 'nullable|exists:membership_tiers,id|different:tierToDeleteId'
+        ];
+
+        if (!empty($this->selectedMembershipIds)) {
+            $rules['migrationTargetTierId'] = 'required|exists:membership_tiers,id|different:tierToDeleteId';
         }
 
-        $this->validate([
-            'migrationTargetTierId' => 'required|exists:membership_tiers,id|different:tierToDeleteId'
-        ], [
-            'migrationTargetTierId.required' => 'Please select a destination tier for migration.',
-            'migrationTargetTierId.different' => 'Target tier must be different from the deleted tier.'
+        $this->validate($rules, [
+            'migrationTargetTierId.required' => 'Please select a destination tier for members.',
+            'migrationTargetTierId.different' => 'Target tier must be different from the deleted tier.',
+            'restrictionTargetTierId.different' => 'Target tier must be different from the deleted tier.'
         ]);
 
         DB::transaction(function() {
-            // Get user IDs for the selected memberships
-            $userIds = Membership::whereIn('id', $this->selectedMembershipIds)->pluck('user_id')->unique();
+            // 1. Migrate selected memberships (Existing logic)
+            if (!empty($this->selectedMembershipIds)) {
+                $userIds = Membership::whereIn('id', $this->selectedMembershipIds)->pluck('user_id')->unique();
+                Membership::whereIn('user_id', $userIds)
+                    ->where('membership_tier_id', $this->tierToDeleteId)
+                    ->update(['membership_tier_id' => $this->migrationTargetTierId]);
+                    
+                MembershipApplication::whereIn('user_id', $userIds)
+                    ->where('selected_tier_id', $this->tierToDeleteId)
+                    ->update(['selected_tier_id' => $this->migrationTargetTierId]);
+                    
+                MembershipApplication::whereIn('user_id', $userIds)
+                    ->where('recommended_tier_id', $this->tierToDeleteId)
+                    ->update(['recommended_tier_id' => $this->migrationTargetTierId]);
+            }
 
-            // 1. Migrate ALL membership records for these users that are on the target tier
-            Membership::whereIn('user_id', $userIds)
-                ->where('membership_tier_id', $this->tierToDeleteId)
-                ->update(['membership_tier_id' => $this->migrationTargetTierId]);
-                
-            // 2. Update Applications
-            MembershipApplication::whereIn('user_id', $userIds)
-                ->where('selected_tier_id', $this->tierToDeleteId)
-                ->update(['selected_tier_id' => $this->migrationTargetTierId]);
-                
-            MembershipApplication::whereIn('user_id', $userIds)
-                ->where('recommended_tier_id', $this->tierToDeleteId)
-                ->update(['recommended_tier_id' => $this->migrationTargetTierId]);
+            // 2. Migrate Product Restrictions (If target provided)
+            if ($this->restrictionTargetTierId) {
+                $this->migrateItemRestrictions($this->tierToDeleteId, $this->restrictionTargetTierId);
+            }
                 
             // Check if any members are left on this tier
             $remainingCount = Membership::where('membership_tier_id', $this->tierToDeleteId)->count();
@@ -389,8 +417,9 @@ class Index extends Component
 
         // Refresh count
         $this->membersOnTierCount = Membership::where('membership_tier_id', $this->tierToDeleteId)->where('status', 'active')->distinct('user_id')->count();
+        $this->checkRestrictionDependencies($this->tierToDeleteId);
         
-        if ($this->membersOnTierCount === 0) {
+        if ($this->membersOnTierCount === 0 && $this->brokenRestrictions['total'] === 0) {
             $this->showMigrationModal = false;
             // Now trigger delete confirmation since it's clean
             $this->confirmingDeletion = true;
@@ -415,20 +444,295 @@ class Index extends Component
                 ->toArray();
             $this->selectedMembershipIds = [];
             $this->selectAll = false;
-            session()->flash('success', 'Selected members migrated successfully.');
+            $this->showMigrationModal = false;
+            $this->dispatch('close-modals');
+            session()->flash('success', 'Migration executed successfully. Note: There are still remaining dependencies on this tier.');
         }
     }
 
-    public function delete()
+    // Resolution Properties
+    public $showResolutionModal = false;
+    public $orphanedItems = [];
+    public $resolutionTargetTierId = null;
+
+    public function getOrphanedRestrictionsCount()
+    {
+        $activeTierIds = MembershipTier::pluck('id')->toArray();
+        
+        $orphanedAuctions = AuctionLot::whereNotNull('restricted_min_tier_id')
+            ->whereNotIn('restricted_min_tier_id', $activeTierIds)->count();
+            
+        $orphanedArchive = ArchiveProduct::whereNotNull('restricted_min_tier_id')
+            ->whereNotIn('restricted_min_tier_id', $activeTierIds)->count();
+            
+        $orphanedCms = CmsBlock::whereNotNull('restricted_min_tier_id')
+            ->whereNotIn('restricted_min_tier_id', $activeTierIds)->count();
+
+        // Plus pivot table checks if we want to be very thorough
+        // But hierarchical min tier is the primary "breaker"
+        
+        return $orphanedAuctions + $orphanedArchive + $orphanedCms;
+    }
+
+    public function openResolutionModal()
+    {
+        $activeTierIds = MembershipTier::pluck('id')->toArray();
+        
+        $this->orphanedItems = [];
+
+        // Fetch Auctions
+        AuctionLot::whereNotNull('restricted_min_tier_id')
+            ->whereNotIn('restricted_min_tier_id', $activeTierIds)
+            ->get()->each(function($item) {
+                $this->orphanedItems[] = ['type' => 'Auction Lot', 'name' => $item->title, 'id' => $item->id, 'module' => 'auctions'];
+            });
+
+        // Fetch Archive
+        ArchiveProduct::whereNotNull('restricted_min_tier_id')
+            ->whereNotIn('restricted_min_tier_id', $activeTierIds)
+            ->get()->each(function($item) {
+                $this->orphanedItems[] = ['type' => 'Archive Product', 'name' => $item->name, 'id' => $item->id, 'module' => 'archive'];
+            });
+
+        // Fetch CMS
+        CmsBlock::whereNotNull('restricted_min_tier_id')
+            ->whereNotIn('restricted_min_tier_id', $activeTierIds)
+            ->get()->each(function($item) {
+                $this->orphanedItems[] = ['type' => 'CMS Block', 'name' => $item->title, 'id' => $item->id, 'module' => 'cms'];
+            });
+
+        $this->showResolutionModal = true;
+        $this->dispatch('open-resolution-modal');
+    }
+
+    public function resolveAllRestrictions()
     {
         $this->checkSuperAdmin();
-        if ($this->tierToDeleteId) {
-            MembershipTier::find($this->tierToDeleteId)?->delete();
-            session()->flash('success', 'Tier deleted successfully.');
-        }
-        $this->confirmingDeletion = false;
-        $this->tierToDeleteId = null;
+        
+        $this->validate([
+            'resolutionTargetTierId' => 'required|exists:membership_tiers,id'
+        ]);
+
+        $activeTierIds = MembershipTier::pluck('id')->toArray();
+
+        // 1. Resolve Auctions
+        AuctionLot::whereNotNull('restricted_min_tier_id')
+            ->whereNotIn('restricted_min_tier_id', $activeTierIds)
+            ->update(['restricted_min_tier_id' => $this->resolutionTargetTierId]);
+
+        // 2. Resolve Archive
+        ArchiveProduct::whereNotNull('restricted_min_tier_id')
+            ->whereNotIn('restricted_min_tier_id', $activeTierIds)
+            ->update(['restricted_min_tier_id' => $this->resolutionTargetTierId]);
+
+        // 3. Resolve CMS
+        CmsBlock::whereNotNull('restricted_min_tier_id')
+            ->whereNotIn('restricted_min_tier_id', $activeTierIds)
+            ->update(['restricted_min_tier_id' => $this->resolutionTargetTierId]);
+
+        session()->flash('success', 'All orphaned restrictions have been re-assigned.');
+        $this->showResolutionModal = false;
         $this->dispatch('close-modals');
+    }
+
+    public function nextStep()
+    {
+        if ($this->migrationStep === 1) {
+            if (!empty($this->selectedMembershipIds)) {
+                $this->validate([
+                    'migrationTargetTierId' => 'required|exists:membership_tiers,id|different:tierToDeleteId'
+                ], [
+                    'migrationTargetTierId.required' => 'Please select a destination tier for the selected members.',
+                    'migrationTargetTierId.different' => 'Target tier must be different from the deleted tier.'
+                ]);
+            }
+            $this->migrationStep = 2;
+        } elseif ($this->migrationStep === 2) {
+            $this->validate([
+                'restrictionTargetTierId' => 'nullable|exists:membership_tiers,id|different:tierToDeleteId'
+            ], [
+                'restrictionTargetTierId.different' => 'Target tier must be different from the deleted tier.'
+            ]);
+            $this->migrationStep = 3;
+        }
+    }
+
+    public function previousStep()
+    {
+        if ($this->migrationStep > 1) {
+            $this->migrationStep--;
+        }
+    }
+
+    public $affectedItemsFilter = 'all';
+
+    public function getAffectedItemsList()
+    {
+        $id = $this->tierToDeleteId;
+        $items = [];
+        
+        // 1. Hierarchical/Private Dependencies (Always count as they are anchors)
+        $auctions = AuctionLot::where(function($q) use ($id) {
+            $q->where('restricted_min_tier_id', $id)
+              ->orWhere('restricted_private_tier_id', $id)
+              ->orWhere('min_clear_view_tier_id', $id)
+              ->orWhere('clear_private_tier_id', $id);
+        })->limit(20)->get();
+        foreach ($auctions as $i) {
+            $items[] = ['id' => $i->id, 'title' => $i->title, 'source' => 'auctions', 'source_label' => 'Auction Lot', 'type' => 'Hierarchical/Private'];
+        }
+
+        $archives = ArchiveProduct::where(function($q) use ($id) {
+            $q->where('restricted_min_tier_id', $id)
+              ->orWhere('restricted_private_tier_id', $id);
+        })->limit(20)->get();
+        foreach ($archives as $i) {
+            $items[] = ['id' => $i->id, 'title' => $i->title, 'source' => 'archive_products', 'source_label' => 'Archive Product', 'type' => 'Hierarchical/Private'];
+        }
+
+        $cms = CmsBlock::where(function($q) use ($id) {
+            $q->where('restricted_min_tier_id', $id)
+              ->orWhere('restricted_private_tier_id', $id)
+              ->orWhere('min_clear_view_tier_id', $id);
+        })->limit(20)->get();
+        foreach ($cms as $i) {
+            $items[] = ['id' => $i->id, 'title' => $i->title, 'source' => 'cms_blocks', 'source_label' => 'CMS Block', 'type' => 'Hierarchical/Private'];
+        }
+
+        // 2. Exclusive Pivot Dependencies
+        $aucIds = DB::table('auction_lot_visibility_tier')
+            ->select('auction_lot_id')
+            ->groupBy('auction_lot_id')
+            ->havingRaw('COUNT(*) = 1 AND MAX(membership_tier_id) = ?', [$id])
+            ->pluck('auction_lot_id');
+        $aucExclusive = AuctionLot::whereIn('id', $aucIds)->limit(20)->get();
+        foreach ($aucExclusive as $i) {
+            $items[] = ['id' => $i->id, 'title' => $i->title, 'source' => 'auctions', 'source_label' => 'Auction Lot', 'type' => 'Exclusive Access'];
+        }
+
+        $prodIds = DB::table('archive_product_visibility_tier')
+            ->select('archive_product_id')
+            ->groupBy('archive_product_id')
+            ->havingRaw('COUNT(*) = 1 AND MAX(membership_tier_id) = ?', [$id])
+            ->pluck('archive_product_id');
+        $prodExclusive = ArchiveProduct::whereIn('id', $prodIds)->limit(20)->get();
+        foreach ($prodExclusive as $i) {
+            $items[] = ['id' => $i->id, 'title' => $i->title, 'source' => 'archive_products', 'source_label' => 'Archive Product', 'type' => 'Exclusive Access'];
+        }
+
+        $catIds = DB::table('archive_category_tier')
+            ->select('archive_category_id')
+            ->groupBy('archive_category_id')
+            ->havingRaw('COUNT(*) = 1 AND MAX(membership_tier_id) = ?', [$id])
+            ->pluck('archive_category_id');
+        $catExclusive = ArchiveCategory::whereIn('id', $catIds)->limit(20)->get();
+        foreach ($catExclusive as $i) {
+            $items[] = ['id' => $i->id, 'title' => $i->name, 'source' => 'archive_categories', 'source_label' => 'Archive Category', 'type' => 'Exclusive Access'];
+        }
+
+        // Remove duplicates if an item is both hierarchical and exclusive (rare but possible)
+        $unique = collect($items)->unique(function ($item) {
+            return $item['source'] . $item['id'];
+        });
+
+        if ($this->affectedItemsFilter !== 'all') {
+            $unique = $unique->where('source', $this->affectedItemsFilter);
+        }
+
+        return $unique->values()->all();
+    }
+
+    private function checkRestrictionDependencies($tierId)
+    {
+        $count = 0;
+
+        // Hierarchical
+        $count += AuctionLot::where(function($q) use ($tierId) {
+            $q->where('restricted_min_tier_id', $tierId)
+              ->orWhere('restricted_private_tier_id', $tierId)
+              ->orWhere('min_clear_view_tier_id', $tierId)
+              ->orWhere('clear_private_tier_id', $tierId);
+        })->count();
+
+        $count += ArchiveProduct::where(function($q) use ($tierId) {
+            $q->where('restricted_min_tier_id', $tierId)
+              ->orWhere('restricted_private_tier_id', $tierId);
+        })->count();
+
+        $count += CmsBlock::where(function($q) use ($tierId) {
+            $q->where('restricted_min_tier_id', $tierId)
+              ->orWhere('restricted_private_tier_id', $tierId)
+              ->orWhere('min_clear_view_tier_id', $tierId);
+        })->count();
+
+        // Pivot Exclusive Access
+        $count += DB::table('auction_lot_visibility_tier')
+            ->select('auction_lot_id')
+            ->whereIn('auction_lot_id', function($q) { $q->select('id')->from('auction_lots')->whereNull('deleted_at'); })
+            ->groupBy('auction_lot_id')
+            ->havingRaw('COUNT(*) = 1 AND MAX(membership_tier_id) = ?', [$tierId])
+            ->get()->count();
+
+        $count += DB::table('archive_product_visibility_tier')
+            ->select('archive_product_id')
+            ->whereIn('archive_product_id', function($q) { $q->select('id')->from('archive_products')->whereNull('deleted_at'); })
+            ->groupBy('archive_product_id')
+            ->havingRaw('COUNT(*) = 1 AND MAX(membership_tier_id) = ?', [$tierId])
+            ->get()->count();
+
+        $count += DB::table('archive_category_tier')
+            ->select('archive_category_id')
+            ->whereIn('archive_category_id', function($q) { $q->select('id')->from('archive_categories')->whereNull('deleted_at'); })
+            ->groupBy('archive_category_id')
+            ->havingRaw('COUNT(*) = 1 AND MAX(membership_tier_id) = ?', [$tierId])
+            ->get()->count();
+
+        $this->brokenRestrictions['total'] = $count;
+    }
+
+    private function safeMigratePivot($table, $itemColumn, $oldTierId, $newTierId)
+    {
+        // 1. Find items that ALREADY have the new tier assigned
+        $conflictingIds = DB::table($table)
+            ->where('membership_tier_id', $newTierId)
+            ->pluck($itemColumn);
+
+        // 2. Delete the old tier row from those items to avoid duplicate unique keys
+        if ($conflictingIds->isNotEmpty()) {
+            DB::table($table)
+                ->where('membership_tier_id', $oldTierId)
+                ->whereIn($itemColumn, $conflictingIds)
+                ->delete();
+        }
+
+        // 3. Safely update the remaining old tier rows to the new tier
+        DB::table($table)
+            ->where('membership_tier_id', $oldTierId)
+            ->update(['membership_tier_id' => $newTierId]);
+    }
+
+    private function migrateItemRestrictions($oldTierId, $newTierId)
+    {
+        // 1. Hierarchical & Private & Clear View
+        AuctionLot::where('restricted_min_tier_id', $oldTierId)->update(['restricted_min_tier_id' => $newTierId]);
+        AuctionLot::where('restricted_private_tier_id', $oldTierId)->update(['restricted_private_tier_id' => $newTierId]);
+        AuctionLot::where('min_clear_view_tier_id', $oldTierId)->update(['min_clear_view_tier_id' => $newTierId]);
+        AuctionLot::where('clear_private_tier_id', $oldTierId)->update(['clear_private_tier_id' => $newTierId]);
+        
+        ArchiveProduct::where('restricted_min_tier_id', $oldTierId)->update(['restricted_min_tier_id' => $newTierId]);
+        ArchiveProduct::where('restricted_private_tier_id', $oldTierId)->update(['restricted_private_tier_id' => $newTierId]);
+        
+        CmsBlock::where('restricted_min_tier_id', $oldTierId)->update(['restricted_min_tier_id' => $newTierId]);
+        CmsBlock::where('restricted_private_tier_id', $oldTierId)->update(['restricted_private_tier_id' => $newTierId]);
+        CmsBlock::where('min_clear_view_tier_id', $oldTierId)->update(['min_clear_view_tier_id' => $newTierId]);
+
+        // 2. Pivot tables (Safe Migration)
+        $this->safeMigratePivot('auction_lot_visibility_tier', 'auction_lot_id', $oldTierId, $newTierId);
+        $this->safeMigratePivot('archive_product_visibility_tier', 'archive_product_id', $oldTierId, $newTierId);
+        $this->safeMigratePivot('archive_product_clear_tier', 'archive_product_id', $oldTierId, $newTierId);
+        $this->safeMigratePivot('archive_category_tier', 'archive_category_id', $oldTierId, $newTierId);
+        $this->safeMigratePivot('cms_block_visibility_tier', 'cms_block_id', $oldTierId, $newTierId);
+        $this->safeMigratePivot('cms_block_clear_tier', 'cms_block_id', $oldTierId, $newTierId);
     }
 
     protected function durationToDays(): int

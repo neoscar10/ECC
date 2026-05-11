@@ -32,6 +32,17 @@
     <!-- custom Css-->
     <link href="{{ asset('velzon/assets') }}/css/custom.min.css" rel="stylesheet" type="text/css" />
 
+    <style>
+        @keyframes pulse-red {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.7; }
+        }
+        .animate-pulse {
+            animation: pulse-red 1.5s infinite;
+        }
+    </style>
+
     <script>
         // Enforce Material Theme (Vertical, Dark Sidebar, Light Topbar, Material Theme)
         if (localStorage.getItem('data-layout') !== 'vertical' || localStorage.getItem('data-sidebar') !== 'dark' || localStorage.getItem('data-theme') !== 'material') {
@@ -280,7 +291,12 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.membership.tiers') }}" class="nav-link {{ request()->routeIs('admin.membership.tiers') ? 'active' : '' }}" data-key="t-tiers">Tiers</a>
+                                        <a href="{{ route('admin.membership.tiers') }}" class="nav-link {{ request()->routeIs('admin.membership.tiers') ? 'active' : '' }}" data-key="t-tiers">
+                                            <span>Tiers</span>
+                                            @if(\App\Models\MembershipTier::getBrokenRestrictionsCount() > 0)
+                                                <i class="ri-error-warning-fill text-danger ms-auto fs-16 animate-pulse"></i>
+                                            @endif
+                                        </a>
                                     </li>
                                     <li class="nav-item">
                                         <a href="{{ route('admin.membership.members') }}" class="nav-link {{ request()->routeIs('admin.membership.members') ? 'active' : '' }}" data-key="t-members">Members</a>

@@ -41,4 +41,20 @@ class MembershipTier extends Model
     {
         return $this->hasMany(MembershipTier::class, 'upgrade_from_id');
     }
+
+    public static function getBrokenRestrictionsCount()
+    {
+        $activeTierIds = self::pluck('id')->toArray();
+        
+        $orphanedAuctions = \App\Models\Auctions\AuctionLot::whereNotNull('restricted_min_tier_id')
+            ->whereNotIn('restricted_min_tier_id', $activeTierIds)->count();
+            
+        $orphanedArchive = \App\Models\Archive\ArchiveProduct::whereNotNull('restricted_min_tier_id')
+            ->whereNotIn('restricted_min_tier_id', $activeTierIds)->count();
+            
+        $orphanedCms = \App\Models\Cms\CmsBlock::whereNotNull('restricted_min_tier_id')
+            ->whereNotIn('restricted_min_tier_id', $activeTierIds)->count();
+
+        return $orphanedAuctions + $orphanedArchive + $orphanedCms;
+    }
 }
