@@ -162,11 +162,11 @@ class ArchiveProductService
         }
 
         if ($product->price_min_amount && $product->price_max_amount) {
-            return '₹' . number_format($product->price_min_amount / 100) . 'k - ₹' . number_format($product->price_max_amount / 100) . 'k';
+            return '₹' . number_format($product->price_min_amount / 1000) . 'k - ₹' . number_format($product->price_max_amount / 1000) . 'k';
         }
 
         if ($product->price_min_amount) {
-            return 'From ₹' . number_format($product->price_min_amount / 100) . 'k';
+            return 'From ₹' . number_format($product->price_min_amount / 1000) . 'k';
         }
 
         return 'Request';
