@@ -29,8 +29,16 @@
     <div class="col-md-6">
         <label class="form-label">Status</label>
         <div class="form-check form-switch form-switch-lg">
-            <input class="form-check-input" type="checkbox" id="isActiveSwitch" wire:model="is_active">
+            <input class="form-check-input" type="checkbox" id="isActiveSwitch" wire:model.live="is_active">
             <label class="form-check-label" for="isActiveSwitch">Active</label>
         </div>
     </div>
+    
+    @if(!$is_active)
+    <div class="col-12 mt-2">
+        <label class="form-label">Reason for Deactivation <span class="text-danger">*</span></label>
+        <textarea class="form-control" wire:model="deactivation_reason" rows="2" placeholder="Why is this product inactive? (e.g., Temporarily out of stock, discontinued)"></textarea>
+        @error('deactivation_reason') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+    </div>
+    @endif
 </div>

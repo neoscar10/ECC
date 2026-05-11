@@ -21,6 +21,7 @@ class ShopProduct extends Model
         'stock_qty',
         'currency',
         'is_active',
+        'deactivation_reason',
         'computed_min_price',
         'computed_max_price',
     ];

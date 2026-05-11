@@ -124,9 +124,16 @@
                                     <span class="text-body fw-medium">{{ $product->currency }} {{ number_format($product->base_price, 2) }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge text-{{ $product->is_active ? 'success' : 'danger' }}">
-                                        {{ $product->is_active ? 'Active' : 'Inactive' }}
-                                    </span>
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch form-switch-md" dir="ltr">
+                                            <input type="checkbox" class="form-check-input" 
+                                                wire:click.prevent="toggleStatus({{ $product->id }}, {{ $product->is_active ? 'true' : 'false' }})" 
+                                                {{ $product->is_active ? 'checked' : '' }}>
+                                        </div>
+                                        @if(!$product->is_active && $product->deactivation_reason)
+                                            <i class="ri-information-line text-muted ms-2 fs-15" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $product->deactivation_reason }}" style="cursor: help;"></i>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="dropdown d-inline-block">
@@ -181,6 +188,7 @@
     {{-- Create/Edit Modal Placeholder (Will be separate file included) --}}
     @include('livewire.admin.shop.products.create')
     @include('livewire.admin.shop.products.partials._delete-confirm')
+    @include('livewire.admin.shop.products.partials._deactivate-modal')
 
 </div>
 
@@ -217,6 +225,26 @@
 
     window.addEventListener('hide-product-delete-modal', event => {
         let el = document.getElementById('deleteProductModal');
+        let modal = bootstrap.Modal.getInstance(el);
+        if (modal) {
+            modal.hide();
+        }
+        setTimeout(() => {
+            if (!document.querySelector('.modal.show')) {
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+            }
+        }, 350);
+    });
+
+    window.addEventListener('show-deactivation-modal', event => {
+        let el = document.getElementById('deactivateProductModal');
+        let modal = bootstrap.Modal.getOrCreateInstance(el);
+        modal.show();
+    });
+
+    window.addEventListener('hide-deactivation-modal', event => {
+        let el = document.getElementById('deactivateProductModal');
         let modal = bootstrap.Modal.getInstance(el);
         if (modal) {
             modal.hide();

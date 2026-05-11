@@ -45,6 +45,7 @@ class Index extends Component
     public $base_price;
     public $currency = 'INR';
     public $is_active = true;
+    public $deactivation_reason = null;
     public $computed_min_price = 0;
     public $computed_max_price = 0;
 
@@ -98,6 +99,9 @@ class Index extends Component
     
     // Deletion
     public $productToDeleteId = null;
+
+    // Quick Toggle State
+    public $deactivationProductId = null;
 
     // --- Render & Computed Props ---
 
@@ -213,6 +217,45 @@ class Index extends Component
         }
     }
 
+    public function toggleStatus($id, $currentStatus)
+    {
+        $product = ShopProduct::findOrFail($id);
+
+        if ($currentStatus) {
+            // Turning OFF - intercept and ask for reason
+            $this->deactivationProductId = $id;
+            $this->deactivation_reason = '';
+            $this->dispatch('show-deactivation-modal');
+        } else {
+            // Turning ON - do it immediately and clear the reason
+            $product->update([
+                'is_active' => true,
+                'deactivation_reason' => null
+            ]);
+            session()->flash('success', 'Product activated successfully.');
+        }
+    }
+
+    public function confirmDeactivation()
+    {
+        $this->validate([
+            'deactivation_reason' => 'required|string|min:5|max:1000'
+        ]);
+
+        if ($this->deactivationProductId) {
+            $product = ShopProduct::findOrFail($this->deactivationProductId);
+            $product->update([
+                'is_active' => false,
+                'deactivation_reason' => $this->deactivation_reason
+            ]);
+            session()->flash('success', 'Product deactivated successfully.');
+        }
+
+        $this->deactivationProductId = null;
+        $this->deactivation_reason = null;
+        $this->dispatch('hide-deactivation-modal');
+    }
+
     // --- Review Logic ---
 
     public $reviewData = [];
@@ -260,6 +303,7 @@ class Index extends Component
             'price' => $this->base_price,
             'currency' => $this->currency,
             'is_active' => $this->is_active,
+            'deactivation_reason' => !$this->is_active ? $this->deactivation_reason : null,
             'description' => $this->description,
         ];
 
@@ -380,6 +424,7 @@ class Index extends Component
         $this->base_price = $product->base_price;
         $this->currency = $product->currency;
         $this->is_active = $product->is_active;
+        $this->deactivation_reason = $product->deactivation_reason;
 
         // Simple Stock Logic
         $this->stock_qty = $product->stock_qty;
@@ -463,6 +508,7 @@ class Index extends Component
     public function closeModal()
     {
         $this->showCreateModal = false;
+        $this->deactivation_reason = null; // Clear out just in case
         $this->dispatch('hide-create-modal');
         $this->dispatch('md:reset', id: 'product_description_md');
         $this->descriptionEditorKey = 'closed-' . uniqid();
@@ -776,6 +822,7 @@ class Index extends Component
             'title' => 'required|string|max:255',
             'base_price' => 'required|numeric|min:0',
             'selectedCategories' => 'required|array|min:1',
+            'deactivation_reason' => !$this->is_active ? 'required|string|min:5' : 'nullable',
         ]);
 
         if (!$this->has_variants) {
@@ -791,6 +838,7 @@ class Index extends Component
                 'base_price' => $this->base_price,
                 'currency' => $this->currency,
                 'is_active' => $this->is_active,
+                'deactivation_reason' => !$this->is_active ? $this->deactivation_reason : null,
                 'stock_qty' => $this->has_variants ? null : $this->stock_qty,
             ]);
 
@@ -870,6 +918,7 @@ class Index extends Component
         $this->base_price = '';
         $this->currency = 'INR';
         $this->is_active = true;
+        $this->deactivation_reason = null;
         
         $this->selectedCategories = [];
         $this->categorySearch = '';
@@ -938,6 +987,7 @@ class Index extends Component
             'title' => 'required|string|max:255',
             'base_price' => 'required|numeric|min:0',
             'selectedCategories' => 'required|array|min:1',
+            'deactivation_reason' => !$this->is_active ? 'required|string|min:5' : 'nullable',
         ]);
 
         if (!$this->has_variants) {
@@ -968,6 +1018,7 @@ class Index extends Component
         $this->validate([
             'title' => 'required|string|max:255',
             'base_price' => 'required|numeric|min:0',
+            'deactivation_reason' => !$this->is_active ? 'required|string|min:5' : 'nullable',
         ]);
 
         $product->update([
@@ -977,6 +1028,7 @@ class Index extends Component
             'base_price' => $this->base_price,
             'currency' => $this->currency,
             'is_active' => $this->is_active,
+            'deactivation_reason' => !$this->is_active ? $this->deactivation_reason : null,
         ]);
     }
 
