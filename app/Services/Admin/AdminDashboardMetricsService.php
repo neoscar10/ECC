@@ -59,7 +59,7 @@ class AdminDashboardMetricsService
     private function calculateTotalSales(): float
     {
         $shopSales = ShopOrder::where('payment_status', 'paid')->sum('total_amount');
-        $otherSales = Order::whereNotNull('paid_at')->sum('subtotal_inr');
+        $otherSales = Order::where('status', 'completed')->sum('subtotal_inr');
         
         return (float) ($shopSales + $otherSales);
     }
@@ -131,9 +131,9 @@ class AdminDashboardMetricsService
                 }
                 
                 if ($source === 'all' || $source === 'other') {
-                    $otherSales = Order::whereNotNull('paid_at')
-                        ->whereDate('paid_at', Carbon::today())
-                        ->whereRaw('HOUR(paid_at) = ?', [$hour])
+                    $otherSales = Order::where('status', 'completed')
+                        ->whereDate('sold_at', Carbon::today())
+                        ->whereRaw('HOUR(sold_at) = ?', [$hour])
                         ->sum('subtotal_inr');
                 }
                 
@@ -156,8 +156,8 @@ class AdminDashboardMetricsService
                 }
                 
                 if ($source === 'all' || $source === 'other') {
-                    $otherSales = Order::whereNotNull('paid_at')
-                        ->whereDate('paid_at', $date)
+                    $otherSales = Order::where('status', 'completed')
+                        ->whereDate('sold_at', $date)
                         ->sum('subtotal_inr');
                 }
                 
@@ -192,8 +192,8 @@ class AdminDashboardMetricsService
     {
         return [
             'shop' => (float) ShopOrder::where('payment_status', 'paid')->sum('total_amount'),
-            'archive' => (float) Order::whereNotNull('paid_at')->whereNotNull('archive_product_id')->sum('subtotal_inr'),
-            'auction' => (float) Order::whereNotNull('paid_at')->whereNotNull('auction_lot_id')->sum('subtotal_inr'),
+            'archive' => (float) Order::where('status', 'completed')->whereNotNull('archive_product_id')->sum('subtotal_inr'),
+            'auction' => (float) Order::where('status', 'completed')->whereNotNull('auction_lot_id')->sum('subtotal_inr'),
         ];
     }
 
