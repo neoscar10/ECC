@@ -258,6 +258,20 @@
         }, 350); // Wait for transition
     });
 
+    window.addEventListener('show-variation-gallery-modal', event => {
+        let el = document.getElementById('variationGalleryModal');
+        let modal = bootstrap.Modal.getOrCreateInstance(el);
+        modal.show();
+    });
+
+    window.addEventListener('hide-variation-gallery-modal', event => {
+        let el = document.getElementById('variationGalleryModal');
+        let modal = bootstrap.Modal.getInstance(el);
+        if (modal) {
+            modal.hide();
+        }
+    });
+
     window.addEventListener('show-product-delete-modal', event => {
         let el = document.getElementById('deleteProductModal');
         let modal = bootstrap.Modal.getOrCreateInstance(el);
