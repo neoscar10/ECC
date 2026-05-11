@@ -132,7 +132,9 @@ class Index extends Component
     public function render(ShopProductService $productService, CartService $cartService)
     {
         // 1. Categories
-        $categories = ShopCategory::active()->roots()->orderBy('sort_order')->orderBy('name')->get();
+        $categories = ShopCategory::active()->roots()->with(['children' => function($q) {
+            $q->active()->orderBy('sort_order')->orderBy('name');
+        }])->orderBy('sort_order')->orderBy('name')->get();
 
         // 2. Tag Groups
         $tagGroups = ShopTagGroup::active()->with(['tags' => function ($q) {
@@ -158,7 +160,13 @@ class Index extends Component
         ];
 
         if ($this->activeCategoryId) {
-            $filters['category_ids'] = [$this->activeCategoryId];
+            $catIds = [$this->activeCategoryId];
+            $category = ShopCategory::find($this->activeCategoryId);
+            if ($category) {
+                // Also include all children IDs for a broader search when parent is selected
+                $catIds = array_merge($catIds, $category->children()->pluck('id')->toArray());
+            }
+            $filters['category_ids'] = $catIds;
         }
 
         if (!empty($groupedTags)) {

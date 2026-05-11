@@ -734,6 +734,18 @@
         .hover-opacity-100 { transition: opacity 0.2s ease; }
         .hover-opacity-100:hover { opacity: 1 !important; }
         .text-gold { color: var(--luxe-gold) !important; }
+        .shop-filter-link.parent-active {
+            color: var(--luxe-gold);
+            font-weight: 600;
+        }
+
+        .border-gold-subtle {
+            border-color: rgba(212, 175, 55, 0.2) !important;
+        }
+
+        .shop-category-item {
+            transition: all 0.3s ease;
+        }
     </style>
     @endpush
 
@@ -773,20 +785,42 @@
                             @php
                                 $categoryId = $category->id;
                                 $categoryName = $category->name;
-                                $categoryCount = tap($category->products_count, fn($c) => $c);
                                 $categoryActive = (string) $activeCategoryId === (string) $categoryId;
+                                $hasChildren = $category->children->isNotEmpty();
+                                $childActive = !$categoryActive && !empty($activeCategoryId) && $category->children->pluck('id')->contains($activeCategoryId);
                             @endphp
 
-                            <button
-                                type="button"
-                                wire:click="$set('activeCategoryId', '{{ $categoryId }}')"
-                                class="shop-filter-link {{ $categoryActive ? 'active' : '' }}"
-                            >
-                                <span>{{ $categoryName }}</span>
-                                @if(!is_null($categoryCount))
-                                    <span class="shop-filter-count">{{ $categoryCount }}</span>
+                            <div class="shop-category-item">
+                                <button
+                                    type="button"
+                                    wire:click="$set('activeCategoryId', '{{ $categoryId }}')"
+                                    class="shop-filter-link {{ $categoryActive ? 'active' : '' }} {{ $childActive ? 'parent-active' : '' }}"
+                                >
+                                    <span>{{ $categoryName }}</span>
+                                    @if($hasChildren)
+                                        <i class="mdi mdi-chevron-{{ $categoryActive || $childActive ? 'down' : 'right' }} ms-auto opacity-50"></i>
+                                    @endif
+                                </button>
+
+                                @if($hasChildren && ($categoryActive || $childActive))
+                                    <div class="shop-category-nested ms-3 border-start border-gold-subtle ps-2 mt-1 d-flex flex-column gap-1">
+                                        @foreach($category->children as $child)
+                                            @php
+                                                $childId = $child->id;
+                                                $isChildActive = (string) $activeCategoryId === (string) $childId;
+                                            @endphp
+                                            <button
+                                                type="button"
+                                                wire:click="$set('activeCategoryId', '{{ $childId }}')"
+                                                class="shop-filter-link py-1 {{ $isChildActive ? 'active' : '' }}"
+                                                style="font-size: 0.85rem;"
+                                            >
+                                                <span>{{ $child->name }}</span>
+                                            </button>
+                                        @endforeach
+                                    </div>
                                 @endif
-                            </button>
+                            </div>
                         @endforeach
                     </div>
                 </div>
@@ -942,20 +976,42 @@
                                     @php
                                         $categoryId = $category->id;
                                         $categoryName = $category->name;
-                                        $categoryCount = tap($category->products_count, fn($c) => $c);
                                         $categoryActive = (string) $activeCategoryId === (string) $categoryId;
+                                        $hasChildren = $category->children->isNotEmpty();
+                                        $childActive = !$categoryActive && !empty($activeCategoryId) && $category->children->pluck('id')->contains($activeCategoryId);
                                     @endphp
 
-                                    <button
-                                        type="button"
-                                        wire:click="$set('activeCategoryId', '{{ $categoryId }}')"
-                                        class="shop-filter-link {{ $categoryActive ? 'active' : '' }}"
-                                    >
-                                        <span>{{ $categoryName }}</span>
-                                        @if(!is_null($categoryCount))
-                                            <span class="shop-filter-count">{{ $categoryCount }}</span>
+                                    <div class="shop-category-item">
+                                        <button
+                                            type="button"
+                                            wire:click="$set('activeCategoryId', '{{ $categoryId }}')"
+                                            class="shop-filter-link {{ $categoryActive ? 'active' : '' }} {{ $childActive ? 'parent-active' : '' }}"
+                                        >
+                                            <span>{{ $categoryName }}</span>
+                                            @if($hasChildren)
+                                                <i class="mdi mdi-chevron-{{ $categoryActive || $childActive ? 'down' : 'right' }} ms-auto opacity-50"></i>
+                                            @endif
+                                        </button>
+
+                                        @if($hasChildren && ($categoryActive || $childActive))
+                                            <div class="shop-category-nested ms-3 border-start border-gold-subtle ps-2 mt-1 d-flex flex-column gap-1">
+                                                @foreach($category->children as $child)
+                                                    @php
+                                                        $childId = $child->id;
+                                                        $isChildActive = (string) $activeCategoryId === (string) $childId;
+                                                    @endphp
+                                                    <button
+                                                        type="button"
+                                                        wire:click="$set('activeCategoryId', '{{ $childId }}')"
+                                                        class="shop-filter-link py-1 {{ $isChildActive ? 'active' : '' }}"
+                                                        style="font-size: 0.85rem;"
+                                                    >
+                                                        <span>{{ $child->name }}</span>
+                                                    </button>
+                                                @endforeach
+                                            </div>
                                         @endif
-                                    </button>
+                                    </div>
                                 @endforeach
                             </div>
                         </section>
