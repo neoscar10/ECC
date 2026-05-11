@@ -49,6 +49,21 @@ class Index extends Component
         $this->dispatch('show-view-modal');
     }
 
+    public function attemptLogSale($enquiryId)
+    {
+        $enquiry = ArchiveProductEnquiry::with('product')->find($enquiryId);
+        
+        if (!$enquiry || !$enquiry->product || (method_exists($enquiry->product, 'trashed') && $enquiry->product->trashed())) {
+            $this->dispatch('swal:error', [
+                'title' => 'Product Unavailable',
+                'text'  => 'You cannot log a sale for this enquiry because the associated product has been deleted or is no longer available in the system.',
+            ]);
+            return;
+        }
+        
+        $this->dispatch('log-sale-from-enquiry', enquiryId: $enquiry->id);
+    }
+
     public function updateStatus($id, $newStatus)
     {
         $enquiry = ArchiveProductEnquiry::find($id);

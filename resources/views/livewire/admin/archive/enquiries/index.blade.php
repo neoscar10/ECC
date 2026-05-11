@@ -82,10 +82,13 @@
                                                     </div>
                                                     <div class="flex-grow-1">
                                                         {{ Str::limit($enquiry->product->title, 20) }}
+                                                        @if(method_exists($enquiry->product, 'trashed') && $enquiry->product->trashed())
+                                                            <span class="badge bg-danger-subtle text-danger ms-1" style="font-size: 10px;">DELETED</span>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             @else
-                                                <span class="text-muted text-italic">Product Not available</span>
+                                                <span class="badge bg-danger-subtle text-danger">Product Deleted</span>
                                             @endif
                                         </td>
                                         <td>
@@ -93,13 +96,13 @@
                                         </td>
                                         <td class="status">
                                             @if($enquiry->status === 'new')
-                                                <span class="text-uppercase">New</span>
+                                                <span class="badge bg-info-subtle text-info text-uppercase">New</span>
                                             @elseif($enquiry->status === 'contacted')
-                                                <span class="text-uppercase">Contacted</span>
+                                                <span class="badge bg-warning-subtle text-warning text-uppercase">Contacted</span>
                                             @elseif($enquiry->status === 'closed')
-                                                <span class="text-uppercase">Closed</span>
+                                                <span class="badge bg-success-subtle text-success text-uppercase">Closed</span>
                                             @else
-                                                <span class="text-uppercase">{{ $enquiry->status }}</span>
+                                                <span class="badge bg-secondary-subtle text-secondary text-uppercase">{{ $enquiry->status }}</span>
                                             @endif
                                         </td>
                                         <td>
@@ -111,7 +114,7 @@
                                                     <li><a href="#" wire:click.prevent="viewEnquiry({{ $enquiry->id }})" class="dropdown-item"><i class="ri-eye-fill align-bottom me-2 text-muted"></i> View</a></li>
                                                     <li><a class="dropdown-item edit-item-btn" href="#" wire:click.prevent="updateStatus({{ $enquiry->id }}, 'contacted')"><i class="ri-mail-send-fill align-bottom me-2 text-muted"></i> Mark Contacted</a></li>
                                                     <li>
-                                                        <a class="dropdown-item" href="#" wire:click.prevent="$dispatch('log-sale-from-enquiry', { enquiryId: {{ $enquiry->id }} })">
+                                                        <a class="dropdown-item" href="#" wire:click.prevent="attemptLogSale({{ $enquiry->id }})">
                                                             <i class="ri-shopping-cart-2-line align-bottom me-2 text-primary"></i> Log Sale
                                                         </a>
                                                     </li>
@@ -187,7 +190,12 @@
                                             @endif
                                         </div>
                                         <div class="flex-grow-1">
-                                            <h6 class="fs-14 mb-1">{{ $selectedEnquiry->product->title }}</h6>
+                                            <h6 class="fs-14 mb-1">
+                                                {{ $selectedEnquiry->product->title }}
+                                                @if(method_exists($selectedEnquiry->product, 'trashed') && $selectedEnquiry->product->trashed())
+                                                    <span class="badge bg-danger-subtle text-danger ms-1">Deleted</span>
+                                                @endif
+                                            </h6>
                                             <p class="text-muted mb-0">{{ $selectedEnquiry->product->category->title ?? 'Unknown Category' }}</p>
                                             <a href="#" class="text-primary fs-12">View Product</a>
                                         </div>
