@@ -871,8 +871,13 @@
                     </div>
 
                     <div class="d-flex align-items-center d-lg-none gap-2">
-                        <a href="{{ $cartUrl }}" class="luxe-icon-btn d-lg-none" aria-label="Cart">
+                        <a href="{{ $cartUrl }}" class="luxe-icon-btn d-lg-none" aria-label="Cart"
+                           x-data="{ count: {{ (int)($cartCount ?? 0) }} }"
+                           @refresh-cart-badge.window="count = $event.detail.count">
                             <i class="mdi mdi-cart-outline fs-5"></i>
+                            <template x-if="count > 0">
+                                <span class="luxe-icon-badge badge rounded-pill" x-text="count"></span>
+                            </template>
                         </a>
                         <button
                             class="btn btn-link text-decoration-none text-white p-0 border-0 shadow-none"

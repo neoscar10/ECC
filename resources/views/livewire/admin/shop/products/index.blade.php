@@ -243,7 +243,7 @@
 
     window.addEventListener('hide-create-modal', event => {
         let el = document.getElementById('createProductModal');
-        let modal = bootstrap.Modal.getInstance(el);
+        let modal = bootstrap.Modal.getOrCreateInstance(el);
         if (modal) {
             modal.hide();
         }
@@ -266,7 +266,7 @@
 
     window.addEventListener('hide-variation-gallery-modal', event => {
         let el = document.getElementById('variationGalleryModal');
-        let modal = bootstrap.Modal.getInstance(el);
+        let modal = bootstrap.Modal.getOrCreateInstance(el);
         if (modal) {
             modal.hide();
         }
@@ -280,7 +280,7 @@
 
     window.addEventListener('hide-product-delete-modal', event => {
         let el = document.getElementById('deleteProductModal');
-        let modal = bootstrap.Modal.getInstance(el);
+        let modal = bootstrap.Modal.getOrCreateInstance(el);
         if (modal) {
             modal.hide();
         }
@@ -300,7 +300,7 @@
 
     window.addEventListener('hide-deactivation-modal', event => {
         let el = document.getElementById('deactivateProductModal');
-        let modal = bootstrap.Modal.getInstance(el);
+        let modal = bootstrap.Modal.getOrCreateInstance(el);
         if (modal) {
             modal.hide();
         }

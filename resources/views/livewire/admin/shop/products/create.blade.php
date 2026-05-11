@@ -146,7 +146,7 @@
                             </button>
                         @endif
 
-                         <button type="button" class="btn btn-success" wire:click="saveVariationsOnly">
+                         <button type="button" class="btn btn-success" wire:click="saveVariationsOnly" data-bs-dismiss="modal">
                             <i class="ri-save-line align-bottom me-1"></i> Save Changes
                         </button>
                     </div>
