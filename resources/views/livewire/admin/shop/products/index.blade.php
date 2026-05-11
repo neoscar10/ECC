@@ -198,118 +198,98 @@
 <!-- Sortable.js -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
-    const initShopSortable = () => {
-        // Existing Images
-        const elEx = document.getElementById('shop-existing-images');
-        if (elEx) {
-            new Sortable(elEx, {
-                animation: 150,
-                onEnd: function (evt) {
-                    let orderedIds = Array.from(elEx.children).map(el => el.dataset.id);
-                    @this.call('reorderImages', orderedIds);
+    document.addEventListener('livewire:initialized', () => {
+        // Modal Instances
+        const createModal = new bootstrap.Modal(document.getElementById('createProductModal'));
+        const variationGalleryModal = new bootstrap.Modal(document.getElementById('variationGalleryModal'));
+        const deleteProductModal = new bootstrap.Modal(document.getElementById('deleteProductModal'));
+        const deactivateProductModal = new bootstrap.Modal(document.getElementById('deactivateProductModal'));
+
+        // Sortable Initialization
+        const initShopSortable = () => {
+            const elEx = document.getElementById('shop-existing-images');
+            if (elEx) {
+                new Sortable(elEx, {
+                    animation: 150,
+                    onEnd: function (evt) {
+                        let orderedIds = Array.from(elEx.children).map(el => el.dataset.id);
+                        @this.call('reorderImages', orderedIds);
+                    }
+                });
+            }
+
+            const elNew = document.getElementById('shop-new-images');
+            if (elNew) {
+                new Sortable(elNew, {
+                    animation: 150,
+                    onEnd: function (evt) {
+                        let indices = Array.from(elNew.children).map(el => el.dataset.index);
+                        @this.call('reorderNewImages', indices);
+                    }
+                });
+            }
+        };
+
+        // Create/Edit Modal Events
+        Livewire.on('show-create-modal', () => {
+            createModal.show();
+            setTimeout(initShopSortable, 500);
+        });
+
+        Livewire.on('hide-create-modal', () => { createModal.hide(); });
+        Livewire.on('shop-product-created', () => { createModal.hide(); });
+        Livewire.on('shop-product-updated', () => { createModal.hide(); });
+
+        // Variation Gallery Events
+        Livewire.on('show-variation-gallery-modal', () => {
+            variationGalleryModal.show();
+        });
+
+        Livewire.on('hide-variation-gallery-modal', () => {
+            variationGalleryModal.hide();
+        });
+
+        // Delete Modal Events
+        Livewire.on('show-product-delete-modal', () => {
+            deleteProductModal.show();
+        });
+
+        Livewire.on('hide-product-delete-modal', () => {
+            deleteProductModal.hide();
+            setTimeout(() => {
+                if (!document.querySelector('.modal.show')) {
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.body.classList.remove('modal-open');
                 }
-            });
-        }
+            }, 350);
+        });
 
-        // New Images
-        const elNew = document.getElementById('shop-new-images');
-        if (elNew) {
-            new Sortable(elNew, {
-                animation: 150,
-                onEnd: function (evt) {
-                    let indices = Array.from(elNew.children).map(el => el.dataset.index);
-                    @this.call('reorderNewImages', indices);
+        // Deactivation Modal Events
+        Livewire.on('show-deactivation-modal', () => {
+            deactivateProductModal.show();
+        });
+
+        Livewire.on('hide-deactivation-modal', () => {
+            deactivateProductModal.hide();
+            setTimeout(() => {
+                if (!document.querySelector('.modal.show')) {
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.body.classList.remove('modal-open');
                 }
+            }, 350);
+        });
+
+        // Re-init Sortable on Livewire updates
+        Livewire.hook('request', ({ succeed }) => {
+            succeed(() => {
+                queueMicrotask(() => {
+                    initShopSortable();
+                });
             });
-        }
-    };
+        });
 
-    window.addEventListener('show-create-modal', event => {
-        let el = document.getElementById('createProductModal');
-        let modal = bootstrap.Modal.getOrCreateInstance(el);
-        modal.show();
-        // Init sortable after modal is shown (content might be rendered)
-        setTimeout(initShopSortable, 500);
-    });
-
-    // Re-init on Livewire update
-    Livewire.hook('request', (({ component, commit, respond, succeed, fail }) => {
-        succeed(({ snapshot, effect }) => {
-            queueMicrotask(() => {
-                initShopSortable();
-            });
-        })
-    }));
-
-    window.addEventListener('hide-create-modal', event => {
-        let el = document.getElementById('createProductModal');
-        let modal = bootstrap.Modal.getOrCreateInstance(el);
-        if (modal) {
-            modal.hide();
-        }
-        // Force backdrop cleanup
-        setTimeout(() => {
-            if (!document.querySelector('.modal.show')) {
-                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-                document.body.classList.remove('modal-open');
-                document.body.style.overflow = '';
-                document.body.style.paddingRight = '';
-            }
-        }, 350); // Wait for transition
-    });
-
-    window.addEventListener('show-variation-gallery-modal', event => {
-        let el = document.getElementById('variationGalleryModal');
-        let modal = bootstrap.Modal.getOrCreateInstance(el);
-        modal.show();
-    });
-
-    window.addEventListener('hide-variation-gallery-modal', event => {
-        let el = document.getElementById('variationGalleryModal');
-        let modal = bootstrap.Modal.getOrCreateInstance(el);
-        if (modal) {
-            modal.hide();
-        }
-    });
-
-    window.addEventListener('show-product-delete-modal', event => {
-        let el = document.getElementById('deleteProductModal');
-        let modal = bootstrap.Modal.getOrCreateInstance(el);
-        modal.show();
-    });
-
-    window.addEventListener('hide-product-delete-modal', event => {
-        let el = document.getElementById('deleteProductModal');
-        let modal = bootstrap.Modal.getOrCreateInstance(el);
-        if (modal) {
-            modal.hide();
-        }
-        setTimeout(() => {
-            if (!document.querySelector('.modal.show')) {
-                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-                document.body.classList.remove('modal-open');
-            }
-        }, 350);
-    });
-
-    window.addEventListener('show-deactivation-modal', event => {
-        let el = document.getElementById('deactivateProductModal');
-        let modal = bootstrap.Modal.getOrCreateInstance(el);
-        modal.show();
-    });
-
-    window.addEventListener('hide-deactivation-modal', event => {
-        let el = document.getElementById('deactivateProductModal');
-        let modal = bootstrap.Modal.getOrCreateInstance(el);
-        if (modal) {
-            modal.hide();
-        }
-        setTimeout(() => {
-            if (!document.querySelector('.modal.show')) {
-                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-                document.body.classList.remove('modal-open');
-            }
-        }, 350);
+        // Initial Sortable Init
+        initShopSortable();
     });
 </script>
 @endpush

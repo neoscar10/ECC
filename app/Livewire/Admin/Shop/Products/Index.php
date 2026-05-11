@@ -974,6 +974,7 @@ class Index extends Component
 
         $this->closeModal();
         $this->resetForm();
+        $this->dispatch('shop-product-created');
         session()->flash('success', 'Product created successfully.');
     }
 
@@ -1077,6 +1078,7 @@ class Index extends Component
 
         $this->closeModal();
         $this->resetForm();
+        $this->dispatch('shop-product-updated');
         session()->flash('success', 'Product updated successfully.');
     }
 
