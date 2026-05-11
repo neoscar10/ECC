@@ -73,7 +73,7 @@
                     </thead>
                     <tbody>
                         @forelse($products as $product)
-                            <tr>
+                            <tr class="{{ !$product->is_active ? 'table-light opacity-75' : '' }}">
                                 <td>
                                     <div class="d-flex align-items-center">
                                          @if($product->images->first())

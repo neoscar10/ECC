@@ -20,6 +20,7 @@ class Index extends Component
     
     // Action properties
     public $selectedEnquiry = null;
+    public $selectedEnquiries = [];
     
     public $viewId = null;
     
@@ -47,7 +48,28 @@ class Index extends Component
 
     public function viewEnquiry($id)
     {
-        $this->selectedEnquiry = ArchiveProductEnquiry::with(['product.images', 'user'])->find($id);
+        $primary = ArchiveProductEnquiry::with(['product.images', 'user'])->find($id);
+        
+        if ($primary->status === 'new') {
+            // Find all 'new' enquiries from the same person
+            $query = ArchiveProductEnquiry::with(['product.images', 'user'])
+                ->where('status', 'new')
+                ->where('id', '!=', $id); // exclude the primary so we can place it first or just fetch all
+                
+            if ($primary->user_id) {
+                $query->where('user_id', $primary->user_id);
+            } else {
+                $query->where('contact_email', $primary->contact_email);
+            }
+            
+            $related = $query->get();
+            $this->selectedEnquiries = collect([$primary])->merge($related);
+        } else {
+            // If not 'new', just load the one they clicked
+            $this->selectedEnquiries = collect([$primary]);
+        }
+        
+        $this->selectedEnquiry = $primary;
         $this->dispatch('show-view-modal');
     }
 
@@ -73,6 +95,16 @@ class Index extends Component
             // Refresh selected enquiry if open
             if ($this->selectedEnquiry && $this->selectedEnquiry->id == $id) {
                 $this->selectedEnquiry = $enquiry->fresh(['product.images', 'user']);
+            }
+            
+            // Refresh in the collection
+            if ($this->selectedEnquiries) {
+                $this->selectedEnquiries = $this->selectedEnquiries->map(function($e) use ($id, $enquiry) {
+                    if ($e->id == $id) {
+                        return $enquiry->fresh(['product.images', 'user']);
+                    }
+                    return $e;
+                });
             }
         }
     }

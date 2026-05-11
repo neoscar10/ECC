@@ -45,10 +45,13 @@
                                     <i class="ri-search-line search-icon"></i>
                                 </div>
                                 
-                                <select wire:model.live="status" class="form-control" style="width: 150px;">
+                                <select wire:model.live="status" class="form-control" style="width: 170px;">
                                     <option value="">All Statuses</option>
                                     <option value="new">New</option>
-                                    <option value="contacted">Contacted</option>
+                                    <option value="interested">Interested</option>
+                                    <option value="not interested">Not Interested</option>
+                                    <option value="negotiation">Negotiation</option>
+                                    <option value="awaiting payment">Awaiting Payment</option>
                                     <option value="closed">Closed</option>
                                 </select>
                             </div>
@@ -108,12 +111,18 @@
                                         <td class="status">
                                             @if($enquiry->status === 'new')
                                                 <span class="badge bg-info-subtle text-info text-uppercase">New</span>
-                                            @elseif($enquiry->status === 'contacted')
-                                                <span class="badge bg-warning-subtle text-warning text-uppercase">Contacted</span>
+                                            @elseif($enquiry->status === 'interested')
+                                                <span class="badge bg-primary-subtle text-primary text-uppercase">Interested</span>
+                                            @elseif($enquiry->status === 'not interested')
+                                                <span class="badge bg-secondary-subtle text-secondary text-uppercase">Not Interested</span>
+                                            @elseif($enquiry->status === 'negotiation')
+                                                <span class="badge bg-warning-subtle text-warning text-uppercase">Negotiation</span>
+                                            @elseif($enquiry->status === 'awaiting payment')
+                                                <span class="badge bg-dark-subtle text-dark text-uppercase">Awaiting Payment</span>
                                             @elseif($enquiry->status === 'closed')
                                                 <span class="badge bg-success-subtle text-success text-uppercase">Closed</span>
                                             @else
-                                                <span class="badge bg-secondary-subtle text-secondary text-uppercase">{{ $enquiry->status }}</span>
+                                                <span class="badge bg-light text-dark text-uppercase">{{ $enquiry->status }}</span>
                                             @endif
                                         </td>
                                         <td>
@@ -123,7 +132,7 @@
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                     <li><a href="#" wire:click.prevent="viewEnquiry({{ $enquiry->id }})" class="dropdown-item"><i class="ri-eye-fill align-bottom me-2 text-muted"></i> View</a></li>
-                                                    <li><a class="dropdown-item edit-item-btn" href="#" wire:click.prevent="updateStatus({{ $enquiry->id }}, 'contacted')"><i class="ri-mail-send-fill align-bottom me-2 text-muted"></i> Mark Contacted</a></li>
+                                                    <li><a class="dropdown-item edit-item-btn" href="#" wire:click.prevent="updateStatus({{ $enquiry->id }}, 'interested')"><i class="ri-thumb-up-fill align-bottom me-2 text-muted"></i> Mark Interested</a></li>
                                                     <li>
                                                         <a class="dropdown-item" href="#" wire:click.prevent="attemptLogSale({{ $enquiry->id }})">
                                                             <i class="ri-shopping-cart-2-line align-bottom me-2 text-primary"></i> Log Sale
@@ -172,7 +181,7 @@
                 <div class="modal-body">
                     @if($selectedEnquiry)
                         <div class="row">
-                            <div class="col-md-6 border-end">
+                            <div class="col-md-5 border-end">
                                 <h6 class="text-muted text-uppercase fw-semibold mb-3">Customer Information</h6>
                                 <p class="mb-2"><span class="fw-medium">Name:</span> {{ $selectedEnquiry->contact_name }}</p>
                                 <p class="mb-2"><span class="fw-medium">Membership Tier:</span> {{ $selectedEnquiry->user?->currentMembership?->membershipTier?->name ?? 'N/A' }}</p>
@@ -187,52 +196,59 @@
                                     @endif
                                 </p>
                             </div>
-                            <div class="col-md-6">
-                                <h6 class="text-muted text-uppercase fw-semibold mb-3">Product Information</h6>
-                                @if($selectedEnquiry->product)
-                                    <div class="d-flex gap-3 mb-3">
-                                        <div class="flex-shrink-0">
-                                            @if($selectedEnquiry->product->images->first())
-                                                <img src="{{ Storage::url($selectedEnquiry->product->images->first()->image_path) }}" alt="" class="avatar-sm rounded">
-                                            @else
-                                                <div class="avatar-sm bg-light rounded d-flex align-items-center justify-content-center">
-                                                    <i class="ri-image-2-line fs-20 text-muted"></i>
+                            <div class="col-md-7" style="max-height: 70vh; overflow-y: auto;">
+                                @foreach($selectedEnquiries as $enq)
+                                    <div class="mb-4 pb-3 {{ !$loop->last ? 'border-bottom' : '' }}">
+                                        <h6 class="text-muted text-uppercase fw-semibold mb-3">Product Information</h6>
+                                        @if($enq->product)
+                                            <div class="d-flex gap-3 mb-3">
+                                                <div class="flex-shrink-0">
+                                                    @if($enq->product->images->first())
+                                                        <img src="{{ Storage::url($enq->product->images->first()->image_path) }}" alt="" class="avatar-sm rounded">
+                                                    @else
+                                                        <div class="avatar-sm bg-light rounded d-flex align-items-center justify-content-center">
+                                                            <i class="ri-image-2-line fs-20 text-muted"></i>
+                                                        </div>
+                                                    @endif
                                                 </div>
-                                            @endif
+                                                <div class="flex-grow-1">
+                                                    <h6 class="fs-14 mb-1">
+                                                        {{ $enq->product->title }}
+                                                        @if(method_exists($enq->product, 'trashed') && $enq->product->trashed())
+                                                            <span class="badge bg-danger-subtle text-danger ms-1">Deleted</span>
+                                                        @endif
+                                                    </h6>
+                                                    <p class="text-muted mb-0">{{ $enq->product->category->title ?? 'Unknown Category' }}</p>
+                                                    <a href="{{ route('admin.archive.products.index', ['search' => $enq->product->title]) }}" target="_blank" class="text-primary fs-12">View Product</a>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <p class="text-danger">Product has been deleted.</p>
+                                        @endif
+                                        
+                                        <h6 class="text-muted text-uppercase fw-semibold mb-2 mt-4">Enquiry Status</h6>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <button wire:click="updateStatus({{ $enq->id }}, 'new')" class="btn btn-sm {{ $enq->status === 'new' ? 'btn-info' : 'btn-ghost-info' }}">New</button>
+                                            <button wire:click="updateStatus({{ $enq->id }}, 'interested')" class="btn btn-sm {{ $enq->status === 'interested' ? 'btn-primary' : 'btn-ghost-primary' }}">Interested</button>
+                                            <button wire:click="updateStatus({{ $enq->id }}, 'not interested')" class="btn btn-sm {{ $enq->status === 'not interested' ? 'btn-secondary' : 'btn-ghost-secondary' }}">Not Interested</button>
+                                            <button wire:click="updateStatus({{ $enq->id }}, 'negotiation')" class="btn btn-sm {{ $enq->status === 'negotiation' ? 'btn-warning' : 'btn-ghost-warning' }}">Negotiation</button>
+                                            <button wire:click="updateStatus({{ $enq->id }}, 'awaiting payment')" class="btn btn-sm {{ $enq->status === 'awaiting payment' ? 'btn-dark' : 'btn-ghost-dark' }}">Awaiting Payment</button>
+                                            <button wire:click="updateStatus({{ $enq->id }}, 'closed')" class="btn btn-sm {{ $enq->status === 'closed' ? 'btn-success' : 'btn-ghost-success' }}">Closed</button>
                                         </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="fs-14 mb-1">
-                                                {{ $selectedEnquiry->product->title }}
-                                                @if(method_exists($selectedEnquiry->product, 'trashed') && $selectedEnquiry->product->trashed())
-                                                    <span class="badge bg-danger-subtle text-danger ms-1">Deleted</span>
-                                                @endif
-                                            </h6>
-                                            <p class="text-muted mb-0">{{ $selectedEnquiry->product->category->title ?? 'Unknown Category' }}</p>
-                                            <a href="#" class="text-primary fs-12">View Product</a>
+                                        
+                                        <div class="mt-4">
+                                            <h6 class="text-muted text-uppercase fw-semibold mb-3">Message</h6>
+                                            <div class="p-3 bg-light rounded">
+                                                <p class="mb-0 text-break">{{ $enq->message }}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-2 text-end text-muted fs-11">
+                                            Submitted on {{ $enq->created_at->format('d M, Y h:i A') }}
                                         </div>
                                     </div>
-                                @else
-                                    <p class="text-danger">Product has been deleted.</p>
-                                @endif
-                                
-                                <h6 class="text-muted text-uppercase fw-semibold mb-2 mt-4">Enquiry Status</h6>
-                                <div class="d-flex gap-2">
-                                    <button wire:click="updateStatus({{ $selectedEnquiry->id }}, 'new')" class="btn btn-sm {{ $selectedEnquiry->status === 'new' ? 'btn-info' : 'btn-ghost-info' }}">New</button>
-                                    <button wire:click="updateStatus({{ $selectedEnquiry->id }}, 'contacted')" class="btn btn-sm {{ $selectedEnquiry->status === 'contacted' ? 'btn-warning' : 'btn-ghost-warning' }}">Contacted</button>
-                                    <button wire:click="updateStatus({{ $selectedEnquiry->id }}, 'closed')" class="btn btn-sm {{ $selectedEnquiry->status === 'closed' ? 'btn-success' : 'btn-ghost-success' }}">Closed</button>
-                                </div>
+                                @endforeach
                             </div>
-                        </div>
-                        
-                        <div class="mt-4">
-                            <h6 class="text-muted text-uppercase fw-semibold mb-3">Message</h6>
-                            <div class="p-3 bg-light rounded">
-                                <p class="mb-0 text-break">{{ $selectedEnquiry->message }}</p>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-2 text-end text-muted fs-11">
-                            Submitted on {{ $selectedEnquiry->created_at->format('d M, Y h:i A') }}
                         </div>
                     @else
                         <div class="text-center py-5">
