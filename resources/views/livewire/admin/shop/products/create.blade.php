@@ -146,8 +146,13 @@
                             </button>
                         @endif
 
-                         <button type="button" class="btn btn-success" wire:click="saveVariationsOnly" data-bs-dismiss="modal">
-                            <i class="ri-save-line align-bottom me-1"></i> Save Changes
+                         <button type="button" class="btn btn-success" wire:click="saveVariationsOnly" wire:loading.attr="disabled" wire:target="saveVariationsOnly">
+                            <span wire:loading.remove wire:target="saveVariationsOnly">
+                                <i class="ri-save-line align-bottom me-1"></i> Save Changes
+                            </span>
+                            <span wire:loading wire:target="saveVariationsOnly">
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...
+                            </span>
                         </button>
                     </div>
                 @else
@@ -161,22 +166,22 @@
 
                         @if($createStep < 6)
                             @if($isEditMode)
-                                <button type="submit" form="productForm" class="btn btn-success" wire:loading.attr="disabled" data-bs-dismiss="modal">
-                                    <span wire:loading.remove>
+                                <button type="submit" form="productForm" class="btn btn-success" wire:loading.attr="disabled" wire:target="updateProduct">
+                                    <span wire:loading.remove wire:target="updateProduct">
                                         <i class="ri-save-line align-bottom me-1"></i> Save Changes
                                     </span>
-                                    <span wire:loading>
+                                    <span wire:loading wire:target="updateProduct">
                                         <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...
                                     </span>
                                 </button>
                             @endif
-                            <button type="button" class="btn btn-primary" wire:click="nextStep" wire:loading.attr="disabled">
+                            <button type="button" class="btn btn-primary" wire:click="nextStep" wire:loading.attr="disabled" wire:target="nextStep">
                                 Next Step <i class="ri-arrow-right-line align-middle ms-1"></i>
                             </button>
                         @else
-                            <button type="submit" form="productForm" class="btn btn-success" wire:loading.attr="disabled" data-bs-dismiss="modal">
-                                <span wire:loading.remove>{{ $isEditMode ? 'Update Product' : 'Create Product' }}</span>
-                                <span wire:loading>
+                            <button type="submit" form="productForm" class="btn btn-success" wire:loading.attr="disabled" wire:target="{{ $isEditMode ? 'updateProduct' : 'storeProduct' }}">
+                                <span wire:loading.remove wire:target="{{ $isEditMode ? 'updateProduct' : 'storeProduct' }}">{{ $isEditMode ? 'Update Product' : 'Create Product' }}</span>
+                                <span wire:loading wire:target="{{ $isEditMode ? 'updateProduct' : 'storeProduct' }}">
                                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                     Saving...
                                 </span>
