@@ -20,6 +20,11 @@ class Index extends Component
     public $sortField = 'updated_at';
     public $sortDirection = 'desc';
 
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'filterStatus' => ['except' => 'all'],
+    ];
+
     public $lowStockThreshold = 5;
 
     // Modal State

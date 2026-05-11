@@ -244,7 +244,7 @@
                                             <span class="badge bg-danger-subtle text-danger">{{ $variation->stock_qty }} left</span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('admin.shop.inventory') }}" class="btn btn-sm btn-soft-primary">Restock</a>
+                                            <a href="{{ $variation->restock_url ?? route('admin.shop.inventory') }}" class="btn btn-sm btn-soft-primary">Restock</a>
                                         </td>
                                     </tr>
                                 @empty

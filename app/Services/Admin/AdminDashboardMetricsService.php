@@ -199,9 +199,6 @@ class AdminDashboardMetricsService
     /**
      * Clear dashboard cache.
      */
-    /**
-     * Clear dashboard cache.
-     */
     public function clearCache(): void
     {
         Cache::forget('admin_dashboard_kpis');
@@ -231,6 +228,7 @@ class AdminDashboardMetricsService
                     ],
                     'caption' => $variation->caption,
                     'stock_qty' => $variation->stock_qty,
+                    'restock_url' => route('admin.shop.inventory', ['search' => $variation->group?->product?->title]),
                 ];
             });
 
@@ -250,6 +248,7 @@ class AdminDashboardMetricsService
                     ],
                     'caption' => 'N/A',
                     'stock_qty' => $product->stock_qty,
+                    'restock_url' => route('admin.shop.inventory', ['search' => $product->title]),
                 ];
             });
 
