@@ -65,7 +65,7 @@
                                     <th class="sort">Date</th>
                                     <th class="sort">Contact</th>
                                     <th class="sort">Product</th>
-                                    <th class="sort">Message Preview</th>
+
                                     <th class="sort">Status</th>
                                     <th class="sort">Action</th>
                                 </tr>
@@ -104,9 +104,7 @@
                                                 <span class="badge bg-danger-subtle text-danger">Product Deleted</span>
                                             @endif
                                         </td>
-                                        <td>
-                                            {{ Str::limit($enquiry->message, 30) }}
-                                        </td>
+
                                         <td class="status">
                                             @if($enquiry->status === 'new')
                                                 <span class="badge bg-info-subtle text-info text-uppercase">New</span>
