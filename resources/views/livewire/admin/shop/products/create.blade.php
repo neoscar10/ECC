@@ -161,7 +161,7 @@
 
                         @if($createStep < 6)
                             @if($isEditMode)
-                                <button type="submit" form="productForm" class="btn btn-success" wire:loading.attr="disabled">
+                                <button type="submit" form="productForm" class="btn btn-success" wire:loading.attr="disabled" data-bs-dismiss="modal">
                                     <span wire:loading.remove>
                                         <i class="ri-save-line align-bottom me-1"></i> Save Changes
                                     </span>
@@ -174,7 +174,7 @@
                                 Next Step <i class="ri-arrow-right-line align-middle ms-1"></i>
                             </button>
                         @else
-                            <button type="submit" form="productForm" class="btn btn-success" wire:loading.attr="disabled">
+                            <button type="submit" form="productForm" class="btn btn-success" wire:loading.attr="disabled" data-bs-dismiss="modal">
                                 <span wire:loading.remove>{{ $isEditMode ? 'Update Product' : 'Create Product' }}</span>
                                 <span wire:loading>
                                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
