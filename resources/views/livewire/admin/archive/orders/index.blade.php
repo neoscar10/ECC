@@ -141,8 +141,7 @@
                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                     <li>
                                                         <a class="dropdown-item remove-item-btn" href="#" 
-                                                           wire:click.prevent="cancelOrder({{ $order->id }})"
-                                                           onclick="confirm('Are you sure? This will RESTORE stock.') || event.stopImmediatePropagation()">
+                                                           wire:click.prevent="confirmCancel({{ $order->id }})">
                                                             <i class="ri-close-circle-fill align-bottom me-2 text-danger"></i> Cancel Order
                                                         </a>
                                                     </li>
@@ -176,5 +175,49 @@
     </div>
 
     @livewire('admin.archive.orders.create')
-    
+
+    <!-- Custom Cancel Order Modal -->
+    <div wire:ignore.self class="modal fade" id="cancelOrderModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btn-close-cancel"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <lord-icon src="https://cdn.lordicon.com/tdrtiskw.json" trigger="loop" colors="primary:#f06548,secondary:#f7b84b" style="width:100px;height:100px"></lord-icon>
+                    <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+                        <h4>Are you sure?</h4>
+                        <p class="text-muted mx-4 mb-0">Are you sure you want to cancel this order? If the product still exists, its stock will be restored.</p>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between w-100">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" wire:click="executeCancelOrder" wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="executeCancelOrder">Yes, Cancel Order</span>
+                        <span wire:loading wire:target="executeCancelOrder">Cancelling...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        Livewire.on('show-cancel-modal', () => {
+            var myModal = new bootstrap.Modal(document.getElementById('cancelOrderModal'));
+            myModal.show();
+        });
+
+        Livewire.on('hide-cancel-modal', () => {
+            const modalEl = document.getElementById('cancelOrderModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+                modal.hide();
+            }
+        });
+    });
+</script>
+@endpush

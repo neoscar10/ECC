@@ -81,17 +81,30 @@ class Index extends Component
         ]);
     }
 
-    public function cancelOrder($orderId, OrderService $service)
+    public $orderIdToCancel = null;
+
+    public function confirmCancel($id)
     {
+        $this->orderIdToCancel = $id;
+        $this->dispatch('show-cancel-modal');
+    }
+
+    public function executeCancelOrder(OrderService $service)
+    {
+        if (!$this->orderIdToCancel) return;
+
         try {
-            $order = Order::findOrFail($orderId);
+            $order = Order::findOrFail($this->orderIdToCancel);
             $service->cancelOrder($order, auth()->user());
             
-            $this->successMessage = 'Order cancelled and stock restored.';
-            session()->flash('success', 'Order cancelled and stock restored.');
+            $this->successMessage = 'Order cancelled successfully.';
+            session()->flash('success', 'Order cancelled successfully.');
         } catch (\Exception $e) {
             session()->flash('error', 'Error cancelling order: ' . $e->getMessage());
         }
+
+        $this->orderIdToCancel = null;
+        $this->dispatch('hide-cancel-modal');
     }
 
     public function openCreateModal()

@@ -178,13 +178,15 @@ class OrderService
             }
 
             if ($order->source === 'archive') {
-                // 1. Lock Product to restore stock safely
+                // 1. Lock Product to restore stock safely (if it still exists)
                 $product = ArchiveProduct::where('id', $order->archive_product_id)
                     ->lockForUpdate()
-                    ->firstOrFail();
+                    ->first();
 
-                // 3. Restore Stock
-                $product->increment('quantity', $order->qty);
+                if ($product) {
+                    // 3. Restore Stock
+                    $product->increment('quantity', $order->qty);
+                }
             }
             
             // 2. Update Order
