@@ -1,4 +1,5 @@
 <div>
+    @if(!$modalsOnly)
     <div class="container-fluid">
         <!-- Page Header -->
         <div class="row">
@@ -47,6 +48,7 @@
         </div>
 
     </div>
+    @endif
 
     <!-- Modals -->
     @include('livewire.admin.archive.products.partials._create-modal')

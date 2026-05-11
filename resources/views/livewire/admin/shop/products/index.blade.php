@@ -1,4 +1,5 @@
 <div>
+    @if(!$modalsOnly)
     {{-- Breadcrumbs --}}
     <div class="row">
         <div class="col-12">
@@ -184,6 +185,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     {{-- Create/Edit Modal Placeholder (Will be separate file included) --}}
     @include('livewire.admin.shop.products.create')

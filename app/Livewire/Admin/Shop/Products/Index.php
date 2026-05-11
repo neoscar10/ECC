@@ -35,6 +35,7 @@ class Index extends Component
     public $isEditMode = false;
     public $variationsOnlyMode = false;
     public $productId;
+    public $modalsOnly = false;
 
     // --- Form Fields ---
     

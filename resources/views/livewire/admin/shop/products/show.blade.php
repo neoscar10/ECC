@@ -92,7 +92,7 @@
             </div>
 
             {{-- Variations Table (if applicable) --}}
-            @if($product->variationGroups->isNotEmpty())
+            @if($product->variants->isNotEmpty())
             <div class="card">
                 <div class="card-header align-items-center d-flex">
                     <h4 class="card-title mb-0 flex-grow-1">Variations & Stock</h4>
@@ -102,44 +102,37 @@
                         <table class="table table-borderless table-nowrap table-sm align-middle mb-0">
                             <thead class="table-light text-muted">
                                 <tr>
-                                    <th>Variation</th>
-                                    <th>Type</th>
+                                    <th>Combination</th>
+                                    <th>SKU</th>
                                     <th class="text-center">Stock</th>
                                     <th class="text-end">Threshold</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($product->variationGroups as $group)
-                                    @foreach($group->values as $value)
-                                        @php $variant = $value->variant; @endphp
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    @if($group->presentation_type === 'color')
-                                                        <div class="flex-shrink-0 avatar-xs me-2">
-                                                            <div class="avatar-title rounded-circle border" style="background-color: {{ $value->color_hex }}"></div>
+                                @foreach($product->variants as $variant)
+                                    <tr>
+                                        <td>
+                                            @foreach($variant->optionValues as $val)
+                                                <div class="d-inline-flex align-items-center me-2">
+                                                    @if($val->group?->presentation_type === 'color')
+                                                        <div class="flex-shrink-0 avatar-xs me-1" style="width: 14px; height: 14px;">
+                                                            <div class="avatar-title rounded-circle border" style="background-color: {{ $val->color_hex }}"></div>
                                                         </div>
                                                     @endif
-                                                    <div>
-                                                        <h6 class="fs-13 mb-0">{{ $group->name }}: {{ $value->caption }}</h6>
-                                                    </div>
+                                                    <span class="badge bg-light text-primary border">{{ $val->group?->name }}: {{ $val->caption }}</span>
                                                 </div>
-                                            </td>
-                                            <td>{{ ucfirst($group->presentation_type) }}</td>
-                                            <td class="text-center">
-                                                @if($variant)
-                                                    @if($variant->stock_qty <= $product->low_stock_threshold)
-                                                        <span class="badge bg-danger-subtle text-danger">{{ $variant->stock_qty }} units</span>
-                                                    @else
-                                                        <span class="badge bg-success-subtle text-success">{{ $variant->stock_qty }} units</span>
-                                                    @endif
-                                                @else
-                                                    <span class="text-muted">N/A</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-end text-muted">{{ $product->low_stock_threshold }}</td>
-                                        </tr>
-                                    @endforeach
+                                            @endforeach
+                                        </td>
+                                        <td class="text-muted">{{ $variant->sku ?? 'N/A' }}</td>
+                                        <td class="text-center">
+                                            @if($variant->stock_qty <= $product->low_stock_threshold)
+                                                <span class="badge bg-danger-subtle text-danger">{{ $variant->stock_qty }} units</span>
+                                            @else
+                                                <span class="badge bg-success-subtle text-success">{{ $variant->stock_qty }} units</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-end text-muted">{{ $product->low_stock_threshold }}</td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -193,18 +186,10 @@
                                 <tr>
                                     <td class="px-0 fw-medium text-muted">Total Stock</td>
                                     <td class="px-0 text-end">
-                                        @if($product->variationGroups->isEmpty())
+                                        @if($product->variants->isEmpty())
                                             {{ $product->stock_qty ?? 0 }} units
                                         @else
-                                            @php
-                                                $totalStock = 0;
-                                                foreach($product->variationGroups as $g) {
-                                                    foreach($g->values as $v) {
-                                                        if($v->variant) $totalStock += $v->variant->stock_qty;
-                                                    }
-                                                }
-                                            @endphp
-                                            {{ $totalStock }} units (across variants)
+                                            {{ $product->variants->sum('stock_qty') }} units (across variants)
                                         @endif
                                     </td>
                                 </tr>
@@ -233,5 +218,5 @@
     </div>
 
     {{-- reusable edit modal --}}
-    <livewire:admin.shop.products.index :key="'shop-product-edit-modal-ref'" />
+    <livewire:admin.shop.products.index :modalsOnly="true" :key="'shop-product-edit-modal-ref'" />
 </div>

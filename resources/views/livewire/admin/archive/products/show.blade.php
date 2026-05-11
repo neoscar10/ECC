@@ -171,18 +171,32 @@
                 </div>
             </div>
 
-            {{-- Visibility & Restrictions --}}
+            {{-- Consolidated Information Card --}}
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Access & Visibility</h5>
+                    <h5 class="card-title mb-0">Item Information</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-borderless table-sm mb-0">
                             <tbody>
                                 <tr>
-                                    <td class="px-0 fw-medium text-muted">Restriction Mode</td>
-                                    <td class="px-0 text-end">
+                                    <td class="px-0 fw-medium text-muted">Price Range</td>
+                                    <td class="px-0 text-end fw-semibold">
+                                        {{ $product->currency }} {{ number_format($product->price_min_amount) }} - {{ number_format($product->price_max_amount) }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-0 fw-medium text-muted">Quantity</td>
+                                    <td class="px-0 text-end">{{ $product->quantity ?? 1 }} items</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-0 fw-medium text-muted">Era/Date</td>
+                                    <td class="px-0 text-end">{{ $product->era_tag ?? 'N/A' }}</td>
+                                </tr>
+                                <tr class="border-top">
+                                    <td class="px-0 fw-medium text-muted pt-2">Restriction Mode</td>
+                                    <td class="px-0 text-end pt-2">
                                         @if($product->restriction_mode == 'public')
                                             <span class="badge bg-success-subtle text-success">Public</span>
                                         @else
@@ -232,38 +246,9 @@
                     @endif
                 </div>
             </div>
-
-            {{-- Historical Stats --}}
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Historical Info</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-borderless table-sm mb-0">
-                            <tbody>
-                                <tr>
-                                    <td class="px-0 fw-medium text-muted">Price Range</td>
-                                    <td class="px-0 text-end fw-semibold">
-                                        {{ $product->currency }} {{ number_format($product->price_min_amount) }} - {{ number_format($product->price_max_amount) }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-0 fw-medium text-muted">Quantity</td>
-                                    <td class="px-0 text-end">{{ $product->quantity ?? 1 }} items</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-0 fw-medium text-muted">Era/Date</td>
-                                    <td class="px-0 text-end">{{ $product->era_tag ?? 'N/A' }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
     {{-- reusable edit modal --}}
-    <livewire:admin.archive.products.index :key="'archive-product-edit-modal-ref'" />
+    <livewire:admin.archive.products.index :modalsOnly="true" :key="'archive-product-edit-modal-ref'" />
 </div>

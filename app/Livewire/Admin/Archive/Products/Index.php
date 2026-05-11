@@ -43,6 +43,7 @@ class Index extends Component
     public $isEditMode = false;
     public $productId;
     public $isHydrating = false;
+    public $modalsOnly = false;
     
     // Delete Modal State
     public $confirmingDelete = false;

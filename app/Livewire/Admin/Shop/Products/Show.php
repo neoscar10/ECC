@@ -23,7 +23,8 @@ class Show extends Component
             'images',
             'categories',
             'tags',
-            'variationGroups.values.variant'
+            'variationGroups.values',
+            'variants.optionValues.group'
         ])->findOrFail($this->productId);
 
         if (!$this->activeImageId || !$this->product->images->contains('id', $this->activeImageId)) {
