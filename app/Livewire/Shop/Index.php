@@ -30,24 +30,26 @@ class Index extends Component
     #[Url(except: [])]
     public $tags = []; // Flat array of tag IDs for URL simplicity
 
-    #[Url(except: null)]
-    public $minPrice = null;
+    public $minPrice = '';
+    public $maxPrice = '';
 
-    #[Url(except: null)]
-    public $maxPrice = null;
-
-    public ?int $absoluteMinPrice = null;
-    public ?int $absoluteMaxPrice = null;
+    public $absoluteMinPrice = 0;
+    public $absoluteMaxPrice = 0;
 
     public function mount()
     {
         $this->absoluteMinPrice = (int) (ShopProduct::query()->active()->min('base_price') ?? 0);
-        $this->absoluteMaxPrice = (int) (ShopProduct::query()->active()->max('base_price') ?? 0);
+        $this->absoluteMaxPrice = (int) (ShopProduct::query()->active()->max('base_price') ?? 1500);
 
-        if ($this->minPrice !== null) {
+        if ($this->minPrice === '' || $this->minPrice === null) {
+            $this->minPrice = $this->absoluteMinPrice;
+        } else {
             $this->minPrice = max($this->absoluteMinPrice, min((int) $this->minPrice, $this->absoluteMaxPrice));
         }
-        if ($this->maxPrice !== null) {
+
+        if ($this->maxPrice === '' || $this->maxPrice === null) {
+            $this->maxPrice = $this->absoluteMaxPrice;
+        } else {
             $this->maxPrice = max($this->absoluteMinPrice, min((int) $this->maxPrice, $this->absoluteMaxPrice));
         }
     }

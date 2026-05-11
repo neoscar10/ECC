@@ -820,26 +820,28 @@
                         <div class="shop-range-inputs">
                             <input
                                 type="range"
-                                min="{{ $absoluteMinPrice ?? 0 }}"
-                                max="{{ $absoluteMaxPrice ?? 1500 }}"
+                                min="{{ $absoluteMinPrice }}"
+                                max="{{ $absoluteMaxPrice }}"
                                 step="1"
-                                wire:model.live="minPrice"
+                                wire:model.live.debounce.500ms="minPrice"
                                 class="shop-range-native min-range"
+                                oninput="this.closest('.shop-range-wrap').querySelector('.range-min-label').innerText = '{{ $currencySymbol ?? '₹' }}' + Number(this.value).toLocaleString()"
                             >
 
                             <input
                                 type="range"
-                                min="{{ $absoluteMinPrice ?? 0 }}"
-                                max="{{ $absoluteMaxPrice ?? 1500 }}"
+                                min="{{ $absoluteMinPrice }}"
+                                max="{{ $absoluteMaxPrice }}"
                                 step="1"
-                                wire:model.live="maxPrice"
+                                wire:model.live.debounce.500ms="maxPrice"
                                 class="shop-range-native max-range"
+                                oninput="this.closest('.shop-range-wrap').querySelector('.range-max-label').innerText = '{{ $currencySymbol ?? '₹' }}' + Number(this.value).toLocaleString()"
                             >
                         </div>
 
                         <div class="shop-range-labels">
-                            <span>{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMin) }}</span>
-                            <span>{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMax) }}{{ ($absoluteMax === $selectedMax) ? '+' : '' }}</span>
+                            <span class="range-min-label">{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMin) }}</span>
+                            <span class="range-max-label">{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMax) }}{{ ($absoluteMax === $selectedMax) ? '+' : '' }}</span>
                         </div>
                     </div>
                 </div>
@@ -986,8 +988,9 @@
                                         min="{{ $absoluteMinPrice ?? 0 }}"
                                         max="{{ $absoluteMaxPrice ?? 1500 }}"
                                         step="1"
-                                        wire:model.live="minPrice"
+                                        wire:model.live.debounce.500ms="minPrice"
                                         class="shop-range-native min-range"
+                                        oninput="this.closest('.shop-range-wrap').querySelector('.range-min-label').innerText = '{{ $currencySymbol ?? '₹' }}' + Number(this.value).toLocaleString()"
                                     >
 
                                     <input
@@ -995,14 +998,15 @@
                                         min="{{ $absoluteMinPrice ?? 0 }}"
                                         max="{{ $absoluteMaxPrice ?? 1500 }}"
                                         step="1"
-                                        wire:model.live="maxPrice"
+                                        wire:model.live.debounce.500ms="maxPrice"
                                         class="shop-range-native max-range"
+                                        oninput="this.closest('.shop-range-wrap').querySelector('.range-max-label').innerText = '{{ $currencySymbol ?? '₹' }}' + Number(this.value).toLocaleString()"
                                     >
                                 </div>
 
                                 <div class="shop-range-labels">
-                                    <span>{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMin) }}</span>
-                                    <span>{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMax) }}{{ ($absoluteMax === $selectedMax) ? '+' : '' }}</span>
+                                    <span class="range-min-label">{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMin) }}</span>
+                                    <span class="range-max-label">{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMax) }}{{ ($absoluteMax === $selectedMax) ? '+' : '' }}</span>
                                 </div>
                             </div>
                         </section>
@@ -1062,6 +1066,13 @@
                             @endif
                         @endforeach
                     </div>
+                </div>
+
+                {{-- Mobile-only Close Trigger --}}
+                <div class="mt-5 mb-4 d-lg-none text-center">
+                    <button type="button" class="btn btn-outline-secondary border-secondary-subtle text-white-50 px-4 py-2 rounded-pill fs-12 fw-bold text-uppercase" data-bs-dismiss="offcanvas">
+                        <i class="mdi mdi-close-circle-outline me-1"></i> Close Filters
+                    </button>
                 </div>
             </div>
         </div>
@@ -1202,3 +1213,40 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    const initPriceRange = () => {
+        document.querySelectorAll('.shop-range-inputs').forEach(wrap => {
+            const minInput = wrap.querySelector('.min-range');
+            const maxInput = wrap.querySelector('.max-range');
+            if(!minInput || !maxInput) return;
+
+            const syncZ = () => {
+                // If min value is high, bring it to front to prevent being blocked by max
+                if(parseInt(minInput.value) > (parseInt(minInput.max) * 0.6)) {
+                    minInput.style.zIndex = "3";
+                    maxInput.style.zIndex = "2";
+                } else {
+                    minInput.style.zIndex = "2";
+                    maxInput.style.zIndex = "3";
+                }
+            };
+            minInput.addEventListener('input', syncZ);
+            maxInput.addEventListener('input', syncZ);
+            syncZ();
+        });
+    };
+
+    document.addEventListener('DOMContentLoaded', initPriceRange);
+    
+    // Re-init on Livewire update
+    Livewire.hook('request', (({ component, commit, respond, succeed, fail }) => {
+        succeed(({ snapshot, effect }) => {
+            queueMicrotask(() => {
+                initPriceRange();
+            });
+        })
+    }));
+</script>
+@endpush
