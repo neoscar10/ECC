@@ -35,8 +35,8 @@
                         <div class="col-lg-8 mb-3 mb-lg-0">
                             <div class="bg-light rounded d-flex align-items-center justify-content-center border p-2" 
                                  style="height: 420px; overflow: hidden;">
-                                @if($activeImage)
-                                    <img src="{{ Storage::url($activeImage->image_path) }}" 
+                                @if($this->activeImage)
+                                    <img src="{{ Storage::url($this->activeImage->image_path) }}" 
                                          class="w-100 h-100 object-fit-contain" 
                                          alt="Product Image">
                                 @else
