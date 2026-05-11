@@ -24,7 +24,9 @@
                     <div class="mb-3">
                         <label class="form-label">Category Image</label>
                         <input type="file" class="form-control @error('image') is-invalid @enderror" wire:model="image" accept="image/png,image/jpeg">
-                        <div class="form-text text-muted">Recommended: 1080 &times; 1080</div>
+                        <div class="form-text text-info fw-semibold mt-2">
+                            <i class="mdi mdi-information-outline me-1"></i>Recommended: 1080 &times; 1080
+                        </div>
                         @error('image') <span class="text-danger">{{ $message }}</span> @enderror
 
                         @if ($image)

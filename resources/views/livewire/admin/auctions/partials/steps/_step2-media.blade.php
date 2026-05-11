@@ -42,7 +42,7 @@
         </div>
         <div class="d-flex align-items-center mt-1">
              <i class="ri-upload-cloud-2-line text-muted me-1"></i>
-             <span class="text-muted fs-11">Max 10MB per file. <span class="text-muted fs-11">Recommended: 1080 &times; 1080</span></span>
+             <span class="text-muted fs-11">Max 10MB per file. <span class="text-info fw-semibold ms-2"><i class="mdi mdi-information-outline me-1"></i>Recommended: 1080 &times; 1080</span></span>
         </div>
         @error('newImages') <span class="text-danger text-sm d-block mt-1">{{ $message }}</span> @enderror
 

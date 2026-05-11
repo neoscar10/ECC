@@ -5,13 +5,15 @@
             <h5 class="mt-2 mb-1">Product Gallery</h5>
             <p class="text-muted mb-3">Upload high-quality images for the product.</p>
             
-            <div class="d-flex justify-content-center">
-                <label class="btn btn-primary btn-sm position-relative overflow-hidden me-2">
+            <div class="d-flex flex-column align-items-center">
+                <label class="btn btn-primary btn-sm position-relative overflow-hidden mb-0">
                     <span wire:loading.remove wire:target="newImages">Add Images</span>
                     <span wire:loading wire:target="newImages">Processing...</span>
                     <input type="file" wire:model="newImages" multiple accept="image/png,image/jpeg" class="opacity-0 position-absolute start-0 top-0 h-100 w-100 cursor-pointer">
-                    <div class="form-text text-muted mt-2">Recommended: 1080 &times; 1080</div>
                 </label>
+                <div class="form-text text-info fw-semibold mt-2">
+                    <i class="mdi mdi-information-outline me-1"></i>Recommended: 1080 &times; 1080
+                </div>
             </div>
             @error('newImages.*') <span class="text-danger text-sm d-block mt-2">{{ $message }}</span> @enderror
         </div>
