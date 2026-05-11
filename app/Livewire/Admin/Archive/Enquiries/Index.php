@@ -54,10 +54,7 @@ class Index extends Component
         $enquiry = ArchiveProductEnquiry::with('product')->find($enquiryId);
         
         if (!$enquiry || !$enquiry->product || (method_exists($enquiry->product, 'trashed') && $enquiry->product->trashed())) {
-            $this->dispatch('swal:error', [
-                'title' => 'Product Unavailable',
-                'text'  => 'You cannot log a sale for this enquiry because the associated product has been deleted or is no longer available in the system.',
-            ]);
+            session()->flash('error', 'You cannot log a sale for this enquiry because the associated product has been deleted or is no longer available in the system.');
             return;
         }
         
