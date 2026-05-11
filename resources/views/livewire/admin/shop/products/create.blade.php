@@ -160,6 +160,16 @@
                         @endif
 
                         @if($createStep < 6)
+                            @if($isEditMode)
+                                <button type="submit" form="productForm" class="btn btn-success" wire:loading.attr="disabled">
+                                    <span wire:loading.remove>
+                                        <i class="ri-save-line align-bottom me-1"></i> Save Changes
+                                    </span>
+                                    <span wire:loading>
+                                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...
+                                    </span>
+                                </button>
+                            @endif
                             <button type="button" class="btn btn-primary" wire:click="nextStep" wire:loading.attr="disabled">
                                 Next Step <i class="ri-arrow-right-line align-middle ms-1"></i>
                             </button>
