@@ -137,7 +137,7 @@
                         </table>
                     </div>
                     <div class="d-flex justify-content-end">
-                        {{ $enquiries->links('pagination::bootstrap-5') }}
+                        {{ $enquiries->links() }}
                     </div>
                 </div>
             </div>
