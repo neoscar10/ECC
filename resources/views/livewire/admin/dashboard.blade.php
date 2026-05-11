@@ -53,6 +53,36 @@
     </div>
 
     <div class="row">
+        <div class="col-xl-4 col-md-6">
+            <x-admin.kpi-card 
+                title="Total Shop Products" 
+                :value="$kpis['total_shop_products'] ?? 0" 
+                icon="ri-store-2-line" 
+                color="primary" 
+                link="{{ route('admin.shop.products') }}" 
+            />
+        </div>
+        <div class="col-xl-4 col-md-6">
+            <x-admin.kpi-card 
+                title="Total Archive Items" 
+                :value="$kpis['total_archive_items'] ?? 0" 
+                icon="ri-archive-line" 
+                color="secondary" 
+                link="{{ route('admin.archive.products') }}" 
+            />
+        </div>
+        <div class="col-xl-4 col-md-6">
+            <x-admin.kpi-card 
+                title="Total Auction Lots" 
+                :value="$kpis['total_auction_lots'] ?? 0" 
+                icon="ri-auction-line" 
+                color="info" 
+                link="{{ route('admin.auctions.lots.index') }}" 
+            />
+        </div>
+    </div>
+
+    <div class="row">
         <!-- Sales Trend Placeholder -->
         <div class="col-xl-12">
             <div class="card">
