@@ -195,31 +195,17 @@ class UserLoginPage extends Component
             ]);
         }
 
-        // Detect admin identity and open modal (no immediate login)
-        if ($this->isAdminUser($user)) {
-            $this->adminCandidateId = $user->id;
-            $this->adminCandidateEmail = $user->email;
-
-            // Best-effort role label
-            $this->adminCandidateRoleLabel = $this->resolveAdminRoleLabel($user);
-
-            $this->adminModalError = null;
-            $this->showAdminModal = true;
-
-            // Open modal in the browser (Bootstrap)
-            $this->dispatch('ecc-admin-modal-open');
-            return;
-        }
-
-        // Enforce "approved member" gate using existing logic (SSOT)
-        try {
-            if (method_exists($authService, 'assertApprovedMember')) {
-                $authService->assertApprovedMember($user);
+        // Enforce "approved member" gate using existing logic (SSOT) - Only for regular users
+        if (!$this->isAdminUser($user)) {
+            try {
+                if (method_exists($authService, 'assertApprovedMember')) {
+                    $authService->assertApprovedMember($user);
+                }
+            } catch (\Throwable $e) {
+                throw ValidationException::withMessages([
+                    'identity' => $e->getMessage() ?: 'Access reserved for approved members of Executive Cricket Club.',
+                ]);
             }
-        } catch (\Throwable $e) {
-            throw ValidationException::withMessages([
-                'identity' => $e->getMessage() ?: 'Access reserved for approved members of Executive Cricket Club.',
-            ]);
         }
 
         // Attempt session login using web guard
@@ -235,6 +221,13 @@ class UserLoginPage extends Component
         }
 
         request()->session()->regenerate();
+
+        // Redirect admins directly to dashboard
+        if ($this->isAdminUser($user)) {
+            $to = Route::has('admin.dashboard') ? route('admin.dashboard') : url('/admin');
+            $this->redirect($to, navigate: false);
+            return;
+        }
 
         $nextRoute = $resumeService->nextRouteForUser($user);
 

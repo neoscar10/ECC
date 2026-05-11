@@ -1,15 +1,9 @@
 @php
   $active = $active ?? null;
 
-  $userHasVaultAccess = auth('web')->user()?->has_vault_access ?? false;
-  $vaultConfig = $userHasVaultAccess
-      ? ['key'=>'vault','label'=>'Vault','icon'=>'security',  'href'=>url('/vault')]
-      : ['key'=>'vault','label'=>'Vault','icon'=>'security',  'href'=>'#', 'extras'=>'x-data @click.prevent="$dispatch(\'open-vault-modal\')"'];
-
   $mainItems = [
     ['key'=>'explore','label'=>'Explore','icon'=>'explore',      'href'=>url('/home')],
     ['key'=>'archive','label'=>'Archive','icon'=>'inventory_2',   'href'=>url('/archive')],
-    $vaultConfig,
     ['key'=>'auctions','label'=>'Auctions','icon'=>'gavel',      'href'=>url('/auctions')],
     ['key'=>'club',    'label'=>'Club',   'icon'=>'shield_person', 'href'=>url('/club')],
     ['key'=>'shop',    'label'=>'Shop',   'icon'=>'storefront',    'href'=>route('shop.index')],

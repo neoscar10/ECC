@@ -59,7 +59,7 @@
             </button>
         </div>
 
-        <div class="col-12">
+        <div class="col-12 col-md-6">
             <button type="button" 
                     class="ecc-settings-action-card"
                     wire:click="openMembershipDetailsModal">
@@ -78,6 +78,31 @@
 
                 <span class="material-symbols-outlined ecc-settings-action-arrow">chevron_right</span>
             </button>
+        </div>
+
+        <div class="col-12 col-md-6">
+            @if($hasVaultAccess)
+                <a href="{{ url('/vault') }}" class="ecc-settings-action-card text-decoration-none">
+            @else
+                <button type="button" class="ecc-settings-action-card" @click.prevent="$dispatch('open-vault-modal')">
+            @endif
+                <div class="d-flex align-items-center gap-4">
+                    <div class="ecc-settings-action-icon">
+                        <span class="material-symbols-outlined">security</span>
+                    </div>
+
+                    <div class="text-start">
+                        <div class="ecc-settings-action-title">Digital Vault</div>
+                        <div class="ecc-settings-action-text">Manage your authenticated assets</div>
+                    </div>
+                </div>
+
+                <span class="material-symbols-outlined ecc-settings-action-arrow">chevron_right</span>
+            @if($hasVaultAccess)
+                </a>
+            @else
+                </button>
+            @endif
         </div>
     </div>
 

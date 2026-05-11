@@ -777,15 +777,9 @@
       elseif (request()->is('shop*') || request()->is('products*')) { $active = 'shop'; }
       elseif (request()->is('home*')) { $active = 'explore'; }
 
-      $userHasVaultAccess = auth('web')->user()?->has_vault_access ?? false;
-      $vaultConfig = $userHasVaultAccess
-          ? ['key'=>'vault', 'label'=>'Vault', 'icon'=>'security', 'href'=>url('/vault')]
-          : ['key'=>'vault', 'label'=>'Vault', 'icon'=>'security', 'href'=>'#', 'extras'=>'x-data @click.prevent="$dispatch(\'open-vault-modal\')"'];
-
       $mainItems = [
         ['key'=>'explore', 'label'=>'Explore',  'icon'=>'explore',          'href'=>url('/home')],
         ['key'=>'archive', 'label'=>'Archive',  'icon'=>'inventory_2',      'href'=>url('/archive')],
-        $vaultConfig,
         ['key'=>'auctions','label'=>'Auctions', 'icon'=>'gavel',            'href'=>url('/auctions')],
         ['key'=>'club',    'label'=>'Club',     'icon'=>'shield_person',    'href'=>url('/club')],
         ['key'=>'shop',    'label'=>'Shop',     'icon'=>'storefront',       'href'=>route('shop.index')],
@@ -952,7 +946,6 @@
                         <div class="d-flex flex-column">
                             <a href="{{ route('auctions.index') }}" class="luxe-footer-link">Live Auctions</a>
                             <a href="{{ url('/archive') }}" class="luxe-footer-link">Archive</a>
-                            <a href="{{ $vaultConfig['href'] }}" class="luxe-footer-link" {!! $vaultConfig['extras'] ?? '' !!}>Vault</a>
                             <a href="{{ route('shop.index') }}" class="luxe-footer-link">Shop</a>
                         </div>
                     </div>

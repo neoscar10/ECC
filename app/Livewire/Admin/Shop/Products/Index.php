@@ -46,6 +46,7 @@ class Index extends Component
     public $currency = 'INR';
     public $is_active = true;
     public $deactivation_reason = null;
+    public $low_stock_threshold = 5;
     public $computed_min_price = 0;
     public $computed_max_price = 0;
 
@@ -425,6 +426,7 @@ class Index extends Component
         $this->currency = $product->currency;
         $this->is_active = $product->is_active;
         $this->deactivation_reason = $product->deactivation_reason;
+        $this->low_stock_threshold = $product->low_stock_threshold ?? 5;
 
         // Simple Stock Logic
         $this->stock_qty = $product->stock_qty;
@@ -839,6 +841,7 @@ class Index extends Component
                 'currency' => $this->currency,
                 'is_active' => $this->is_active,
                 'deactivation_reason' => !$this->is_active ? $this->deactivation_reason : null,
+                'low_stock_threshold' => $this->low_stock_threshold ?: 5,
                 'stock_qty' => $this->has_variants ? null : $this->stock_qty,
             ]);
 
@@ -919,6 +922,7 @@ class Index extends Component
         $this->currency = 'INR';
         $this->is_active = true;
         $this->deactivation_reason = null;
+        $this->low_stock_threshold = 5;
         
         $this->selectedCategories = [];
         $this->categorySearch = '';
@@ -1029,6 +1033,7 @@ class Index extends Component
             'currency' => $this->currency,
             'is_active' => $this->is_active,
             'deactivation_reason' => !$this->is_active ? $this->deactivation_reason : null,
+            'low_stock_threshold' => $this->low_stock_threshold ?: 5,
         ]);
     }
 

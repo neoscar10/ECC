@@ -19,6 +19,7 @@ class SettingsPage extends Component
     public bool $showEditProfileModal = false;
     public bool $showChangePasswordModal = false;
     public bool $showMembershipDetailsModal = false;
+    public bool $hasVaultAccess = false;
 
     public $avatarUpload;
 
@@ -44,6 +45,7 @@ class SettingsPage extends Component
 
     public function mount(ProfileService $profileService)
     {
+        $this->hasVaultAccess = Auth::user()->has_vault_access ?? false;
         $this->hydratePageData($profileService);
         
         // Mocking some URLs as requested "wire only to the closest valid existing destination already in the project"

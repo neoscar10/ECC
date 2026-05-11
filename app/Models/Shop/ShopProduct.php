@@ -22,6 +22,7 @@ class ShopProduct extends Model
         'currency',
         'is_active',
         'deactivation_reason',
+        'low_stock_threshold',
         'computed_min_price',
         'computed_max_price',
     ];
@@ -30,6 +31,7 @@ class ShopProduct extends Model
         'is_active' => 'boolean',
         'base_price' => 'decimal:2',
         'stock_qty' => 'integer',
+        'low_stock_threshold' => 'integer',
         'computed_min_price' => 'decimal:2',
         'computed_max_price' => 'decimal:2',
     ];

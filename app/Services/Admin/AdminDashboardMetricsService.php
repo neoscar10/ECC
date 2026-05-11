@@ -48,11 +48,7 @@ class AdminDashboardMetricsService
                 ->limit(5)
                 ->get(),
             'new_enquiries' => $this->getLatestNewEnquiries(5),
-            'low_stock' => ShopProductVariationValue::with(['group.product'])
-                ->where('stock_qty', '<', 5) // Simple threshold for now
-                ->orderBy('stock_qty', 'asc')
-                ->limit(5)
-                ->get(),
+            'low_stock' => $this->getLowStockItems(5),
         ];
     }
 
@@ -203,8 +199,43 @@ class AdminDashboardMetricsService
     /**
      * Clear dashboard cache.
      */
+    /**
+     * Clear dashboard cache.
+     */
     public function clearCache(): void
     {
         Cache::forget('admin_dashboard_kpis');
+    }
+
+    /**
+     * Get combined low stock items (variants + simple products) using dynamic thresholds.
+     */
+    private function getLowStockItems(int $limit): \Illuminate\Support\Collection
+    {
+        // 1. Get Variants with low stock
+        $variants = ShopProductVariationValue::join('shop_product_variation_groups', 'shop_product_variation_values.group_id', '=', 'shop_product_variation_groups.id')
+            ->join('shop_products', 'shop_product_variation_groups.shop_product_id', '=', 'shop_products.id')
+            ->whereColumn('shop_product_variation_values.stock_qty', '<', 'shop_products.low_stock_threshold')
+            ->select('shop_product_variation_values.*')
+            ->with(['group.product'])
+            ->limit($limit)
+            ->get();
+
+        // 2. Get Simple Products with low stock
+        $simple = \App\Models\Shop\ShopProduct::whereDoesntHave('variationGroups')
+            ->whereNotNull('stock_qty')
+            ->whereColumn('stock_qty', '<', 'low_stock_threshold')
+            ->limit($limit)
+            ->get()
+            ->map(function($product) {
+                // Mock a variation-like object for the blade view
+                return (object)[
+                    'group' => (object)['product' => $product],
+                    'caption' => 'N/A',
+                    'stock_qty' => $product->stock_qty,
+                ];
+            });
+
+        return $variants->concat($simple)->sortBy('stock_qty')->take($limit);
     }
 }
