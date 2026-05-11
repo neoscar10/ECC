@@ -67,6 +67,7 @@ Route::middleware(['auth:web', EnsureAdminRole::class])->prefix('admin')->name('
     Route::prefix('archive')->name('archive.')->group(function () {
         Route::get('/categories', \App\Livewire\Admin\Archive\Categories\Index::class)->name('categories');
         Route::get('/products', \App\Livewire\Admin\Archive\Products\Index::class)->name('products');
+        Route::get('/products/{id}', \App\Livewire\Admin\Archive\Products\Show::class)->name('products.show');
         Route::get('/enquiries', \App\Livewire\Admin\Archive\Enquiries\Index::class)->name('enquiries');
         Route::get('/orders', \App\Livewire\Admin\Archive\Orders\Index::class)->name('orders.index');
     });
@@ -100,6 +101,7 @@ Route::middleware(['auth:web', EnsureAdminRole::class])->prefix('admin')->name('
         Route::get('/categories', \App\Livewire\Admin\Shop\Categories\CategoriesExplorer::class)->name('categories');
         Route::get('/tags', \App\Livewire\Admin\Shop\Tags\TagsExplorer::class)->name('tags');
         Route::get('/products', \App\Livewire\Admin\Shop\Products\Index::class)->name('products');
+        Route::get('/products/{id}', \App\Livewire\Admin\Shop\Products\Show::class)->name('products.show');
         Route::get('/carts', \App\Livewire\Admin\Shop\Carts\Index::class)->name('carts');
         Route::get('/inventory', \App\Livewire\Admin\Shop\Inventory\Index::class)->name('inventory');
         Route::get('/orders', \App\Livewire\Admin\Shop\Orders\Index::class)->name('orders');
