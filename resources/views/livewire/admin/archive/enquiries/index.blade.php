@@ -219,7 +219,7 @@
                                                         @endif
                                                     </h6>
                                                     <p class="text-muted mb-0">{{ $enq->product->category->title ?? 'Unknown Category' }}</p>
-                                                    <a href="{{ route('admin.archive.products.index', ['search' => $enq->product->title]) }}" target="_blank" class="text-primary fs-12">View Product</a>
+                                                    <a href="#" class="text-primary fs-12">View Product</a>
                                                 </div>
                                             </div>
                                         @else
