@@ -219,7 +219,20 @@ class AdminDashboardMetricsService
             ->select('shop_product_variation_values.*')
             ->with(['group.product'])
             ->limit($limit)
-            ->get();
+            ->get()
+            ->map(function($variation) {
+                // Return a plain object to avoid Livewire "multiple model types" serialization error
+                return (object)[
+                    'id' => $variation->id,
+                    'group' => (object)[
+                        'product' => (object)[
+                            'title' => $variation->group?->product?->title
+                        ]
+                    ],
+                    'caption' => $variation->caption,
+                    'stock_qty' => $variation->stock_qty,
+                ];
+            });
 
         // 2. Get Simple Products with low stock
         $simple = \App\Models\Shop\ShopProduct::whereDoesntHave('variationGroups')
@@ -228,9 +241,13 @@ class AdminDashboardMetricsService
             ->limit($limit)
             ->get()
             ->map(function($product) {
-                // Mock a variation-like object for the blade view
                 return (object)[
-                    'group' => (object)['product' => $product],
+                    'id' => $product->id,
+                    'group' => (object)[
+                        'product' => (object)[
+                            'title' => $product->title
+                        ]
+                    ],
                     'caption' => 'N/A',
                     'stock_qty' => $product->stock_qty,
                 ];
