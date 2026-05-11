@@ -11,7 +11,7 @@
     <div class="card-body">
         <div class="row g-3 align-items-end">
             {{-- Toggle Column --}}
-            <div class="col-lg-6">
+            <div class="col-lg-{{ $has_variants ? '8' : '6' }}">
                 <div class="form-check form-switch form-switch-lg mb-0" dir="ltr">
                     <input class="form-check-input" type="checkbox" id="hasVariantsToggle" wire:model.live="has_variants" @if($variantsLocked) disabled @endif>
                     <label class="form-check-label ms-2 align-middle" for="hasVariantsToggle">This product has variations?</label>
@@ -27,7 +27,7 @@
 
             {{-- Stock Input Column (Only if Simple) --}}
             @if(!$has_variants)
-            <div class="col-lg-6">
+            <div class="col-lg-3">
                 <label class="form-label">Stock Quantity <span class="text-danger">*</span></label>
                 <div class="input-group">
                     <input type="number" class="form-control" wire:model.live="stock_qty" placeholder="0">
@@ -36,6 +36,16 @@
                 @error('stock_qty') <span class="text-danger small">{{ $message }}</span> @enderror
             </div>
             @endif
+
+            {{-- Threshold Column (Always visible) --}}
+            <div class="col-lg-{{ $has_variants ? '4' : '3' }}">
+                <label class="form-label">Low Stock Alert Threshold</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" wire:model="low_stock_threshold" placeholder="5">
+                    <span class="input-group-text"><i class="ri-alert-line"></i></span>
+                </div>
+                @error('low_stock_threshold') <span class="text-danger small">{{ $message }}</span> @enderror
+            </div>
         </div>
         
         @if($has_variants)

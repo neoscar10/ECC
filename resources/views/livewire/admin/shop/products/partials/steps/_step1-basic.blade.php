@@ -4,19 +4,13 @@
         <input type="text" class="form-control" wire:model="title" placeholder="e.g., Cricket Bat 2026">
         @error('title') <span class="text-danger text-sm">{{ $message }}</span> @enderror
     </div>
-    <div class="col-md-4">
+    <div class="col-md-6">
         <label class="form-label">Base Price <span class="text-danger">*</span></label>
         <div class="input-group">
             <span class="input-group-text">{{ $currency }}</span>
             <input type="number" step="0.01" class="form-control" wire:model="base_price" placeholder="0.00">
         </div>
         @error('base_price') <span class="text-danger text-sm">{{ $message }}</span> @enderror
-    </div>
-
-    <div class="col-md-2">
-        <label class="form-label">Low Stock Threshold</label>
-        <input type="number" class="form-control" wire:model="low_stock_threshold" placeholder="5">
-        @error('low_stock_threshold') <span class="text-danger text-sm">{{ $message }}</span> @enderror
     </div>
     
     <div class="col-12">
