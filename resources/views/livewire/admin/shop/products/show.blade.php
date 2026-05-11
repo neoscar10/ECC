@@ -6,7 +6,7 @@
                 <h4 class="mb-sm-0">Product Details</h4>
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.shop.products.index') }}">Shop</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.shop.products') }}">Shop</a></li>
                         <li class="breadcrumb-item active">Product Details</li>
                     </ol>
                 </div>
