@@ -911,7 +911,9 @@
 
         {{-- MOBILE FILTER OFFCANVAS --}}
         <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="shopFiltersCanvas" aria-labelledby="shopFiltersCanvasLabel" wire:ignore.self>
-            <div class="offcanvas-body">
+            <div class="offcanvas-body pt-5">
+                {{-- Spacer to clear the fixed navbar --}}
+                <div class="d-lg-none" style="height: 40px;"></div>
                 <div class="shop-filter-mobile-card p-3">
                     <div class="d-flex flex-column gap-4">
                         <section>
