@@ -45,12 +45,7 @@
                 </div>
                 
                 <div class="card-body">
-                    @if ($successMessage)
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ $successMessage }}
-                            <button type="button" class="btn-close" wire:click="$set('successMessage', null)" aria-label="Close"></button>
-                        </div>
-                    @endif
+
                     
                     @if(session()->has('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -127,9 +122,9 @@
                                         </td>
                                         <td class="status">
                                             @if($order->status === 'completed')
-                                                <span class=" text-uppercase">Completed</span>
+                                                <span class="badge bg-success-subtle text-success text-uppercase">Completed</span>
                                             @else
-                                                <span class="text-uppercase">Cancelled</span>
+                                                <span class="badge bg-danger-subtle text-danger text-uppercase">Cancelled</span>
                                             @endif
                                         </td>
                                         <td class="text-end">

@@ -16,15 +16,6 @@ class Index extends Component
 
     protected $paginationTheme = 'bootstrap';
     
-    // Alerts
-    public $successMessage = '';
-    
-    #[\Livewire\Attributes\On('operation-success')]
-    public function showSuccessAlert($message)
-    {
-        $this->successMessage = $message;
-    }
-
     #[\Livewire\Attributes\On('order-created')]
     public function refresh() { 
         // Re-render to show new orders
@@ -97,7 +88,6 @@ class Index extends Component
             $order = Order::findOrFail($this->orderIdToCancel);
             $service->cancelOrder($order, auth()->user());
             
-            $this->successMessage = 'Order cancelled successfully.';
             session()->flash('success', 'Order cancelled successfully.');
         } catch (\Exception $e) {
             session()->flash('error', 'Error cancelling order: ' . $e->getMessage());

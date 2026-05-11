@@ -70,9 +70,9 @@
                                     <div class="d-flex align-items-center">
                                          <div class="flex-grow-1">
                                              <h5 class="fs-14 m-0">
-                                                 <a href="#" class="text-dark">{{ $cart->user->name }}</a>
+                                                 <a href="#" class="text-dark">{{ $cart->user->name ?? 'Deleted User' }}</a>
                                              </h5>
-                                             <small class="text-muted">{{ $cart->user->email }}</small>
+                                             <small class="text-muted">{{ $cart->user->email ?? 'N/A' }}</small>
                                          </div>
                                     </div>
                                 </td>
@@ -144,7 +144,7 @@
                 <div class="modal-body">
                     @if($selectedCart)
                         <div class="mb-3">
-                            <h6>{{ $selectedCart->user->name }} <span class="text-muted">({{ $selectedCart->user->email }})</span></h6>
+                            <h6>{{ $selectedCart->user->name ?? 'Deleted User' }} <span class="text-muted">({{ $selectedCart->user->email ?? 'N/A' }})</span></h6>
                             <div>
                                 Status: 
                                 @if($selectedCart->is_abandoned)
