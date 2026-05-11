@@ -324,6 +324,77 @@ class LotFormModal extends Component
         }
     }
 
+    public function moveImage($id, $direction, $type = 'main')
+    {
+        if (!$this->lotId) return;
+        $lot = AuctionLot::find($this->lotId);
+        if (!$lot) return;
+
+        $images = $lot->images()
+            ->where('type', ($type === 'main' ? '!=' : '='), '360')
+            ->orderBy('sort_order')
+            ->get();
+        
+        $currentIndex = $images->search(fn($img) => $img->id == $id);
+        if ($currentIndex === false) return;
+
+        $targetIndex = ($direction === 'up') ? $currentIndex - 1 : $currentIndex + 1;
+        if ($targetIndex < 0 || $targetIndex >= $images->count()) return;
+
+        $imgA = $images[$currentIndex];
+        $imgB = $images[$targetIndex];
+
+        $orderA = $imgA->sort_order;
+        $orderB = $imgB->sort_order;
+
+        $imgA->update(['sort_order' => $orderB]);
+        $imgB->update(['sort_order' => $orderA]);
+
+        // Refresh lists
+        $this->existingImages = $lot->images()->where('type', '!=', '360')->orderBy('sort_order')->get()->map(fn($i) => ['id'=>$i->id, 'path'=>$i->path, 'image_path'=>$i->path])->toArray();
+        $this->existing360Images = $lot->images()->where('type', '360')->orderBy('sort_order')->get()->map(fn($i) => ['id'=>$i->id, 'path'=>$i->path, 'image_path'=>$i->path])->toArray();
+    }
+
+    public function moveNewImage($index, $direction, $type = 'main')
+    {
+        $arrName = ($type === 'main') ? 'newImages' : 'new360Images';
+        $arr = $this->$arrName;
+        
+        $targetIndex = ($direction === 'up') ? $index - 1 : $index + 1;
+        if ($targetIndex < 0 || $targetIndex >= count($arr)) return;
+
+        $temp = $arr[$index];
+        $arr[$index] = $arr[$targetIndex];
+        $arr[$targetIndex] = $temp;
+        
+        $this->$arrName = $arr;
+    }
+
+    public function reorderImages($orderedIds, $type = 'main')
+    {
+        foreach ($orderedIds as $index => $id) {
+            \App\Models\Auctions\AuctionLotImage::where('id', $id)->update(['sort_order' => $index]);
+        }
+        if ($this->lotId) {
+            $lot = AuctionLot::find($this->lotId);
+            $this->existingImages = $lot->images()->where('type', '!=', '360')->orderBy('sort_order')->get()->map(fn($i) => ['id'=>$i->id, 'path'=>$i->path, 'image_path'=>$i->path])->toArray();
+            $this->existing360Images = $lot->images()->where('type', '360')->orderBy('sort_order')->get()->map(fn($i) => ['id'=>$i->id, 'path'=>$i->path, 'image_path'=>$i->path])->toArray();
+        }
+    }
+
+    public function reorderNewImages($indices, $type = 'main')
+    {
+        $arrName = ($type === 'main') ? 'newImages' : 'new360Images';
+        $oldArr = $this->$arrName;
+        $newArr = [];
+        foreach ($indices as $oldIndex) {
+            if (isset($oldArr[$oldIndex])) {
+                $newArr[] = $oldArr[$oldIndex];
+            }
+        }
+        $this->$arrName = $newArr;
+    }
+
     // --- Save ---
 
     public function save()

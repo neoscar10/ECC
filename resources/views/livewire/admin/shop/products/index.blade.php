@@ -195,12 +195,51 @@
 </div>
 
 @push('scripts')
+<!-- Sortable.js -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
+    const initShopSortable = () => {
+        // Existing Images
+        const elEx = document.getElementById('shop-existing-images');
+        if (elEx) {
+            new Sortable(elEx, {
+                animation: 150,
+                onEnd: function (evt) {
+                    let orderedIds = Array.from(elEx.children).map(el => el.dataset.id);
+                    @this.call('reorderImages', orderedIds);
+                }
+            });
+        }
+
+        // New Images
+        const elNew = document.getElementById('shop-new-images');
+        if (elNew) {
+            new Sortable(elNew, {
+                animation: 150,
+                onEnd: function (evt) {
+                    let indices = Array.from(elNew.children).map(el => el.dataset.index);
+                    @this.call('reorderNewImages', indices);
+                }
+            });
+        }
+    };
+
     window.addEventListener('show-create-modal', event => {
         let el = document.getElementById('createProductModal');
         let modal = bootstrap.Modal.getOrCreateInstance(el);
         modal.show();
+        // Init sortable after modal is shown (content might be rendered)
+        setTimeout(initShopSortable, 500);
     });
+
+    // Re-init on Livewire update
+    Livewire.hook('request', (({ component, commit, respond, succeed, fail }) => {
+        succeed(({ snapshot, effect }) => {
+            queueMicrotask(() => {
+                initShopSortable();
+            });
+        })
+    }));
 
     window.addEventListener('hide-create-modal', event => {
         let el = document.getElementById('createProductModal');

@@ -18,32 +18,68 @@
     </div>
 
     <div class="col-12">
-        <div class="row g-3">
+        <div class="row g-3" id="shop-existing-images">
             {{-- Existing Images (Edit Mode) --}}
             @foreach($existingImages as $img)
-                <div class="col-6 col-sm-4 col-md-3">
+                <div class="col-6 col-sm-4 col-md-3" data-id="{{ $img->id }}" wire:key="ex-img-{{ $img->id }}">
                     <div class="position-relative border rounded overflow-hidden group-preview">
-                        <img src="{{ Storage::url($img->image_path) }}" class="img-fluid w-100" style="height: 150px; object-fit: cover;">
+                        <img src="{{ Storage::url($img->image_path) }}" class="img-fluid w-100 cursor-move" style="height: 150px; object-fit: cover;">
                         <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 m-1 shadow-sm"
                             wire:click="removeExistingImage({{ $img->id }})">
                             <i class="ri-close-line"></i>
                         </button>
+
+                        <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-2 pb-1" style="background: linear-gradient(transparent, rgba(0,0,0,0.5));">
+                            @if(!$loop->first)
+                                <button type="button" class="btn btn-link text-white p-0" wire:click.prevent="moveImage({{ $img->id }}, 'up')">
+                                    <i class="ri-arrow-left-s-line fs-18"></i>
+                                </button>
+                            @else
+                                <span></span>
+                            @endif
+                            @if(!$loop->last)
+                                <button type="button" class="btn btn-link text-white p-0" wire:click.prevent="moveImage({{ $img->id }}, 'down')">
+                                    <i class="ri-arrow-right-s-line fs-18"></i>
+                                </button>
+                            @endif
+                        </div>
                     </div>
                 </div>
             @endforeach
+        </div>
 
+        <div class="row g-3 mt-1" id="shop-new-images">
             {{-- New Temporary Images --}}
             @foreach($newImages as $index => $img)
-                <div class="col-6 col-sm-4 col-md-3">
+                <div class="col-6 col-sm-4 col-md-3" data-index="{{ $index }}" wire:key="new-img-{{ $index }}">
                     <div class="position-relative border rounded overflow-hidden group-preview">
-                        <img src="{{ $img->temporaryUrl() }}" class="img-fluid w-100" style="height: 150px; object-fit: cover;">
-                        
-                        {{-- Loading Overlay for this image (if re-uploading logic existed, but basic temp URL is instant mostly) --}}
+                        @try
+                            <img src="{{ $img->temporaryUrl() }}" class="img-fluid w-100 cursor-move" style="height: 150px; object-fit: cover;">
+                        @catch(\Exception $e)
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                                <i class="ri-image-line fs-24 text-muted"></i>
+                            </div>
+                        @endtry
                         
                         <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 m-1 shadow-sm"
                             wire:click="removeNewImage({{ $index }})">
                             <i class="ri-close-line"></i>
                         </button>
+
+                        <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-2 pb-1" style="background: linear-gradient(transparent, rgba(0,0,0,0.5));">
+                            @if(!$loop->first)
+                                <button type="button" class="btn btn-link text-white p-0" wire:click.prevent="moveNewImage({{ $index }}, 'up')">
+                                    <i class="ri-arrow-left-s-line fs-18"></i>
+                                </button>
+                            @else
+                                <span></span>
+                            @endif
+                            @if(!$loop->last)
+                                <button type="button" class="btn btn-link text-white p-0" wire:click.prevent="moveNewImage({{ $index }}, 'down')">
+                                    <i class="ri-arrow-right-s-line fs-18"></i>
+                                </button>
+                            @endif
+                        </div>
                     </div>
                 </div>
             @endforeach

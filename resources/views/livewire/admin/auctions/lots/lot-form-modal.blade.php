@@ -109,11 +109,77 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         document.addEventListener('livewire:initialized', () => {
             var createModal = new bootstrap.Modal(document.getElementById('createAuctionModal'));
-            Livewire.on('show-create-modal', () => { createModal.show(); });
+            Livewire.on('show-create-modal', () => { 
+                createModal.show(); 
+                setTimeout(initAuctionSortable, 500);
+            });
             Livewire.on('hide-create-modal', () => { createModal.hide(); });
+
+            const initAuctionSortable = () => {
+                // Existing Main Images
+                const elExMain = document.getElementById('auction-existing-main');
+                if (elExMain) {
+                    new Sortable(elExMain, {
+                        animation: 150,
+                        onEnd: function (evt) {
+                            let orderedIds = Array.from(elExMain.children).map(el => el.dataset.id);
+                            @this.call('reorderImages', orderedIds, 'main');
+                        }
+                    });
+                }
+
+                // New Main Images
+                const elNewMain = document.getElementById('auction-new-main');
+                if (elNewMain) {
+                    new Sortable(elNewMain, {
+                        animation: 150,
+                        onEnd: function (evt) {
+                            let indices = Array.from(elNewMain.children).map(el => el.dataset.index);
+                            @this.call('reorderNewImages', indices, 'main');
+                        }
+                    });
+                }
+
+                // Existing 360 Images
+                const elEx360 = document.getElementById('auction-existing-360');
+                if (elEx360) {
+                    new Sortable(elEx360, {
+                        animation: 150,
+                        onEnd: function (evt) {
+                            let orderedIds = Array.from(elEx360.children).map(el => el.dataset.id);
+                            @this.call('reorderImages', orderedIds, '360');
+                        }
+                    });
+                }
+
+                // New 360 Images
+                const elNew360 = document.getElementById('auction-new-360');
+                if (elNew360) {
+                    new Sortable(elNew360, {
+                        animation: 150,
+                        onEnd: function (evt) {
+                            let indices = Array.from(elNew360.children).map(el => el.dataset.index);
+                            @this.call('reorderNewImages', indices, '360');
+                        }
+                    });
+                }
+            };
+
+            // Re-init on Livewire update
+            Livewire.hook('request', (({ component, commit, respond, succeed, fail }) => {
+                succeed(({ snapshot, effect }) => {
+                    queueMicrotask(() => {
+                        initAuctionSortable();
+                    });
+                })
+            }));
+
+            // Initial init
+            initAuctionSortable();
         });
     </script>
     <style>

@@ -5,10 +5,10 @@
         
         <!-- Existing Images -->
         @if(count($existingImages) > 0)
-            <div class="d-flex gap-2 flex-wrap mb-3">
+            <div id="existing-main-images" class="d-flex gap-2 flex-wrap mb-3">
                 @foreach($existingImages as $img)
-                    <div class="position-relative" style="width: 70px; height: 70px;" wire:key="ex-img-{{ $img->id }}">
-                        <img src="{{ Storage::url(str_replace('\\', '/', $img->image_path)) }}" class="img-fluid rounded w-100 h-100 object-cover border">
+                    <div class="position-relative" style="width: 70px; height: 70px;" wire:key="ex-img-{{ $img->id }}" data-id="{{ $img->id }}">
+                        <img src="{{ Storage::url(str_replace('\\', '/', $img->image_path)) }}" class="img-fluid rounded w-100 h-100 object-cover border cursor-move">
                         
                         <div class="position-absolute top-0 end-0 d-flex flex-column gap-1" style="transform: translate(30%, -30%);">
                             <button type="button" class="btn btn-danger btn-icon rounded-circle shadow-sm" 
@@ -57,10 +57,10 @@
         </div>
 
         @if ($newImages)
-            <div class="d-flex gap-2 mt-2 pb-2 overflow-auto custom-scrollbar">
+            <div id="new-main-images" class="d-flex gap-2 mt-2 pb-2 overflow-auto custom-scrollbar">
                 @foreach ($newImages as $i => $tempImg)
-                     <div class="avatar-lg bg-white border rounded p-1 flex-shrink-0 position-relative" style="width: 70px; height: 70px;" wire:key="new-main-{{ $i }}">
-                         <img src="{{ $tempImg->temporaryUrl() }}" class="img-fluid rounded h-100 w-100 object-cover">
+                     <div class="avatar-lg bg-white border rounded p-1 flex-shrink-0 position-relative" style="width: 70px; height: 70px;" wire:key="new-main-{{ $i }}" data-index="{{ $i }}">
+                         <img src="{{ $tempImg->temporaryUrl() }}" class="img-fluid rounded h-100 w-100 object-cover cursor-move">
                          <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 rounded-circle shadow-sm" 
                                 style="width: 18px; height: 18px; transform: translate(30%, -30%); padding: 0;"
                                 wire:click.prevent.stop="removeNewImage({{ $i }})">
@@ -93,10 +93,10 @@
 
         <!-- Existing 360 Images -->
         @if(count($existing360Images) > 0)
-            <div class="d-flex gap-2 flex-wrap mb-3">
+            <div id="existing-360-images" class="d-flex gap-2 flex-wrap mb-3">
                 @foreach($existing360Images as $img)
-                     <div class="position-relative" style="width: 70px; height: 70px;" wire:key="ex-360-{{ $img->id }}">
-                        <img src="{{ Storage::url(str_replace('\\', '/', $img->image_path)) }}" class="img-fluid rounded w-100 h-100 object-cover border">
+                     <div class="position-relative" style="width: 70px; height: 70px;" wire:key="ex-360-{{ $img->id }}" data-id="{{ $img->id }}">
+                        <img src="{{ Storage::url(str_replace('\\', '/', $img->image_path)) }}" class="img-fluid rounded w-100 h-100 object-cover border cursor-move">
                         <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 rounded-circle shadow-sm" 
                                 style="width: 18px; height: 18px; transform: translate(30%, -30%); padding: 0;"
                                 wire:click.prevent.stop="deleteImage({{ $img->id }}, '360')">
@@ -142,10 +142,10 @@
         </div>
 
          @if ($new360Images)
-            <div class="d-flex gap-2 mt-2 pb-2 overflow-auto custom-scrollbar">
+            <div id="new-360-images" class="d-flex gap-2 mt-2 pb-2 overflow-auto custom-scrollbar">
                 @foreach ($new360Images as $i => $tempImg)
-                     <div class="avatar-lg bg-white border rounded p-1 flex-shrink-0 position-relative" style="width: 70px; height: 70px;" wire:key="new-360-{{ $i }}">
-                         <img src="{{ $tempImg->temporaryUrl() }}" class="img-fluid rounded h-100 w-100 object-cover">
+                     <div class="avatar-lg bg-white border rounded p-1 flex-shrink-0 position-relative" style="width: 70px; height: 70px;" wire:key="new-360-{{ $i }}" data-index="{{ $i }}">
+                         <img src="{{ $tempImg->temporaryUrl() }}" class="img-fluid rounded h-100 w-100 object-cover cursor-move">
                          <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 rounded-circle shadow-sm" 
                                 style="width: 18px; height: 18px; transform: translate(30%, -30%); padding: 0;"
                                 wire:click.prevent.stop="removeNew360Image({{ $i }})">

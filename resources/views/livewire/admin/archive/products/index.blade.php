@@ -57,6 +57,7 @@
     @include('livewire.admin.archive.products.partials._delete-confirm')
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         document.addEventListener('livewire:initialized', () => {
             
@@ -82,6 +83,69 @@
             var deleteModal = new bootstrap.Modal(document.getElementById('deleteProductModal'));
             Livewire.on('show-product-delete-modal', () => { deleteModal.show(); });
             Livewire.on('hide-product-delete-modal', () => { deleteModal.hide(); });
+
+            // Sortable Initialization
+            const initSortable = () => {
+                // Existing Main Images
+                const elExMain = document.getElementById('existing-main-images');
+                if (elExMain) {
+                    new Sortable(elExMain, {
+                        animation: 150,
+                        onEnd: function (evt) {
+                            let orderedIds = Array.from(elExMain.children).map(el => el.dataset.id);
+                            @this.call('reorderImages', orderedIds, 'main');
+                        }
+                    });
+                }
+
+                // New Main Images
+                const elNewMain = document.getElementById('new-main-images');
+                if (elNewMain) {
+                    new Sortable(elNewMain, {
+                        animation: 150,
+                        onEnd: function (evt) {
+                            let indices = Array.from(elNewMain.children).map(el => el.dataset.index);
+                            @this.call('reorderNewImages', indices, 'main');
+                        }
+                    });
+                }
+
+                // Existing 360 Images
+                const elEx360 = document.getElementById('existing-360-images');
+                if (elEx360) {
+                    new Sortable(elEx360, {
+                        animation: 150,
+                        onEnd: function (evt) {
+                            let orderedIds = Array.from(elEx360.children).map(el => el.dataset.id);
+                            @this.call('reorderImages', orderedIds, '360');
+                        }
+                    });
+                }
+
+                // New 360 Images
+                const elNew360 = document.getElementById('new-360-images');
+                if (elNew360) {
+                    new Sortable(elNew360, {
+                        animation: 150,
+                        onEnd: function (evt) {
+                            let indices = Array.from(elNew360.children).map(el => el.dataset.index);
+                            @this.call('reorderNewImages', indices, '360');
+                        }
+                    });
+                }
+            };
+
+            // Re-init on Livewire update
+            Livewire.hook('request', (({ component, commit, respond, succeed, fail }) => {
+                succeed(({ snapshot, effect }) => {
+                    queueMicrotask(() => {
+                        initSortable();
+                    });
+                })
+            }));
+
+            // Initial init
+            initSortable();
         });
     </script>
 </div>

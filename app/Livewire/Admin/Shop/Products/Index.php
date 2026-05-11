@@ -528,7 +528,69 @@ class Index extends Component
 
     public function removeNewImage($index)
     {
-        array_splice($this->newImages, $index, 1);
+        if (isset($this->newImages[$index])) {
+            unset($this->newImages[$index]);
+            $this->newImages = array_values($this->newImages);
+        }
+    }
+
+    public function moveImage($id, $direction)
+    {
+        if (!$this->productId) return;
+        $product = ShopProduct::find($this->productId);
+        if (!$product) return;
+
+        $images = $product->images()->orderBy('sort_order')->get();
+        
+        $currentIndex = $images->search(fn($img) => $img->id == $id);
+        if ($currentIndex === false) return;
+
+        $targetIndex = ($direction === 'up') ? $currentIndex - 1 : $currentIndex + 1;
+        if ($targetIndex < 0 || $targetIndex >= $images->count()) return;
+
+        $imgA = $images[$currentIndex];
+        $imgB = $images[$targetIndex];
+
+        $orderA = $imgA->sort_order;
+        $orderB = $imgB->sort_order;
+
+        $imgA->update(['sort_order' => $orderB]);
+        $imgB->update(['sort_order' => $orderA]);
+
+        $this->existingImages = $product->images()->orderBy('sort_order')->get();
+    }
+
+    public function moveNewImage($index, $direction)
+    {
+        $targetIndex = ($direction === 'up') ? $index - 1 : $index + 1;
+        if ($targetIndex < 0 || $targetIndex >= count($this->newImages)) return;
+
+        $temp = $this->newImages[$index];
+        $this->newImages[$index] = $this->newImages[$targetIndex];
+        $this->newImages[$targetIndex] = $temp;
+    }
+
+    public function reorderImages($orderedIds)
+    {
+        foreach ($orderedIds as $index => $id) {
+            \App\Models\Shop\ShopProductImage::where('id', $id)->update(['sort_order' => $index]);
+        }
+        if ($this->productId) {
+            $product = ShopProduct::find($this->productId);
+            $this->existingImages = $product->images()->orderBy('sort_order')->get();
+        }
+    }
+
+    public function reorderNewImages($indices)
+    {
+        $oldArr = $this->newImages;
+        $newArr = [];
+        foreach ($indices as $oldIndex) {
+            if (isset($oldArr[$oldIndex])) {
+                $newArr[] = $oldArr[$oldIndex];
+            }
+        }
+        $this->newImages = $newArr;
     }
 
     public function removeExistingImage($imageId)

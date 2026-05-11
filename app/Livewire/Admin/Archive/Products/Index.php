@@ -660,6 +660,33 @@ class Index extends Component
         $this->$arrName = $arr;
     }
 
+    public function reorderImages($orderedIds, $type = 'main')
+    {
+        foreach ($orderedIds as $index => $id) {
+            if ($type === 'main') {
+                ArchiveProductImage::where('id', $id)->update(['sort_order' => $index]);
+            } else {
+                \App\Models\Archive\ArchiveProduct360Image::where('id', $id)->update(['sort_order' => $index]);
+            }
+        }
+        $this->refreshMedia();
+    }
+
+    public function reorderNewImages($indices, $type = 'main')
+    {
+        $arrName = ($type === 'main') ? 'newImages' : 'new360Images';
+        $oldArr = $this->$arrName;
+        $newArr = [];
+
+        foreach ($indices as $oldIndex) {
+            if (isset($oldArr[$oldIndex])) {
+                $newArr[] = $oldArr[$oldIndex];
+            }
+        }
+
+        $this->$arrName = $newArr;
+    }
+
 
 
     // --- Early Access Config ---
