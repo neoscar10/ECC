@@ -44,8 +44,11 @@
                         <option value="empty">Empty</option>
                     </select>
                 </div>
-                <div class="col-md-6 text-end text-muted small pt-2">
-                    <i class="ri-information-line"></i> Abandoned threshold: {{ config('cart.abandoned_minutes') }} minutes
+                <div class="col-md-6 text-end text-muted small pt-2 d-flex justify-content-end align-items-center">
+                    <i class="ri-information-line me-1"></i> Abandoned threshold: <span class="fw-medium ms-1">{{ $this->formattedThreshold }}</span>
+                    <button type="button" class="btn btn-sm btn-soft-primary ms-3" wire:click="openSettingsModal">
+                        <i class="ri-settings-3-line align-middle"></i> Configure
+                    </button>
                 </div>
             </div>
 
@@ -220,10 +223,70 @@
             </div>
         </div>
     </div>
+    {{-- Settings Modal --}}
+    <div wire:ignore.self class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-light p-3">
+                    <h5 class="modal-title"><i class="ri-settings-3-line align-middle me-1 text-primary"></i> Configure Abandoned Threshold</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btn-close-settings"></button>
+                </div>
+                <form wire:submit.prevent="saveSettings">
+                    <div class="modal-body">
+                        <div class="alert alert-info border-0 shadow-sm mb-4">
+                            <strong>What is this?</strong><br>
+                            This setting determines how long an active shopping cart must sit completely untouched before the system officially flags it as "Abandoned". You can use this status to trigger automated recovery emails to the user.
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-lg-6">
+                                <label for="thresholdValue" class="form-label">Duration</label>
+                                <input type="number" class="form-control" id="thresholdValue" wire:model="thresholdValue" min="1" required>
+                                @error('thresholdValue') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="col-lg-6">
+                                <label for="thresholdUnit" class="form-label">Unit</label>
+                                <select class="form-select" id="thresholdUnit" wire:model="thresholdUnit" required>
+                                    <option value="minutes">Minutes</option>
+                                    <option value="hours">Hours</option>
+                                    <option value="days">Days</option>
+                                </select>
+                                @error('thresholdUnit') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="hstack gap-2 justify-content-end w-100">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="saveSettings">Save Configuration</span>
+                                <span wire:loading wire:target="saveSettings">Saving...</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
 <script>
+    document.addEventListener('livewire:initialized', () => {
+        Livewire.on('show-settings-modal', () => {
+            var myModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+            myModal.show();
+        });
+
+        Livewire.on('hide-settings-modal', () => {
+            const modalEl = document.getElementById('settingsModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+                modal.hide();
+            }
+        });
+    });
+
     window.addEventListener('show-cart-modal', event => {
         var myModal = new bootstrap.Modal(document.getElementById('cartDetailModal'));
         myModal.show();

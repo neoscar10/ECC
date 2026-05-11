@@ -62,7 +62,7 @@ class Cart extends Model
             return false;
         }
 
-        $thresholdMinutes = config('cart.abandoned_minutes', 60);
+        $thresholdMinutes = \App\Models\Setting::get('cart_abandoned_minutes', config('cart.abandoned_minutes', 60));
 
         return $this->last_activity_at && $this->last_activity_at->lt(now()->subMinutes($thresholdMinutes));
     }
