@@ -727,6 +727,9 @@
                 height: 40px;
             }
         }
+        .hover-opacity-100 { transition: opacity 0.2s ease; }
+        .hover-opacity-100:hover { opacity: 1 !important; }
+        .text-gold { color: var(--luxe-gold) !important; }
     </style>
     @endpush
 
@@ -908,9 +911,11 @@
 
         {{-- MOBILE FILTER OFFCANVAS --}}
         <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="shopFiltersCanvas" aria-labelledby="shopFiltersCanvasLabel" wire:ignore.self>
-            <div class="offcanvas-header border-bottom border-secondary-subtle">
-                <h5 class="offcanvas-title" id="shopFiltersCanvasLabel">Shop Filters</h5>
-                <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            <div class="offcanvas-header border-bottom border-secondary-subtle py-3">
+                <h5 class="offcanvas-title fw-bold text-gold" id="shopFiltersCanvasLabel">Filters & Sort</h5>
+                <button type="button" class="btn btn-icon btn-sm btn-ghost-light fs-20 text-white opacity-75 hover-opacity-100" data-bs-dismiss="offcanvas" aria-label="Close">
+                    <i class="mdi mdi-close"></i>
+                </button>
             </div>
             <div class="offcanvas-body">
                 <div class="shop-filter-mobile-card p-3">
@@ -1068,12 +1073,7 @@
                     </div>
                 </div>
 
-                {{-- Mobile-only Close Trigger --}}
-                <div class="mt-5 mb-4 d-lg-none text-center">
-                    <button type="button" class="btn btn-outline-secondary border-secondary-subtle text-white-50 px-4 py-2 rounded-pill fs-12 fw-bold text-uppercase" data-bs-dismiss="offcanvas">
-                        <i class="mdi mdi-close-circle-outline me-1"></i> Close Filters
-                    </button>
-                </div>
+
             </div>
         </div>
 
