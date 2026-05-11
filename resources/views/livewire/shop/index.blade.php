@@ -826,9 +826,9 @@
                                 min="{{ $absoluteMinPrice }}"
                                 max="{{ $absoluteMaxPrice }}"
                                 step="1"
-                                wire:model.live.debounce.500ms="minPrice"
+                                wire:model="minPrice"
                                 class="shop-range-native min-range"
-                                oninput="this.closest('.shop-range-wrap').querySelector('.range-min-label').innerText = '{{ $currencySymbol ?? '₹' }}' + Number(this.value).toLocaleString()"
+                                oninput="updateRangeUI(this)"
                             >
 
                             <input
@@ -836,9 +836,9 @@
                                 min="{{ $absoluteMinPrice }}"
                                 max="{{ $absoluteMaxPrice }}"
                                 step="1"
-                                wire:model.live.debounce.500ms="maxPrice"
+                                wire:model="maxPrice"
                                 class="shop-range-native max-range"
-                                oninput="this.closest('.shop-range-wrap').querySelector('.range-max-label').innerText = '{{ $currencySymbol ?? '₹' }}' + Number(this.value).toLocaleString()"
+                                oninput="updateRangeUI(this)"
                             >
                         </div>
 
@@ -911,13 +911,15 @@
 
         {{-- MOBILE FILTER OFFCANVAS --}}
         <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="shopFiltersCanvas" aria-labelledby="shopFiltersCanvasLabel" wire:ignore.self>
-            <div class="offcanvas-header border-bottom border-secondary-subtle py-3">
-                <h5 class="offcanvas-title fw-bold text-gold" id="shopFiltersCanvasLabel">Filters & Sort</h5>
-                <button type="button" class="btn btn-icon btn-sm btn-ghost-light fs-20 text-white opacity-75 hover-opacity-100" data-bs-dismiss="offcanvas" aria-label="Close">
-                    <i class="mdi mdi-close"></i>
+            <div class="offcanvas-body position-relative">
+                {{-- Floating Close Button --}}
+                <button type="button" class="btn btn-icon btn-ghost-light position-absolute top-0 end-0 m-2 text-white opacity-75 hover-opacity-100" 
+                        data-bs-dismiss="offcanvas" aria-label="Close" style="z-index: 1070;">
+                    <i class="mdi mdi-close fs-22"></i>
                 </button>
-            </div>
-            <div class="offcanvas-body">
+
+                <h5 class="fw-bold text-gold mb-4 mt-2">Filters & Sort</h5>
+                
                 <div class="shop-filter-mobile-card p-3">
                     <div class="d-flex flex-column gap-4">
                         <section>
@@ -987,34 +989,34 @@
                                     ></span>
                                 </div>
 
-                                <div class="shop-range-inputs">
-                                    <input
-                                        type="range"
-                                        min="{{ $absoluteMinPrice ?? 0 }}"
-                                        max="{{ $absoluteMaxPrice ?? 1500 }}"
-                                        step="1"
-                                        wire:model.live.debounce.500ms="minPrice"
-                                        class="shop-range-native min-range"
-                                        oninput="this.closest('.shop-range-wrap').querySelector('.range-min-label').innerText = '{{ $currencySymbol ?? '₹' }}' + Number(this.value).toLocaleString()"
-                                    >
+                        <div class="shop-range-inputs">
+                            <input
+                                type="range"
+                                min="{{ $absoluteMinPrice }}"
+                                max="{{ $absoluteMaxPrice }}"
+                                step="1"
+                                wire:model="minPrice"
+                                class="shop-range-native min-range"
+                                oninput="updateRangeUI(this)"
+                            >
 
-                                    <input
-                                        type="range"
-                                        min="{{ $absoluteMinPrice ?? 0 }}"
-                                        max="{{ $absoluteMaxPrice ?? 1500 }}"
-                                        step="1"
-                                        wire:model.live.debounce.500ms="maxPrice"
-                                        class="shop-range-native max-range"
-                                        oninput="this.closest('.shop-range-wrap').querySelector('.range-max-label').innerText = '{{ $currencySymbol ?? '₹' }}' + Number(this.value).toLocaleString()"
-                                    >
-                                </div>
+                            <input
+                                type="range"
+                                min="{{ $absoluteMinPrice }}"
+                                max="{{ $absoluteMaxPrice }}"
+                                step="1"
+                                wire:model="maxPrice"
+                                class="shop-range-native max-range"
+                                oninput="updateRangeUI(this)"
+                            >
+                        </div>
 
-                                <div class="shop-range-labels">
-                                    <span class="range-min-label">{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMin) }}</span>
-                                    <span class="range-max-label">{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMax) }}{{ ($absoluteMax === $selectedMax) ? '+' : '' }}</span>
-                                </div>
-                            </div>
-                        </section>
+                        <div class="shop-range-labels">
+                            <span class="range-min-label">{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMin) }}</span>
+                            <span class="range-max-label">{{ $currencySymbol ?? '₹' }}{{ number_format($selectedMax) }}{{ ($absoluteMax === $selectedMax) ? '+' : '' }}</span>
+                        </div>
+                    </div>
+                </section>
 
                         @foreach($tagGroups as $group)
                             @php
@@ -1216,25 +1218,60 @@
 
 @push('scripts')
 <script>
+    // Smooth Range Slider UI
+    window.updateRangeUI = (el) => {
+        const wrap = el.closest('.shop-range-wrap');
+        const minInput = wrap.querySelector('.min-range');
+        const maxInput = wrap.querySelector('.max-range');
+        const activeTrack = wrap.querySelector('.shop-range-active');
+        const thumbs = wrap.querySelectorAll('.shop-range-thumb-visual');
+        const minLabel = wrap.querySelector('.range-min-label');
+        const maxLabel = wrap.querySelector('.range-max-label');
+        
+        if (!minInput || !maxInput || !activeTrack || thumbs.length < 2) return;
+
+        // Prevent crossing
+        if (el.classList.contains('min-range')) {
+            if (parseInt(minInput.value) > parseInt(maxInput.value)) {
+                minInput.value = maxInput.value;
+            }
+        } else {
+            if (parseInt(maxInput.value) < parseInt(minInput.value)) {
+                maxInput.value = minInput.value;
+            }
+        }
+        
+        const min = parseInt(minInput.value);
+        const max = parseInt(maxInput.value);
+        const absMin = parseInt(minInput.min);
+        const absMax = parseInt(minInput.max);
+        const range = absMax - absMin || 1;
+        
+        const left = ((min - absMin) / range) * 100;
+        const right = ((max - absMin) / range) * 100;
+        
+        activeTrack.style.left = left + '%';
+        activeTrack.style.width = (right - left) + '%';
+        thumbs[0].style.left = left + '%';
+        thumbs[1].style.left = right + '%';
+        
+        if (minLabel) minLabel.innerText = '{{ $currencySymbol ?? '₹' }}' + min.toLocaleString();
+        if (maxLabel) maxLabel.innerText = '{{ $currencySymbol ?? '₹' }}' + max.toLocaleString() + (max === absMax ? '+' : '');
+        
+        // Z-Index Logic
+        if (min > (absMax * 0.6)) {
+            minInput.style.zIndex = "3";
+            maxInput.style.zIndex = "2";
+        } else {
+            minInput.style.zIndex = "2";
+            maxInput.style.zIndex = "3";
+        }
+    };
+
     const initPriceRange = () => {
         document.querySelectorAll('.shop-range-inputs').forEach(wrap => {
             const minInput = wrap.querySelector('.min-range');
-            const maxInput = wrap.querySelector('.max-range');
-            if(!minInput || !maxInput) return;
-
-            const syncZ = () => {
-                // If min value is high, bring it to front to prevent being blocked by max
-                if(parseInt(minInput.value) > (parseInt(minInput.max) * 0.6)) {
-                    minInput.style.zIndex = "3";
-                    maxInput.style.zIndex = "2";
-                } else {
-                    minInput.style.zIndex = "2";
-                    maxInput.style.zIndex = "3";
-                }
-            };
-            minInput.addEventListener('input', syncZ);
-            maxInput.addEventListener('input', syncZ);
-            syncZ();
+            if (minInput) updateRangeUI(minInput);
         });
     };
 
