@@ -36,18 +36,10 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-lg-8 mb-3 mb-lg-0">
-                            @php
-                                $activeImg = $this->activeImage;
-                                $mainPath = null;
-                                if ($activeImg) {
-                                    $mainPath = preg_replace('#^public/#', '', str_replace('\\','/', $activeImg->image_path));
-                                }
-                            @endphp
-                            
                             <div class="bg-light rounded d-flex align-items-center justify-content-center border p-2" 
                                  style="height: 420px; overflow: hidden;">
-                                @if($mainPath)
-                                    <img src="{{ Storage::url($mainPath) }}" 
+                                @if($activeImage)
+                                    <img src="{{ Storage::url($activeImage->image_path) }}" 
                                          class="w-100 h-100 object-fit-contain" 
                                          alt="Archive Image">
                                 @else
@@ -63,7 +55,6 @@
                             <div class="d-flex flex-row flex-lg-column gap-2 overflow-auto" style="max-height: 420px;">
                                 @forelse($product->images->sortBy('sort_order') as $img)
                                     @php 
-                                        $thumbPath = preg_replace('#^public/#', '', str_replace('\\','/', $img->image_path));
                                         $isActive = $activeImageId === $img->id;
                                     @endphp
                                     <div wire:key="thumb-{{ $img->id }}" 
@@ -71,7 +62,7 @@
                                          class="d-flex align-items-center justify-content-center flex-shrink-0 cursor-pointer border rounded bg-white p-1 {{ $isActive ? 'border-primary border-2 shadow-sm' : 'border-light' }}"
                                          style="width: 80px; height: 80px; transition: all 0.2s;"
                                          role="button">
-                                        <img src="{{ Storage::url($thumbPath) }}" class="img-fluid" style="max-height: 100%; object-fit: contain;">
+                                        <img src="{{ Storage::url($img->image_path) }}" class="img-fluid" style="max-height: 100%; object-fit: contain;">
                                     </div>
                                 @empty
                                     <div class="text-muted fs-12">No images available.</div>
