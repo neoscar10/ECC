@@ -238,13 +238,13 @@
                             <tbody>
                                 @forelse($queues['low_stock'] as $variation)
                                     <tr>
-                                        <td>{{ $variation->group?->product?->title }}</td>
-                                        <td>{{ $variation->caption }}</td>
+                                        <td>{{ $variation->display_product_title }}</td>
+                                        <td>{{ $variation->display_caption }}</td>
                                         <td>
                                             <span class="badge bg-danger-subtle text-danger">{{ $variation->stock_qty }} left</span>
                                         </td>
                                         <td>
-                                            <a href="{{ $variation->restock_url ?? route('admin.shop.inventory') }}" class="btn btn-sm btn-soft-primary">Restock</a>
+                                            <a href="{{ $variation->restock_url }}" class="btn btn-sm btn-soft-primary">Restock</a>
                                         </td>
                                     </tr>
                                 @empty

@@ -217,47 +217,36 @@ class AdminDashboardMetricsService
         // 1. Get Variants with low stock
         $variants = ShopProductVariationValue::join('shop_product_variation_groups', 'shop_product_variation_values.group_id', '=', 'shop_product_variation_groups.id')
             ->join('shop_products', 'shop_product_variation_groups.shop_product_id', '=', 'shop_products.id')
-            ->whereNull('shop_products.deleted_at') // Exclude soft-deleted products
+            ->whereNull('shop_products.deleted_at')
             ->whereColumn('shop_product_variation_values.stock_qty', '<', 'shop_products.low_stock_threshold')
             ->select('shop_product_variation_values.*')
             ->with(['group.product'])
             ->limit($limit)
-            ->get()
-            ->map(function($variation) {
-                // Return a plain object to avoid Livewire "multiple model types" serialization error
-                return (object)[
-                    'id' => $variation->id,
-                    'group' => (object)[
-                        'product' => (object)[
-                            'title' => $variation->group?->product?->title
-                        ]
-                    ],
-                    'caption' => $variation->caption,
-                    'stock_qty' => $variation->stock_qty,
-                    'restock_url' => route('admin.shop.inventory', ['search' => $variation->group?->product?->title]),
-                ];
-            });
+            ->get();
 
         // 2. Get Simple Products with low stock
         $simple = \App\Models\Shop\ShopProduct::whereDoesntHave('variationGroups')
             ->whereNotNull('stock_qty')
             ->whereColumn('stock_qty', '<', 'low_stock_threshold')
             ->limit($limit)
-            ->get()
-            ->map(function($product) {
-                return (object)[
-                    'id' => $product->id,
-                    'group' => (object)[
-                        'product' => (object)[
-                            'title' => $product->title
-                        ]
-                    ],
-                    'caption' => 'N/A',
-                    'stock_qty' => $product->stock_qty,
-                    'restock_url' => route('admin.shop.inventory', ['search' => $product->title]),
-                ];
-            });
+            ->get();
 
-        return $variants->concat($simple)->sortBy('stock_qty')->take($limit);
+        // 3. Combine and prepare for display (as models)
+        return $variants->concat($simple)
+            ->sortBy('stock_qty')
+            ->take($limit)
+            ->map(function($item) {
+                // Add helper properties to the models
+                if ($item instanceof ShopProductVariationValue) {
+                    $item->display_product_title = $item->group?->product?->title;
+                    $item->display_caption = $item->caption;
+                    $item->restock_url = route('admin.shop.inventory', ['search' => $item->group?->product?->title]);
+                } else {
+                    $item->display_product_title = $item->title;
+                    $item->display_caption = 'N/A';
+                    $item->restock_url = route('admin.shop.inventory', ['search' => $item->title]);
+                }
+                return $item;
+            });
     }
 }
