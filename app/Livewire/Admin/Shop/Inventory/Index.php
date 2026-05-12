@@ -141,9 +141,9 @@ class Index extends Component
                 $query->having('total_computed_stock', '=', 0);
             } elseif ($this->filterStatus === 'low_stock') {
                 $query->having('total_computed_stock', '>', 0)
-                      ->having('total_computed_stock', '<=', $this->lowStockThreshold);
+                      ->havingRaw('total_computed_stock <= low_stock_threshold');
             } elseif ($this->filterStatus === 'in_stock') {
-                $query->having('total_computed_stock', '>', $this->lowStockThreshold);
+                $query->havingRaw('total_computed_stock > low_stock_threshold');
             }
         }
 

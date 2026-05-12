@@ -32,7 +32,7 @@
                     <select class="form-select" wire:model.live="filterStatus">
                         <option value="all">Status: All</option>
                         <option value="in_stock">In Stock</option>
-                        <option value="low_stock">Low Stock (≤ {{ $lowStockThreshold }})</option>
+                        <option value="low_stock">Low Stock</option>
                         <option value="out_of_stock">Out of Stock</option>
                     </select>
                 </div>
@@ -95,11 +95,12 @@
                         @forelse($products as $product)
                             @php
                                 $totalStock = $product->total_computed_stock;
-                                $statusBadge = $totalStock == 0 ? 'bg-danger' : ($totalStock <= $lowStockThreshold ? 'bg-warning text-dark' : 'bg-success');
-                                $statusLabel = $totalStock == 0 ? 'Out of Stock' : ($totalStock <= $lowStockThreshold ? 'Low Stock' : 'In Stock');
+                                $threshold = $product->low_stock_threshold;
+                                $statusBadge = $totalStock == 0 ? 'bg-danger' : ($totalStock <= $threshold ? 'bg-warning text-dark' : 'bg-success');
+                                $statusLabel = $totalStock == 0 ? 'Out of Stock' : ($totalStock <= $threshold ? 'Low Stock' : 'In Stock');
                                 $isVariant = $product->variation_groups_count > 0;
                             @endphp
-                            <tr class="{{ $totalStock <= $lowStockThreshold ? ($totalStock == 0 ? 'table-danger-subtle' : 'table-warning-subtle') : '' }}">
+                            <tr class="{{ $totalStock <= $threshold ? ($totalStock == 0 ? 'table-danger-subtle' : 'table-warning-subtle') : '' }}">
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="flex-shrink-0 me-2">

@@ -217,6 +217,7 @@ class AdminDashboardMetricsService
         // 1. Get Variants with low stock
         $variants = ShopProductVariationValue::join('shop_product_variation_groups', 'shop_product_variation_values.group_id', '=', 'shop_product_variation_groups.id')
             ->join('shop_products', 'shop_product_variation_groups.shop_product_id', '=', 'shop_products.id')
+            ->whereNull('shop_products.deleted_at') // Exclude soft-deleted products
             ->whereColumn('shop_product_variation_values.stock_qty', '<', 'shop_products.low_stock_threshold')
             ->select('shop_product_variation_values.*')
             ->with(['group.product'])
