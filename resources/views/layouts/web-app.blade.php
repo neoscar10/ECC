@@ -836,6 +836,90 @@
         [data-theme="light"] .luxe-logout-simple {
             color: var(--luxe-text-soft) !important;
         }
+
+        /* Generic Content & Global Overrides */
+        [data-theme="light"] h1, [data-theme="light"] h2, [data-theme="light"] h3, 
+        [data-theme="light"] h4, [data-theme="light"] h5, [data-theme="light"] h6,
+        [data-theme="light"] .h1, [data-theme="light"] .h2, [data-theme="light"] .h3, 
+        [data-theme="light"] .h4, [data-theme="light"] .h5, [data-theme="light"] .h6,
+        [data-theme="light"] strong, [data-theme="light"] b,
+        [data-theme="light"] .text-white,
+        [data-theme="light"] .text-secondary,
+        [data-theme="light"] .modal-title {
+            color: var(--luxe-text) !important;
+        }
+
+        [data-theme="light"] .text-white-50 {
+            color: var(--luxe-text-soft) !important;
+        }
+
+        [data-theme="light"] .modal-content {
+            background: var(--luxe-surface) !important;
+            border-color: var(--luxe-border-strong) !important;
+            color: var(--luxe-text) !important;
+            box-shadow: var(--luxe-shadow) !important;
+        }
+
+        [data-theme="light"] .btn-close-white {
+            filter: invert(1) grayscale(1) brightness(0);
+        }
+
+        /* Luxury Component Patterns */
+        [data-theme="light"] [class*="-card"],
+        [data-theme="light"] [class*="-stage"],
+        [data-theme="light"] [class*="-block"],
+        [data-theme="light"] [class*="-box"],
+        [data-theme="light"] [class*="-panel"] {
+            background: var(--luxe-surface) !important;
+            border-color: var(--luxe-border) !important;
+            color: var(--luxe-text) !important;
+        }
+
+        /* Module Specific Refinements */
+        [data-theme="light"] .shop-detail-gallery-stage,
+        [data-theme="light"] .archive-detail-stage,
+        [data-theme="light"] .auction-gallery-stage {
+            background: #ffffff !important;
+        }
+
+        [data-theme="light"] .shop-detail-title,
+        [data-theme="light"] .shop-detail-story-title,
+        [data-theme="light"] .archive-detail-title,
+        [data-theme="light"] .archive-detail-section-title,
+        [data-theme="light"] .auction-detail-title,
+        [data-theme="light"] .shop-products-title,
+        [data-theme="light"] .archive-detail-spec-value,
+        [data-theme="light"] .auction-highest-bid {
+            color: var(--luxe-text) !important;
+        }
+
+        [data-theme="light"] .shop-detail-qty,
+        [data-theme="light"] .shop-detail-thumb,
+        [data-theme="light"] .archive-detail-thumb,
+        [data-theme="light"] .auction-thumb-btn,
+        [data-theme="light"] .shop-detail-stage-control,
+        [data-theme="light"] .archive-detail-stage-btn,
+        [data-theme="light"] .auction-stage-btn,
+        [data-theme="light"] .shop-card-view-btn,
+        [data-theme="light"] .ecc-shop-search-input {
+            background: var(--luxe-surface-2) !important;
+            border-color: var(--luxe-border) !important;
+            color: var(--luxe-text) !important;
+        }
+
+        [data-theme="light"] .shop-detail-price,
+        [data-theme="light"] .archive-detail-side-value {
+            color: #b8860b !important; /* Deeper gold for readability */
+        }
+
+        [data-theme="light"] .shop-filter-link,
+        [data-theme="light"] .shop-checkbox {
+            color: var(--luxe-text-soft) !important;
+        }
+
+        [data-theme="light"] .shop-sort-inline .form-select {
+            color: var(--luxe-text) !important;
+        }
     </style>
 
     @livewireStyles
