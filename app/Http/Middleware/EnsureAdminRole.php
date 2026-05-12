@@ -26,8 +26,9 @@ class EnsureAdminRole
         $user = Auth::guard($guard)->user();
         
         // If somehow an array got stored, try to recover safely, otherwise refuse.
-        if (is_array($user)) {
-            $id = $user['id'] ?? null;
+        // If somehow an array or stdClass got stored, try to recover safely, otherwise refuse.
+        if (is_array($user) || $user instanceof \stdClass) {
+            $id = is_array($user) ? ($user['id'] ?? null) : ($user->id ?? null);
 
             if ($id) {
                 $model = \App\Models\User::query()->find($id);
@@ -38,7 +39,7 @@ class EnsureAdminRole
             }
         }
 
-        if (!is_object($user)) {
+        if (!($user instanceof \App\Models\User)) {
             return $this->refuseAccess($guard);
         }
 
