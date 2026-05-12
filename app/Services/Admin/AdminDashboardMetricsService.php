@@ -104,14 +104,19 @@ class AdminDashboardMetricsService
         $values = [];
         
         // Define start and end dates based on range
-        $end = Carbon::now();
+        $end = Carbon::now()->endOfDay();
         $start = match($range) {
             'today' => Carbon::today(),
-            '1w' => Carbon::now()->subWeek(),
-            '1m' => Carbon::now()->subMonth(),
-            'custom' => ($startDate && $endDate) ? Carbon::parse($startDate) : Carbon::now()->subMonth(),
-            default => Carbon::now()->subMonth(),
+            '1w' => $end->copy()->subDays(6)->startOfDay(),
+            '1m' => $end->copy()->subMonth()->startOfDay(),
+            'custom' => ($startDate && $endDate) ? Carbon::parse($startDate)->startOfDay() : $end->copy()->subMonth()->startOfDay(),
+            default => $end->copy()->subMonth()->startOfDay(),
         };
+
+        // Override end for custom if provided
+        if ($range === 'custom' && $endDate) {
+            $end = Carbon::parse($endDate)->endOfDay();
+        }
 
         if ($range === 'today') {
             // Hourly breakdown for today
