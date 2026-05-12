@@ -10,15 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@200..700&display=swap" rel="stylesheet">
-    
-    <script>
-        // Check for theme in localStorage or system preference
-        if (localStorage.getItem('theme') === 'light' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: light)').matches)) {
-            document.documentElement.setAttribute('data-theme', 'light');
-        } else {
-            document.documentElement.removeAttribute('data-theme');
-        }
-    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet">
 
@@ -760,165 +751,14 @@
             color: #111;
         }
 
+        .luxe-logout-simple {
+            font-size: 0.9rem;
+            transition: color 0.2s ease;
+        }
+
         .luxe-logout-simple:hover {
             color: var(--luxe-gold) !important;
             text-decoration: underline !important;
-        }
-
-        /* Light Mode Overrides */
-        [data-theme="light"] {
-            --luxe-bg: #fdfdfb;
-            --luxe-bg-2: #f7f6f2;
-            --luxe-surface: #ffffff;
-            --luxe-surface-2: #f0eee8;
-            --luxe-card: rgba(0,0,0,0.03);
-            --luxe-card-2: rgba(0,0,0,0.05);
-            --luxe-border: rgba(212, 175, 55, 0.15);
-            --luxe-border-strong: rgba(212, 175, 55, 0.3);
-            --luxe-text: #1d170d;
-            --luxe-text-soft: #5c5545;
-            --luxe-muted: #8f8878;
-            --luxe-shadow: 0 20px 45px rgba(212, 175, 55, 0.08);
-        }
-
-        [data-theme="light"] html, [data-theme="light"] body {
-            background: var(--luxe-bg);
-            color: var(--luxe-text);
-        }
-
-        [data-theme="light"] .luxe-header {
-            background: rgba(253, 253, 251, 0.94);
-        }
-
-        [data-theme="light"] .luxe-top-link {
-            color: rgba(29, 23, 13, 0.88);
-        }
-
-        [data-theme="light"] .luxe-top-link:hover,
-        [data-theme="light"] .luxe-top-link.active {
-            color: #fff;
-            background: var(--luxe-gold);
-        }
-
-        [data-theme="light"] .luxe-icon-btn {
-            background: rgba(0,0,0,0.05);
-            border-color: rgba(0,0,0,0.05);
-            color: var(--luxe-text);
-        }
-
-        [data-theme="light"] .luxe-hero-body {
-            background: #f7f6f2;
-        }
-
-        [data-theme="light"] .luxe-hero-title,
-        [data-theme="light"] .luxe-section-title,
-        [data-theme="light"] .luxe-subsection-title,
-        [data-theme="light"] .luxe-grid-title,
-        [data-theme="light"] .luxe-footer-title,
-        [data-theme="light"] .fw-bold.text-uppercase.text-white {
-            color: var(--luxe-text) !important;
-        }
-
-        [data-theme="light"] .luxe-footer {
-            background: #f7f6f2;
-            border-top: 1px solid var(--luxe-border);
-        }
-
-        [data-theme="light"] .luxe-footer-text, 
-        [data-theme="light"] .luxe-footer-link {
-            color: var(--luxe-text-soft);
-        }
-
-        [data-theme="light"] .luxe-brand {
-            color: var(--luxe-text);
-        }
-
-        [data-theme="light"] .luxe-logout-simple {
-            color: var(--luxe-text-soft) !important;
-        }
-
-        /* Generic Content & Global Overrides */
-        [data-theme="light"] h1, [data-theme="light"] h2, [data-theme="light"] h3, 
-        [data-theme="light"] h4, [data-theme="light"] h5, [data-theme="light"] h6,
-        [data-theme="light"] .h1, [data-theme="light"] .h2, [data-theme="light"] .h3, 
-        [data-theme="light"] .h4, [data-theme="light"] .h5, [data-theme="light"] .h6,
-        [data-theme="light"] strong, [data-theme="light"] b,
-        [data-theme="light"] .text-white,
-        [data-theme="light"] .text-secondary,
-        [data-theme="light"] .modal-title {
-            color: var(--luxe-text) !important;
-        }
-
-        [data-theme="light"] .text-white-50 {
-            color: var(--luxe-text-soft) !important;
-        }
-
-        [data-theme="light"] .modal-content {
-            background: var(--luxe-surface) !important;
-            border-color: var(--luxe-border-strong) !important;
-            color: var(--luxe-text) !important;
-            box-shadow: var(--luxe-shadow) !important;
-        }
-
-        [data-theme="light"] .btn-close-white {
-            filter: invert(1) grayscale(1) brightness(0);
-        }
-
-        /* Luxury Component Patterns */
-        [data-theme="light"] [class*="-card"],
-        [data-theme="light"] [class*="-stage"],
-        [data-theme="light"] [class*="-block"],
-        [data-theme="light"] [class*="-box"],
-        [data-theme="light"] [class*="-panel"] {
-            background: var(--luxe-surface) !important;
-            border-color: var(--luxe-border) !important;
-            color: var(--luxe-text) !important;
-        }
-
-        /* Module Specific Refinements */
-        [data-theme="light"] .shop-detail-gallery-stage,
-        [data-theme="light"] .archive-detail-stage,
-        [data-theme="light"] .auction-gallery-stage {
-            background: #ffffff !important;
-        }
-
-        [data-theme="light"] .shop-detail-title,
-        [data-theme="light"] .shop-detail-story-title,
-        [data-theme="light"] .archive-detail-title,
-        [data-theme="light"] .archive-detail-section-title,
-        [data-theme="light"] .auction-detail-title,
-        [data-theme="light"] .shop-products-title,
-        [data-theme="light"] .archive-detail-spec-value,
-        [data-theme="light"] .auction-highest-bid {
-            color: var(--luxe-text) !important;
-        }
-
-        [data-theme="light"] .shop-detail-qty,
-        [data-theme="light"] .shop-detail-thumb,
-        [data-theme="light"] .archive-detail-thumb,
-        [data-theme="light"] .auction-thumb-btn,
-        [data-theme="light"] .shop-detail-stage-control,
-        [data-theme="light"] .archive-detail-stage-btn,
-        [data-theme="light"] .auction-stage-btn,
-        [data-theme="light"] .shop-card-view-btn,
-        [data-theme="light"] .ecc-shop-search-input {
-            background: var(--luxe-surface-2) !important;
-            border-color: var(--luxe-border) !important;
-            color: var(--luxe-text) !important;
-        }
-
-        [data-theme="light"] .shop-detail-price,
-        [data-theme="light"] .archive-detail-side-value {
-            color: #b8860b !important; /* Deeper gold for readability */
-        }
-
-        [data-theme="light"] .shop-filter-link,
-        [data-theme="light"] .shop-checkbox {
-            color: var(--luxe-text-soft) !important;
-        }
-
-        [data-theme="light"] .shop-sort-inline .form-select {
-            color: var(--luxe-text) !important;
         }
     </style>
 
@@ -1017,15 +857,10 @@
                                x-data="{ count: {{ (int)($cartCount ?? 0) }} }"
                                @refresh-cart-badge.window="count = $event.detail.count">
                                 <i class="mdi mdi-cart-outline fs-5"></i>
-                                 <template x-if="count > 0">
+                                <template x-if="count > 0">
                                     <span class="luxe-icon-badge badge rounded-pill" x-text="count"></span>
                                 </template>
                             </a>
-
-                            <button id="theme-toggle" class="luxe-icon-btn" aria-label="Toggle theme">
-                                <i class="mdi mdi-weather-night fs-5" id="theme-toggle-dark-icon"></i>
-                                <i class="mdi mdi-weather-sunny fs-5 d-none" id="theme-toggle-light-icon"></i>
-                            </button>
 
                             @guest
                                 <a href="{{ route('login') }}" class="luxe-top-link ms-2" style="background: rgba(255,255,255,0.06);">
@@ -1155,34 +990,6 @@
 
     {{-- Bootstrap JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const themeToggleBtn = document.getElementById('theme-toggle');
-            const darkIcon = document.getElementById('theme-toggle-dark-icon');
-            const lightIcon = document.getElementById('theme-toggle-light-icon');
-
-            // Sync icons with initial theme
-            if (document.documentElement.getAttribute('data-theme') === 'light') {
-                darkIcon?.classList.add('d-none');
-                lightIcon?.classList.remove('d-none');
-            }
-
-            themeToggleBtn?.addEventListener('click', function() {
-                if (document.documentElement.getAttribute('data-theme') === 'light') {
-                    document.documentElement.removeAttribute('data-theme');
-                    localStorage.setItem('theme', 'dark');
-                    darkIcon?.classList.remove('d-none');
-                    lightIcon?.classList.add('d-none');
-                } else {
-                    document.documentElement.setAttribute('data-theme', 'light');
-                    localStorage.setItem('theme', 'light');
-                    darkIcon?.classList.add('d-none');
-                    lightIcon?.classList.remove('d-none');
-                }
-            });
-        });
-    </script>
 
     @livewireScripts
     @stack('scripts')
