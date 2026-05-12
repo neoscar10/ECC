@@ -1161,6 +1161,7 @@
             @endforeach
         </div>
     </section>
+    @endif
     {{-- PREMIUM CART SUCCESS TOAST --}}
     <div
         x-data="{ show: false, name: '' }"
