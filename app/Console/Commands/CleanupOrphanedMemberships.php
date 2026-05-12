@@ -36,13 +36,9 @@ class CleanupOrphanedMemberships extends Command
         }
 
         // 1. Memberships
-        $this->info('Checking for orphaned memberships...');
+        $this->info('Checking for orphaned memberships (Missing or soft-deleted users)...');
         
-        $orphanedMemberships = Membership::whereNotExists(function ($query) {
-            $query->select(DB::raw(1))
-                  ->from('users')
-                  ->whereRaw('users.id = memberships.user_id');
-        })->get();
+        $orphanedMemberships = Membership::whereDoesntHave('user')->get();
 
         if ($orphanedMemberships->isEmpty()) {
             $this->info('No orphaned memberships found.');
@@ -63,13 +59,9 @@ class CleanupOrphanedMemberships extends Command
         $this->newLine();
 
         // 2. Membership Applications
-        $this->info('Checking for orphaned membership applications...');
+        $this->info('Checking for orphaned membership applications (Missing or soft-deleted users)...');
         
-        $orphanedApps = MembershipApplication::whereNotExists(function ($query) {
-            $query->select(DB::raw(1))
-                  ->from('users')
-                  ->whereRaw('users.id = membership_applications.user_id');
-        })->get();
+        $orphanedApps = MembershipApplication::whereDoesntHave('user')->get();
 
         if ($orphanedApps->isEmpty()) {
             $this->info('No orphaned applications found.');
