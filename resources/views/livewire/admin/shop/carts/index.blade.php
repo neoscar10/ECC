@@ -147,7 +147,7 @@
                 <div class="modal-body">
                     @if($selectedCart)
                         <div class="mb-3">
-                            <h6>{{ $selectedCart->user->name ?? 'Deleted User' }} <span class="text-muted">({{ $selectedCart->user->email ?? 'N/A' }})</span></h6>
+                            <h6>{{ $selectedCart->user->name ?? 'Deleted User' }} <span class="text-muted">({{ $selectedCart->user->email ?? 'N/A' }} | {{ $selectedCart->user->phone ?? 'No Phone' }})</span></h6>
                             <div>
                                 Status: 
                                 @if($selectedCart->is_abandoned)
