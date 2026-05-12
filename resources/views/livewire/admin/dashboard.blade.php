@@ -29,7 +29,7 @@
                 :value="$kpis['active_members'] ?? 0" 
                 icon="ri-user-star-line" 
                 color="info" 
-                link="{{ route('admin.membership.members') }}" 
+                link="{{ route('admin.membership.members', ['statusFilter' => 'active']) }}" 
             />
         </div>
         <div class="col-xl-3 col-md-6">
