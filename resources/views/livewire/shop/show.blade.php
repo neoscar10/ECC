@@ -1105,7 +1105,6 @@
                 </div>
             </div>
         </div>
-        </div>
     </div>
 
     {{-- RELATED PRODUCTS --}}
