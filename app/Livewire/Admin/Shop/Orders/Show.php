@@ -42,7 +42,11 @@ class Show extends Component
             $shipment = $shipmentService->refreshCourierSelectionForShopOrder($this->order);
             
             if ($shipment && $shipment->status === 'courier_selected') {
-                session()->flash('success', 'Courier selection refreshed successfully.');
+                $msg = 'Courier selection refreshed successfully.';
+                if ($this->order->shipping_charge !== null && $shipment->courier_total_charge !== null && round($shipment->courier_total_charge, 2) !== round((float)$this->order->shipping_charge, 2)) {
+                    $msg .= ' Note: Customer paid INR ' . number_format($this->order->shipping_charge, 2) . '. Current quote is INR ' . number_format($shipment->courier_total_charge, 2) . '.';
+                }
+                session()->flash('success', $msg);
             } else {
                 session()->flash('warning', 'Shipment record updated but no couriers were available.');
             }
