@@ -35,14 +35,6 @@ class CheckoutService
         $currency = 'INR'; // Default
 
         foreach ($cart->items as $item) {
-            // Re-validate price/stock strictly? 
-            // For summary, we just calc current values.
-            // But we should warn if out of stock.
-            
-            // Note: unit_price on item might be stale if product changed. 
-            // Ideally we re-compute, but for efficiency we often trust cart unless 'refresh' requested.
-            // Implementation: using stored unit_price for display, but placeOrder must re-verify.
-            
             $lineTotal = $item->quantity * $item->unit_price;
             $subtotal += $lineTotal;
             $currency = $item->currency;
@@ -78,8 +70,26 @@ class CheckoutService
             ];
         }
 
-        // Placeholders for fees
+        // --- Shipping Quote ---
         $shippingFee = 0;
+        $shippingQuote = null;
+        $shippingError = null;
+
+        if ($shippingAddressId) {
+            $address = UserAddress::find($shippingAddressId);
+            if ($address) {
+                $quoteService = app(\App\Services\Shipping\CheckoutShippingQuoteService::class);
+                $quoteResult = $quoteService->quoteForCheckout($user, $cart->items, $address);
+                
+                if ($quoteResult['success']) {
+                    $shippingFee = $quoteResult['shipping_charge'];
+                    $shippingQuote = $quoteResult;
+                } else {
+                    $shippingError = $quoteResult['message'];
+                }
+            }
+        }
+
         $taxAmount = 0;
         $discountAmount = 0;
         
@@ -89,11 +99,14 @@ class CheckoutService
             'currency' => $currency,
             'subtotal' => round($subtotal, 2),
             'shipping_fee' => round($shippingFee, 2),
+            'shipping_quote' => $shippingQuote,
+            'shipping_error' => $shippingError,
             'tax_amount' => round($taxAmount, 2),
             'discount_amount' => round($discountAmount, 2),
             'total_amount' => round($totalAmount, 2),
             'items' => $items,
-            'can_place_order' => empty(array_filter(array_column($items, 'stock_issues'))),
+            'can_place_order' => empty(array_filter(array_column($items, 'stock_issues')))
+                && ($shippingError === null || !config('shiprocket.checkout_requires_serviceability', true)),
         ];
     }
 
@@ -114,12 +127,21 @@ class CheckoutService
             $billingAddress = $shippingAddress;
         }
 
+        // --- Final Shipping Validation ---
+        $quoteService = app(\App\Services\Shipping\CheckoutShippingQuoteService::class);
+        $cart = $this->cartService->getCart($user);
+        $cart->load(['items.product', 'items.variant']);
+
+        $shippingQuote = $quoteService->quoteForCheckout($user, $cart->items, $shippingAddress);
+        
+        if (!$shippingQuote['success'] && config('shiprocket.checkout_requires_serviceability', true)) {
+            throw new Exception($shippingQuote['message'] ?? "Shipping is not available for this address.");
+        }
+
+        $shippingFee = $shippingQuote['success'] ? $shippingQuote['shipping_charge'] : 0;
         $isPaid = !empty($paymentDetails);
 
-        return DB::transaction(function () use ($user, $shippingAddress, $billingAddress, $data, $paymentDetails, $isPaid) {
-            $cart = $this->cartService->getCart($user);
-            $cart->load(['items.product', 'items.variationValues']);
-
+        $order = DB::transaction(function () use ($user, $shippingAddress, $billingAddress, $data, $paymentDetails, $isPaid, $cart, $shippingQuote, $shippingFee) {
             if ($cart->items->isEmpty()) {
                 throw new Exception("Cart is empty.");
             }
@@ -187,10 +209,20 @@ class CheckoutService
                 'payment_status' => $isPaid ? 'paid' : 'unpaid',
                 'currency' => $currency,
                 'subtotal' => $subtotal,
-                'shipping_fee' => 0,
+                'shipping_fee' => $shippingFee, // Legacy field if any
+                'shipping_charge' => $shippingFee,
+                'shipping_currency' => $currency,
+                'shipping_courier_company_id' => $shippingQuote['selected_courier']['courier_company_id'] ?? null,
+                'shipping_courier_name' => $shippingQuote['selected_courier']['courier_name'] ?? null,
+                'shipping_courier_rating' => $shippingQuote['selected_courier']['rating'] ?? null,
+                'shipping_rate_quote_id' => $shippingQuote['rate_quote_id'] ?? null,
+                'shipping_chargeable_weight_kg' => $shippingQuote['measurement']['chargeable_weight_kg'] ?? null,
+                'shipping_delivery_pincode' => $shippingQuote['delivery_pincode'] ?? null,
+                'shipping_pickup_pincode' => $shippingQuote['pickup_pincode'] ?? null,
+                'shipping_metadata' => $shippingQuote,
                 'tax_amount' => 0,
                 'discount_amount' => 0,
-                'total_amount' => $subtotal,
+                'total_amount' => $subtotal + $shippingFee,
                 'shipping_address_snapshot' => $shippingAddress->toArray(),
                 'billing_address_snapshot' => $billingAddress->toArray(),
                 'notes' => $data['notes'] ?? null,
@@ -218,20 +250,26 @@ class CheckoutService
             // 4. Clear Cart
             $this->cartService->clearCart($user);
 
+            // 5. Update Rate Quote with Order ID
+            if (!empty($shippingQuote['rate_quote_id'])) {
+                \App\Models\Shipping\ShippingRateQuote::where('id', $shippingQuote['rate_quote_id'])
+                    ->update([
+                        'shippable_type' => get_class($order),
+                        'shippable_id' => $order->id,
+                    ]);
+            }
+
             return $order->load('items.variationValues');
         });
 
-        // Shiprocket Phase 3 Integration: Automatic Courier Selection
-        // Triggered only if order is already paid (e.g. online payment)
-        if ($order->status === 'paid') {
-            try {
-                app(\App\Services\Shipping\ShipmentService::class)->prepareCourierSelectionForShopOrder($order);
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::error('Shiprocket Phase 3: Auto courier selection failed after order placement', [
-                    'order_id' => $order->id,
-                    'error' => $e->getMessage()
-                ]);
-            }
+        // Shiprocket: Create local shipping_shipment from the checkout quote
+        try {
+            app(\App\Services\Shipping\ShipmentService::class)->prepareCourierSelectionForShopOrder($order);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Shiprocket: Failed to create shipping shipment after order placement', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
         }
 
         return $order;

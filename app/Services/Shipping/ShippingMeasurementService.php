@@ -101,15 +101,30 @@ class ShippingMeasurementService
     public function measurementFromShopOrder($order): array
     {
         $order->load(['items.product', 'items.variant']);
+        return $this->measurementFromItems($order->items);
+    }
 
+    /**
+     * Calculate total package measurement from cart items.
+     */
+    public function measurementFromCartItems($cartItems): array
+    {
+        return $this->measurementFromItems($cartItems);
+    }
+
+    /**
+     * Shared logic to calculate measurements from a collection of items (OrderItems or CartItems).
+     */
+    protected function measurementFromItems($items): array
+    {
         $totalWeight = 0;
         $maxLength = 0;
         $maxBreadth = 0;
-        $maxHeight = 0;
+        $totalHeight = 0;
         $hasFallback = false;
         $itemsData = [];
 
-        foreach ($order->items as $item) {
+        foreach ($items as $item) {
             $record = $item->variant ?: $item->product;
             $measurement = $this->measurementFromRecord($record);
             
@@ -120,15 +135,14 @@ class ShippingMeasurementService
             $quantity = $item->quantity;
             $totalWeight += ($measurement['weight_kg'] ?? 0) * $quantity;
             
-            // Simple logic: largest dimensions of any single item defines the package box
+            // Logic: items are stacked by height, taking the largest footprint
             $maxLength = max($maxLength, (float) ($measurement['length_cm'] ?? 0));
             $maxBreadth = max($maxBreadth, (float) ($measurement['breadth_cm'] ?? 0));
-            $maxHeight = max($maxHeight, (float) ($measurement['height_cm'] ?? 0));
+            $totalHeight += (float) ($measurement['height_cm'] ?? 0) * $quantity;
 
             $itemsData[] = [
-                'order_item_id' => $item->id,
                 'product_id' => $item->shop_product_id,
-                'variant_id' => $item->shop_product_variant_id,
+                'variant_id' => $item->shop_product_variant_id ?? null,
                 'quantity' => $quantity,
                 'measurement_source' => $measurement['source'],
                 'weight_kg' => $measurement['weight_kg'],
@@ -138,17 +152,18 @@ class ShippingMeasurementService
             ];
         }
 
-        $volumetricWeight = $this->volumetricWeightKg($maxLength, $maxBreadth, $maxHeight);
+        // Cap height or dimensions if needed, here we just round
+        $volumetricWeight = $this->volumetricWeightKg($maxLength, $maxBreadth, $totalHeight);
         $chargeableWeight = $this->chargeableWeightKg($totalWeight, $volumetricWeight);
 
         return [
             'weight_kg' => round($totalWeight, 3),
             'length_cm' => round($maxLength, 2),
             'breadth_cm' => round($maxBreadth, 2),
-            'height_cm' => round($maxHeight, 2),
+            'height_cm' => round($totalHeight, 2),
             'volumetric_weight_kg' => $volumetricWeight,
             'chargeable_weight_kg' => $chargeableWeight,
-            'source' => 'order_items',
+            'source' => 'items',
             'items' => $itemsData,
             'has_fallback' => $hasFallback,
         ];

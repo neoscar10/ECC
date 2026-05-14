@@ -568,9 +568,19 @@
                             <strong>{{ $summary['formatted_subtotal'] }}</strong>
                         </div>
 
-                        <div class="d-flex justify-content-between gap-3">
-                            <span class="ecc-muted">Shipping</span>
-                            <strong class="{{ $summary['shipping_fee'] <= 0 ? 'ecc-text-gold' : '' }}">{{ $summary['formatted_shipping'] }}</strong>
+                        <div class="d-flex flex-column gap-1">
+                            <div class="d-flex justify-content-between gap-3">
+                                <span class="ecc-muted">Shipping</span>
+                                <strong class="{{ $summary['formatted_shipping_class'] ?? '' }}">{{ $summary['formatted_shipping'] }}</strong>
+                            </div>
+                            @if($shippingCourierName)
+                                <div class="d-flex justify-content-between gap-3" style="font-size: 0.75rem;">
+                                    <span class="ecc-muted">via {{ $shippingCourierName }}</span>
+                                    @if($shippingEtd)
+                                        <span class="ecc-muted">Est. {{ \Carbon\Carbon::parse($shippingEtd)->format('M d') }}</span>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
 
                         <div class="d-flex justify-content-between gap-3">
@@ -592,10 +602,18 @@
                             <span class="ecc-total-amount">{{ $summary['formatted_total'] }}</span>
                         </div>
 
+                        @if($shippingError)
+                            <div class="alert alert-danger border-0 rounded-3 py-2 px-3 mb-3 d-flex align-items-center" style="background: rgba(220, 53, 69, 0.1); color: #ff8e99; font-size: 0.8rem;">
+                                <i class="mdi mdi-alert-circle-outline me-2 fs-5"></i> 
+                                <div>{{ $shippingError }}</div>
+                            </div>
+                        @endif
+
                         <button type="button"
                                 class="btn ecc-btn-gold w-100 py-3 fw-bold"
                                 wire:click="placeOrder"
-                                wire:loading.attr="disabled">
+                                wire:loading.attr="disabled"
+                                @if(!$canPlaceOrder) disabled @endif>
                             <span wire:loading.remove wire:target="placeOrder">PLACE ORDER</span>
                             <span wire:loading wire:target="placeOrder">
                                 <span class="spinner-border spinner-border-sm me-2"></span> PROCESSING...

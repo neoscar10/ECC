@@ -19,4 +19,6 @@ return [
 
     'auto_select_courier_by' => env('SHIPROCKET_AUTO_SELECT_COURIER_BY', 'rating'),
     'rate_quote_ttl_minutes' => (int) env('SHIPROCKET_RATE_QUOTE_TTL_MINUTES', 60),
+
+    'checkout_requires_serviceability' => env('SHIPPING_CHECKOUT_REQUIRES_SERVICEABILITY', true),
 ];

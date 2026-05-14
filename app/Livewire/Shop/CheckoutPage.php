@@ -37,6 +37,12 @@ class CheckoutPage extends Component
     public $summary = [];
     public $summaryItems = [];
 
+    // Shipping Quote State
+    public $shippingError = null;
+    public $shippingCourierName = null;
+    public $shippingEtd = null;
+    public $canPlaceOrder = false;
+
     protected $rules = [
         'addressForm.full_name' => 'required|string|max:255',
         'addressForm.phone' => 'required|string|max:20',
@@ -74,14 +80,40 @@ class CheckoutPage extends Component
                 return redirect()->route('shop.cart');
             }
 
+            // Shipping state
+            $this->shippingError = $summaryData['shipping_error'] ?? null;
+            $this->canPlaceOrder = $summaryData['can_place_order'] ?? false;
+
+            // Determine shipping display text
+            $shippingFee = $summaryData['shipping_fee'];
+            if (!$this->selectedAddressId) {
+                $formattedShipping = 'Select address';
+                $shippingDisplayClass = 'ecc-muted';
+            } elseif ($this->shippingError) {
+                $formattedShipping = 'Unavailable';
+                $shippingDisplayClass = 'text-danger';
+            } elseif ($shippingFee > 0) {
+                $formattedShipping = '₹' . number_format($shippingFee, 2);
+                $shippingDisplayClass = '';
+            } else {
+                $formattedShipping = 'FREE';
+                $shippingDisplayClass = 'ecc-text-gold';
+            }
+
+            // Courier info from quote
+            $shippingQuote = $summaryData['shipping_quote'] ?? null;
+            $this->shippingCourierName = $shippingQuote['selected_courier']['courier_name'] ?? null;
+            $this->shippingEtd = $shippingQuote['selected_courier']['etd'] ?? null;
+
             $this->summary = [
                 'subtotal' => $summaryData['subtotal'],
-                'shipping_fee' => $summaryData['shipping_fee'],
+                'shipping_fee' => $shippingFee,
                 'tax_amount' => $summaryData['tax_amount'],
                 'discount_amount' => $summaryData['discount_amount'],
                 'total_amount' => $summaryData['total_amount'],
                 'formatted_subtotal' => '₹' . number_format($summaryData['subtotal'], 2),
-                'formatted_shipping' => $summaryData['shipping_fee'] > 0 ? '₹' . number_format($summaryData['shipping_fee'], 2) : 'FREE',
+                'formatted_shipping' => $formattedShipping,
+                'formatted_shipping_class' => $shippingDisplayClass,
                 'formatted_tax' => '₹' . number_format($summaryData['tax_amount'], 2),
                 'formatted_discount' => '₹' . number_format($summaryData['discount_amount'], 2),
                 'formatted_total' => '₹' . number_format($summaryData['total_amount'], 2),
