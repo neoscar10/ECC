@@ -225,47 +225,8 @@ Route::prefix('v1')->group(function () {
     });
 });
 
-// Shiprocket Webhook Routes (Neutral name to avoid Shiprocket's restricted word filter)
+// Logistics Webhook Routes (Neutral name to avoid provider restricted word filters)
 Route::prefix('webhooks/logistics')->group(function () {
-    Route::post('/tracking', function (\Illuminate\Http\Request $request) {
-        $expectedToken = config('shiprocket.webhook_token');
-
-        if ($expectedToken) {
-            $incomingToken = $request->header('x-api-key');
-
-            if (! hash_equals((string) $expectedToken, (string) $incomingToken)) {
-                \Illuminate\Support\Facades\Log::warning('Shiprocket webhook rejected: invalid token', [
-                    'ip' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'headers' => $request->headers->all(),
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid webhook token.',
-                ], 401);
-            }
-        }
-
-        \Illuminate\Support\Facades\Log::info('Shiprocket webhook received', [
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'headers' => $request->headers->all(),
-            'payload' => $request->all(),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Shiprocket webhook received.',
-        ], 200);
-    })->name('api.webhooks.shiprocket.tracking');
-
-    Route::get('/health', function () {
-        return response()->json([
-            'success' => true,
-            'message' => 'Shiprocket webhook endpoint is reachable.',
-            'webhook_url' => config('shiprocket.webhook_url'),
-            'token_configured' => filled(config('shiprocket.webhook_token')),
-        ]);
-    })->name('api.webhooks.shiprocket.health');
+    Route::get('/health', [\App\Http\Controllers\Webhooks\LogisticsWebhookController::class, 'health'])->name('api.webhooks.logistics.health');
+    Route::post('/tracking', [\App\Http\Controllers\Webhooks\LogisticsWebhookController::class, 'tracking'])->name('api.webhooks.logistics.tracking');
 });

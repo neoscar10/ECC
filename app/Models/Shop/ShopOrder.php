@@ -55,4 +55,9 @@ class ShopOrder extends Model
     {
         return $this->hasMany(ShopOrderItem::class);
     }
+
+    public function shippingShipment()
+    {
+        return $this->morphOne(\App\Models\Shipping\ShippingShipment::class, 'shippable')->latestOfMany();
+    }
 }

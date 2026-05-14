@@ -29,6 +29,7 @@
         {{-- Right Column (Sidebar) --}}
         <div class="col-xl-3">
             @include('livewire.admin.shop.orders.partials._sidebar-status-manager')
+            @include('livewire.admin.shop.orders.partials._sidebar-fulfillment')
             @include('livewire.admin.shop.orders.partials._sidebar-customer')
             @include('livewire.admin.shop.orders.partials._sidebar-shipping')
         </div>

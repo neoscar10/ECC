@@ -30,7 +30,25 @@ class Show extends Component
 
     public function getOrderProperty()
     {
-        return ShopOrder::with(['items.product.images', 'items.variationValues', 'user'])->findOrFail($this->orderId);
+        return ShopOrder::with(['items.product.images', 'items.variationValues', 'user', 'shippingShipment.events'])->findOrFail($this->orderId);
+    }
+
+    /**
+     * Shiprocket Phase 4: Refresh local courier selection
+     */
+    public function refreshCourierSelection(\App\Services\Shipping\ShipmentService $shipmentService)
+    {
+        try {
+            $shipment = $shipmentService->refreshCourierSelectionForShopOrder($this->order);
+            
+            if ($shipment && $shipment->status === 'courier_selected') {
+                session()->flash('success', 'Courier selection refreshed successfully.');
+            } else {
+                session()->flash('warning', 'Shipment record updated but no couriers were available.');
+            }
+        } catch (Exception $e) {
+            session()->flash('error', 'Error refreshing courier: ' . $e->getMessage());
+        }
     }
 
     public function updateStatuses()

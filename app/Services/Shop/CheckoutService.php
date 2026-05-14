@@ -220,6 +220,21 @@ class CheckoutService
 
             return $order->load('items.variationValues');
         });
+
+        // Shiprocket Phase 3 Integration: Automatic Courier Selection
+        // Triggered only if order is already paid (e.g. online payment)
+        if ($order->status === 'paid') {
+            try {
+                app(\App\Services\Shipping\ShipmentService::class)->prepareCourierSelectionForShopOrder($order);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Shiprocket Phase 3: Auto courier selection failed after order placement', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+
+        return $order;
     }
 
     /**
@@ -237,6 +252,16 @@ class CheckoutService
             'paid_at' => now(),
             'meta_json' => array_merge($order->meta_json ?? [], ['payment_details' => $paymentDetails]),
         ]);
+
+        // Shiprocket Phase 3 Integration: Automatic Courier Selection
+        try {
+            app(\App\Services\Shipping\ShipmentService::class)->prepareCourierSelectionForShopOrder($order);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Shiprocket Phase 3: Auto courier selection failed during payment confirmation', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+        }
 
         return $order;
     }
