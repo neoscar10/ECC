@@ -9,7 +9,6 @@ use App\Models\ContactEnquiry;
 use App\Models\MembershipApplication;
 use App\Models\Shop\ShopOrder;
 use App\Models\Order;
-
 use App\Models\Auctions\AuctionLot;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
@@ -218,16 +217,15 @@ class AdminDashboardMetricsService
         $variants = \App\Models\Shop\ShopProductVariant::with(['product', 'optionValues'])
             ->join('shop_products', 'shop_product_variants.shop_product_id', '=', 'shop_products.id')
             ->whereNull('shop_products.deleted_at')
-            ->whereColumn('shop_product_variants.stock_qty', '<', 'shop_products.low_stock_threshold')
+            ->whereColumn('shop_product_variants.stock_qty', '<=', 'shop_products.low_stock_threshold')
             ->select('shop_product_variants.*')
-
             ->limit($limit)
             ->get();
 
         // 2. Get Simple Products with low stock
         $simple = \App\Models\Shop\ShopProduct::whereDoesntHave('variationGroups')
             ->whereNotNull('stock_qty')
-            ->whereColumn('stock_qty', '<', 'low_stock_threshold')
+            ->whereColumn('stock_qty', '<=', 'low_stock_threshold')
             ->limit($limit)
             ->get();
 
