@@ -257,7 +257,6 @@
                     <p class="text-muted fs-12 mb-0">No tracking events yet.</p>
                 @endif
             </div>
-            @endif
         @endif
     </div>
 </div>
