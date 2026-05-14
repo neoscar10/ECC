@@ -1126,6 +1126,8 @@ class Index extends Component
             'length_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
             'breadth_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
             'height_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
+            'low_stock_threshold' => ['required', 'integer', 'min:0'],
+
         ]);
 
         if (($this->length_cm || $this->breadth_cm || $this->height_cm) && (!$this->length_cm || !$this->breadth_cm || !$this->height_cm)) {
@@ -1164,6 +1166,7 @@ class Index extends Component
             'title' => 'required|string|max:255',
             'base_price' => 'required|numeric|min:0',
             'deactivation_reason' => !$this->is_active ? 'required|string|min:5' : 'nullable',
+            'low_stock_threshold' => ['required', 'integer', 'min:0'],
         ]);
 
 
@@ -1176,6 +1179,7 @@ class Index extends Component
             'currency' => $this->currency,
             'is_active' => $this->is_active,
             'deactivation_reason' => !$this->is_active ? $this->deactivation_reason : null,
+            'low_stock_threshold' => $this->low_stock_threshold ?: 5,
         ]);
     }
 
@@ -1242,6 +1246,9 @@ class Index extends Component
 
     private function saveVariations(ShopProduct $product)
     {
+        // Update product threshold since it's displayed in this step
+        $product->update(['low_stock_threshold' => $this->low_stock_threshold ?: 5]);
+
         if (!$this->has_variants) {
             $this->validate(['stock_qty' => 'required|integer|min:0']);
             $product->update(['stock_qty' => $this->stock_qty]);
@@ -1250,18 +1257,7 @@ class Index extends Component
             // Force null if has variants
             $product->update(['stock_qty' => null]);
         }
-        // Full replacement of variations logic is complex because of IDs.
-        // Strategy: Process changes. 
-        // For simplicity in this "Minimal Logic" update: 
-        // We will update existing groups/values if they track back to an ID (TODO: track IDs in array),
-        // Or for now, we can continue the "Delete All & Recreate" approach IF we are sure it doesn't break orders?
-        // NO, Delete All is bad for existing orders/carts.
-        // We need to map by ID if possible. 
-        // Since `variationGroups` array doesn't currently store IDs in `edit()` (I missed adding IDs in the `edit` hydration),
-        // we must accept that "Safe Fix" for now might involve "Soft Delete" or just "Re-create" if no orders exist?
-        // User rule: "Do NOT delete any DB records".
-        // OK, so we MUST update.
-        
+
         // Validation Logic for Variations (Step 4)
         foreach ($this->variationGroups as $gIndex => $gData) {
             // Validation A: If Has Images is ON, ensure at least one image exists for each value
@@ -1279,45 +1275,7 @@ class Index extends Component
                 }
             }
         }
-        
-        // Limitation: The current `edit()` method I added earlier didn't push `id` into `$this->variationGroups`.
-        // I need to update `edit()` to include IDs first? 
-        // Or I can fetch the product's actual relation and try to match by index? No, index is reliable only if not reordered.
-        
-        // RETROACTIVE FIX: We will assume we can't perfectly update individual rows without IDs.
-        // BUT, for this task, let's try to adhere to "Minimal".
-        // Best approach without IDs: Delete all variation groups and re-create. 
-        // "Do NOT delete any DB records" -> This implies I cannot use the easy way.
-        
-        // ALTERNATIVE: Since I can't effectively map back to DB rows without IDs in the Livewire state,
-        // and I cannot change the `edit()` state structure heavily without risking the UI binding...
-        // I will implement a "Delete/Recreate" strategy but wrapped in a way that minimizes impact?
-        // No, that violates the rule.
-        
-        // Let's modify the `variationGroups` hydration in `edit()` in the NEXT step if needed,
-        // but for `saveCurrentStep`, I'll stick to a simpler path:
-        // We'll skip saving Variations in "Partial Save" if it's too risky, 
-        // OR we implement the proper ID tracking.
-        
-        // Let's go with the ID tracking fix. accessible hidden inputs?
-        // I'll add `id` to the `edit()` hydration and then use it here.
-        // Since I'm in `Index.php`, I can update `edit()` and `saveVariations` same time.
-        
-        // Let's try the "Delete All & Recreate" approach but ONLY if the user accepts it?
-        // No, explicit instruction: "Do NOT delete any DB records".
-        // This likely refers to PRODUCTS. Deleting variations might be okay if they look same?
-        // No, order items reference variation IDs.
-        
-        // OK, I will IMPLEMENT ID tracking.
-        // I'll add 'id' => $group->id to hydration.
-        // And update `saveVariations` to use `updateOrCreate`.
-        
-        // Hydrating IDs is done in `edit()` method. I need to make sure I update that method too.
-        // But for this `replace_file_content` block, I am adding NEW methods.
-        // I will write `saveVariations` assuming the IDs are present in the state.
-        
-        // NOTE: I will perform a separate edit to `edit()` to add the IDs.
-        
+
         $currentGroupIds = [];
         
         foreach ($this->variationGroups as $gIndex => $gData) {
