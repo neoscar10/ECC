@@ -57,6 +57,11 @@
                     </div>
                 @endif
                 
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Fee Collected:</span>
+                    <span class="fw-medium text-success">INR {{ number_format($this->order->shipping_charge ?? 0, 2) }}</span>
+                </div>
+                
                 @if($shipment->courier_etd)
                     <div class="d-flex justify-content-between">
                         <span class="text-muted">Est. Delivery:</span>
