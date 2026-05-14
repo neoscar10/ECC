@@ -9,7 +9,7 @@ use App\Models\ContactEnquiry;
 use App\Models\MembershipApplication;
 use App\Models\Shop\ShopOrder;
 use App\Models\Order;
-use App\Models\Shop\ShopProductVariationValue;
+
 use App\Models\Auctions\AuctionLot;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
@@ -215,12 +215,12 @@ class AdminDashboardMetricsService
     private function getLowStockItems(int $limit): \Illuminate\Support\Collection
     {
         // 1. Get Variants with low stock
-        $variants = ShopProductVariationValue::join('shop_product_variation_groups', 'shop_product_variation_values.group_id', '=', 'shop_product_variation_groups.id')
-            ->join('shop_products', 'shop_product_variation_groups.shop_product_id', '=', 'shop_products.id')
+        $variants = \App\Models\Shop\ShopProductVariant::with(['product', 'optionValues'])
+            ->join('shop_products', 'shop_product_variants.shop_product_id', '=', 'shop_products.id')
             ->whereNull('shop_products.deleted_at')
-            ->whereColumn('shop_product_variation_values.stock_qty', '<', 'shop_products.low_stock_threshold')
-            ->select('shop_product_variation_values.*')
-            ->with(['group.product'])
+            ->whereColumn('shop_product_variants.stock_qty', '<', 'shop_products.low_stock_threshold')
+            ->select('shop_product_variants.*')
+
             ->limit($limit)
             ->get();
 
@@ -231,16 +231,16 @@ class AdminDashboardMetricsService
             ->limit($limit)
             ->get();
 
-        // 3. Combine and prepare for display (as models)
+        // 3. Combine and prepare for display
         return $variants->concat($simple)
             ->sortBy('stock_qty')
             ->take($limit)
             ->map(function($item) {
                 // Add helper properties to the models
-                if ($item instanceof ShopProductVariationValue) {
-                    $item->display_product_title = $item->group?->product?->title;
-                    $item->display_caption = $item->caption;
-                    $item->restock_url = route('admin.shop.inventory', ['search' => $item->group?->product?->title]);
+                if ($item instanceof \App\Models\Shop\ShopProductVariant) {
+                    $item->display_product_title = $item->product?->title;
+                    $item->display_caption = $item->optionValues->pluck('caption')->implode(' - ');
+                    $item->restock_url = route('admin.shop.inventory', ['search' => $item->product?->title]);
                 } else {
                     $item->display_product_title = $item->title;
                     $item->display_caption = 'N/A';

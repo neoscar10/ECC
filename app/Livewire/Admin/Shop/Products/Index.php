@@ -832,7 +832,7 @@ class Index extends Component
             }
             
             $key = implode('-', $ids);
-            $captionKey = implode('-', collect($combo)->pluck('caption')->all());
+            $captionKey = implode('-', collect($combo)->pluck('caption')->sort()->values()->all());
             
             // Preserve existing data
             // Match #1: Exact Key (ID-based or Caption-based)
@@ -995,21 +995,23 @@ class Index extends Component
                     'sort_order' => $index,
                 ]);
 
-                foreach ($groupData['values'] as $valData) {
+                // Sync Group ID
+                $this->variationGroups[$index]['id'] = $group->id;
+
+                foreach ($groupData['values'] as $valIndex => $valData) {
                     $variationValue = $group->values()->create([
                         'caption' => $valData['caption'],
                         'is_default' => $valData['is_default'],
                         'color_hex' => $valData['color_hex'],
                     ]);
                     
+                    // Sync Value ID
+                    $this->variationGroups[$index]['values'][$valIndex]['id'] = $variationValue->id;
+                    
                     // Variation Gallery (if Has Images)
                     if (($groupData['has_images'] ?? false) && !empty($valData['new_gallery_images'])) {
                         foreach ($valData['new_gallery_images'] as $idx => $vInfo) {
-                            // $vInfo is TemporaryUploadedFile
                             $path = $vInfo->store('shop/variations', 'public');
-                            // Create mapping in shop_variation_value_images
-                            // Assuming we have a relation or separate table
-                            // Checking migration: `shop_variation_value_images` with `variation_value_id`, `image_path`
                             DB::table('shop_variation_value_images')->insert([
                                 'shop_product_variation_value_id' => $variationValue->id,
                                 'image_path' => $path,
@@ -1336,6 +1338,7 @@ class Index extends Component
             }
             
             $currentGroupIds[] = $group->id;
+            $this->variationGroups[$gIndex]['id'] = $group->id;
 
             // Values
             $currentValueIds = [];
