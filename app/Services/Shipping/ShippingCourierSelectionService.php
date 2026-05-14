@@ -208,14 +208,10 @@ class ShippingCourierSelectionService
     {
         $snapshot = $order->shipping_address_snapshot;
         
-        if (is_array($snapshot) && !empty($snapshot['pincode'])) {
-            return $snapshot['pincode'];
+        if (is_array($snapshot)) {
+            return $snapshot['postal_code'] ?? $snapshot['pincode'] ?? $snapshot['postcode'] ?? null;
         }
 
-        if (is_array($snapshot) && !empty($snapshot['postcode'])) {
-            return $snapshot['postcode'];
-        }
-
-        return $order->shipping_pincode ?? $order->shipping_postcode ?? null;
+        return $order->shipping_pincode ?? $order->shipping_postcode ?? $order->shipping_postal_code ?? null;
     }
 }

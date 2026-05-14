@@ -39,28 +39,28 @@
                 <div class="d-flex align-items-center mb-2">
                     <div class="flex-grow-1">
                         <h6 class="fs-13 mb-1">Selected Courier</h6>
-                        <p class="text-muted mb-0">{{ $shipment->selected_courier_name ?? 'Not Selected' }}</p>
+                        <p class="text-muted mb-0">{{ $shipment->courier_name ?? 'Not Selected' }}</p>
                     </div>
-                    @if($shipment->selected_courier_rating)
+                    @if($shipment->courier_rating)
                         <div class="text-end">
                             <span class="badge bg-warning-subtle text-warning">
-                                <i class="ri-star-fill me-1"></i>{{ $shipment->selected_courier_rating }}
+                                <i class="ri-star-fill me-1"></i>{{ $shipment->courier_rating }}
                             </span>
                         </div>
                     @endif
                 </div>
                 
-                @if($shipment->selected_total_charge)
+                @if($shipment->courier_total_charge)
                     <div class="d-flex justify-content-between mb-1">
                         <span class="text-muted">Est. Charge:</span>
-                        <span class="fw-medium text-primary">INR {{ number_format($shipment->selected_total_charge, 2) }}</span>
+                        <span class="fw-medium text-primary">INR {{ number_format($shipment->courier_total_charge, 2) }}</span>
                     </div>
                 @endif
                 
-                @if($shipment->selected_etd)
+                @if($shipment->courier_etd)
                     <div class="d-flex justify-content-between">
                         <span class="text-muted">Est. Delivery:</span>
-                        <span class="fw-medium">{{ $shipment->selected_etd }}</span>
+                        <span class="fw-medium">{{ $shipment->courier_etd }}</span>
                     </div>
                 @endif
             </div>

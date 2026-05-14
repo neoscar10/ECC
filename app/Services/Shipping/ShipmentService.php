@@ -207,10 +207,10 @@ class ShipmentService
     protected function extractDeliveryPincode($order): ?string
     {
         $snapshot = $order->shipping_address_snapshot;
-        if (is_array($snapshot) && !empty($snapshot['pincode'])) {
-            return $snapshot['pincode'];
+        if (is_array($snapshot)) {
+            return $snapshot['postal_code'] ?? $snapshot['pincode'] ?? $snapshot['postcode'] ?? null;
         }
-        return $order->shipping_pincode ?? null;
+        return $order->shipping_pincode ?? $order->shipping_postcode ?? $order->shipping_postal_code ?? null;
     }
 
     /**
