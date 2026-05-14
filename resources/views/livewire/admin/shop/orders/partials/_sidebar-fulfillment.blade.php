@@ -20,6 +20,14 @@
 @endphp
 
 <div class="card">
+    @if(config('shiprocket.test_mode'))
+        <div class="card-header bg-warning-subtle text-warning border-bottom-0 py-2">
+            <div class="d-flex align-items-center">
+                <i class="ri-alert-line fs-16 me-2"></i>
+                <span class="fs-12 fw-medium">Test Mode Active — shipment initiation will be simulated</span>
+            </div>
+        </div>
+    @endif
     <div class="card-header d-flex align-items-center">
         <h5 class="card-title flex-grow-1 mb-0">Shipping & Fulfillment</h5>
         <span class="badge {{ $badgeClass }}">{{ $statusLabel }}</span>
@@ -55,20 +63,6 @@
                     <div class="d-flex justify-content-between mb-1">
                         <span class="text-muted">Est. Charge:</span>
                         <span class="fw-medium text-primary">INR {{ number_format($shipment->courier_total_charge, 2) }}</span>
-                    </div>
-                @endif
-                
-                @if($shipment->courier_freight_charge)
-                    <div class="d-flex justify-content-between mb-1 fs-12">
-                        <span class="text-muted ps-2">- Freight:</span>
-                        <span class="text-muted">INR {{ number_format($shipment->courier_freight_charge, 2) }}</span>
-                    </div>
-                @endif
-                
-                @if($shipment->courier_cod_charge > 0)
-                    <div class="d-flex justify-content-between mb-1 fs-12">
-                        <span class="text-muted ps-2">- COD:</span>
-                        <span class="text-muted">INR {{ number_format($shipment->courier_cod_charge, 2) }}</span>
                     </div>
                 @endif
                 
@@ -150,33 +144,54 @@
             {{-- Documents (Phase 5) --}}
             @if($shipment->provider_order_id)
                 <div class="d-flex gap-2 mb-3">
+                    {{-- Label --}}
                     @if($shipment->label_url)
                         <a href="{{ $shipment->label_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-soft-secondary flex-grow-1">
                             <i class="ri-file-pdf-line me-1"></i> Label
                         </a>
-                    @else
-                        <button class="btn btn-sm btn-soft-secondary flex-grow-1" disabled data-bs-toggle="tooltip" title="Not generated yet">
+                    @elseif(isset($shipment->metadata['documents']['label']['simulated']) && $shipment->metadata['documents']['label']['simulated'])
+                        <button class="btn btn-sm btn-soft-secondary flex-grow-1" disabled data-bs-toggle="tooltip" title="Generated in test mode">
                             <i class="ri-file-pdf-line me-1"></i> Label
+                        </button>
+                    @else
+                        <button class="btn btn-sm btn-soft-secondary flex-grow-1" wire:click="generateDocument('label')" wire:loading.attr="disabled">
+                            <i class="ri-file-pdf-line me-1"></i> 
+                            <span wire:loading.remove wire:target="generateDocument('label')">Generate</span>
+                            <span wire:loading wire:target="generateDocument('label')">...</span>
                         </button>
                     @endif
                     
+                    {{-- Invoice --}}
                     @if($shipment->invoice_url)
                         <a href="{{ $shipment->invoice_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-soft-secondary flex-grow-1">
                             <i class="ri-file-list-3-line me-1"></i> Invoice
                         </a>
-                    @else
-                        <button class="btn btn-sm btn-soft-secondary flex-grow-1" disabled data-bs-toggle="tooltip" title="Not generated yet">
+                    @elseif(isset($shipment->metadata['documents']['invoice']['simulated']) && $shipment->metadata['documents']['invoice']['simulated'])
+                        <button class="btn btn-sm btn-soft-secondary flex-grow-1" disabled data-bs-toggle="tooltip" title="Generated in test mode">
                             <i class="ri-file-list-3-line me-1"></i> Invoice
+                        </button>
+                    @else
+                        <button class="btn btn-sm btn-soft-secondary flex-grow-1" wire:click="generateDocument('invoice')" wire:loading.attr="disabled">
+                            <i class="ri-file-list-3-line me-1"></i>
+                            <span wire:loading.remove wire:target="generateDocument('invoice')">Generate</span>
+                            <span wire:loading wire:target="generateDocument('invoice')">...</span>
                         </button>
                     @endif
                     
+                    {{-- Manifest --}}
                     @if($shipment->manifest_url)
                         <a href="{{ $shipment->manifest_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-soft-secondary flex-grow-1">
                             <i class="ri-file-list-3-line me-1"></i> Manifest
                         </a>
-                    @else
-                        <button class="btn btn-sm btn-soft-secondary flex-grow-1" disabled data-bs-toggle="tooltip" title="Not generated yet">
+                    @elseif(isset($shipment->metadata['documents']['manifest']['simulated']) && $shipment->metadata['documents']['manifest']['simulated'])
+                        <button class="btn btn-sm btn-soft-secondary flex-grow-1" disabled data-bs-toggle="tooltip" title="Generated in test mode">
                             <i class="ri-file-list-3-line me-1"></i> Manifest
+                        </button>
+                    @else
+                        <button class="btn btn-sm btn-soft-secondary flex-grow-1" wire:click="generateDocument('manifest')" wire:loading.attr="disabled">
+                            <i class="ri-file-list-3-line me-1"></i>
+                            <span wire:loading.remove wire:target="generateDocument('manifest')">Generate</span>
+                            <span wire:loading wire:target="generateDocument('manifest')">...</span>
                         </button>
                     @endif
                 </div>
@@ -189,10 +204,15 @@
                         <i class="ri-refresh-line align-middle me-1"></i> Refresh Courier
                     </button>
                     
-                    <button class="btn btn-sm btn-primary" disabled data-bs-toggle="tooltip" title="Shipment initiation will be enabled in Phase 5">
+                    <button wire:click="confirmInitiateShipment" wire:loading.attr="disabled" class="btn btn-sm btn-primary">
                         Initiate Shipment
                     </button>
                 @else
+                    @if(!$shipment->awb_code)
+                        <button wire:click="retryAssignAwb" wire:loading.attr="disabled" class="btn btn-sm btn-warning">
+                            <i class="ri-refresh-line align-middle me-1"></i> Retry AWB Assignment
+                        </button>
+                    @endif
                     <button class="btn btn-sm btn-soft-primary" disabled data-bs-toggle="tooltip" title="Tracking refresh will be enabled in Phase 5">
                         <i class="ri-map-pin-line align-middle me-1"></i> Refresh Tracking
                     </button>

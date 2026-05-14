@@ -37,4 +37,5 @@
 
     {{-- Modals --}}
     @include('livewire.admin.shop.orders.partials._cancel-modal')
+    @include('livewire.admin.shop.orders.partials._initiate-shipment-modal')
 </div>

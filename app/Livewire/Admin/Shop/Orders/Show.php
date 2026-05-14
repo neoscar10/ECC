@@ -20,6 +20,9 @@ class Show extends Component
     public $cancelReason = '';
     public $restoreStock = true; // Default to true
 
+    // Shiprocket Phase 5 Modal State
+    public $showInitiateShipmentModal = false;
+
     public function mount($id)
     {
         $this->orderId = $id;
@@ -52,6 +55,77 @@ class Show extends Component
             }
         } catch (Exception $e) {
             session()->flash('error', 'Error refreshing courier: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Shiprocket Phase 5: Initiate Shipment Flow
+     */
+    public function confirmInitiateShipment()
+    {
+        $shipment = $this->order->shippingShipment;
+        if (!$shipment || !$shipment->canInitiateShipment()) {
+            session()->flash('error', 'Shipment cannot be initiated at this time.');
+            return;
+        }
+        if ($this->order->payment_status !== 'paid') {
+            session()->flash('error', 'Shipment cannot be initiated until payment is confirmed.');
+            return;
+        }
+        $this->showInitiateShipmentModal = true;
+    }
+
+    public function initiateShipment(\App\Services\Shipping\Shiprocket\ShiprocketOrderService $service)
+    {
+        try {
+            $shipment = $this->order->shippingShipment;
+            $service->initiateShipment($shipment);
+            
+            $this->showInitiateShipmentModal = false;
+            
+            $msg = config('shiprocket.test_mode') ? 'Test shipment simulated successfully.' : 'Shipment initiated successfully.';
+            session()->flash('success', $msg);
+        } catch (Exception $e) {
+            $this->showInitiateShipmentModal = false;
+            session()->flash('error', 'Failed to initiate shipment: ' . $e->getMessage());
+        }
+    }
+
+    public function retryAssignAwb(\App\Services\Shipping\Shiprocket\ShiprocketOrderService $service)
+    {
+        try {
+            $shipment = $this->order->shippingShipment;
+            $service->retryAssignAwb($shipment);
+            
+            $msg = config('shiprocket.test_mode') ? 'Test AWB assigned successfully.' : 'AWB assigned successfully.';
+            session()->flash('success', $msg);
+        } catch (Exception $e) {
+            session()->flash('error', 'Failed to assign AWB: ' . $e->getMessage());
+        }
+    }
+
+    public function generateDocument($type, \App\Services\Shipping\Shiprocket\ShiprocketOrderService $service)
+    {
+        try {
+            $shipment = $this->order->shippingShipment;
+            switch ($type) {
+                case 'label':
+                    $service->generateLabel($shipment);
+                    break;
+                case 'invoice':
+                    $service->generateInvoice($shipment);
+                    break;
+                case 'manifest':
+                    $service->generateManifest($shipment);
+                    break;
+                default:
+                    throw new Exception("Unknown document type.");
+            }
+            
+            $msg = config('shiprocket.test_mode') ? ucfirst($type) . ' generated in test mode.' : ucfirst($type) . ' generated successfully.';
+            session()->flash('success', $msg);
+        } catch (Exception $e) {
+            session()->flash('error', 'Failed to generate ' . $type . ': ' . $e->getMessage());
         }
     }
 

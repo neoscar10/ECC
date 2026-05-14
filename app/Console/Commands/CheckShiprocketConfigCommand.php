@@ -28,6 +28,23 @@ class CheckShiprocketConfigCommand extends Command
     {
         $this->info('Shiprocket Config Check');
 
+        // Safety Layer Status
+        $this->line('');
+        $this->info('Shiprocket Shipment Safety:');
+        $testMode = config('shiprocket.test_mode');
+        $liveShipment = config('shiprocket.live_shipment_enabled');
+        
+        $this->line('Test Mode: ' . ($testMode ? 'ENABLED' : 'DISABLED'));
+        $this->line('Live Shipment Enabled: ' . ($liveShipment ? 'YES' : 'NO'));
+        
+        if (!$testMode && $liveShipment) {
+            $this->warn('WARNING: Real Shiprocket shipment creation is enabled.');
+            $this->warn('Live API Shipment Calls: ALLOWED');
+        } else {
+            $this->info('Live API Shipment Calls: BLOCKED');
+        }
+        $this->line('');
+
         $baseUrl = config('shiprocket.base_url');
         $email = config('shiprocket.email');
         $password = config('shiprocket.password');

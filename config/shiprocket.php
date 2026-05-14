@@ -3,6 +3,11 @@
 return [
     'base_url' => env('SHIPROCKET_BASE_URL', 'https://apiv2.shiprocket.in/v1/external'),
 
+    // --- Safety Layer ---
+    'test_mode' => env('SHIPROCKET_TEST_MODE', true),
+    'live_shipment_enabled' => env('SHIPROCKET_LIVE_SHIPMENT_ENABLED', false),
+
+
     'email' => env('SHIPROCKET_EMAIL'),
     'password' => env('SHIPROCKET_PASSWORD'),
 
