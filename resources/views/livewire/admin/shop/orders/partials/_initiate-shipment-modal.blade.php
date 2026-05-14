@@ -11,16 +11,16 @@
                 <button type="button" class="btn-close" wire:click="$set('showInitiateShipmentModal', false)"></button>
             </div>
             <div class="modal-body">
-                <div class="mt-2 text-center">
+                <div class="text-center">
                     <lord-icon src="https://cdn.lordicon.com/oaajtyjp.json" trigger="loop" colors="{{ config('shiprocket.test_mode') ? 'primary:#f7b84b,secondary:#f06548' : 'primary:#25a0e2,secondary:#00bd9d' }}" style="width:90px;height:90px"></lord-icon>
-                    <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+                    <div class="mt-2 fs-15">
                         <h4>Are you sure?</h4>
                         @if(config('shiprocket.test_mode'))
                             <p class="text-warning mb-0 fw-medium">Test Mode Active: No real Shiprocket shipment will be created.</p>
-                            <p class="text-muted mx-4 mt-2 mb-0">This will simulate Shiprocket order creation, AWB assignment, and document generation locally for development testing.</p>
+                            <p class="text-muted mt-2 mb-0">This will simulate Shiprocket order creation, AWB assignment, and document generation locally for development testing.</p>
                         @else
                             <p class="text-danger mb-0 fw-medium">Live Mode Active: This will create a real Shiprocket shipment.</p>
-                            <p class="text-muted mx-4 mt-2 mb-0">Continue only if the order, address, and package details are correct.</p>
+                            <p class="text-muted mt-2 mb-0">Continue only if the order, address, and package details are correct.</p>
                         @endif
                     </div>
                 </div>

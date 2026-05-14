@@ -22,7 +22,10 @@ class LogisticsWebhookController extends Controller
     public function health()
     {
         return response()->json([
-            'status' => 'ok',
+            'success' => true,
+            'message' => 'Logistics webhook endpoint is reachable.',
+            'webhook_url' => config('shiprocket.webhook_url'),
+            'token_configured' => filled(config('shiprocket.webhook_token')),
             'timestamp' => now()->toIso8601String(),
         ]);
     }
@@ -30,17 +33,24 @@ class LogisticsWebhookController extends Controller
     /**
      * Handle incoming tracking updates from logistics provider.
      */
-    public function tracking(Request $request)
+    public function tracking(Request $request, \App\Services\Shipping\Shiprocket\ShiprocketTrackingWebhookService $webhookService)
     {
         $token = config('shiprocket.webhook_token');
         $incomingToken = $request->header('x-api-key');
 
-        if (empty($token) || $incomingToken !== $token) {
+        if (empty($token)) {
+            // If running in production and token is not configured, we should reject it for safety.
+            if (!app()->environment('local', 'testing')) {
+                Log::error('Logistics Webhook: Token is not configured in production.');
+                return response()->json(['success' => false, 'message' => 'Configuration error.'], 500);
+            }
+            Log::warning('Logistics Webhook: Missing token configuration but accepted due to local/testing environment.');
+        } elseif (!hash_equals($token, (string) $incomingToken)) {
             Log::warning('Logistics Webhook: Unauthorized attempt', [
                 'ip' => $request->ip(),
                 'token_provided' => (bool) $incomingToken,
             ]);
-            return response()->json(['message' => 'Unauthorized'], 401);
+            return response()->json(['success' => false, 'message' => 'Invalid webhook token.'], 401);
         }
 
         $payload = $request->all();
@@ -50,27 +60,24 @@ class LogisticsWebhookController extends Controller
             'payload' => $payload,
         ]);
 
-        // Attempt to find matching shipment and record event
-        $awbCode = $payload['awb'] ?? $payload['awb_code'] ?? null;
-        $orderId = $payload['order_id'] ?? null;
-        $shipmentId = $payload['shipment_id'] ?? null;
+        try {
+            $result = $webhookService->handle($payload, $request->headers->all());
 
-        $shipment = $this->shipmentService->findByProviderReference($orderId, $shipmentId, $awbCode);
-
-        if ($shipment) {
-            $this->shipmentService->recordEvent($shipment, [
-                'event_code' => $payload['current_status_id'] ?? null,
-                'event_status' => $payload['current_status'] ?? null,
-                'event_description' => $payload['status_description'] ?? null,
-                'location' => $payload['last_location'] ?? null,
-                'event_time' => $payload['current_timestamp'] ?? now(),
-                'raw_payload' => $payload,
+            return response()->json([
+                'success' => true,
+                'message' => $result['message'],
+                'data' => $result,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Logistics Webhook: Failed to process payload.', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
+            // Return 200 to prevent constant Shiprocket retries if payload was bad, but return success => false
+            return response()->json([
+                'success' => false,
+                'message' => 'Internal processing error.',
+            ], 200);
         }
-
-        return response()->json([
-            'success' => true,
-            'received_at' => now()->toIso8601String(),
-        ]);
     }
 }

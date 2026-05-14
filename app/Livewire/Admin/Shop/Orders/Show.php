@@ -129,6 +129,22 @@ class Show extends Component
         }
     }
 
+    public function refreshTracking(\App\Services\Shipping\Shiprocket\ShiprocketOrderService $service)
+    {
+        try {
+            $shipment = $this->order->shippingShipment;
+            if (!$shipment) {
+                throw new Exception("No shipment found.");
+            }
+            $service->refreshTracking($shipment);
+            
+            $msg = config('shiprocket.test_mode') ? 'Tracking refreshed in test mode.' : 'Tracking refreshed successfully.';
+            session()->flash('success', $msg);
+        } catch (Exception $e) {
+            session()->flash('error', 'Failed to refresh tracking: ' . $e->getMessage());
+        }
+    }
+
     public function updateStatuses()
     {
         $this->validate([

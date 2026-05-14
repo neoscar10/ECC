@@ -338,10 +338,79 @@ class ShiprocketOrderService
     }
 
     /**
+     * Check if documents can be generated.
+     */
+    public function canGenerateDocuments(ShippingShipment $shipment): bool
+    {
+        return in_array($shipment->status, ['created', 'awb_assigned', 'pickup_scheduled', 'in_transit'])
+            && (!empty($shipment->provider_shipment_id) || !empty($shipment->provider_order_id));
+    }
+
+    /**
+     * Refresh tracking from Shiprocket.
+     */
+    public function refreshTracking(ShippingShipment $shipment): ShippingShipment
+    {
+        if (!$this->canUseLiveShiprocket()) {
+            $this->shipmentService->recordEvent($shipment, [
+                'event_code' => 'test_tracking_refreshed',
+                'event_status' => 'Simulated Tracking Refresh',
+                'event_description' => 'Tracking refreshed in test mode.',
+                'event_time' => now(),
+                'raw_payload' => ['simulated' => true],
+            ]);
+            $shipment->update(['last_tracked_at' => now()]);
+            return $shipment;
+        }
+
+        if (!$shipment->awb_code) {
+            throw new \Exception("Cannot refresh tracking without an AWB code.");
+        }
+
+        $response = $this->client->get("/courier/track/awb/{$shipment->awb_code}");
+        
+        // Pass to webhook service to parse it
+        app(\App\Services\Shipping\Shiprocket\ShiprocketTrackingWebhookService::class)->handle($response);
+
+        return $shipment->fresh();
+    }
+
+    /**
+     * Helper to safely extract deep URLs from variable Shiprocket responses.
+     */
+    protected function extractDocumentUrl(array $response, string $type): ?string
+    {
+        $keys = [
+            "{$type}_url",
+            "url",
+            "file",
+            "file_url",
+            "download_url",
+            "manifest_url", // Shiprocket specific
+            "invoice_url",
+            "label_url",
+        ];
+
+        foreach (['', 'data.', 'response.'] as $prefix) {
+            foreach ($keys as $key) {
+                $val = data_get($response, $prefix . $key);
+                if (!empty($val) && is_string($val)) {
+                    return $val;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Generate Label
      */
     public function generateLabel(ShippingShipment $shipment): array
     {
+        if (!$this->canGenerateDocuments($shipment)) {
+            throw new \Exception("Shipment must be initiated before generating documents.");
+        }
+
         if (!$this->canUseLiveShiprocket()) {
             return $this->simulateDocumentGeneration($shipment, 'label');
         }
@@ -354,17 +423,41 @@ class ShiprocketOrderService
             'shipment_id' => [$shipment->provider_shipment_id]
         ]);
 
-        $labelUrl = $response['label_url'] ?? null;
+        $labelUrl = $this->extractDocumentUrl($response, 'label');
+
+        $metadata = $shipment->metadata ?? [];
+        if (!isset($metadata['documents'])) {
+            $metadata['documents'] = [];
+        }
+
+        $metadata['documents']['label'] = [
+            'generated' => true,
+            'simulated' => false,
+            'url' => $labelUrl,
+            'generated_at' => now()->toDateTimeString(),
+            'response' => $response,
+        ];
 
         if ($labelUrl) {
-            $shipment->update(['label_url' => $labelUrl]);
+            $shipment->update([
+                'label_url' => $labelUrl,
+                'metadata' => $metadata,
+            ]);
             $this->shipmentService->recordEvent($shipment, [
                 'event_code' => 'label_generated',
                 'event_status' => $shipment->status,
-                'event_description' => 'Label generated.',
+                'event_description' => 'Label generated successfully.',
+                'raw_payload' => $response,
             ]);
         } else {
-             throw new \Exception("Label URL not found in response.");
+             $shipment->update(['metadata' => $metadata]);
+             $this->shipmentService->recordEvent($shipment, [
+                'event_code' => 'label_generation_failed',
+                'event_status' => $shipment->status,
+                'event_description' => 'Label generation successful, but no URL was returned.',
+                'raw_payload' => $response,
+             ]);
+             throw new \Exception("Label URL not found in response. Check Shiprocket panel.");
         }
 
         return $response;
@@ -375,6 +468,10 @@ class ShiprocketOrderService
      */
     public function generateInvoice(ShippingShipment $shipment): array
     {
+        if (!$this->canGenerateDocuments($shipment)) {
+            throw new \Exception("Shipment must be initiated before generating documents.");
+        }
+
         if (!$this->canUseLiveShiprocket()) {
             return $this->simulateDocumentGeneration($shipment, 'invoice');
         }
@@ -387,17 +484,41 @@ class ShiprocketOrderService
             'ids' => [$shipment->provider_order_id]
         ]);
 
-        $invoiceUrl = $response['invoice_url'] ?? null;
+        $invoiceUrl = $this->extractDocumentUrl($response, 'invoice');
+
+        $metadata = $shipment->metadata ?? [];
+        if (!isset($metadata['documents'])) {
+            $metadata['documents'] = [];
+        }
+
+        $metadata['documents']['invoice'] = [
+            'generated' => true,
+            'simulated' => false,
+            'url' => $invoiceUrl,
+            'generated_at' => now()->toDateTimeString(),
+            'response' => $response,
+        ];
 
         if ($invoiceUrl) {
-            $shipment->update(['invoice_url' => $invoiceUrl]);
+            $shipment->update([
+                'invoice_url' => $invoiceUrl,
+                'metadata' => $metadata,
+            ]);
             $this->shipmentService->recordEvent($shipment, [
                 'event_code' => 'invoice_generated',
                 'event_status' => $shipment->status,
-                'event_description' => 'Invoice generated.',
+                'event_description' => 'Invoice generated successfully.',
+                'raw_payload' => $response,
             ]);
         } else {
-             throw new \Exception("Invoice URL not found in response.");
+             $shipment->update(['metadata' => $metadata]);
+             $this->shipmentService->recordEvent($shipment, [
+                'event_code' => 'invoice_generation_failed',
+                'event_status' => $shipment->status,
+                'event_description' => 'Invoice generation successful, but no URL was returned.',
+                'raw_payload' => $response,
+             ]);
+             throw new \Exception("Invoice URL not found in response. Check Shiprocket panel.");
         }
 
         return $response;
@@ -408,6 +529,10 @@ class ShiprocketOrderService
      */
     public function generateManifest(ShippingShipment $shipment): array
     {
+        if (!$this->canGenerateDocuments($shipment)) {
+            throw new \Exception("Shipment must be initiated before generating documents.");
+        }
+
         if (!$this->canUseLiveShiprocket()) {
             return $this->simulateDocumentGeneration($shipment, 'manifest');
         }
@@ -430,17 +555,41 @@ class ShiprocketOrderService
             'shipment_id' => [$shipment->provider_shipment_id]
         ]);
 
-        $manifestUrl = $response['manifest_url'] ?? null;
+        $manifestUrl = $this->extractDocumentUrl($response, 'manifest');
+
+        $metadata = $shipment->metadata ?? [];
+        if (!isset($metadata['documents'])) {
+            $metadata['documents'] = [];
+        }
+
+        $metadata['documents']['manifest'] = [
+            'generated' => true,
+            'simulated' => false,
+            'url' => $manifestUrl,
+            'generated_at' => now()->toDateTimeString(),
+            'response' => $response,
+        ];
 
         if ($manifestUrl) {
-            $shipment->update(['manifest_url' => $manifestUrl]);
+            $shipment->update([
+                'manifest_url' => $manifestUrl,
+                'metadata' => $metadata,
+            ]);
             $this->shipmentService->recordEvent($shipment, [
                 'event_code' => 'manifest_generated',
                 'event_status' => $shipment->status,
-                'event_description' => 'Manifest generated.',
+                'event_description' => 'Manifest generated successfully.',
+                'raw_payload' => $response,
             ]);
         } else {
-             throw new \Exception("Manifest URL not found in response.");
+             $shipment->update(['metadata' => $metadata]);
+             $this->shipmentService->recordEvent($shipment, [
+                'event_code' => 'manifest_generation_failed',
+                'event_status' => $shipment->status,
+                'event_description' => 'Manifest generation successful, but no URL was returned.',
+                'raw_payload' => $response,
+             ]);
+             throw new \Exception("Manifest URL not found in response. Check Shiprocket panel.");
         }
 
         return $response;
@@ -457,9 +606,11 @@ class ShiprocketOrderService
         }
         
         $metadata['documents'][$type] = [
+            'generated' => true,
             'simulated' => true,
-            'generated_at' => now()->toDateTimeString(),
             'url' => null,
+            'generated_at' => now()->toDateTimeString(),
+            'response' => ['simulated' => true],
         ];
 
         $shipment->update(['metadata' => $metadata]);
@@ -468,6 +619,7 @@ class ShiprocketOrderService
             'event_code' => "test_{$type}_generated",
             'event_status' => $shipment->status,
             'event_description' => ucfirst($type) . ' generated in test mode.',
+            'raw_payload' => ['simulated' => true],
         ]);
 
         return ['simulated' => true, 'type' => $type];

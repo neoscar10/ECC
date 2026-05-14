@@ -24,7 +24,7 @@ class ShopOrderController extends Controller
     public function index(Request $request)
     {
         $orders = ShopOrder::where('user_id', $request->user()->id)
-            ->with(['items.variationValues'])
+            ->with(['items.variationValues', 'shippingShipment.events'])
             ->latest('placed_at')
             ->paginate(15);
 
@@ -35,7 +35,7 @@ class ShopOrderController extends Controller
     {
         $order = ShopOrder::where('user_id', $request->user()->id)
             ->where('id', $id)
-            ->with(['items.variationValues'])
+            ->with(['items.variationValues', 'shippingShipment.events'])
             ->firstOrFail();
 
         return $this->success(new ShopOrderResource($order), 'Order details fetched successfully.');
@@ -58,7 +58,7 @@ class ShopOrderController extends Controller
 
         $order = ShopOrder::where('user_id', $request->user()->id)
             ->where('id', $id)
-            ->with(['items.variationValues']) // Needed for stock restoration
+            ->with(['items.variationValues', 'shippingShipment.events']) // Needed for stock restoration
             ->firstOrFail();
 
         try {

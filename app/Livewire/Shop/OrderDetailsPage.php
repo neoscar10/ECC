@@ -11,6 +11,7 @@ use Livewire\Component;
 class OrderDetailsPage extends Component
 {
     public $order;
+    public $trackingData;
     public $displayOrderReference;
     public $placedAtLabel;
     public $statusBadgeLabel;
@@ -44,7 +45,7 @@ class OrderDetailsPage extends Component
     {
         $this->order = ShopOrder::where('user_id', Auth::id())
             ->where('id', $orderId)
-            ->with(['items.product.images', 'items.variationValues'])
+            ->with(['items.product.images', 'items.variationValues', 'shippingShipment.events'])
             ->firstOrFail();
 
         $this->loadData();
@@ -97,8 +98,7 @@ class OrderDetailsPage extends Component
         $this->ordersIndexUrl = route('shop.orders');
         $this->conciergeUrl = route('home'); // Fallback to home
         
-        $this->invoiceUrl = null; // Placeholder
-        $this->trackingUrl = null; // Placeholder
+        $this->trackingData = app(\App\Services\Shipping\ShipmentTrackingPresenter::class)->forCustomer($this->order->shippingShipment);
     }
 
     protected function setStatusBadge()

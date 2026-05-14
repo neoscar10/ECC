@@ -42,6 +42,10 @@ class ShopOrderResource extends JsonResource
                 'cancelled_at' => $this->cancelled_at?->toIso8601String(),
             ],
             'notes' => $this->notes,
+            'shipment' => $this->relationLoaded('shippingShipment') 
+                ? (app(\App\Services\Shipping\ShipmentTrackingPresenter::class)->forCustomer($this->shippingShipment) 
+                    ?? ['available' => false, 'message' => 'Shipment information is not available yet.']) 
+                : ['available' => false, 'message' => 'Shipment information is not available yet.'],
         ];
     }
 }

@@ -15,7 +15,7 @@ return [
     'pickup_pincode' => env('SHIPROCKET_PICKUP_PINCODE'),
 
     'webhook_url' => env('SHIPROCKET_WEBHOOK_URL', env('APP_URL') . '/api/webhooks/logistics/tracking'),
-    'webhook_token' => env('SHIPROCKET_WEBHOOK_TOKEN'),
+    'webhook_token' => env('SHIPROCKET_WEBHOOK_TOKEN', env('SHIPROCKET_WEBHOOK_SECRET')),
 
     'timeout' => (int) env('SHIPROCKET_TIMEOUT', 30),
 

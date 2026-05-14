@@ -474,6 +474,77 @@
                             </div>
                         </section>
 
+                        <!-- Shipment Tracking -->
+                        <section class="ecc-panel overflow-hidden shadow-lg mt-4 mt-xl-5">
+                            <div class="ecc-panel-header d-flex justify-content-between align-items-center gap-3">
+                                <h3 class="ecc-panel-title mb-0">Shipment Tracking</h3>
+                                @if($trackingData && $trackingData['available'])
+                                    <div class="ecc-status-pill {{ $trackingData['status_badge_class'] }}">
+                                        {{ $trackingData['status_label'] }}
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="p-4">
+                                @if(!$trackingData || !$trackingData['available'])
+                                    <p class="ecc-muted mb-0">Shipment information is not available yet. You will see tracking details here once your order is prepared.</p>
+                                @else
+                                    <div class="row g-4 mb-4">
+                                        <div class="col-6 col-md-3">
+                                            <div class="ecc-item-label">Courier</div>
+                                            <div class="text-white fw-bold">{{ $trackingData['courier_name'] ?? 'Pending Selection' }}</div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="ecc-item-label">AWB</div>
+                                            <div class="text-white fw-bold">{{ $trackingData['awb_code'] ?? 'Not Assigned' }}</div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="ecc-item-label">Shipping Paid</div>
+                                            <div class="text-white fw-bold">{{ $trackingData['currency'] }} {{ number_format($trackingData['shipping_charge'], 2) }}</div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="ecc-item-label">Estimated Delivery</div>
+                                            <div class="text-white fw-bold">{{ $trackingData['estimated_delivery_days'] ? $trackingData['estimated_delivery_days'] . ' days' : ($trackingData['etd'] ?? 'Pending') }}</div>
+                                        </div>
+                                    </div>
+
+                                    @if(count($trackingData['events']) > 0)
+                                        <div class="mt-4 pt-4 border-top" style="border-color: rgba(245,239,225,.08) !important;">
+                                            <h4 class="fs-6 text-white mb-4">Tracking History</h4>
+                                            <ul class="list-unstyled mb-0">
+                                                @foreach($trackingData['events'] as $event)
+                                                    <li class="mb-3 d-flex gap-3">
+                                                        <div class="d-flex flex-column align-items-center">
+                                                            <div class="rounded-circle bg-primary opacity-50" style="width: 10px; height: 10px; margin-top: 6px;"></div>
+                                                            @if(!$loop->last)
+                                                                <div class="flex-grow-1 bg-secondary opacity-25 my-1" style="width: 2px;"></div>
+                                                            @endif
+                                                        </div>
+                                                        <div class="pb-3">
+                                                            <div class="text-white fw-bold fs-6">{{ $event['status_label'] }}</div>
+                                                            @if($event['description'])
+                                                                <div class="ecc-muted small mb-1">{{ $event['description'] }}</div>
+                                                            @endif
+                                                            <div class="d-flex gap-3 ecc-muted" style="font-size: 0.75rem;">
+                                                                @if($event['location'])
+                                                                    <span><i class="ri-map-pin-2-line align-middle me-1"></i>{{ $event['location'] }}</span>
+                                                                @endif
+                                                                @if($event['event_time'])
+                                                                    <span><i class="ri-time-line align-middle me-1"></i>{{ \Carbon\Carbon::parse($event['event_time'])->format('M d, g:i A') }}</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @else
+                                        <p class="ecc-muted mb-0">No tracking events yet.</p>
+                                    @endif
+                                @endif
+                            </div>
+                        </section>
+
                         <!-- Logistics -->
                         <section>
                             <div class="row g-4">

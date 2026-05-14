@@ -153,6 +153,10 @@
                         <button class="btn btn-sm btn-soft-secondary flex-grow-1" disabled data-bs-toggle="tooltip" title="Generated in test mode">
                             <i class="ri-file-pdf-line me-1"></i> Label
                         </button>
+                    @elseif(isset($shipment->metadata['documents']['label']['generated']) && $shipment->metadata['documents']['label']['generated'])
+                        <button class="btn btn-sm btn-soft-warning flex-grow-1" disabled data-bs-toggle="tooltip" title="Generated — download URL not returned. Check Shiprocket panel.">
+                            <i class="ri-error-warning-line me-1"></i> Label
+                        </button>
                     @else
                         <button class="btn btn-sm btn-soft-secondary flex-grow-1" wire:click="generateDocument('label')" wire:loading.attr="disabled">
                             <i class="ri-file-pdf-line me-1"></i> 
@@ -170,6 +174,10 @@
                         <button class="btn btn-sm btn-soft-secondary flex-grow-1" disabled data-bs-toggle="tooltip" title="Generated in test mode">
                             <i class="ri-file-list-3-line me-1"></i> Invoice
                         </button>
+                    @elseif(isset($shipment->metadata['documents']['invoice']['generated']) && $shipment->metadata['documents']['invoice']['generated'])
+                        <button class="btn btn-sm btn-soft-warning flex-grow-1" disabled data-bs-toggle="tooltip" title="Generated — download URL not returned. Check Shiprocket panel.">
+                            <i class="ri-error-warning-line me-1"></i> Invoice
+                        </button>
                     @else
                         <button class="btn btn-sm btn-soft-secondary flex-grow-1" wire:click="generateDocument('invoice')" wire:loading.attr="disabled">
                             <i class="ri-file-list-3-line me-1"></i>
@@ -186,6 +194,10 @@
                     @elseif(isset($shipment->metadata['documents']['manifest']['simulated']) && $shipment->metadata['documents']['manifest']['simulated'])
                         <button class="btn btn-sm btn-soft-secondary flex-grow-1" disabled data-bs-toggle="tooltip" title="Generated in test mode">
                             <i class="ri-file-list-3-line me-1"></i> Manifest
+                        </button>
+                    @elseif(isset($shipment->metadata['documents']['manifest']['generated']) && $shipment->metadata['documents']['manifest']['generated'])
+                        <button class="btn btn-sm btn-soft-warning flex-grow-1" disabled data-bs-toggle="tooltip" title="Generated — download URL not returned. Check Shiprocket panel.">
+                            <i class="ri-error-warning-line me-1"></i> Manifest
                         </button>
                     @else
                         <button class="btn btn-sm btn-soft-secondary flex-grow-1" wire:click="generateDocument('manifest')" wire:loading.attr="disabled">
@@ -213,29 +225,38 @@
                             <i class="ri-refresh-line align-middle me-1"></i> Retry AWB Assignment
                         </button>
                     @endif
-                    <button class="btn btn-sm btn-soft-primary" disabled data-bs-toggle="tooltip" title="Tracking refresh will be enabled in Phase 5">
-                        <i class="ri-map-pin-line align-middle me-1"></i> Refresh Tracking
+                    <button wire:click="refreshTracking" wire:loading.attr="disabled" class="btn btn-sm btn-soft-primary">
+                        <i class="ri-map-pin-line align-middle me-1"></i> 
+                        <span wire:loading.remove wire:target="refreshTracking">Refresh Tracking</span>
+                        <span wire:loading wire:target="refreshTracking">Refreshing...</span>
                     </button>
                 @endif
             </div>
 
             {{-- Tracking History (Small section) --}}
-            @if($shipment->events && $shipment->events->count() > 0)
-                <div class="mt-3">
-                    <h6 class="fs-13 mb-2">Tracking History</h6>
+            <div class="mt-3">
+                <h6 class="fs-13 mb-2">Tracking History</h6>
+                @if($shipment->events && $shipment->events->count() > 0)
                     <ul class="list-unstyled mb-0">
-                        @foreach($shipment->events->take(3) as $event)
-                            <li class="mb-2">
-                                <div class="d-flex">
-                                    <div class="flex-grow-1">
-                                        <h6 class="fs-12 mb-0">{{ $event->event_status }}</h6>
-                                        <p class="text-muted fs-11 mb-0">{{ $event->location }} | {{ $event->event_time->format('d M, H:i') }}</p>
+                        @foreach($shipment->events->sortByDesc('event_time')->take(5) as $event)
+                            <li class="mb-3 border-bottom pb-2">
+                                <div class="d-flex flex-column">
+                                    <h6 class="fs-12 mb-1 text-primary">{{ $event->event_status }}</h6>
+                                    @if($event->event_description)
+                                        <p class="text-muted fs-12 mb-1">{{ $event->event_description }}</p>
+                                    @endif
+                                    <div class="d-flex justify-content-between text-muted fs-11">
+                                        <span><i class="ri-map-pin-2-line me-1"></i>{{ $event->location ?? 'Unknown' }}</span>
+                                        <span><i class="ri-time-line me-1"></i>{{ $event->event_time ? $event->event_time->format('d M, H:i') : 'N/A' }}</span>
                                     </div>
                                 </div>
                             </li>
                         @endforeach
                     </ul>
-                </div>
+                @else
+                    <p class="text-muted fs-12 mb-0">No tracking events yet.</p>
+                @endif
+            </div>
             @endif
         @endif
     </div>
