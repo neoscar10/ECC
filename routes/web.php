@@ -150,29 +150,3 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/membership/upgrade/payment', \App\Livewire\Membership\Upgrade\Payment::class)->name('membership.upgrade.payment');
     Route::get('/membership/upgrade/success', \App\Livewire\Membership\Upgrade\Success::class)->name('membership.upgrade.success');
 });
-
-// Shiprocket Webhook Placeholder
-Route::post('/webhooks/shiprocket/tracking', function (\Illuminate\Http\Request $request) {
-    $expectedToken = config('shiprocket.webhook_token');
-
-    if ($expectedToken) {
-        $incomingToken = $request->header('x-api-key');
-
-        if (! hash_equals($expectedToken, (string) $incomingToken)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid webhook token.',
-            ], 401);
-        }
-    }
-
-    \Log::info('Shiprocket webhook received', [
-        'headers' => $request->headers->all(),
-        'payload' => $request->all(),
-    ]);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Shiprocket webhook received.',
-    ]);
-})->name('webhooks.shiprocket.tracking');
