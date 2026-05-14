@@ -71,9 +71,14 @@ class CheckoutShippingQuoteService
             // 3. Store quote for reference
             $quote = $this->courierService->storeQuote($payload, $response, $selectedCourier);
 
+            $shippingCharge = (float) ($selectedCourier['total_charge'] ?? 0);
+            if ($shippingCharge <= 0) {
+                $shippingCharge = (float) ($selectedCourier['freight_charge'] ?? 0) + (float) ($selectedCourier['cod_charge'] ?? 0);
+            }
+
             return [
                 'success' => true,
-                'shipping_charge' => (float) $selectedCourier['total_charge'],
+                'shipping_charge' => $shippingCharge,
                 'currency' => 'INR',
                 'pickup_pincode' => $pickupPincode,
                 'delivery_pincode' => $deliveryPincode,

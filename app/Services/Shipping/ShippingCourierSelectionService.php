@@ -97,13 +97,21 @@ class ShippingCourierSelectionService
      */
     public function normalizeCourier(array $courier): array
     {
+        $freightCharge = (float) ($courier['freight_charge'] ?? $courier['rate'] ?? $courier['shipping_charge'] ?? $courier['courier_charge'] ?? $courier['charges'] ?? 0);
+        $codCharge = (float) ($courier['cod_charges'] ?? $courier['cod_charge'] ?? 0);
+        
+        $totalCharge = (float) ($courier['total_charge'] ?? 0);
+        if ($totalCharge <= 0) {
+            $totalCharge = $freightCharge + $codCharge;
+        }
+
         return [
             'courier_company_id' => (string) ($courier['courier_company_id'] ?? ''),
             'courier_name' => $courier['courier_name'] ?? '',
             'rating' => (float) ($courier['rating'] ?? 0),
-            'freight_charge' => (float) ($courier['freight_charge'] ?? $courier['rate'] ?? 0),
-            'cod_charge' => (float) ($courier['cod_charges'] ?? $courier['cod_charge'] ?? 0),
-            'total_charge' => (float) ($courier['total_charge'] ?? 0),
+            'freight_charge' => $freightCharge,
+            'cod_charge' => $codCharge,
+            'total_charge' => $totalCharge,
             'etd' => $courier['etd'] ?? null,
             'estimated_delivery_days' => (int) ($courier['estimated_delivery_days'] ?? $courier['estimated_delivery_days_min'] ?? 0),
             'is_cod_available' => (bool) ($courier['cod'] ?? false),
