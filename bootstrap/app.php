@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\CheckUserSuspension::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/shiprocket/tracking',
+        ]);
+
         $middleware->api(append: [
             \App\Http\Middleware\CheckUserSuspension::class,
         ]);

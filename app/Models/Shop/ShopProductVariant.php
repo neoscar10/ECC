@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+use App\Models\Concerns\HasShippingDimensions;
+
 class ShopProductVariant extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasShippingDimensions;
 
     protected $fillable = [
         'shop_product_id',
@@ -19,6 +21,10 @@ class ShopProductVariant extends Model
         'stock_qty',
         'is_active',
         'is_default',
+        'weight_kg',
+        'length_cm',
+        'breadth_cm',
+        'height_cm',
     ];
 
     protected $casts = [
@@ -26,6 +32,10 @@ class ShopProductVariant extends Model
         'stock_qty' => 'integer',
         'is_active' => 'boolean',
         'is_default' => 'boolean',
+        'weight_kg' => 'decimal:3',
+        'length_cm' => 'decimal:2',
+        'breadth_cm' => 'decimal:2',
+        'height_cm' => 'decimal:2',
     ];
 
     /**

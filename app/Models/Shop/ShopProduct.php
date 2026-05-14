@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Concerns\HasShippingDimensions;
 
 class ShopProduct extends Model
 {
-    use SoftDeletes, HasFactory;
+    use SoftDeletes, HasFactory, HasShippingDimensions;
 
     protected $fillable = [
         'title',
@@ -25,6 +26,10 @@ class ShopProduct extends Model
         'low_stock_threshold',
         'computed_min_price',
         'computed_max_price',
+        'weight_kg',
+        'length_cm',
+        'breadth_cm',
+        'height_cm',
     ];
 
     protected $casts = [
@@ -34,6 +39,10 @@ class ShopProduct extends Model
         'low_stock_threshold' => 'integer',
         'computed_min_price' => 'decimal:2',
         'computed_max_price' => 'decimal:2',
+        'weight_kg' => 'decimal:3',
+        'length_cm' => 'decimal:2',
+        'breadth_cm' => 'decimal:2',
+        'height_cm' => 'decimal:2',
     ];
 
     // --- Relationships ---

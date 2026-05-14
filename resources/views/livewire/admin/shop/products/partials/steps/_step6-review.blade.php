@@ -123,6 +123,48 @@
                     </div>
                 </div>
 
+                {{-- 2.5) Shipping Details --}}
+                @if(!$has_variants)
+                <div class="card shadow-none border mb-0 mt-3">
+                    <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Shipping Details</h5>
+                        <button type="button" class="btn btn-sm btn-soft-primary" wire:click="goToStep(5)">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        @if($reviewData['shipping']['has_shipping'])
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="text-muted text-uppercase fs-11 mb-1">Weight</label>
+                                    <h6 class="fs-14 fw-semibold mb-0">{{ $reviewData['shipping']['weight_kg'] ?: '0.000' }} kg</h6>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="text-muted text-uppercase fs-11 mb-1">Dimensions (L×B×H)</label>
+                                    <h6 class="fs-14 fw-semibold mb-0">
+                                        @if($reviewData['shipping']['length_cm'])
+                                            {{ $reviewData['shipping']['length_cm'] }} × {{ $reviewData['shipping']['breadth_cm'] }} × {{ $reviewData['shipping']['height_cm'] }} cm
+                                        @else
+                                            -
+                                        @endif
+                                    </h6>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="text-muted text-uppercase fs-11 mb-1">Volumetric Weight</label>
+                                    <h6 class="fs-14 fw-semibold mb-0">{{ $reviewData['shipping']['volumetric_weight_kg'] ?: '0.000' }} kg</h6>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <label class="text-muted text-uppercase fs-11 mb-1">Chargeable Weight</label>
+                                    <h6 class="fs-14 fw-bold text-primary mb-0">{{ $reviewData['shipping']['chargeable_weight_kg'] ?: '0.000' }} kg</h6>
+                                </div>
+                            </div>
+                        @else
+                            <div class="text-center py-3 bg-light rounded text-muted fs-13">
+                                <i class="ri-information-line me-1"></i> No shipping dimensions provided. Using fallback defaults.
+                            </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
                 {{-- 3) Combinations & Inventory (HIGHER PRIORITY) --}}
                 <div class="card shadow-none border mb-0">
                     <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
@@ -144,11 +186,12 @@
                                             <th>SKU</th>
                                             <th>Price</th>
                                             <th>Stock</th>
+                                            <th>Shipping (kg)</th>
                                             <th>Default</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($combinations as $key => $combo)
+                                        @foreach($reviewData['combinations'] as $combo)
                                             <tr class="border-bottom">
                                                 <td class="fw-medium">
                                                     @foreach($combo['labels'] as $label)
@@ -162,6 +205,17 @@
                                                         <span class="badge bg-success-subtle text-success">{{ $combo['stock'] }} units</span>
                                                     @else
                                                         <span class="badge bg-danger-subtle text-danger">Out of Stock</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($combo['weight_kg'] || $combo['volumetric_weight_kg'])
+                                                        <div class="d-flex flex-column gap-0">
+                                                            <small class="text-muted">Actual: <strong>{{ $combo['weight_kg'] ?: '0.000' }} kg</strong></small>
+                                                            <small class="text-muted">Volumetric: <strong>{{ $combo['volumetric_weight_kg'] ?: '0.000' }} kg</strong></small>
+                                                            <small class="text-primary fw-bold">Chargeable: <strong>{{ $combo['chargeable_weight_kg'] ?: '0.000' }} kg</strong></small>
+                                                        </div>
+                                                    @else
+                                                        <span class="text-muted fs-11">No Data</span>
                                                     @endif
                                                 </td>
                                                 <td>

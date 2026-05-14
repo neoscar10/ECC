@@ -48,12 +48,12 @@
                                 <span class="step-label d-none d-sm-block">Variations</span>
                             </button>
                         </div>
-                        <!-- Step 5: Combinations (NEW) -->
+                        <!-- Step 5: Combinations / Shipping -->
                         <div class="sp-step">
                             <button class="sp-pill btn {{ $createStep === 5 ? 'active' : '' }} {{ $createStep > 5 ? 'done' : '' }}" 
                                 wire:click="$set('createStep', 5)" type="button" @if(!$isEditMode && $createStep < 5) disabled @endif>
                                 <span class="step-icon">@if($createStep > 5) <i class="ri-check-line"></i> @else 5 @endif</span>
-                                <span class="step-label d-none d-sm-block">Combinations</span>
+                                <span class="step-label d-none d-sm-block">Combinations / Shipping</span>
                             </button>
                         </div>
                         <!-- Step 6: Review -->

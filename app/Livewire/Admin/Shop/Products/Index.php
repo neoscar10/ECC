@@ -50,6 +50,10 @@ class Index extends Component
     public $low_stock_threshold = 5;
     public $computed_min_price = 0;
     public $computed_max_price = 0;
+    public $weight_kg;
+    public $length_cm;
+    public $breadth_cm;
+    public $height_cm;
 
     public $categorySearch = '';
     
@@ -309,6 +313,24 @@ class Index extends Component
             'description' => $this->description,
         ];
 
+        // 1.5 Shipping Info (Simple)
+        $divisor = (float) config('shipping.volumetric_divisor', 5000);
+        $volumetric = 0;
+        if ($this->length_cm && $this->breadth_cm && $this->height_cm) {
+            $volumetric = round(((float)$this->length_cm * (float)$this->breadth_cm * (float)$this->height_cm) / $divisor, 3);
+        }
+        $chargeable = max((float)$this->weight_kg, $volumetric);
+
+        $this->reviewData['shipping'] = [
+            'has_shipping' => (bool)$this->weight_kg || $volumetric > 0,
+            'weight_kg' => $this->weight_kg,
+            'length_cm' => $this->length_cm,
+            'breadth_cm' => $this->breadth_cm,
+            'height_cm' => $this->height_cm,
+            'volumetric_weight_kg' => $volumetric > 0 ? $volumetric : null,
+            'chargeable_weight_kg' => ($this->weight_kg || $volumetric > 0) ? $chargeable : null,
+        ];
+
         // 2. Media
         $primary = null;
         if (!empty($this->existingImages) && count($this->existingImages) > 0) {
@@ -384,10 +406,23 @@ class Index extends Component
                 'sku' => $c['sku'] ?? 'N/A',
                 'price' => $c['price'],
                 'stock' => $c['stock'],
-                'is_active' => $c['is_active'],
                 'is_default' => $c['is_default'],
+                'weight_kg' => $c['weight_kg'] ?? null,
+                'length_cm' => $c['length_cm'] ?? null,
+                'breadth_cm' => $c['breadth_cm'] ?? null,
+                'height_cm' => $c['height_cm'] ?? null,
             ];
         })->values()->toArray();
+        
+        // Add calculated weights for combinations
+        foreach ($this->reviewData['combinations'] as &$combo) {
+            $v = 0;
+            if (!empty($combo['length_cm']) && !empty($combo['breadth_cm']) && !empty($combo['height_cm'])) {
+                $v = round(((float)$combo['length_cm'] * (float)$combo['breadth_cm'] * (float)$combo['height_cm']) / $divisor, 3);
+            }
+            $combo['volumetric_weight_kg'] = $v > 0 ? $v : null;
+            $combo['chargeable_weight_kg'] = ($combo['weight_kg'] || $v > 0) ? max((float)$combo['weight_kg'], $v) : null;
+        }
         
         // Checklist
         $this->reviewData['checklist'] = [
@@ -428,6 +463,10 @@ class Index extends Component
         $this->is_active = $product->is_active;
         $this->deactivation_reason = $product->deactivation_reason;
         $this->low_stock_threshold = $product->low_stock_threshold ?? 5;
+        $this->weight_kg = $product->weight_kg;
+        $this->length_cm = $product->length_cm;
+        $this->breadth_cm = $product->breadth_cm;
+        $this->height_cm = $product->height_cm;
 
         // Simple Stock Logic
         $this->stock_qty = $product->stock_qty;
@@ -500,6 +539,10 @@ class Index extends Component
                 'stock' => $variant->stock_qty,
                 'is_active' => (bool)$variant->is_active,
                 'is_default' => (bool)$variant->is_default,
+                'weight_kg' => $variant->weight_kg,
+                'length_cm' => $variant->length_cm,
+                'breadth_cm' => $variant->breadth_cm,
+                'height_cm' => $variant->height_cm,
             ];
         }
 
@@ -805,8 +848,11 @@ class Index extends Component
                     'sku' => '',
                     'price' => $this->base_price,
                     'stock' => 0,
-                    'is_active' => true,
                     'is_default' => false,
+                    'weight_kg' => null,
+                    'length_cm' => null,
+                    'breadth_cm' => null,
+                    'height_cm' => null,
                 ];
             }
             
@@ -888,7 +934,16 @@ class Index extends Component
             'base_price' => 'required|numeric|min:0',
             'selectedCategories' => 'required|array|min:1',
             'deactivation_reason' => !$this->is_active ? 'required|string|min:5' : 'nullable',
+            'weight_kg' => ['nullable', 'numeric', 'min:0.001', 'max:999.999'],
+            'length_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
+            'breadth_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
+            'height_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
         ]);
+
+        if (($this->length_cm || $this->breadth_cm || $this->height_cm) && (!$this->length_cm || !$this->breadth_cm || !$this->height_cm)) {
+            $this->addError('length_cm', 'Length, breadth, and height are required together for volumetric weight calculation.');
+            return;
+        }
 
         if (!$this->has_variants) {
              $this->validate(['stock_qty' => 'required|integer|min:0']);
@@ -906,6 +961,10 @@ class Index extends Component
                 'deactivation_reason' => !$this->is_active ? $this->deactivation_reason : null,
                 'low_stock_threshold' => $this->low_stock_threshold ?: 5,
                 'stock_qty' => $this->has_variants ? null : $this->stock_qty,
+                'weight_kg' => $this->weight_kg,
+                'length_cm' => $this->length_cm,
+                'breadth_cm' => $this->breadth_cm,
+                'height_cm' => $this->height_cm,
             ]);
 
             // 2. Attach Categories
@@ -1007,6 +1066,10 @@ class Index extends Component
         $this->has_variants = false;
         $this->variantsLocked = false;
         $this->stock_qty = null;
+        $this->weight_kg = null;
+        $this->length_cm = null;
+        $this->breadth_cm = null;
+        $this->height_cm = null;
         
         $this->variationsOnlyMode = false;
     }
@@ -1038,6 +1101,7 @@ class Index extends Component
                 }
                 break;
             case 5:
+                $this->saveShippingInfo($product);
                 $this->saveCombinations($product);
                 break;
             case 6:
@@ -1056,7 +1120,16 @@ class Index extends Component
             'base_price' => 'required|numeric|min:0',
             'selectedCategories' => 'required|array|min:1',
             'deactivation_reason' => !$this->is_active ? 'required|string|min:5' : 'nullable',
+            'weight_kg' => ['nullable', 'numeric', 'min:0.001', 'max:999.999'],
+            'length_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
+            'breadth_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
+            'height_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
         ]);
+
+        if (($this->length_cm || $this->breadth_cm || $this->height_cm) && (!$this->length_cm || !$this->breadth_cm || !$this->height_cm)) {
+            $this->addError('length_cm', 'Length, breadth, and height are required together for volumetric weight calculation.');
+            return;
+        }
 
         if (!$this->has_variants) {
              $this->validate(['stock_qty' => 'required|integer|min:0']);
@@ -1069,6 +1142,7 @@ class Index extends Component
             $this->saveAttributes($product);
             $this->saveMedia($product);
             $this->saveVariations($product);
+            $this->saveShippingInfo($product);
             if ($this->has_variants) {
                 // Re-sync combinations state to use real IDs instead of temporary caption keys
                 $this->generateCombinations(); 
@@ -1090,6 +1164,8 @@ class Index extends Component
             'deactivation_reason' => !$this->is_active ? 'required|string|min:5' : 'nullable',
         ]);
 
+
+
         $product->update([
             'title' => $this->title,
             'slug' => Str::slug($this->title),
@@ -1098,8 +1174,31 @@ class Index extends Component
             'currency' => $this->currency,
             'is_active' => $this->is_active,
             'deactivation_reason' => !$this->is_active ? $this->deactivation_reason : null,
-            'low_stock_threshold' => $this->low_stock_threshold ?: 5,
         ]);
+    }
+
+    private function saveShippingInfo(ShopProduct $product)
+    {
+        if (!$this->has_variants) {
+            $this->validate([
+                'weight_kg' => ['nullable', 'numeric', 'min:0.001', 'max:999.999'],
+                'length_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
+                'breadth_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
+                'height_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
+            ]);
+
+            if (($this->length_cm || $this->breadth_cm || $this->height_cm) && (!$this->length_cm || !$this->breadth_cm || !$this->height_cm)) {
+                $this->addError('length_cm', 'Length, breadth, and height are required together for volumetric weight calculation.');
+                return;
+            }
+
+            $product->update([
+                'weight_kg' => $this->weight_kg,
+                'length_cm' => $this->length_cm,
+                'breadth_cm' => $this->breadth_cm,
+                'height_cm' => $this->height_cm,
+            ]);
+        }
     }
 
     private function saveMedia(ShopProduct $product)
@@ -1311,6 +1410,10 @@ class Index extends Component
                     'stock_qty' => $data['stock'],
                     'is_active' => $data['is_active'] ?? true,
                     'is_default' => $data['is_default'] ?? false,
+                    'weight_kg' => $data['weight_kg'] ?? null,
+                    'length_cm' => $data['length_cm'] ?? null,
+                    'breadth_cm' => $data['breadth_cm'] ?? null,
+                    'height_cm' => $data['height_cm'] ?? null,
                 ]
             );
 
