@@ -8,7 +8,7 @@ return [
 
     'pickup_location' => env('SHIPROCKET_PICKUP_LOCATION'),
 
-    'webhook_url' => env('SHIPROCKET_WEBHOOK_URL', env('APP_URL') . '/api/webhooks/shiprocket/tracking'),
+    'webhook_url' => env('SHIPROCKET_WEBHOOK_URL', env('APP_URL') . '/api/webhooks/logistics/tracking'),
     'webhook_token' => env('SHIPROCKET_WEBHOOK_TOKEN'),
 
     'timeout' => (int) env('SHIPROCKET_TIMEOUT', 30),

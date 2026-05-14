@@ -225,8 +225,8 @@ Route::prefix('v1')->group(function () {
     });
 });
 
-// Shiprocket Webhook Routes
-Route::prefix('webhooks/shiprocket')->group(function () {
+// Shiprocket Webhook Routes (Neutral name to avoid Shiprocket's restricted word filter)
+Route::prefix('webhooks/logistics')->group(function () {
     Route::post('/tracking', function (\Illuminate\Http\Request $request) {
         $expectedToken = config('shiprocket.webhook_token');
 
