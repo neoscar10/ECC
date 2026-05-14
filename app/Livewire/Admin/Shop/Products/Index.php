@@ -29,6 +29,7 @@ class Index extends Component
     public $search = '';
     public $filterCategory = '';
     public $filterStatus = '';
+    public $filterStock = '';
 
     // Modal States
     public $showCreateModal = false;
@@ -138,6 +139,11 @@ class Index extends Component
                 $q->whereHas('categories', fn($c) => $c->where('shop_categories.id', (int) $this->filterCategory));
             })
             ->when($this->filterStatus !== '', fn($q) => $q->where('is_active', (bool)$this->filterStatus))
+            ->when($this->filterStock, function($q) {
+                if ($this->filterStock === 'in_stock') $q->inStock();
+                if ($this->filterStock === 'low_stock') $q->lowStock();
+                if ($this->filterStock === 'out_of_stock') $q->outOfStock();
+            })
             ->latest()
             ->paginate(10);
 

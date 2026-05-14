@@ -49,11 +49,19 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select class="form-select" wire:model.live="filterStatus">
                         <option value="">All Status</option>
                         <option value="1">Active</option>
                         <option value="0">Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" wire:model.live="filterStock">
+                        <option value="">All Stock Status</option>
+                        <option value="in_stock">In Stock</option>
+                        <option value="low_stock">Low Stock</option>
+                        <option value="out_of_stock">Out of Stock</option>
                     </select>
                 </div>
             </div>

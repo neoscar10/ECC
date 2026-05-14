@@ -125,6 +125,39 @@ class ShopProduct extends Model
         });
     }
 
+    public function scopeLowStock(Builder $query): Builder
+    {
+        return $query->where(function ($q) {
+            // Variants: at least one variant is low stock
+            $q->whereHas('variants', function ($v) {
+                $v->whereColumn('stock_qty', '<', 'shop_products.low_stock_threshold');
+            })
+            // OR Simple Product: stock is low
+            ->orWhere(function($sub) {
+                $sub->whereDoesntHave('variationGroups')
+                    ->whereColumn('stock_qty', '<', 'low_stock_threshold');
+            });
+        });
+    }
+
+    public function scopeOutOfStock(Builder $query): Builder
+    {
+        return $query->where(function ($q) {
+            // Variants: ALL variants are 0 stock (or no variants exist but group exists? No, if group exists variants should exist)
+            $q->whereHas('variants')
+              ->whereDoesntHave('variants', function ($v) {
+                  $v->where('stock_qty', '>', 0);
+              })
+            // OR Simple Product: stock is 0
+            ->orWhere(function($sub) {
+                $sub->whereDoesntHave('variationGroups')
+                    ->where(function($s) {
+                        $s->where('stock_qty', '<=', 0)->orWhereNull('stock_qty');
+                    });
+            });
+        });
+    }
+
     // --- Accessors ---
 
     public function getComputedStockAttribute(): int
