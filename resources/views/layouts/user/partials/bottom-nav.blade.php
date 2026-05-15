@@ -27,7 +27,7 @@
             <div class="col">
                 <a href="{{ $it['href'] }}"
                    class="d-inline-flex flex-column align-items-center justify-content-center gap-1 text-decoration-none"
-                   style="color: {{ $on ? 'var(--ecc-primary)' : 'rgba(203,188,144,.75)' }};">
+                   style="color: {{ $on ? 'var(--ecc-primary)' : 'var(--ecc-text-muted)' }};">
                     <span class="material-symbols-outlined" style="font-size:24px;">
                         {{ $it['icon'] }}
                     </span>

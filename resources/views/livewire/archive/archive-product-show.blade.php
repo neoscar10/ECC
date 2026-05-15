@@ -330,7 +330,7 @@
                 </div>
                 <div class="modal-body pt-2">
                     @if($enquirySuccess)
-                        <div class="alert alert-success d-flex align-items-center gap-2" style="background:rgba(25,135,84,0.1); border-color:rgba(25,135,84,0.3); color:#d1e7dd; border-radius:12px;">
+                        <div class="alert alert-success d-flex align-items-center gap-2" style="background: var(--ecc-bg-hover); border: 1px solid var(--ecc-success); color: var(--ecc-success); border-radius: 12px;">
                             <span class="material-symbols-outlined">check_circle</span>
                             Your private enquiry has been successfully sent to the admin.
                         </div>
@@ -342,12 +342,12 @@
                         
                         <form wire:submit.prevent="submitEnquiry">
                             <div class="mb-4">
-                                <textarea wire:model="enquiryMessage" class="form-control" rows="3" placeholder="Add an optional message..." style="background:var(--ecc-text-primary); border:1px solid rgba(199, 167, 90,0.2); color: var(--ecc-text-primary); border-radius:12px; box-shadow:none;"></textarea>
+                                <textarea wire:model="enquiryMessage" class="form-control" rows="3" placeholder="Add an optional message..." style="background: var(--ecc-bg-input); border:1px solid var(--ecc-border); color: var(--ecc-text-primary); border-radius:12px; box-shadow:none;"></textarea>
                                 @error('enquiryMessage') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                             </div>
                             
                             <div class="text-end">
-                                <button type="submit" class="archive-detail-solid-soft-btn w-100 w-md-auto px-4 d-inline-flex ms-auto justify-content-center">
+                                <button type="submit" class="archive-detail-solid-soft-btn w-100 w-md-auto px-4 d-inline-flex align-items-center ms-auto justify-content-center">
                                     <span class="material-symbols-outlined me-2" wire:loading.remove wire:target="submitEnquiry">send</span>
                                     <span class="spinner-border spinner-border-sm me-2" wire:loading wire:target="submitEnquiry" role="status" aria-hidden="true"></span>
                                     Send Enquiry

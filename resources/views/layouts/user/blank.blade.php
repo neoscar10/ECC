@@ -1,9 +1,21 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100" data-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? config('app.name', 'ECC') }}</title>
+
+    <script>
+        (function () {
+            try {
+                var storedTheme = localStorage.getItem('ecc_user_theme');
+                var theme = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (error) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
 
     {{-- Fonts + Icons (match premium designs) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">

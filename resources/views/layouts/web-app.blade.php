@@ -485,9 +485,9 @@
         }
 
         .luxe-chip {
-            border: 1px solid rgba(199, 167, 90, .14);
+            border: 1px solid var(--ecc-border);
             background: var(--ecc-bg-input);
-            color: rgba(245,240,231,.92);
+            color: var(--ecc-text-secondary);
             border-radius: 999px;
             padding: .72rem 1rem;
             font-size: .9rem;
@@ -662,7 +662,7 @@
         }
 
         .luxe-mobile-nav {
-            border-top: 1px solid rgba(199, 167, 90, .08);
+            border-top: 1px solid var(--ecc-border);
             padding-top: .85rem;
             margin-top: .85rem;
         }
@@ -670,10 +670,10 @@
         .luxe-mobile-nav a {
             display: block;
             padding: .8rem 0;
-            color: rgba(245,240,231,.92);
+            color: var(--ecc-text-secondary);
             font-weight: 600;
             text-decoration: none;
-            border-bottom: 1px solid rgba(255,255,255,.04);
+            border-bottom: 1px solid var(--ecc-border-soft);
         }
 
         .luxe-mobile-nav a:last-child {
@@ -941,7 +941,7 @@
                                     $disabled = $isAwaitingApproval && $it['key'] !== 'explore';
                                 @endphp
                                 <a href="{{ $disabled ? 'javascript:void(0)' : $it['href'] }}"
-                                   class="{{ $isOn($it['key']) ? 'text-warning' : '' }} d-flex align-items-center gap-2"
+                                   class="{{ $isOn($it['key']) ? 'is-active text-warning' : '' }} d-flex align-items-center gap-2"
                                    {!! $it['extras'] ?? '' !!}
                                    @if($disabled) style="opacity: 0.45; pointer-events: none; cursor: default;" @endif>
                                     <span class="material-symbols-outlined fs-5">{{ $it['icon'] }}</span>

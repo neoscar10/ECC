@@ -23,6 +23,7 @@
         --ecc-primary-gradient-dark: linear-gradient(135deg, var(--ecc-gold-500), var(--ecc-gold-600), var(--ecc-gold-700));
     }
 
+    html,
     html[data-theme="dark"] {
         color-scheme: dark;
 
@@ -146,7 +147,25 @@
         color: var(--ecc-text-primary) !important;
     }
 
-    /* Override common chip/pill patterns that might be hardcoded to dark bg/white text */
+    html[data-theme="light"] .btn-close-white {
+        filter: invert(1) grayscale(100%) brightness(0);
+    }
+
+    /* Standard inputs */
+    .form-control, .form-select {
+        background-color: var(--ecc-bg-input) !important;
+        color: var(--ecc-text-primary) !important;
+        border-color: var(--ecc-border) !important;
+    }
+    .form-control:focus, .form-select:focus {
+        background-color: var(--ecc-bg-input) !important;
+        color: var(--ecc-text-primary) !important;
+        border-color: var(--ecc-primary) !important;
+        box-shadow: 0 0 0 0.25rem var(--ecc-primary-soft) !important;
+    }
+    .form-control::placeholder {
+        color: var(--ecc-text-muted) !important;
+    }
     html[data-theme="light"] .luxe-chip,
     html[data-theme="light"] .archive-chip,
     html[data-theme="light"] .ecc-chip,
@@ -165,10 +184,33 @@
         border-color: var(--ecc-primary) !important;
     }
 
-    html[data-theme="light"] .luxe-chip:hover,
-    html[data-theme="light"] .archive-chip:hover {
-        background: var(--ecc-bg-hover) !important;
-        color: var(--ecc-text-primary) !important;
+    /* Navigation visibility fixes for Light Mode (Mobile & Sidebar) */
+    html[data-theme="light"] .ecc-sidebar-item,
+    html[data-theme="light"] .ecc-nav-link,
+    html[data-theme="light"] .nav-item-pavilion,
+    html[data-theme="light"] .ecc-app-nav__item,
+    html[data-theme="light"] .luxe-mobile-nav a {
+        color: var(--ecc-text-secondary) !important;
+        opacity: 1 !important;
+    }
+
+    html[data-theme="light"] .ecc-sidebar-item.is-active,
+    html[data-theme="light"] .ecc-nav-link.active,
+    html[data-theme="light"] .nav-item-pavilion.active,
+    html[data-theme="light"] .ecc-app-nav__item.is-active,
+    html[data-theme="light"] .luxe-mobile-nav a.is-active,
+    html[data-theme="light"] .luxe-mobile-nav a.text-warning {
+        color: var(--ecc-primary) !important;
+    }
+
+    html[data-theme="light"] .ecc-sidebar-icon,
+    html[data-theme="light"] .material-symbols-outlined,
+    html[data-theme="light"] .mdi {
+        opacity: 1 !important;
+    }
+
+    html[data-theme="light"] .ecc-sidebar-section-header {
+        color: var(--ecc-text-muted) !important;
     }
 
     /* Force white text in intentionally dark areas (overlays, dark cards) even in Light Mode */
@@ -189,25 +231,38 @@
     }
 
     /* Keep footer dark if requested, but fix readability */
-    .luxe-footer, footer {
+    .luxe-footer, footer, html[data-theme="light"] .luxe-footer, html[data-theme="light"] footer {
         background: #0b0b08 !important;
         color: rgba(255,255,255,0.8) !important;
         border-top: 1px solid var(--ecc-primary-border) !important;
     }
-    .luxe-footer a, footer a {
+    .luxe-footer a, footer a, html[data-theme="light"] .luxe-footer a, html[data-theme="light"] footer a {
         color: rgba(255,255,255,0.6) !important;
-        transition: color 0.2s ease;
     }
     .luxe-footer a:hover, footer a:hover {
         color: var(--ecc-primary) !important;
     }
     .luxe-footer .text-muted, footer .text-muted,
-    .luxe-footer .luxe-footer-text, footer .luxe-footer-text {
+    .luxe-footer .luxe-footer-text, footer .luxe-footer-text,
+    .luxe-footer .luxe-legal,
+    html[data-theme="light"] .luxe-footer .luxe-footer-text,
+    html[data-theme="light"] .luxe-footer .luxe-legal {
         color: rgba(255,255,255,0.5) !important;
     }
-    .luxe-footer .luxe-footer-title, footer .luxe-footer-title {
+    .luxe-footer .luxe-footer-title, footer .luxe-footer-title,
+    html[data-theme="light"] .luxe-footer .luxe-footer-title {
         color: #ffffff !important;
         font-weight: 800;
+    }
+
+    /* Force footer inputs to remain dark-themed in light mode */
+    html[data-theme="light"] .luxe-footer .form-control {
+        background-color: rgba(255,255,255,0.05) !important;
+        color: #ffffff !important;
+        border-color: rgba(199, 167, 90, 0.2) !important;
+    }
+    html[data-theme="light"] .luxe-footer .form-control::placeholder {
+        color: rgba(255,255,255,0.4) !important;
     }
 
 
