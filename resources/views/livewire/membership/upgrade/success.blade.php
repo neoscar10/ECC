@@ -44,7 +44,7 @@
 @push('styles')
 <style>
   :root{
-    --ecc-gold:#D4AF37;
+    --ecc-gold:var(--ecc-primary);
     --ecc-gold-pale:#E5C568;
     --ecc-black:#0A0A0A;
     --ecc-gray:#1C1C1C;
@@ -58,19 +58,19 @@
 
   .ecc-success__grad{
     height: 66%;
-    background: linear-gradient(to bottom, rgba(212,175,55,.10), rgba(0,0,0,0));
+    background: linear-gradient(to bottom, rgba(199, 167, 90,.10), rgba(0,0,0,0));
     pointer-events:none;
   }
 
   .ecc-success__tex{
-    background-image: radial-gradient(circle at center, rgba(212, 175, 55, 0.08) 0%, transparent 80%);
+    background-image: radial-gradient(circle at center, rgba(199, 167, 90, 0.08) 0%, transparent 80%);
     pointer-events:none;
   }
 
   .ecc-success__glow{
     width: 120px; height: 120px;
     border-radius: 9999px;
-    background: rgba(212,175,55,.20);
+    background: rgba(199, 167, 90,.20);
     filter: blur(26px);
     transform: translate(-50%,-50%) scale(1.1);
     pointer-events:none;
@@ -79,7 +79,7 @@
   .ecc-success__icon{
     width: 112px; height: 112px;
     border-radius: 9999px;
-    border: 1px solid rgba(212,175,55,.40);
+    border: 1px solid rgba(199, 167, 90,.40);
     background: rgba(28,28,28,.80);
     box-shadow: 0 30px 80px rgba(0,0,0,.60);
     display:flex; align-items:center; justify-content:center;
@@ -113,7 +113,7 @@
   .ecc-success__divider{
     height: 1px;
     width: 80px;
-    background: rgba(212,175,55,.30);
+    background: rgba(199, 167, 90,.30);
     margin: 10px auto;
   }
 
@@ -128,12 +128,12 @@
   .ecc-success__btn{
     height: 56px;
     border-radius: 12px;
-    border: 1px solid rgba(212,175,55,.50);
+    border: 1px solid rgba(199, 167, 90,.50);
     background: transparent;
     color: var(--ecc-gold);
     font-weight: 800;
     letter-spacing: .02em;
-    box-shadow: 0 0 15px rgba(212,175,55,0.10);
+    box-shadow: 0 0 15px rgba(199, 167, 90,0.10);
     position: relative;
     overflow: hidden;
     transition: all 220ms ease;
@@ -142,17 +142,17 @@
   .ecc-success__btn::before{
     content:"";
     position:absolute; inset:0;
-    background: rgba(212,175,55,.05);
+    background: rgba(199, 167, 90,.05);
     transition: background 220ms ease;
   }
   .ecc-success__btn > *{ position: relative; z-index: 1; }
 
   .ecc-success__btn:hover{
-    border-color: rgba(212,175,55,1);
+    border-color: rgba(199, 167, 90,1);
     transform: translateY(-1px);
   }
   .ecc-success__btn:hover::before{
-    background: rgba(212,175,55,.10);
+    background: rgba(199, 167, 90,.10);
   }
 
   @media (min-width: 992px){

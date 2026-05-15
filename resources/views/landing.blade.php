@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable" data-theme="default" data-theme-colors="default">
 
 
@@ -1244,7 +1244,7 @@
                     <div class="col-lg-8">
                         <div class="text-center mb-5">
                             <h3 class="mb-3 fw-semibold">Our Work Process</h3>
-                            <p class="text-muted mb-4 ff-secondary">In an ideal world this website wouldnâ€™t exist, a client would acknowledge the importance of having web copy before the Proin vitae ipsum vel ex finibus semper design starts.</p>
+                            <p class="text-muted mb-4 ff-secondary">In an ideal world this website wouldn’t exist, a client would acknowledge the importance of having web copy before the Proin vitae ipsum vel ex finibus semper design starts.</p>
                         </div>
                     </div>
                 </div>
@@ -1650,7 +1650,7 @@
 
                         <div>
                             <p class="copy-rights mb-0">
-                                <script> document.write(new Date().getFullYear()) </script> Â© Velzon - Themesbrand
+                                <script> document.write(new Date().getFullYear()) </script> © Velzon - Themesbrand
                             </p>
                         </div>
                     </div>

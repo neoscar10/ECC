@@ -3,7 +3,7 @@
     <header class="position-relative z-2 pt-4 pt-md-4 pb-2">
         {{-- Mobile icon stays exactly like before --}}
         <div class="d-flex justify-content-center d-md-none">
-            <span class="material-symbols-outlined ecc-icon text-center">shield_moon</span>
+            <img src="{{ asset('ecc_logo_dark.png') }}" class="ecc-icon" alt="ECC Logo">
         </div>
     </header>
 
@@ -35,7 +35,7 @@
                     <div class="text-center text-md-start ecc-animate-up-delay">
                         {{-- Desktop emblem (icon moves closer to headline) --}}
                         <div class="d-none d-md-flex align-items-center mb-3">
-                            <span class="material-symbols-outlined ecc-icon ecc-icon--desktop">shield_moon</span>
+                            <img src="{{ asset('ecc_logo_dark.png') }}" class="ecc-icon ecc-icon--desktop" alt="ECC Logo">
                         </div>
 
                         <h1 class="mb-3 mb-md-4 ecc-title">
@@ -99,19 +99,22 @@
 
     /* Top icon */
     .ecc-icon{
-        font-size: 34px;
-        color: rgba(212,175,55,.95);
-        filter: drop-shadow(0 0 10px rgba(212,175,55,.25));
+        width: 108px;
+        height: 84px;
+        object-fit: contain;
+        filter: drop-shadow(0 0 10px rgba(199, 167, 90,.25));
     }
 
     /* Desktop-only placement: same icon, slightly refined sizing */
     .ecc-icon--desktop{
-        font-size: 30px;
+        width: 97px;
+        height: 76px;
         opacity: .95;
     }
     @media (min-width: 992px){
         .ecc-icon--desktop{
-            font-size: 32px;
+            width: 104px;
+            height: 81px;
         }
     }
 
@@ -119,7 +122,7 @@
     .ecc-glow{
         width: min(1200px, 120vw);
         height: min(700px, 70vh);
-        background: rgba(212,175,55,.10);
+        background: rgba(199, 167, 90,.10);
         filter: blur(120px);
         border-radius: 9999px;
         pointer-events: none;
@@ -184,8 +187,8 @@
     .ecc-dot{
         width: 7px; height: 7px;
         border-radius: 50%;
-        background: #D4AF37;
-        box-shadow: 0 0 14px rgba(212,175,55,.75);
+        background: var(--ecc-primary);
+        box-shadow: 0 0 14px rgba(199, 167, 90,.75);
         animation: eccPulse 1.4s ease-in-out infinite;
     }
 
@@ -204,7 +207,7 @@
     }
 
     .ecc-gradient-text{
-        background: linear-gradient(90deg, #F2D06B, #D4AF37, #aa8c2c);
+        background: var(--ecc-primary-gradient);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -213,7 +216,7 @@
     .ecc-divider{
         height: 1px;
         width: 56px;
-        background: rgba(212,175,55,.60);
+        background: rgba(199, 167, 90,.60);
         margin-top: .25rem;
     }
     @media (min-width: 768px){
@@ -254,13 +257,13 @@
     .ecc-enter-btn::before{
         content:"";
         position:absolute; inset:0;
-        background: rgba(212,175,55,.08);
+        background: rgba(199, 167, 90,.08);
         opacity: 0;
         transition: opacity 260ms ease;
     }
     .ecc-enter-btn:hover{
-        border-color: rgba(212,175,55,.55);
-        color: #D4AF37;
+        border-color: rgba(199, 167, 90,.55);
+        color: var(--ecc-primary);
         transform: translateY(-1px);
     }
     .ecc-enter-btn:hover::before{ opacity: 1; }
@@ -279,7 +282,7 @@
     }
     .ecc-enter-btn span{ position: relative; z-index: 1; }
     .ecc-enter-btn:hover .ecc-arrow{
-        color: #D4AF37;
+        color: var(--ecc-primary);
         transform: translateX(4px);
     }
 

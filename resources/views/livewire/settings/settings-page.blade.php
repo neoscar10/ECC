@@ -44,7 +44,7 @@
     .ecc-settings-info-link,
     .ecc-settings-modal {
         background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
-        border: 1px solid rgba(212,175,55,.12);
+        border: 1px solid rgba(199, 167, 90,.12);
         border-radius: 1.25rem;
         box-shadow: 0 12px 30px rgba(0,0,0,.14);
     }
@@ -63,8 +63,8 @@
         width: 96px;
         height: 96px;
         background: rgba(255,255,255,.05);
-        border: 2px solid #d4af37;
-        color: #d4af37;
+        border: 2px solid var(--ecc-primary);
+        color: var(--ecc-primary);
         font-size: 2rem;
     }
 
@@ -78,7 +78,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: #d4af37;
+        background: var(--ecc-primary);
         color: #151109;
         cursor: pointer;
         border: 2px solid #0b0904;
@@ -100,7 +100,7 @@
         align-items: center;
         justify-content: center;
         z-index: 3;
-        color: #d4af37;
+        color: var(--ecc-primary);
     }
     
     .ecc-spin {
@@ -115,7 +115,7 @@
         width: 30px;
         height: 30px;
         border-radius: 50%;
-        background: #d4af37;
+        background: var(--ecc-primary);
         color: #151109;
         display: inline-flex;
         align-items: center;
@@ -143,9 +143,9 @@
         align-items: center;
         padding: .45rem .9rem;
         border-radius: 999px;
-        background: rgba(212,175,55,.10);
-        border: 1px solid rgba(212,175,55,.18);
-        color: #d4af37;
+        background: rgba(199, 167, 90,.10);
+        border: 1px solid rgba(199, 167, 90,.18);
+        color: var(--ecc-primary);
         font-size: .68rem;
         font-weight: 900;
         letter-spacing: .16em;
@@ -183,7 +183,7 @@
     }
 
     .ecc-settings-side-link.is-active {
-        background: #d4af37;
+        background: var(--ecc-primary);
         color: #16110a;
         font-weight: 800;
     }
@@ -217,13 +217,13 @@
         gap: 1rem;
         transition: .25s ease;
         text-align: left;
-        border: 1px solid rgba(212,175,55,.12);
+        border: 1px solid rgba(199, 167, 90,.12);
         background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
         border-radius: 1.25rem;
     }
 
     .ecc-settings-action-card:hover {
-        border-color: rgba(212,175,55,.28);
+        border-color: rgba(199, 167, 90,.28);
         transform: translateY(-1px);
         background: linear-gradient(180deg, rgba(34,29,20,.94), rgba(27,23,17,.98));
     }
@@ -235,8 +235,8 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: rgba(212,175,55,.10);
-        color: #d4af37;
+        background: rgba(199, 167, 90,.10);
+        color: var(--ecc-primary);
         font-size: 1.25rem;
         flex-shrink: 0;
     }
@@ -276,7 +276,7 @@
     }
 
     .ecc-settings-divider {
-        border-color: rgba(212,175,55,.08) !important;
+        border-color: rgba(199, 167, 90,.08) !important;
     }
 
     .ecc-settings-section-title {
@@ -298,14 +298,14 @@
     }
 
     .ecc-settings-info-link:hover {
-        border-color: rgba(212,175,55,.28);
+        border-color: rgba(199, 167, 90,.28);
         color: #fff;
         background: rgba(255,255,255,.02);
     }
 
     .ecc-settings-divider-line {
         height: 1px;
-        background: rgba(212,175,55,.08);
+        background: rgba(199, 167, 90,.08);
     }
 
     .ecc-settings-version {
@@ -319,13 +319,13 @@
 
     .ecc-settings-modal {
         background: linear-gradient(180deg, rgba(24,19,10,.98), rgba(17,13,7,.99));
-        border: 1px solid rgba(212,175,55,.16);
+        border: 1px solid rgba(199, 167, 90,.16);
         color: #f5efe1;
         border-radius: 1.5rem;
     }
 
     .ecc-settings-modal-kicker {
-        color: #d4af37;
+        color: var(--ecc-primary);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .24em;
@@ -355,14 +355,14 @@
         min-height: 48px;
         border-radius: .9rem;
         background: rgba(255,255,255,.04);
-        border: 1px solid rgba(212,175,55,.12);
+        border: 1px solid rgba(199, 167, 90,.12);
         color: #f5efe1;
         box-shadow: none !important;
     }
 
     .ecc-settings-form-control:focus {
         background: rgba(255,255,255,.06);
-        border-color: rgba(212,175,55,.42);
+        border-color: rgba(199, 167, 90,.42);
         color: #fff;
     }
 
@@ -380,7 +380,7 @@
         padding: .95rem 1rem;
         border-radius: .9rem;
         background: rgba(255,255,255,.03);
-        border: 1px solid rgba(212,175,55,.08);
+        border: 1px solid rgba(199, 167, 90,.08);
     }
 
     .ecc-membership-detail-label {
@@ -393,18 +393,18 @@
         padding-top: .25rem;
     }
 
-    .ecc-btn-gold {
-        background: linear-gradient(180deg, #e0be52, #cfa52b);
-        border: 1px solid #d4af37;
+    .ecc-btn-primary {
+        background: linear-gradient(180deg, var(--ecc-primary), var(--ecc-gold-500));
+        border: 1px solid var(--ecc-primary);
         color: #16110a;
         font-weight: 800;
         border-radius: .95rem;
         padding: 0.75rem 1.5rem;
     }
 
-    .ecc-btn-gold:hover,
-    .ecc-btn-gold:focus {
-        background: linear-gradient(180deg, #e7c75c, #d7ad35);
+    .ecc-btn-primary:hover,
+    .ecc-btn-primary:focus {
+        background: var(--ecc-primary-gradient-dark);
         color: #16110a;
     }
 
@@ -421,7 +421,7 @@
     .ecc-btn-outline-light:focus {
         background: rgba(255,255,255,.04);
         color: #fff;
-        border-color: rgba(212,175,55,.24);
+        border-color: rgba(199, 167, 90,.24);
     }
 </style>
 @endpush

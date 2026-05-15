@@ -18,7 +18,7 @@
             max-height: 1000px;
             border-radius: 22px;
             overflow: hidden;
-            border: 1px solid rgba(212,175,55,.14);
+            border: 1px solid rgba(199, 167, 90,.14);
             background:
                 linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
                 rgba(23,19,13,.95);
@@ -109,7 +109,7 @@
             font-weight: 900;
             letter-spacing: .16em;
             text-transform: uppercase;
-            box-shadow: 0 10px 18px rgba(212,175,55,.18);
+            box-shadow: 0 10px 18px rgba(199, 167, 90,.18);
         }
 
         .shop-detail-stage-control {
@@ -182,7 +182,7 @@
             position: relative;
             border-radius: 14px;
             overflow: hidden;
-            border: 1px solid rgba(212,175,55,.14);
+            border: 1px solid rgba(199, 167, 90,.14);
             background: #120f08;
             aspect-ratio: 1 / 1;
             padding: 0;
@@ -209,7 +209,7 @@
 
         .shop-detail-thumb.active {
             border-color: var(--luxe-gold);
-            box-shadow: 0 0 0 2px rgba(212,175,55,.12);
+            box-shadow: 0 0 0 2px rgba(199, 167, 90,.12);
         }
 
         .shop-detail-thumb-placeholder {
@@ -232,7 +232,7 @@
         .shop-detail-side-card,
         .shop-detail-cert-card {
             border-radius: 22px;
-            border: 1px solid rgba(212,175,55,.14);
+            border: 1px solid rgba(199, 167, 90,.14);
             background:
                 linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
                 rgba(16,13,7,.78);
@@ -355,7 +355,7 @@
 
         .shop-detail-divider {
             height: 1px;
-            background: linear-gradient(90deg, rgba(212,175,55,.18), transparent);
+            background: linear-gradient(90deg, rgba(199, 167, 90,.18), transparent);
         }
 
         .shop-detail-field-label {
@@ -385,7 +385,7 @@
         .shop-detail-size-btn {
             min-height: 48px;
             border-radius: 12px;
-            border: 1px solid rgba(212,175,55,.14);
+            border: 1px solid rgba(199, 167, 90,.14);
             background: transparent;
             color: #fff;
             font-size: .9rem;
@@ -394,13 +394,13 @@
         }
 
         .shop-detail-size-btn:hover {
-            border-color: rgba(212,175,55,.4);
+            border-color: rgba(199, 167, 90,.4);
             color: var(--luxe-gold);
         }
 
         .shop-detail-size-btn.active {
             border: 2px solid var(--luxe-gold);
-            background: rgba(212,175,55,.06);
+            background: rgba(199, 167, 90,.06);
             color: #fff;
         }
 
@@ -421,7 +421,7 @@
             width: 34px;
             height: 34px;
             border-radius: 50%;
-            border: 1px solid rgba(212,175,55,.16);
+            border: 1px solid rgba(199, 167, 90,.16);
             padding: 3px;
             background: transparent;
             transition: .2s ease;
@@ -442,7 +442,7 @@
 
         .shop-detail-purchase-card {
             border-radius: 18px;
-            border: 1px solid rgba(212,175,55,.12);
+            border: 1px solid rgba(199, 167, 90,.12);
             background:
                 linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
                 rgba(45,42,33,.86);
@@ -462,7 +462,7 @@
             gap: .6rem;
             padding: .3rem;
             border-radius: 999px;
-            border: 1px solid rgba(212,175,55,.12);
+            border: 1px solid rgba(199, 167, 90,.12);
             background: rgba(35,31,23,.92);
         }
 
@@ -512,7 +512,7 @@
             height: 52px;
             flex: 0 0 auto;
             border-radius: 50%;
-            border: 1px solid rgba(212,175,55,.14);
+            border: 1px solid rgba(199, 167, 90,.14);
             background: transparent;
             color: #fff;
             display: inline-flex;
@@ -522,7 +522,7 @@
         }
 
         .shop-detail-icon-btn:hover {
-            border-color: rgba(212,175,55,.34);
+            border-color: rgba(199, 167, 90,.34);
             color: var(--luxe-gold);
         }
 
@@ -690,7 +690,7 @@
             min-height: 34px;
             padding: .4rem .9rem;
             border-radius: 999px;
-            border: 1px solid rgba(212,175,55,.18);
+            border: 1px solid rgba(199, 167, 90,.18);
             background: transparent;
             color: #fff;
             font-size: .68rem;
@@ -960,7 +960,7 @@
                         </div>
                     </div>
 
-                    <div class="shop-detail-divider mb-4" style="background: linear-gradient(90deg, rgba(212,175,55,.18), transparent); height: 1px;"></div>
+                    <div class="shop-detail-divider mb-4" style="background: linear-gradient(90deg, rgba(199, 167, 90,.18), transparent); height: 1px;"></div>
 
                     {{-- VARIATION GROUPS / SPECIFICATIONS --}}
                     @if(count($variationGroups ?? []))
@@ -1046,7 +1046,7 @@
                         </div>
                     @endif
 
-                    <div class="shop-detail-divider mb-4" style="background: linear-gradient(90deg, rgba(212,175,55,.18), transparent); height: 1px;"></div>
+                    <div class="shop-detail-divider mb-4" style="background: linear-gradient(90deg, rgba(199, 167, 90,.18), transparent); height: 1px;"></div>
 
                     <div class="shop-detail-story-title">
                         <span style="color: var(--luxe-gold); margin-right: .5rem;">|</span>The Craftsmanship

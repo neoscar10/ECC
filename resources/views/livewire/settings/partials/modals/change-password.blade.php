@@ -58,7 +58,7 @@
                 </button>
 
                 <button type="button" 
-                        class="btn ecc-btn-gold px-4"
+                        class="btn ecc-btn-primary px-4"
                         wire:click="changePassword"
                         wire:loading.attr="disabled">
                     <span wire:loading.remove wire:target="changePassword">Update Password</span>

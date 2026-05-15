@@ -76,26 +76,19 @@
                 <div class="navbar-brand-box horizontal-logo">
                     <a href="{{ route('admin.dashboard') }}" class="logo logo-dark">
                         <span class="logo-sm">
-                            <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
-
-                             <h5 class="text-dark pt-3">Executive Club Cricket</h3>
+                            <img src="{{ asset('ecc_logo_dark.png') }}" alt="ECC Logo" height="22">
                         </span>
-                        <span class="">
-                            <!-- <img src="{{ asset('velzon/assets') }}/images/logo-dark.png" alt="" height="17"> -->
-
-                             <h5 class="text-white pt-3">Executive Club Cricket</h3>
+                        <span class="logo-lg">
+                            <img src="{{ asset('ecc_logo_dark.png') }}" alt="ECC Logo" height="35">
                         </span>
                     </a>
 
                     <a href="{{ route('admin.dashboard') }}" class="logo logo-light">
                         <span class="logo-sm">
-                            <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
-                              <h5 class="text-white pt-3">Executive Club Cricket</h3>
+                            <img src="{{ asset('ecc_logo_dark.png') }}" alt="ECC Logo" height="22">
                         </span>
-                        <span class="">
-                            <!-- <img src="{{ asset('velzon/assets') }}/images/logo-light.png" alt="" height="17"> -->
-
-                             <h5 class="text-white pt-3">Executive Club Cricket</h3>
+                        <span class="logo-lg">
+                            <img src="{{ asset('ecc_logo_dark.png') }}" alt="ECC Logo" height="35">
                         </span>
                     </a>
                 </div>
@@ -187,23 +180,19 @@
                 <!-- Dark Logo-->
                 <a href="{{ route('admin.dashboard') }}" class="logo logo-dark">
                     <span class="logo-sm">
-                        <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
-                          <h3 class="text-dark pt-2">Executive Club Cricket</h3>
+                        <img src="{{ asset('ecc_logo_dark.png') }}" alt="ECC Logo" height="22">
                     </span>
-                    <span class="">
-                        <!-- <img src="{{ asset('velzon/assets') }}/images/logo-dark.png" alt="" height="17"> -->
-                         <h3 class="text-dark pt-2">Executive Club Cricket</h3>
+                    <span class="logo-lg">
+                        <img src="{{ asset('ecc_logo_dark.png') }}" alt="ECC Logo" height="40" style="margin-top: 15px;">
                     </span>
                 </a>
                 <!-- Light Logo-->
                 <a href="{{ route('admin.dashboard') }}" class="logo logo-light">
                     <span class="logo-sm">
-                        <!-- <img src="{{ asset('velzon/assets') }}/images/logo-sm.png" alt="" height="22"> -->
-                          <h5 class="text-white pt-2">Executive Club Cricket</h3>
+                        <img src="{{ asset('ecc_logo_dark.png') }}" alt="ECC Logo" height="22">
                     </span>
-                    <span class="">
-                        <!-- <img src="{{ asset('velzon/assets') }}/images/logo-light.png" alt="" height="17"> -->
-                          <h5 class="text-white pt-2">Executive Club Cricket</h3>
+                    <span class="logo-lg">
+                        <img src="{{ asset('ecc_logo_dark.png') }}" alt="ECC Logo" height="40" style="margin-top: 15px;">
                     </span>
                 </a>
                 <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">

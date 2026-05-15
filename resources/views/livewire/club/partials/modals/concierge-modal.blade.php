@@ -65,7 +65,7 @@
                 </button>
 
                 <button type="button"
-                        class="btn ecc-btn-gold px-5 py-2"
+                        class="btn ecc-btn-primary px-5 py-2"
                         wire:click="submitConciergeEnquiry"
                         wire:loading.attr="disabled">
                     <span wire:loading.remove wire:target="submitConciergeEnquiry">Submit Enquiry</span>

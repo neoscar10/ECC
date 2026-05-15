@@ -194,7 +194,7 @@
                                     </p>
                                     
                                     @if(!auth('web')->user()?->has_vault_access)
-                                        <button class="btn ecc-btn-gold mt-3 px-4 py-2" wire:click="$set('showAccessModal', true)">
+                                        <button class="btn ecc-btn-primary mt-3 px-4 py-2" wire:click="$set('showAccessModal', true)">
                                             UNLOCK ACCESS
                                         </button>
                                     @endif
@@ -323,7 +323,7 @@
                                                                     <h6 class="text-white mb-0 fs-14 fw-bold">{{ $addr->full_name }}</h6>
                                                                     <span class="badge bg-white-5 text-white-50 fw-semibold px-2 py-0 fs-10 border border-white-5">{{ $addr->label }}</span>
                                                                     @if($addr->is_default)
-                                                                        <span class="badge bg-gold-subtle text-gold fw-semibold px-2 py-0 fs-10">Default</span>
+                                                                        <span class="badge ecc-bg-primary-subtle ecc-text-primary fw-semibold px-2 py-0 fs-10">Default</span>
                                                                     @endif
                                                                 </div>
                                                                 <div class="text-white-50 fs-13 lh-sm">
@@ -398,7 +398,7 @@
 
                         <div class="d-flex gap-3 mt-4">
                             <button class="btn btn-link text-white-50 text-decoration-none fw-bold fs-13" wire:click="$set('showRemovalModal', false)">CANCEL</button>
-                            <button class="btn ecc-btn-gold px-4 ms-auto" wire:click="submitRemovalRequest">
+                            <button class="btn ecc-btn-primary px-4 ms-auto" wire:click="submitRemovalRequest">
                                 SUBMIT REQUEST
                             </button>
                         </div>
@@ -428,19 +428,19 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: radial-gradient(circle at 50% 0%, rgba(212,175,55,.08) 0%, transparent 70%);
+        background: radial-gradient(circle at 50% 0%, rgba(199, 167, 90,.08) 0%, transparent 70%);
         pointer-events: none;
     }
 
     .ecc-vault-header-line {
         width: 48px;
         height: 1px;
-        background: #d4af37;
+        background: var(--ecc-primary);
         display: inline-block;
     }
 
     .ecc-vault-kicker {
-        color: #d4af37;
+        color: var(--ecc-primary);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .24em;
@@ -469,7 +469,7 @@
     .ecc-vault-artifact-card,
     .ecc-vault-appraisal-card {
         background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
-        border: 1px solid rgba(212,175,55,.14);
+        border: 1px solid rgba(199, 167, 90,.14);
         border-radius: 1.25rem;
         box-shadow: 0 12px 30px rgba(0,0,0,.14);
         color: #f5efe1;
@@ -489,7 +489,7 @@
     }
 
     .ecc-vault-standing-tier {
-        color: #d4af37;
+        color: var(--ecc-primary);
         font-size: 2rem;
         font-weight: 900;
         letter-spacing: -.03em;
@@ -501,9 +501,9 @@
         align-items: center;
         padding: .55rem 1rem;
         border-radius: 999px;
-        background: rgba(212,175,55,.10);
-        border: 1px solid rgba(212,175,55,.24);
-        color: #d4af37;
+        background: rgba(199, 167, 90,.10);
+        border: 1px solid rgba(199, 167, 90,.24);
+        color: var(--ecc-primary);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .14em;
@@ -523,14 +523,14 @@
     }
 
     .ecc-vault-sidebar-title {
-        color: #d4af37;
+        color: var(--ecc-primary);
         font-size: .85rem;
         font-weight: 900;
         letter-spacing: .18em;
         text-transform: uppercase;
         margin-bottom: 1.25rem;
         padding-bottom: .75rem;
-        border-bottom: 1px solid rgba(212,175,55,.08);
+        border-bottom: 1px solid rgba(199, 167, 90,.08);
     }
 
     .ecc-vault-sidebar-icon {
@@ -542,8 +542,8 @@
         align-items: center;
         justify-content: center;
         background: rgba(255,255,255,.04);
-        border: 1px solid rgba(212,175,55,.12);
-        color: #d4af37;
+        border: 1px solid rgba(199, 167, 90,.12);
+        color: var(--ecc-primary);
     }
 
     .ecc-vault-sidebar-item-title {
@@ -561,12 +561,12 @@
 
     .ecc-vault-value-card {
         padding: 1.5rem;
-        border-left: 4px solid #d4af37;
+        border-left: 4px solid var(--ecc-primary);
         border-radius: 1.1rem;
         background: rgba(255,255,255,.03);
-        border-top: 1px solid rgba(212,175,55,.08);
-        border-right: 1px solid rgba(212,175,55,.08);
-        border-bottom: 1px solid rgba(212,175,55,.08);
+        border-top: 1px solid rgba(199, 167, 90,.08);
+        border-right: 1px solid rgba(199, 167, 90,.08);
+        border-bottom: 1px solid rgba(199, 167, 90,.08);
     }
 
     .ecc-vault-value-label {
@@ -611,16 +611,16 @@
         width: 40px;
         height: 40px;
         border-radius: .85rem;
-        border: 1px solid rgba(212,175,55,.12);
+        border: 1px solid rgba(199, 167, 90,.12);
         background: rgba(255,255,255,.03);
         color: rgba(245,239,225,.56);
     }
 
     .ecc-vault-toggle-btn.is-active,
     .ecc-vault-toggle-btn:hover {
-        color: #d4af37;
-        border-color: rgba(212,175,55,.24);
-        background: rgba(212,175,55,.06);
+        color: var(--ecc-primary);
+        border-color: rgba(199, 167, 90,.24);
+        background: rgba(199, 167, 90,.06);
     }
 
     .ecc-vault-artifact-card,
@@ -656,8 +656,8 @@
         padding: .35rem .7rem;
         border-radius: .6rem;
         background: rgba(0,0,0,.62);
-        border: 1px solid rgba(212,175,55,.28);
-        color: #d4af37;
+        border: 1px solid rgba(199, 167, 90,.28);
+        color: var(--ecc-primary);
         font-size: .62rem;
         font-weight: 900;
         letter-spacing: .14em;
@@ -689,7 +689,7 @@
         display: inline-flex;
         align-items: center;
         gap: .45rem;
-        color: #d4af37;
+        color: var(--ecc-primary);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .16em;
@@ -723,8 +723,8 @@
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: rgba(212,175,55,.08);
-        color: #d4af37;
+        background: rgba(199, 167, 90,.08);
+        color: var(--ecc-primary);
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -748,9 +748,9 @@
         margin-bottom: 1.5rem;
     }
 
-    .ecc-btn-gold {
-        background: linear-gradient(180deg, #e0be52, #cfa52b);
-        border: 1px solid #d4af37;
+    .ecc-btn-primary {
+        background: linear-gradient(180deg, var(--ecc-primary), var(--ecc-gold-500));
+        border: 1px solid var(--ecc-primary);
         color: #16110a !important;
         font-weight: 800;
         border-radius: .95rem;
@@ -761,8 +761,8 @@
         transition: filter .2s ease;
     }
 
-    .ecc-btn-gold:hover,
-    .ecc-btn-gold:focus {
+    .ecc-btn-primary:hover,
+    .ecc-btn-primary:focus {
         filter: brightness(1.1);
         color: #16110a;
     }
@@ -820,13 +820,13 @@
     .ecc-vault-artifact-price-mini {
         font-size: .85rem;
         font-weight: 900;
-        color: #d4af37;
+        color: var(--ecc-primary);
         letter-spacing: .02em;
     }
 
     .ecc-vault-modal-content {
         background: #17130b !important;
-        border: 1px solid rgba(212,175,55,0.2) !important;
+        border: 1px solid rgba(199, 167, 90,0.2) !important;
         border-radius: 1.5rem !important;
         box-shadow: 0 25px 80px rgba(0,0,0,0.8) !important;
     }
@@ -841,14 +841,14 @@
     .ecc-vault-modal-total {
         font-size: 1.75rem;
         font-weight: 900;
-        color: #d4af37;
+        color: var(--ecc-primary);
         letter-spacing: -0.02em;
     }
 
     .ecc-vault-btn-outline {
         background: transparent;
-        border: 1px solid rgba(212,175,55,0.4);
-        color: #d4af37;
+        border: 1px solid rgba(199, 167, 90,0.4);
+        color: var(--ecc-primary);
         font-weight: 800;
         padding: 0.85rem 2rem;
         border-radius: 1rem;
@@ -857,9 +857,9 @@
     }
 
     .ecc-vault-btn-outline:hover {
-        background: rgba(212,175,55,0.1);
-        border-color: #d4af37;
-        color: #d4af37;
+        background: rgba(199, 167, 90,0.1);
+        border-color: var(--ecc-primary);
+        color: var(--ecc-primary);
     }
 
     .bg-white-5 {
@@ -876,36 +876,36 @@
         padding: 0.75rem 1rem !important;
     }
     .ecc-vault-input:focus {
-        border-color: #d4af37 !important;
-        box-shadow: 0 0 0 0.25rem rgba(212,175,55,0.1) !important;
+        border-color: var(--ecc-primary) !important;
+        box-shadow: 0 0 0 0.25rem rgba(199, 167, 90,0.1) !important;
     }
 
     .ecc-vault-valuation-line {
-        background: linear-gradient(90deg, rgba(212,175,55,0.05), transparent);
+        background: linear-gradient(90deg, rgba(199, 167, 90,0.05), transparent);
     }
     
     .c-pointer { cursor: pointer; }
     .transition-all { transition: all 0.2s ease; }
     
     .ecc-address-card input:checked + .ecc-address-card-inner {
-        border-color: rgba(212,175,55,0.6) !important;
-        background: rgba(212,175,55,0.05) !important;
+        border-color: rgba(199, 167, 90,0.6) !important;
+        background: rgba(199, 167, 90,0.05) !important;
     }
     .custom-radio-dot {
         width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);
         position: relative; transition: all 0.2s ease;
     }
-    .custom-radio-dot.is-checked { border-color: #d4af37; }
+    .custom-radio-dot.is-checked { border-color: var(--ecc-primary); }
     .custom-radio-dot.is-checked::after {
-        content: ''; position: absolute; inset: 2px; border-radius: 50%; background: #d4af37;
+        content: ''; position: absolute; inset: 2px; border-radius: 50%; background: var(--ecc-primary);
     }
-    .bg-gold-subtle { background: rgba(212,175,55,0.1) !important; }
-    .text-gold { color: #d4af37 !important; }
+    .ecc-bg-primary-subtle { background: rgba(199, 167, 90,0.1) !important; }
+    .ecc-text-primary { color: var(--ecc-primary) !important; }
     .custom-checkbox-white .form-check-input {
         background-color: transparent; border-color: rgba(255,255,255,0.2);
     }
     .custom-checkbox-white .form-check-input:checked {
-        background-color: #d4af37; border-color: #d4af37;
+        background-color: var(--ecc-primary); border-color: var(--ecc-primary);
     }
 </style>
 @endpush

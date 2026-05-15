@@ -37,17 +37,17 @@
                             default => 'lock_person'
                         };
                     @endphp
-                    <span class="material-symbols-outlined fs-1" style="color: var(--ecc-gold, #D4AF37);">{{ $iconName }}</span>
+                    <span class="material-symbols-outlined fs-1" style="color: var(--ecc-gold, var(--ecc-primary));">{{ $iconName }}</span>
                 </div>
 
                 {{-- Message --}}
-                <h5 class="fw-bold mb-2" style="color: var(--ecc-gold, #D4AF37);">{{ $message['title'] ?? 'Access Restricted' }}</h5>
+                <h5 class="fw-bold mb-2" style="color: var(--ecc-gold, var(--ecc-primary));">{{ $message['title'] ?? 'Access Restricted' }}</h5>
                 <p class="small text-white mb-4" style="opacity: 0.8;">{{ $message['body'] ?? 'This content is exclusive to specific membership tiers.' }}</p>
 
                 {{-- Action --}}
                 @foreach($actions as $action)
                     @if($action['type'] === 'upgrade_membership' || $action['type'] === 'subscribe')
-                        <a href="{{ $action['deeplink'] ?? '/membership/tiers' }}" class="btn w-100 fw-bold rounded-pill py-2" style="background: linear-gradient(135deg, #D4AF37 0%, #B8961E 100%); color: #000; border: none; box-shadow: 0 4px 15px rgba(212,175,55,0.2);">
+                        <a href="{{ $action['deeplink'] ?? '/membership/tiers' }}" class="btn w-100 fw-bold rounded-pill py-2" style="background: linear-gradient(135deg, var(--ecc-primary) 0%, #B8961E 100%); color: #000; border: none; box-shadow: 0 4px 15px rgba(199, 167, 90,0.2);">
                             {{ $action['label'] ?? 'Upgrade Now' }}
                         </a>
                     @endif
@@ -73,7 +73,7 @@
         min-height: 200px;
     }
     .cms-gate-card {
-        border: 1px solid rgba(212,175,55,0.2) !important;
+        border: 1px solid rgba(199, 167, 90,0.2) !important;
         box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
     }
 </style>

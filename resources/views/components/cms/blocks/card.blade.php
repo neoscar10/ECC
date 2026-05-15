@@ -10,7 +10,7 @@
     $words = explode(' ', $title);
     if(count($words) > 1) {
         $last = array_pop($words);
-        $formattedTitle = implode(' ', $words) . ' <span class="ecc-text-italic ecc-text-gold">' . $last . '</span>';
+        $formattedTitle = implode(' ', $words) . ' <span class="ecc-text-italic ecc-text-primary">' . $last . '</span>';
     } else {
         $formattedTitle = $title;
     }
@@ -34,7 +34,7 @@
                     <div class="cms-card-content-panel p-4 p-lg-5 w-100">
                         @if(!empty($content['badge_text']))
                             <div class="ecc-hero-badge mb-3">
-                                <i class="mdi mdi-star-four-points text-gold"></i>
+                                <i class="mdi mdi-star-four-points ecc-text-primary"></i>
                                 <span>{{ $content['badge_text'] }}</span>
                             </div>
                         @endif
@@ -49,7 +49,7 @@
 
                         <div class="d-flex flex-wrap gap-3 mt-2">
                             @if($hasDetail && ($content['cta_text'] ?? null))
-                                <a href="{{ $content['web_detail_url'] ?? url('/content/blocks/' . $id) }}" class="btn ecc-btn-gold px-4 px-lg-5 py-3">
+                                <a href="{{ $content['web_detail_url'] ?? url('/content/blocks/' . $id) }}" class="btn ecc-btn-primary px-4 px-lg-5 py-3">
                                     {{ $content['cta_text'] }}
                                     <i class="mdi mdi-arrow-right ms-2"></i>
                                 </a>
@@ -82,10 +82,10 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem 1rem;
-        background: rgba(212, 175, 55, 0.1);
-        border: 1px solid rgba(212, 175, 55, 0.2);
+        background: rgba(199, 167, 90, 0.1);
+        border: 1px solid rgba(199, 167, 90, 0.2);
         border-radius: 50px;
-        color: #D4AF37;
+        color: var(--ecc-primary);
         font-size: 0.75rem;
         font-weight: 700;
         letter-spacing: 0.05em;
@@ -99,20 +99,20 @@
     }
 
     .ecc-text-italic { font-style: italic; }
-    .ecc-text-gold { color: #D4AF37; }
+    .ecc-text-primary { color: var(--ecc-primary); }
 
-    .ecc-btn-gold {
-        background: linear-gradient(135deg, #D4AF37 0%, #B8961E 100%);
+    .ecc-btn-primary {
+        background: linear-gradient(135deg, var(--ecc-primary) 0%, #B8961E 100%);
         color: #000;
         border: none;
-        box-shadow: 0 4px 20px rgba(212,175,55,0.25);
+        box-shadow: 0 4px 20px rgba(199, 167, 90,0.25);
         transition: all 0.3s ease;
         font-weight: 600;
     }
-    .ecc-btn-gold:hover {
-        background: linear-gradient(135deg, #E5C05B 0%, #D4AF37 100%);
+    .ecc-btn-primary:hover {
+        background: linear-gradient(135deg, #E5C05B 0%, var(--ecc-primary) 100%);
         transform: scale(1.02);
-        box-shadow: 0 6px 25px rgba(212,175,55,0.35);
+        box-shadow: 0 6px 25px rgba(199, 167, 90,0.35);
         color: #000;
     }
 

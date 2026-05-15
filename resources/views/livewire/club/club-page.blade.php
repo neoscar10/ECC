@@ -68,14 +68,14 @@
     .ecc-club-panel,
     .ecc-club-quote-section {
         background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
-        border: 1px solid rgba(212,175,55,.12);
+        border: 1px solid rgba(199, 167, 90,.12);
         border-radius: 1.25rem;
         box-shadow: 0 12px 30px rgba(0,0,0,.14);
     }
 
     .ecc-club-hero-card {
         padding: 1.75rem;
-        background-image: linear-gradient(90deg, rgba(212,175,55,.10), rgba(212,175,55,.02));
+        background-image: linear-gradient(90deg, rgba(199, 167, 90,.10), rgba(199, 167, 90,.02));
     }
 
     .ecc-club-avatar-wrap {
@@ -88,10 +88,10 @@
         height: 132px;
         border-radius: 50%;
         overflow: hidden;
-        border: 4px solid #d4af37;
+        border: 4px solid var(--ecc-primary);
         padding: 4px;
-        background: rgba(212,175,55,.06);
-        box-shadow: 0 0 24px rgba(212,175,55,.12);
+        background: rgba(199, 167, 90,.06);
+        box-shadow: 0 0 24px rgba(199, 167, 90,.12);
     }
 
     .ecc-club-avatar img {
@@ -106,7 +106,7 @@
         align-items: center;
         padding: .28rem .7rem;
         border-radius: 999px;
-        background: #d4af37;
+        background: var(--ecc-primary);
         color: #151109;
         font-size: .62rem;
         font-weight: 900;
@@ -130,7 +130,7 @@
         display: inline-flex;
         align-items: center;
         gap: .4rem;
-        color: #d4af37;
+        color: var(--ecc-primary);
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: .06em;
@@ -147,7 +147,7 @@
 
     .ecc-inline-link,
     .ecc-footer-link {
-        color: #d4af37;
+        color: var(--ecc-primary);
         text-decoration: none;
         font-weight: 700;
     }
@@ -164,7 +164,7 @@
     }
 
     .ecc-privilege-card:hover {
-        border-color: rgba(212,175,55,.32);
+        border-color: rgba(199, 167, 90,.32);
         transform: translateY(-1px);
     }
 
@@ -175,8 +175,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(212,175,55,.12);
-        color: #d4af37;
+        background: rgba(199, 167, 90,.12);
+        color: var(--ecc-primary);
         font-size: 1.5rem;
         margin-bottom: 1rem;
     }
@@ -206,8 +206,8 @@
 
     .ecc-table-head {
         padding: .85rem 1.5rem;
-        border-top: 1px solid rgba(212,175,55,.08);
-        border-bottom: 1px solid rgba(212,175,55,.08);
+        border-top: 1px solid rgba(199, 167, 90,.08);
+        border-bottom: 1px solid rgba(199, 167, 90,.08);
         color: rgba(245,239,225,.45);
         font-size: .72rem;
         font-weight: 800;
@@ -226,7 +226,7 @@
         align-items: center;
         gap: 1rem;
         padding: 1rem 1.5rem;
-        border-bottom: 1px solid rgba(212,175,55,.08);
+        border-bottom: 1px solid rgba(199, 167, 90,.08);
     }
 
     .ecc-club-list-row:last-child {
@@ -241,7 +241,7 @@
         align-items: center;
         justify-content: center;
         background: rgba(255,255,255,.05);
-        color: rgba(212,175,55,.70);
+        color: rgba(199, 167, 90,.70);
         flex-shrink: 0;
     }
 
@@ -296,9 +296,9 @@
     }
 
     .ecc-status-pill.status-default {
-        background: rgba(212,175,55,.10);
-        color: #d4af37;
-        border-color: rgba(212,175,55,.16);
+        background: rgba(199, 167, 90,.10);
+        color: var(--ecc-primary);
+        border-color: rgba(199, 167, 90,.16);
     }
 
     .ecc-dossier-thumb {
@@ -307,7 +307,7 @@
         min-width: 48px;
         border-radius: .75rem;
         overflow: hidden;
-        border: 1px solid rgba(212,175,55,.18);
+        border: 1px solid rgba(199, 167, 90,.18);
         background: rgba(255,255,255,.05);
     }
 
@@ -319,7 +319,7 @@
 
     .ecc-panel-footer {
         padding: 1rem 1.5rem;
-        border-top: 1px solid rgba(212,175,55,.08);
+        border-top: 1px solid rgba(199, 167, 90,.08);
         text-align: center;
     }
 
@@ -333,11 +333,11 @@
 
     .ecc-club-quote-section {
         padding: 2rem 1.5rem;
-        border-top: 1px solid rgba(212,175,55,.08);
+        border-top: 1px solid rgba(199, 167, 90,.08);
     }
 
     .ecc-kicker {
-        color: #d4af37;
+        color: var(--ecc-primary);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .32em;
@@ -371,34 +371,34 @@
     .ecc-club-stat-divider {
         width: 1px;
         height: 40px;
-        background: rgba(212,175,55,.15);
+        background: rgba(199, 167, 90,.15);
     }
 
-    .ecc-btn-gold {
-        background: linear-gradient(180deg, #e0be52, #cfa52b);
-        border: 1px solid #d4af37;
+    .ecc-btn-primary {
+        background: linear-gradient(180deg, var(--ecc-primary), var(--ecc-gold-500));
+        border: 1px solid var(--ecc-primary);
         color: #16110a;
         font-weight: 800;
         border-radius: .95rem;
     }
 
-    .ecc-btn-gold:hover,
-    .ecc-btn-gold:focus {
-        background: linear-gradient(180deg, #e7c75c, #d7ad35);
+    .ecc-btn-primary:hover,
+    .ecc-btn-primary:focus {
+        background: var(--ecc-primary-gradient-dark);
         color: #16110a;
     }
 
     /* Concierge Modal Styles */
     .ecc-concierge-modal {
         background: linear-gradient(180deg, rgba(24,19,10,.98), rgba(17,13,7,.99));
-        border: 1px solid rgba(212,175,55,.16);
+        border: 1px solid rgba(199, 167, 90,.16);
         border-radius: 1.25rem;
         color: #f5efe1;
         box-shadow: 0 24px 60px rgba(0,0,0,.32);
     }
 
     .ecc-modal-kicker {
-        color: #d4af37;
+        color: var(--ecc-primary);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .26em;
@@ -428,7 +428,7 @@
 
     .ecc-form-control {
         background: rgba(255,255,255,.04) !important;
-        border: 1px solid rgba(212,175,55,.15) !important;
+        border: 1px solid rgba(199, 167, 90,.15) !important;
         color: #f5efe1 !important;
         border-radius: .9rem !important;
         min-height: 48px;
@@ -438,7 +438,7 @@
 
     .ecc-form-control:focus {
         background: rgba(255,255,255,.06) !important;
-        border-color: rgba(212,175,55,.45) !important;
+        border-color: rgba(199, 167, 90,.45) !important;
         color: #fff !important;
     }
 
@@ -467,7 +467,7 @@
     .ecc-btn-outline-light:hover {
         background: rgba(255,255,255,.05);
         color: #fff;
-        border-color: rgba(212,175,55,.25);
+        border-color: rgba(199, 167, 90,.25);
     }
 
     @media (max-width: 767.98px) {

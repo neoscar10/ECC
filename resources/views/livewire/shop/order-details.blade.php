@@ -9,7 +9,7 @@
             display: inline-flex;
             align-items: center;
             gap: .5rem;
-            color: #d4af37;
+            color: var(--ecc-primary);
             font-size: .78rem;
             font-weight: 800;
             letter-spacing: .14em;
@@ -18,7 +18,7 @@
         }
 
         .ecc-return-link:hover {
-            color: #e6c45b;
+            color: var(--ecc-primary);
         }
 
         .ecc-order-title {
@@ -57,8 +57,8 @@
 
         .ecc-status-pill.status-processing {
             color: #f0c859;
-            background: rgba(212,175,55,.10);
-            border-color: rgba(212,175,55,.18);
+            background: rgba(199, 167, 90,.10);
+            border-color: rgba(199, 167, 90,.18);
         }
 
         .ecc-status-pill.status-shipped {
@@ -74,16 +74,16 @@
         }
 
         .ecc-status-pill.status-default {
-            color: #d4af37;
-            background: rgba(212,175,55,.08);
-            border-color: rgba(212,175,55,.16);
+            color: var(--ecc-primary);
+            background: rgba(199, 167, 90,.08);
+            border-color: rgba(199, 167, 90,.16);
         }
 
         .ecc-panel,
         .ecc-summary-card,
         .ecc-support-card {
             background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
-            border: 1px solid rgba(212,175,55,.12);
+            border: 1px solid rgba(199, 167, 90,.12);
             border-radius: 1.2rem;
             box-shadow: 0 12px 32px rgba(0,0,0,.16);
             color: #f5efe1;
@@ -136,7 +136,7 @@
         }
 
         .ecc-item-label {
-            color: #d4af37;
+            color: var(--ecc-primary);
             font-size: .62rem;
             font-weight: 800;
             letter-spacing: .22em;
@@ -157,7 +157,7 @@
         }
 
         .ecc-item-price {
-            color: #d4af37;
+            color: var(--ecc-primary);
             font-size: 1.25rem;
             font-weight: 800;
             white-space: nowrap;
@@ -170,7 +170,7 @@
         }
 
         .ecc-section-icon {
-            color: #d4af37;
+            color: var(--ecc-primary);
             font-size: 1.2rem;
         }
 
@@ -247,7 +247,7 @@
         }
 
         .ecc-total-amount {
-            color: #d4af37;
+            color: var(--ecc-primary);
             font-size: clamp(1.8rem, 2vw, 2.4rem);
             font-weight: 900;
             line-height: 1;
@@ -262,9 +262,9 @@
             margin-top: .4rem;
         }
 
-        .ecc-btn-gold {
-            background: linear-gradient(180deg, #e0be52, #cfa52b);
-            border: 1px solid #d4af37;
+        .ecc-btn-primary {
+            background: linear-gradient(180deg, var(--ecc-primary), var(--ecc-gold-500));
+            border: 1px solid var(--ecc-primary);
             color: #16110a;
             font-weight: 800;
             border-radius: .95rem;
@@ -276,9 +276,9 @@
             justify-content: center;
         }
 
-        .ecc-btn-gold:hover,
-        .ecc-btn-gold:focus {
-            background: linear-gradient(180deg, #e7c75c, #d7ad35);
+        .ecc-btn-primary:hover,
+        .ecc-btn-primary:focus {
+            background: var(--ecc-primary-gradient-dark);
             color: #16110a;
         }
 
@@ -300,7 +300,7 @@
         .ecc-btn-outline-light:focus {
             background: rgba(255,255,255,.04);
             color: #fff;
-            border-color: rgba(212,175,55,.28);
+            border-color: rgba(199, 167, 90,.28);
         }
 
         .ecc-summary-note {
@@ -325,13 +325,13 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: rgba(212,175,55,.10);
-            color: #d4af37;
+            background: rgba(199, 167, 90,.10);
+            color: var(--ecc-primary);
             flex-shrink: 0;
         }
 
         .ecc-support-link {
-            color: #d4af37;
+            color: var(--ecc-primary);
             font-size: .8rem;
             font-weight: 800;
             text-decoration: underline;
@@ -403,12 +403,12 @@
 
                         @if($trackingUrl)
                             <a href="{{ $trackingUrl }}"
-                               class="btn ecc-btn-gold px-4 py-3">
+                               class="btn ecc-btn-primary px-4 py-3">
                                 TRACK SHIPMENT
                             </a>
                         @elseif($canTrackShipment)
                             <button type="button"
-                                    class="btn ecc-btn-gold px-4 py-3">
+                                    class="btn ecc-btn-primary px-4 py-3">
                                 TRACK SHIPMENT
                             </button>
                         @endif
@@ -641,7 +641,7 @@
                                 @if($discountAmount > 0)
                                     <div class="d-flex justify-content-between gap-3">
                                         <span class="ecc-muted fw-bold small text-uppercase">Discount Applied</span>
-                                        <strong class="ecc-text-gold">-{{ $formattedDiscount }}</strong>
+                                        <strong class="ecc-text-primary">-{{ $formattedDiscount }}</strong>
                                     </div>
                                 @endif
                             </div>

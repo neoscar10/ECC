@@ -14,7 +14,7 @@
                 transform: translate(-50%, -50%);
                 width: 600px;
                 height: 600px;
-                background: rgba(212,175,55,.05);
+                background: rgba(199, 167, 90,.05);
                 border-radius: 9999px;
                 filter: blur(120px);
                 animation: eccSubtlePulse 4s ease-in-out infinite;
@@ -49,7 +49,7 @@
                             font-size: 40px;
                             color: var(--ecc-primary);
                             opacity: .85;
-                            filter: drop-shadow(0 0 8px rgba(212,175,55,.40));
+                            filter: drop-shadow(0 0 8px rgba(199, 167, 90,.40));
                           ">diamond</span>
                 </div>
 
@@ -71,7 +71,7 @@
                             transform: translate(.20em, 18px);
                             font-size: clamp(56px, 10vw, 92px);
                             letter-spacing: .20em;
-                            color: rgba(212,175,55,.10);
+                            color: rgba(199, 167, 90,.10);
                             filter: blur(2px);
                             line-height: 1;
                             pointer-events: none;
@@ -82,13 +82,13 @@
 
                 {{-- Divider line --}}
                 <div class="mx-auto my-4"
-                     style="height:1px; width:64px; background: linear-gradient(90deg, transparent, rgba(212,175,55,.50), transparent);"></div>
+                     style="height:1px; width:64px; background: linear-gradient(90deg, transparent, rgba(199, 167, 90,.50), transparent);"></div>
 
                 {{-- Subtitles --}}
                 <div class="d-flex flex-column align-items-center gap-1">
                     <div class="text-uppercase fw-semibold"
                          style="
-                            color: rgba(212,175,55,.90);
+                            color: rgba(199, 167, 90,.90);
                             font-size: clamp(11px, 1.6vw, 14px);
                             letter-spacing: .40em;
                          ">
@@ -116,7 +116,7 @@
                             background: var(--ecc-primary);
                             width: 0%;
                             animation: eccLoadingBar {{ $durationSec }}s ease-in-out forwards;
-                            box-shadow: 0 0 10px rgba(212,175,55,.80);
+                            box-shadow: 0 0 10px rgba(199, 167, 90,.80);
                          "></div>
                 </div>
 

@@ -59,7 +59,7 @@
                 </button>
 
                 <button type="button" 
-                        class="btn ecc-btn-gold px-4"
+                        class="btn ecc-btn-primary px-4"
                         wire:click="saveProfile"
                         wire:loading.attr="disabled">
                     <span wire:loading.remove wire:target="saveProfile">Save Changes</span>

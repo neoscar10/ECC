@@ -11,7 +11,7 @@
 
       <div class="flex-grow-1 text-center">
         <div class="d-inline-flex align-items-center gap-2 opacity-90">
-          <span class="material-symbols-outlined text-ecc">sports_cricket</span>
+          <img src="{{ asset('ecc_logo_dark.png') }}" style="width: 64px; height: 64px; object-fit: contain;" alt="ECC Logo">
           <div class="ecc-topbar-title">THE APPLICATION</div>
         </div>
       </div>
@@ -136,8 +136,8 @@
 @push('styles')
 <style>
   :root{
-    --ecc-primary:#D4AF37;
-    --ecc-primary-dark:#AA8C2C;
+    --ecc-primary:var(--ecc-primary);
+    --ecc-primary-dark:var(--ecc-gold-600);
     --ecc-bg:#020202;
     --ecc-surface:#181818;
     --ecc-border:#333333;
@@ -163,7 +163,7 @@
     top:0; left:50%;
     transform:translateX(-50%);
     width:520px; height:320px;
-    background: rgba(212,175,55,.10);
+    background: rgba(199, 167, 90,.10);
     filter: blur(110px);
     border-radius:9999px;
     pointer-events:none;
@@ -177,11 +177,11 @@
   .ecc-icon-btn{
     width:40px; height:40px; border-radius:9999px;
     border:0; background: transparent;
-    color: rgba(212,175,55,.85);
+    color: rgba(199, 167, 90,.85);
     display:flex; align-items:center; justify-content:center;
   }
   .ecc-icon-btn:hover{ background: rgba(255,255,255,.05); }
-  .text-ecc{ color: rgba(212,175,55,.95); }
+  .text-ecc{ color: rgba(199, 167, 90,.95); }
   .ecc-topbar-title{
     font-family: "Noto Sans", system-ui, sans-serif;
     color: rgba(255,255,255,.90);
@@ -191,7 +191,7 @@
   }
 
   .ecc-step-kicker{
-    color: rgba(212,175,55,.95);
+    color: rgba(199, 167, 90,.95);
     font-family: "Noto Sans", system-ui, sans-serif;
     font-size: 11px;
     font-weight: 800;
@@ -205,12 +205,12 @@
   }
   .ecc-dot--done{
     width: 18px;
-    background: rgba(212,175,55,.55);
+    background: rgba(199, 167, 90,.55);
   }
   .ecc-dot--active{
     width: 34px;
     background: var(--ecc-primary);
-    box-shadow: 0 0 10px rgba(212,175,55,.30);
+    box-shadow: 0 0 10px rgba(199, 167, 90,.30);
   }
 
   .ecc-h1-lite{
@@ -230,7 +230,7 @@
 
   .ecc-section-title{
     font-family: "Noto Sans", system-ui, sans-serif;
-    color: rgba(212,175,55,.90);
+    color: rgba(199, 167, 90,.90);
     font-size: 12px;
     font-weight: 700;
     letter-spacing: .22em;
@@ -294,8 +294,8 @@
   }
   .ecc-card__check .material-symbols-outlined{ font-size: 18px; }
   .ecc-card.is-selected{
-    border-color: rgba(212,175,55,.95);
-    box-shadow: 0 0 0 2px rgba(212,175,55,.55), 0 10px 30px rgba(212,175,55,.10);
+    border-color: rgba(199, 167, 90,.95);
+    box-shadow: 0 0 0 2px rgba(199, 167, 90,.55), 0 10px 30px rgba(199, 167, 90,.10);
   }
   .ecc-card.is-selected .ecc-card__check{
     background: var(--ecc-primary);
@@ -323,13 +323,13 @@
     transition: all .18s ease;
   }
   .ecc-chip:hover{
-    border-color: rgba(212,175,55,.40);
+    border-color: rgba(199, 167, 90,.40);
     color: rgba(255,255,255,.90);
   }
   .ecc-chip.is-on{
     background: var(--ecc-primary);
     color: #221f10;
-    box-shadow: 0 0 15px rgba(212,175,55,.22);
+    box-shadow: 0 0 15px rgba(199, 167, 90,.22);
     border-color: transparent;
     font-weight: 700;
   }
@@ -344,7 +344,7 @@
     font-weight: 700 !important;
     padding: 16px !important;
     border-radius: 12px !important;
-    box-shadow: 0 0 20px rgba(212,175,55,.25) !important;
+    box-shadow: 0 0 20px rgba(199, 167, 90,.25) !important;
     transition: all .2s ease;
     font-family: "Newsreader", serif;
   }

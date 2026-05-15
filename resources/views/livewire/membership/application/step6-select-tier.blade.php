@@ -11,7 +11,7 @@
 
       <div class="flex-grow-1 text-center">
         <div class="d-inline-flex align-items-center gap-2 opacity-90">
-          <span class="material-symbols-outlined text-ecc">sports_cricket</span>
+          <img src="{{ asset('ecc_logo_dark.png') }}" style="width: 64px; height: 64px; object-fit: contain;" alt="ECC Logo">
           <div class="ecc-topbar-title">THE APPLICATION</div>
         </div>
       </div>
@@ -149,7 +149,7 @@
 @push('styles')
 <style>
   :root{
-    --ecc-primary:#D4AF37; --ecc-primary-dark:#AA8C2C;
+    --ecc-primary:var(--ecc-primary); --ecc-primary-dark:var(--ecc-gold-600);
     --ecc-bg:#020202; --ecc-surface:#181818; --ecc-border:#333333;
   }
   .ecc-bg{ background:var(--ecc-bg); color:#fff; font-family:"Newsreader", serif; }
@@ -167,33 +167,33 @@
     opacity:.55; pointer-events:none;
   }
   .ecc-bg-grad{ position:absolute; inset:0; background:linear-gradient(to bottom, transparent, rgba(2,2,2,.80), rgba(2,2,2,1)); pointer-events:none;}
-  .ecc-bg-glow{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:520px; height:320px; background:rgba(212,175,55,.10); filter:blur(110px); border-radius:9999px; pointer-events:none;}
+  .ecc-bg-glow{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:520px; height:320px; background:rgba(199, 167, 90,.10); filter:blur(110px); border-radius:9999px; pointer-events:none;}
 
   .ecc-topbar{ background:rgba(2,2,2,.80); backdrop-filter:blur(10px); border-bottom:1px solid rgba(255,255,255,.05);}
-  .ecc-icon-btn{ width:40px; height:40px; border-radius:9999px; border:0; background:transparent; color:rgba(212,175,55,.85); display:flex; align-items:center; justify-content:center;}
+  .ecc-icon-btn{ width:40px; height:40px; border-radius:9999px; border:0; background:transparent; color:rgba(199, 167, 90,.85); display:flex; align-items:center; justify-content:center;}
   .ecc-icon-btn:hover{ background:rgba(255,255,255,.05); }
-  .text-ecc{ color:rgba(212,175,55,.95); }
+  .text-ecc{ color:rgba(199, 167, 90,.95); }
   .ecc-topbar-title{ font-family:"Noto Sans",system-ui,sans-serif; color:rgba(255,255,255,.90); font-size:12px; letter-spacing:.22em; font-weight:700;}
 
-  .ecc-step-kicker{ color:rgba(212,175,55,.95); font-family:"Noto Sans",system-ui,sans-serif; font-size:11px; font-weight:800; letter-spacing:.20em; text-transform:uppercase;}
+  .ecc-step-kicker{ color:rgba(199, 167, 90,.95); font-family:"Noto Sans",system-ui,sans-serif; font-size:11px; font-weight:800; letter-spacing:.20em; text-transform:uppercase;}
   .ecc-dot{ height:4px; width:10px; border-radius:9999px; background:var(--ecc-border);}
-  .ecc-dot--done{ width:18px; background:rgba(212,175,55,.55);}
-  .ecc-dot--active{ width:34px; background:var(--ecc-primary); box-shadow:0 0 10px rgba(212,175,55,.30);}
+  .ecc-dot--done{ width:18px; background:rgba(199, 167, 90,.55);}
+  .ecc-dot--active{ width:34px; background:var(--ecc-primary); box-shadow:0 0 10px rgba(199, 167, 90,.30);}
 
   .ecc-h1-lite{ font-family:"Noto Sans",system-ui,sans-serif; font-size:34px; font-weight:700; letter-spacing:-.02em; line-height:1.15;}
   .ecc-sub{ font-family:"Noto Sans",system-ui,sans-serif; color:rgba(255,255,255,.60); font-size:16px; line-height:1.6;}
-  .ecc-section-title{ font-family:"Noto Sans",system-ui,sans-serif; color:rgba(212,175,55,.90); font-size:12px; font-weight:700; letter-spacing:.22em; text-transform:uppercase;}
+  .ecc-section-title{ font-family:"Noto Sans",system-ui,sans-serif; color:rgba(199, 167, 90,.90); font-size:12px; font-weight:700; letter-spacing:.22em; text-transform:uppercase;}
 
   .ecc-rec{
-    border:1px solid rgba(212,175,55,.25);
-    background:rgba(212,175,55,.06);
+    border:1px solid rgba(199, 167, 90,.25);
+    background:rgba(199, 167, 90,.06);
     border-radius:16px;
     padding:16px;
   }
   .ecc-rec-tier{ font-family:"Noto Sans",system-ui,sans-serif; font-size:18px; font-weight:800; color:var(--ecc-primary); }
   .ecc-rec-list{ padding-left:18px; color:rgba(255,255,255,.70); font-family:"Noto Sans",system-ui,sans-serif; font-size:13px; line-height:1.6;}
-  .ecc-rec-btn{ border:1px solid rgba(212,175,55,.50) !important; color:var(--ecc-primary) !important; background:transparent !important; border-radius:12px !important; padding:10px 14px !important; font-weight:800; font-family:"Noto Sans",system-ui,sans-serif;}
-  .ecc-rec-btn:hover{ background:rgba(212,175,55,.10) !important; }
+  .ecc-rec-btn{ border:1px solid rgba(199, 167, 90,.50) !important; color:var(--ecc-primary) !important; background:transparent !important; border-radius:12px !important; padding:10px 14px !important; font-weight:800; font-family:"Noto Sans",system-ui,sans-serif;}
+  .ecc-rec-btn:hover{ background:rgba(199, 167, 90,.10) !important; }
 
   .ecc-tier-card{
     width:100%;
@@ -204,11 +204,11 @@
     text-align:left;
     transition:all .18s ease;
   }
-  .ecc-tier-card:hover{ border-color:rgba(212,175,55,.35); }
+  .ecc-tier-card:hover{ border-color:rgba(199, 167, 90,.35); }
   .ecc-tier-card.is-on{
-    border-color:rgba(212,175,55,.95);
-    box-shadow:0 0 0 2px rgba(212,175,55,.35), 0 18px 50px rgba(212,175,55,.08);
-    background:rgba(212,175,55,.06);
+    border-color:rgba(199, 167, 90,.95);
+    box-shadow:0 0 0 2px rgba(199, 167, 90,.35), 0 18px 50px rgba(199, 167, 90,.08);
+    background:rgba(199, 167, 90,.06);
   }
   .ecc-tier-name{ font-family:"Noto Sans",system-ui,sans-serif; font-size:18px; font-weight:800; color:rgba(255,255,255,.94); }
   .ecc-tier-price{ font-family:"Noto Sans",system-ui,sans-serif; font-size:20px; font-weight:900; color:var(--ecc-primary); margin-top:2px;}
@@ -218,7 +218,7 @@
   .ecc-tier-benefits{ margin-top:12px; padding:0; list-style:none; }
   .ecc-benefit-li{ display:flex; align-items:start; gap:8px; margin-bottom:4px; font-size:13px; color:rgba(255,255,255,.75); font-family:"Noto Sans",system-ui,sans-serif; }
   .ecc-benefit-li .material-symbols-outlined{ font-size:16px; color:var(--ecc-primary); margin-top:2px; }
-  .ecc-benefit-more{ font-size:11px; color:rgba(212,175,55,.85); font-weight:800; margin-left:24px; text-transform:uppercase; letter-spacing:.05em; }
+  .ecc-benefit-more{ font-size:11px; color:rgba(199, 167, 90,.85); font-weight:800; margin-left:24px; text-transform:uppercase; letter-spacing:.05em; }
 
   .ecc-tier-perks{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;}
   .ecc-perk{ border:1px solid rgba(242,185,13,.18); color:rgba(242,185,13,.75); padding:6px 10px; border-radius:9999px; font-size:11px; letter-spacing:.06em; font-weight:800; font-family:"Noto Sans",system-ui,sans-serif; }
@@ -237,7 +237,7 @@
   .ecc-continue{
     background:var(--ecc-primary) !important; border:0 !important; color:var(--ecc-bg) !important;
     font-size:18px !important; font-weight:700 !important; padding:16px !important; border-radius:12px !important;
-    box-shadow:0 0 20px rgba(212,175,55,.25) !important; font-family:"Newsreader",serif;
+    box-shadow:0 0 20px rgba(199, 167, 90,.25) !important; font-family:"Newsreader",serif;
   }
   .ecc-continue:hover{ background:var(--ecc-primary-dark) !important; }
 

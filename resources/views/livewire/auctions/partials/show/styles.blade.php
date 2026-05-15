@@ -2,7 +2,7 @@
 <style>
     .auction-detail-page {
         --auction-panel-bg: rgba(10, 18, 38, 0.88);
-        --auction-panel-border: rgba(212, 175, 55, 0.14);
+        --auction-panel-border: rgba(199, 167, 90, 0.14);
     }
 
     .auction-breadcrumb {
@@ -46,7 +46,7 @@
         align-items: center;
         padding: .45rem .85rem;
         border-radius: 999px;
-        background: rgba(212,175,55,.14);
+        background: rgba(199, 167, 90,.14);
         color: var(--luxe-gold);
         font-size: .72rem;
         font-weight: 800;
@@ -70,7 +70,7 @@
     .auction-seller-card,
     .auction-related-card {
         border-radius: 24px;
-        border: 1px solid rgba(212,175,55,.12);
+        border: 1px solid rgba(199, 167, 90,.12);
         background:
             linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
             var(--luxe-surface);
@@ -82,7 +82,7 @@
         border-radius: 24px;
         overflow: hidden;
         background: #0f0d09;
-        border: 1px solid rgba(212,175,55,.1);
+        border: 1px solid rgba(199, 167, 90,.1);
         aspect-ratio: 4 / 3;
     }
 
@@ -152,7 +152,7 @@
         border-radius: 18px;
         overflow: hidden;
         background: #14110b;
-        border: 1px solid rgba(212,175,55,.14);
+        border: 1px solid rgba(199, 167, 90,.14);
         padding: 0;
         transition: .2s ease;
     }
@@ -160,7 +160,7 @@
     .auction-thumb-btn.active,
     .auction-thumb-btn:hover {
         border-color: var(--luxe-gold);
-        box-shadow: 0 0 0 2px rgba(212,175,55,.18);
+        box-shadow: 0 0 0 2px rgba(199, 167, 90,.18);
     }
 
     .auction-thumb-btn img {
@@ -183,7 +183,7 @@
 
     .auction-bid-head {
         background: rgba(255,255,255,.03);
-        border-bottom: 1px solid rgba(212,175,55,.12);
+        border-bottom: 1px solid rgba(199, 167, 90,.12);
         border-top-left-radius: 24px;
         border-top-right-radius: 24px;
     }
@@ -266,7 +266,7 @@
     .auction-quick-bid-btn {
         height: 42px;
         border-radius: 14px;
-        border: 1px solid rgba(212,175,55,.28);
+        border: 1px solid rgba(199, 167, 90,.28);
         background: transparent;
         color: #fff;
         font-size: .88rem;
@@ -276,7 +276,7 @@
 
     .auction-quick-bid-btn:hover,
     .auction-quick-bid-btn.active {
-        background: rgba(212,175,55,.12);
+        background: rgba(199, 167, 90,.12);
         border-color: var(--luxe-gold);
         color: var(--luxe-gold);
     }
@@ -289,7 +289,7 @@
         height: 72px;
         border-radius: 18px;
         background: rgba(255,255,255,.04);
-        border: 2px solid rgba(212,175,55,.28);
+        border: 2px solid rgba(199, 167, 90,.28);
         color: #fff;
         font-size: 1.55rem;
         font-weight: 900;
@@ -303,7 +303,7 @@
 
     .auction-bid-input-wrap .form-control:focus {
         border-color: var(--luxe-gold);
-        box-shadow: 0 0 0 .2rem rgba(212,175,55,.08);
+        box-shadow: 0 0 0 .2rem rgba(199, 167, 90,.08);
         background: rgba(255,255,255,.05);
         color: #fff;
     }
@@ -329,7 +329,7 @@
         font-weight: 900;
         letter-spacing: .14em;
         text-transform: uppercase;
-        box-shadow: 0 14px 28px rgba(212,175,55,.18);
+        box-shadow: 0 14px 28px rgba(199, 167, 90,.18);
         transition: .2s ease;
     }
 
@@ -355,14 +355,14 @@
     }
 
     .auction-history-head {
-        border-bottom: 1px solid rgba(212,175,55,.1);
+        border-bottom: 1px solid rgba(199, 167, 90,.1);
         background: rgba(255,255,255,.03);
         border-top-left-radius: 24px;
         border-top-right-radius: 24px;
     }
 
     .auction-bid-row + .auction-bid-row {
-        border-top: 1px solid rgba(212,175,55,.06);
+        border-top: 1px solid rgba(199, 167, 90,.06);
     }
 
     .auction-bid-row-index {
@@ -385,7 +385,7 @@
 
     .auction-description-card .auction-desc-divider {
         height: 1px;
-        background: rgba(212,175,55,.16);
+        background: rgba(199, 167, 90,.16);
         margin: 1rem 0 1.25rem;
     }
 
@@ -428,7 +428,7 @@
         justify-content: center;
         font-weight: 900;
         letter-spacing: .04em;
-        border: 1px solid rgba(212,175,55,.18);
+        border: 1px solid rgba(199, 167, 90,.18);
     }
 
     .auction-related-nav-btn {
@@ -452,7 +452,7 @@
     .auction-related-item {
         border-radius: 20px;
         overflow: hidden;
-        border: 1px solid rgba(212,175,55,.12);
+        border: 1px solid rgba(199, 167, 90,.12);
         background: rgba(255,255,255,.03);
         box-shadow: 0 14px 28px rgba(0,0,0,.22);
         transition: .2s ease;
@@ -461,7 +461,7 @@
 
     .auction-related-item:hover {
         transform: translateY(-4px);
-        border-color: rgba(212,175,55,.24);
+        border-color: rgba(199, 167, 90,.24);
     }
 
     .auction-related-media {

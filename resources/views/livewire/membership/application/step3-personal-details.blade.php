@@ -13,7 +13,7 @@
 
       <div class="flex-grow-1 text-center">
         <div class="d-inline-flex align-items-center gap-2 opacity-90">
-          <span class="material-symbols-outlined text-ecc">sports_cricket</span>
+          <img src="{{ asset('ecc_logo_dark.png') }}" style="width: 64px; height: 64px; object-fit: contain;" alt="ECC Logo">
           <div class="ecc-topbar-title">THE APPLICATION</div>
         </div>
       </div>
@@ -150,8 +150,8 @@
 @push('styles')
 <style>
   :root{
-    --ecc-primary:#D4AF37;
-    --ecc-primary-dark:#AA8C2C;
+    --ecc-primary:var(--ecc-primary);
+    --ecc-primary-dark:var(--ecc-gold-600);
     --ecc-bg:#020202;
     --ecc-surface:#181818;
     --ecc-border:#333333;
@@ -179,7 +179,7 @@
     top:0; left:50%;
     transform:translateX(-50%);
     width:500px; height:300px;
-    background: rgba(212,175,55,.10);
+    background: rgba(199, 167, 90,.10);
     filter: blur(100px);
     border-radius:9999px;
     pointer-events:none;
@@ -193,13 +193,13 @@
   .ecc-icon-btn{
     width:40px; height:40px; border-radius:9999px;
     border:0; background: transparent;
-    color: rgba(212,175,55,.85);
+    color: rgba(199, 167, 90,.85);
     display:flex; align-items:center; justify-content:center;
     transition: background .2s ease;
   }
   .ecc-icon-btn:hover{ background: rgba(255,255,255,.05); }
 
-  .text-ecc{ color: rgba(212,175,55,.95); }
+  .text-ecc{ color: rgba(199, 167, 90,.95); }
   .ecc-topbar-title{
     font-family: "Noto Sans", system-ui, sans-serif;
     color: rgba(255,255,255,.90);
@@ -209,18 +209,18 @@
   }
 
   .ecc-step-kicker{
-    color: rgba(212,175,55,.95);
+    color: rgba(199, 167, 90,.95);
     font-family: "Noto Sans", system-ui, sans-serif;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: .20em;
     text-transform: uppercase;
   }
-  .ecc-dot--done{ height: 4px; width: 14px; border-radius: 9999px; background: rgba(212,175,55,.35); }
+  .ecc-dot--done{ height: 4px; width: 14px; border-radius: 9999px; background: rgba(199, 167, 90,.35); }
   .ecc-dot--active{
     width: 34px;
     background: var(--ecc-primary);
-    box-shadow: 0 0 10px rgba(212,175,55,.30);
+    box-shadow: 0 0 10px rgba(199, 167, 90,.30);
   }
 
   .ecc-h1{
@@ -239,7 +239,7 @@
 
   .ecc-label{
     font-family: "Noto Sans", system-ui, sans-serif;
-    color: rgba(212,175,55,.90);
+    color: rgba(199, 167, 90,.90);
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 8px;
@@ -291,7 +291,7 @@
     font-weight: 700 !important;
     padding: 16px !important;
     border-radius: 12px !important;
-    box-shadow: 0 0 20px rgba(212,175,55,.25) !important;
+    box-shadow: 0 0 20px rgba(199, 167, 90,.25) !important;
     transition: all .2s ease;
     font-family: "Newsreader", serif;
   }
@@ -316,7 +316,7 @@
     font-weight: 700 !important;
   }
   .flatpickr-day { color: #fff !important; }
-  .flatpickr-day:hover { background: rgba(212,175,55,0.2) !important; }
+  .flatpickr-day:hover { background: rgba(199, 167, 90,0.2) !important; }
   .flatpickr-months .flatpickr-month, .flatpickr-current-month .flatpickr-monthDropdown-months,
   .flatpickr-current-month input.cur-year, .flatpickr-weekday {
     color: #fff !important;

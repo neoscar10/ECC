@@ -48,7 +48,7 @@
                         </div>
                     </div>
 
-                    <button type="button" class="auction-place-bid-btn w-100" style="min-height: 48px; font-size: 0.82rem; background: rgba(212,175,55,.12); border: 1px solid rgba(212,175,55,.2); color: var(--luxe-gold); box-shadow: none;" wire:click="openAutoBidModal" @if(empty($canAutoBid)) disabled @endif>
+                    <button type="button" class="auction-place-bid-btn w-100" style="min-height: 48px; font-size: 0.82rem; background: rgba(199, 167, 90,.12); border: 1px solid rgba(199, 167, 90,.2); color: var(--luxe-gold); box-shadow: none;" wire:click="openAutoBidModal" @if(empty($canAutoBid)) disabled @endif>
                         <i class="mdi mdi-flash me-2"></i>
                         {{ $hasAutoBidConfigured ? 'Update Auto Bid' : 'Set Auto Bid Limit' }}
                     </button>
@@ -183,7 +183,7 @@
             </div>
 
             @if($bidHistory->count() > 6)
-                <div class="px-4 px-lg-5 py-3 text-center" style="background: rgba(255,255,255,.03); border-top: 1px solid rgba(212,175,55,.06);">
+                <div class="px-4 px-lg-5 py-3 text-center" style="background: rgba(255,255,255,.03); border-top: 1px solid rgba(199, 167, 90,.06);">
                     <a href="javascript:void(0)" @click.prevent="showAllBids = !showAllBids" class="btn btn-link p-0 text-decoration-none fw-black text-uppercase" style="letter-spacing: .08em; color: var(--luxe-gold); font-size: .72rem;">
                         <span x-text="showAllBids ? 'Show Less' : 'See All Bids'"></span>
                         <i class="mdi ms-1" :class="showAllBids ? 'mdi-chevron-up' : 'mdi-chevron-down'"></i>

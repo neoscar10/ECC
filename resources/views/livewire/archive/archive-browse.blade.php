@@ -174,8 +174,8 @@
         gap: .55rem;
         padding: .5rem .95rem;
         border-radius: 999px;
-        background: rgba(212,175,55,.08);
-        border: 1px solid rgba(212,175,55,.16);
+        background: rgba(199, 167, 90,.08);
+        border: 1px solid rgba(199, 167, 90,.16);
         color: var(--luxe-gold);
         font-size: .72rem;
         font-weight: 900;
@@ -214,7 +214,7 @@
         flex-wrap: wrap;
         padding: 1rem;
         border-radius: 22px;
-        border: 1px solid rgba(212,175,55,.12);
+        border: 1px solid rgba(199, 167, 90,.12);
         background:
             linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
             rgba(23,19,11,.92);
@@ -232,7 +232,7 @@
         min-width: 0;
         padding-bottom: .2rem;
         scrollbar-width: thin;
-        scrollbar-color: rgba(212,175,55,.5) transparent;
+        scrollbar-color: rgba(199, 167, 90,.5) transparent;
     }
 
     .archive-filter-rail::-webkit-scrollbar {
@@ -240,7 +240,7 @@
     }
 
     .archive-filter-rail::-webkit-scrollbar-thumb {
-        background: rgba(212,175,55,.45);
+        background: rgba(199, 167, 90,.45);
         border-radius: 999px;
     }
 
@@ -252,7 +252,7 @@
         min-height: 42px;
         padding: .72rem 1rem;
         border-radius: 999px;
-        border: 1px solid rgba(212,175,55,.14);
+        border: 1px solid rgba(199, 167, 90,.14);
         background: rgba(255,255,255,.03);
         color: rgba(245,240,231,.92);
         font-size: .88rem;
@@ -264,7 +264,7 @@
     }
 
     .archive-chip:hover {
-        border-color: rgba(212,175,55,.34);
+        border-color: rgba(199, 167, 90,.34);
         color: #fff;
     }
 
@@ -272,7 +272,7 @@
         background: var(--luxe-gold);
         border-color: var(--luxe-gold);
         color: #111;
-        box-shadow: 0 10px 22px rgba(212,175,55,.18);
+        box-shadow: 0 10px 22px rgba(199, 167, 90,.18);
     }
 
     .archive-chip .mdi {
@@ -287,7 +287,7 @@
     .archive-sort-wrap .form-select {
         height: 42px;
         border-radius: 999px;
-        border: 1px solid rgba(212,175,55,.14);
+        border: 1px solid rgba(199, 167, 90,.14);
         background-color: rgba(255,255,255,.03);
         color: #fff;
         box-shadow: none;
@@ -298,8 +298,8 @@
     }
 
     .archive-sort-wrap .form-select:focus {
-        border-color: rgba(212,175,55,.34);
-        box-shadow: 0 0 0 .2rem rgba(212,175,55,.08);
+        border-color: rgba(199, 167, 90,.34);
+        box-shadow: 0 0 0 .2rem rgba(199, 167, 90,.08);
     }
 
     .archive-sort-wrap .form-select option {
@@ -314,7 +314,7 @@
         height: 100%;
         border-radius: 24px;
         overflow: hidden;
-        border: 1px solid rgba(212,175,55,.12);
+        border: 1px solid rgba(199, 167, 90,.12);
         background:
             linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
             var(--luxe-surface);
@@ -324,7 +324,7 @@
 
     .archive-card:hover {
         transform: translateY(-5px);
-        border-color: rgba(212,175,55,.28);
+        border-color: rgba(199, 167, 90,.28);
         box-shadow: 0 24px 44px rgba(0,0,0,.34);
     }
 
@@ -407,8 +407,8 @@
         width: 54px;
         height: 54px;
         border-radius: 50%;
-        background: rgba(212,175,55,.12);
-        border: 1px solid rgba(212,175,55,.24);
+        background: rgba(199, 167, 90,.12);
+        border: 1px solid rgba(199, 167, 90,.24);
         color: var(--luxe-gold);
         display: inline-flex;
         align-items: center;
@@ -432,7 +432,7 @@
         padding: .6rem .95rem;
         border-radius: 999px;
         border: 1px solid var(--luxe-gold);
-        background: rgba(212,175,55,.10);
+        background: rgba(199, 167, 90,.10);
         color: var(--luxe-gold);
         font-size: .76rem;
         font-weight: 800;
@@ -494,7 +494,7 @@
         min-height: 54px;
         padding: .9rem 1.65rem;
         border-radius: 999px;
-        border: 1px solid rgba(212,175,55,.18);
+        border: 1px solid rgba(199, 167, 90,.18);
         background: rgba(255,255,255,.03);
         color: #fff;
         font-size: .95rem;
@@ -504,9 +504,9 @@
     }
 
     .archive-load-more-btn:hover {
-        border-color: rgba(212,175,55,.36);
+        border-color: rgba(199, 167, 90,.36);
         color: var(--luxe-gold);
-        background: rgba(212,175,55,.06);
+        background: rgba(199, 167, 90,.06);
     }
 
     .archive-result-note {
@@ -516,7 +516,7 @@
     }
 
     .archive-empty-state {
-        border: 1px dashed rgba(212,175,55,.18);
+        border: 1px dashed rgba(199, 167, 90,.18);
         border-radius: 24px;
         padding: 2.5rem 1.5rem;
         background: rgba(255,255,255,.02);

@@ -38,7 +38,7 @@
     .ecc-hero-block {
         min-height: 500px;
         border-radius: 1.75rem;
-        border: 1px solid rgba(212,175,55,.14);
+        border: 1px solid rgba(199, 167, 90,.14);
         background: #17120a;
         box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     }
@@ -82,9 +82,9 @@
         margin-bottom: 1.25rem;
         padding: .45rem 1rem;
         border-radius: 999px;
-        background: rgba(212,175,55,.12);
-        border: 1px solid rgba(212,175,55,.24);
-        color: #d4af37;
+        background: rgba(199, 167, 90,.12);
+        border: 1px solid rgba(199, 167, 90,.24);
+        color: var(--ecc-primary);
         font-size: .7rem;
         font-weight: 900;
         letter-spacing: .16em;
@@ -99,7 +99,7 @@
         color: #fff;
     }
 
-    .ecc-text-gold { color: #d4af37; }
+    .ecc-text-primary { color: var(--ecc-primary); }
     .ecc-text-italic { font-style: italic; }
 
     .ecc-hero-text {
@@ -128,7 +128,7 @@
         display: inline-flex;
         align-items: center;
         gap: .3rem;
-        color: #d4af37;
+        color: var(--ecc-primary);
         font-weight: 800;
         text-decoration: none;
         font-size: .95rem;
@@ -141,20 +141,20 @@
     }
 
     /* Buttons */
-    .ecc-btn-gold {
-        background: linear-gradient(180deg, #e0be52, #cfa52b);
-        border: 1px solid #d4af37;
+    .ecc-btn-primary {
+        background: linear-gradient(180deg, var(--ecc-primary), var(--ecc-gold-500));
+        border: 1px solid var(--ecc-primary);
         color: #16110a;
         font-weight: 800;
         border-radius: 1rem;
         transition: .3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .ecc-btn-gold:hover {
-        background: linear-gradient(180deg, #e7c75c, #d7ad35);
+    .ecc-btn-primary:hover {
+        background: var(--ecc-primary-gradient-dark);
         color: #16110a;
         transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(212,175,55,0.3);
+        box-shadow: 0 10px 25px rgba(199, 167, 90,0.3);
     }
 
     .ecc-btn-glass {
@@ -169,7 +169,7 @@
 
     .ecc-btn-glass:hover {
         background: rgba(255,255,255,.12);
-        border-color: #d4af37;
+        border-color: var(--ecc-primary);
         color: #fff;
     }
 

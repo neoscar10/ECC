@@ -24,10 +24,10 @@
             --luxe-surface-2: #2a2115;
             --luxe-card: rgba(255,255,255,0.04);
             --luxe-card-2: rgba(255,255,255,0.06);
-            --luxe-border: rgba(212, 175, 55, 0.18);
-            --luxe-border-strong: rgba(212, 175, 55, 0.34);
-            --luxe-gold: #d4af37;
-            --luxe-gold-2: #e4c85b;
+            --luxe-border: rgba(199, 167, 90, 0.18);
+            --luxe-border-strong: rgba(199, 167, 90, 0.34);
+            --luxe-gold: var(--ecc-primary);
+            --luxe-gold-2: var(--ecc-gold-300);
             --luxe-text: #f5f0e7;
             --luxe-text-soft: #b8ab91;
             --luxe-muted: #8f826b;
@@ -42,7 +42,7 @@
 
         html, body {
             background:
-                radial-gradient(circle at top, rgba(212,175,55,0.08), transparent 22%),
+                radial-gradient(circle at top, rgba(199, 167, 90, 0.08), transparent 22%),
                 linear-gradient(180deg, #19140b 0%, #141008 100%);
             color: var(--luxe-text);
         }
@@ -95,10 +95,15 @@
         }
 
         .luxe-brand-icon {
-            width: 28px;
-            height: 28px;
-            color: var(--luxe-gold);
+            width: 86px;
+            height: 67px;
+            object-fit: contain;
             flex: 0 0 auto;
+        }
+
+        .luxe-brand-icon--footer {
+            width: 115px;
+            height: 90px;
         }
 
         .luxe-search {
@@ -121,7 +126,7 @@
 
         .luxe-search .form-control:focus {
             border-color: var(--luxe-border-strong);
-            box-shadow: 0 0 0 0.2rem rgba(212,175,55,.08);
+            box-shadow: 0 0 0 0.2rem rgba(199, 167, 90, .08);
             background: rgba(255,255,255,0.04);
             color: var(--luxe-text);
         }
@@ -192,7 +197,7 @@
             position: absolute; 
             top: -2px; 
             right: -2px;
-            background: #f2b90d;
+            background: var(--ecc-gold-500);
             color: #000;
             font-size: 10px;
             font-weight: 800;
@@ -304,7 +309,7 @@
             background:
                 linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)),
                 var(--luxe-surface);
-            border: 1px solid rgba(212,175,55,0.12);
+            border: 1px solid rgba(199, 167, 90, 0.12);
             box-shadow: var(--luxe-shadow);
             flex: 0 0 auto;
         }
@@ -426,7 +431,7 @@
             text-decoration: none;
             font-weight: 800;
             letter-spacing: .02em;
-            box-shadow: 0 12px 25px rgba(212,175,55,.18);
+            box-shadow: 0 12px 25px rgba(199, 167, 90, .18);
             transition: transform .15s ease, filter .2s ease, box-shadow .2s ease;
         }
 
@@ -465,7 +470,7 @@
         }
 
         .luxe-chip {
-            border: 1px solid rgba(212,175,55,.14);
+            border: 1px solid rgba(199, 167, 90, .14);
             background: rgba(255,255,255,.03);
             color: rgba(245,240,231,.92);
             border-radius: 999px;
@@ -482,7 +487,7 @@
             background: var(--luxe-gold);
             border-color: var(--luxe-gold);
             color: #111;
-            box-shadow: 0 8px 18px rgba(212,175,55,.18);
+            box-shadow: 0 8px 18px rgba(199, 167, 90, .18);
         }
 
         .luxe-grid-card {
@@ -491,7 +496,7 @@
             background:
                 linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
                 var(--luxe-surface);
-            border: 1px solid rgba(212,175,55,0.12);
+            border: 1px solid rgba(199, 167, 90, 0.12);
             box-shadow: 0 18px 38px rgba(0,0,0,.26);
             transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
             height: 100%;
@@ -499,7 +504,7 @@
 
         .luxe-grid-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(212,175,55,0.28);
+            border-color: rgba(199, 167, 90, 0.28);
             box-shadow: 0 22px 42px rgba(0,0,0,.35);
         }
 
@@ -570,13 +575,13 @@
             display: flex;
             justify-content: space-between;
             gap: .75rem;
-            border-top: 1px solid rgba(212,175,55,.07);
+            border-top: 1px solid rgba(199, 167, 90, .07);
             padding-top: .85rem;
         }
 
         .luxe-footer {
             background: #0f0c07;
-            border-top: 1px solid rgba(212,175,55,.12);
+            border-top: 1px solid rgba(199, 167, 90, .12);
             padding-top: 3.25rem;
             padding-bottom: 1rem;
         }
@@ -602,7 +607,7 @@
 
         .luxe-newsletter .form-control {
             background: rgba(255,255,255,.02);
-            border: 1px solid rgba(212,175,55,.14);
+            border: 1px solid rgba(199, 167, 90, .14);
             border-radius: 999px;
             color: #fff;
             height: 46px;
@@ -615,8 +620,8 @@
 
         .luxe-newsletter .form-control:focus {
             background: rgba(255,255,255,.03);
-            border-color: rgba(212,175,55,.32);
-            box-shadow: 0 0 0 .2rem rgba(212,175,55,.08);
+            border-color: rgba(199, 167, 90, .32);
+            box-shadow: 0 0 0 .2rem rgba(199, 167, 90, .08);
             color: #fff;
         }
 
@@ -634,7 +639,7 @@
         }
 
         .luxe-legal {
-            border-top: 1px solid rgba(212,175,55,.08);
+            border-top: 1px solid rgba(199, 167, 90, .08);
             margin-top: 2rem;
             padding-top: 1rem;
             color: var(--luxe-muted);
@@ -642,7 +647,7 @@
         }
 
         .luxe-mobile-nav {
-            border-top: 1px solid rgba(212,175,55,.08);
+            border-top: 1px solid rgba(199, 167, 90, .08);
             padding-top: .85rem;
             margin-top: .85rem;
         }
@@ -661,7 +666,7 @@
         }
 
         .luxe-empty-state {
-            border: 1px dashed rgba(212,175,55,.18);
+            border: 1px dashed rgba(199, 167, 90, .18);
             border-radius: 24px;
             padding: 2rem 1.25rem;
             background: rgba(255,255,255,.02);
@@ -702,8 +707,8 @@
             width: 54px;
             height: 54px;
             border-radius: 50%;
-            background: rgba(212,175,55,.12);
-            border: 1px solid rgba(212,175,55,.24);
+            background: rgba(199, 167, 90, .12);
+            border: 1px solid rgba(199, 167, 90, .24);
             color: var(--luxe-gold);
             display: inline-flex;
             align-items: center;
@@ -737,7 +742,7 @@
             padding: .6rem .95rem;
             border-radius: 999px;
             border: 1px solid var(--luxe-gold);
-            background: rgba(212,175,55,.10);
+            background: rgba(199, 167, 90, .10);
             color: var(--luxe-gold);
             font-size: .76rem;
             font-weight: 800;
@@ -818,10 +823,7 @@
                 <div class="d-flex align-items-center justify-content-between gap-3">
                     <div class="d-flex align-items-center gap-3 gap-lg-4 flex-grow-1">
                         <a href="{{ url('/') }}" class="luxe-brand">
-                            <svg class="luxe-brand-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path d="M4 4H17.3334V17.3334H30.6666V30.6666H44V44H4V4Z" fill="currentColor"/>
-                            </svg>
-                            <span>ECC</span>
+                            <img src="{{ asset('ecc_logo_dark.png') }}" class="luxe-brand-icon" alt="ECC Logo">
                         </a>
 
                         {{-- Search removed as per requirement --}}
@@ -936,10 +938,7 @@
                 <div class="row g-4 g-lg-5">
                     <div class="col-lg-3 col-md-6">
                         <div class="d-flex align-items-center gap-2 mb-3">
-                            <svg class="luxe-brand-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path d="M4 4H17.3334V17.3334H30.6666V30.6666H44V44H4V4Z" fill="currentColor"/>
-                            </svg>
-                            <span class="fw-bold text-uppercase text-white">Executive club cricket</span>
+                            <img src="{{ asset('ecc_logo_dark.png') }}" class="luxe-brand-icon luxe-brand-icon--footer" alt="ECC Logo">
                         </div>
                         <p class="luxe-footer-text mb-0">
                             The world’s premier destination for rare collectibles, luxury watches, and fine art. Connecting discerning collectors with extraordinary items.

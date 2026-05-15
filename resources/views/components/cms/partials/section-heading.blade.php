@@ -6,7 +6,7 @@
             <div>
                 @if($badge)
                     <div class="ecc-hero-badge mb-2" style="transform: scale(0.8); transform-origin: left;">
-                        <i class="mdi mdi-star-four-points text-gold"></i>
+                        <i class="mdi mdi-star-four-points ecc-text-primary"></i>
                         <span>{{ $badge }}</span>
                     </div>
                 @endif

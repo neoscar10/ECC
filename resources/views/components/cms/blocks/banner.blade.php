@@ -21,7 +21,7 @@
             <div class="ecc-hero-content position-relative">
                 @if(!empty($content['badge_text']))
                     <div class="ecc-hero-badge">
-                        <i class="mdi mdi-star-four-points text-gold"></i>
+                        <i class="mdi mdi-star-four-points ecc-text-primary"></i>
                         <span>{{ $content['badge_text'] }}</span>
                     </div>
                 @endif
@@ -33,7 +33,7 @@
                         $words = explode(' ', $title);
                         if(count($words) > 1) {
                             $last = array_pop($words);
-                            $formattedTitle = implode(' ', $words) . ' <span class="ecc-text-italic ecc-text-gold">' . $last . '</span>';
+                            $formattedTitle = implode(' ', $words) . ' <span class="ecc-text-italic ecc-text-primary">' . $last . '</span>';
                         } else {
                             $formattedTitle = $title;
                         }
@@ -47,7 +47,7 @@
 
                 <div class="d-flex flex-wrap gap-3 mt-2">
                     @if($hasDetail && ($content['cta_text'] ?? null))
-                        <a href="{{ url('/content/blocks/' . $content['id']) }}" class="btn ecc-btn-gold px-4 px-lg-5 py-3">
+                        <a href="{{ url('/content/blocks/' . $content['id']) }}" class="btn ecc-btn-primary px-4 px-lg-5 py-3">
                             {{ $content['cta_text'] }}
                             <i class="mdi mdi-arrow-right ms-2"></i>
                         </a>
@@ -82,16 +82,16 @@
     }
 
     .cms-btn-gold {
-        background: linear-gradient(135deg, #D4AF37 0%, #B8961E 100%);
+        background: linear-gradient(135deg, var(--ecc-primary) 0%, #B8961E 100%);
         color: #000;
         border: none;
-        box-shadow: 0 4px 20px rgba(212,175,55,0.25);
+        box-shadow: 0 4px 20px rgba(199, 167, 90,0.25);
         transition: all 0.3s ease;
     }
     .cms-btn-gold:hover {
-        background: linear-gradient(135deg, #E5C05B 0%, #D4AF37 100%);
+        background: linear-gradient(135deg, #E5C05B 0%, var(--ecc-primary) 100%);
         transform: scale(1.02);
-        box-shadow: 0 6px 25px rgba(212,175,55,0.35);
+        box-shadow: 0 6px 25px rgba(199, 167, 90,0.35);
         color: #000;
     }
 

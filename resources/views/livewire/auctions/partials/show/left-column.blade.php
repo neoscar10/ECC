@@ -127,7 +127,7 @@
                  <div class="col-12 col-md-6">
                      <a href="{{ $attachmentUrl }}" target="_blank" class="text-decoration-none">
                         <div class="auction-related-item d-flex align-items-center p-3 gap-3 h-100">
-                             <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; border-radius: 12px; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.2); color: var(--luxe-gold);">
+                             <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; border-radius: 12px; background: rgba(199, 167, 90, 0.1); border: 1px solid rgba(199, 167, 90, 0.2); color: var(--luxe-gold);">
                                   <i class="mdi mdi-file-document-outline fs-4"></i>
                              </div>
                              <div class="min-w-0">

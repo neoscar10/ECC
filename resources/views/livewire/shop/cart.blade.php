@@ -25,7 +25,7 @@
                 line-height: 0.95;
                 font-weight: 900;
                 letter-spacing: -0.05em;
-                color: #d4af35;
+                color: var(--ecc-primary);
                 margin: 0 0 0.5rem;
             }
 
@@ -82,7 +82,7 @@
             }
 
             .ecc-cart-price {
-                color: #d4af35;
+                color: var(--ecc-primary);
                 font-size: 1.85rem;
                 font-weight: 900;
                 letter-spacing: -0.03em;
@@ -113,7 +113,7 @@
             }
 
             .ecc-qty-btn:hover {
-                color: #d4af35;
+                color: var(--ecc-primary);
             }
 
             .ecc-qty-value {
@@ -179,7 +179,7 @@
             }
 
             .ecc-summary-free {
-                color: #d4af35;
+                color: var(--ecc-primary);
                 font-size: 0.82rem;
                 font-weight: 900;
                 letter-spacing: 0.18em;
@@ -203,7 +203,7 @@
             }
 
             .ecc-summary-total .amount {
-                color: #d4af35;
+                color: var(--ecc-primary);
                 font-size: 3rem;
                 line-height: 1;
                 font-weight: 900;
@@ -215,7 +215,7 @@
                 min-height: 58px;
                 border: 0;
                 border-radius: 0.9rem;
-                background: #d4af35;
+                background: var(--ecc-primary);
                 color: #120f08;
                 font-size: 1.1rem;
                 font-weight: 900;
@@ -260,14 +260,14 @@
             }
 
             .ecc-secure-note i {
-                color: #d4af35;
+                color: var(--ecc-primary);
             }
 
             /* Toast/Alert Styles consistency */
             .alert-gold {
                 background: rgba(212, 175, 53, 0.1);
                 border: 1px solid rgba(212, 175, 53, 0.2);
-                color: #d4af35;
+                color: var(--ecc-primary);
                 border-radius: 12px;
             }
         </style>

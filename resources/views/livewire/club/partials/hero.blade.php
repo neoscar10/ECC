@@ -42,7 +42,7 @@
             <div class="d-flex justify-content-center justify-content-lg-end">
                 <button type="button"
                         wire:click="openConciergeModal"
-                        class="btn ecc-btn-gold px-4 px-lg-5 py-3">
+                        class="btn ecc-btn-primary px-4 px-lg-5 py-3">
                     <i class="mdi mdi-lifebuoy me-2"></i>
                     Contact Concierge
                 </button>

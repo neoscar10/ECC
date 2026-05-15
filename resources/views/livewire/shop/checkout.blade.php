@@ -18,8 +18,8 @@
             color: rgba(245, 239, 225, .65);
             font-weight: 800;
         }
-        .ecc-text-gold {
-            color: #d4af37;
+        .ecc-text-primary {
+            color: var(--ecc-primary);
         }
         .ecc-muted {
             color: rgba(245, 239, 225, .68);
@@ -31,7 +31,7 @@
         .ecc-empty-panel,
         .ecc-form-panel {
             background: linear-gradient(180deg, rgba(24,19,10,.92), rgba(17,13,7,.96));
-            border: 1px solid rgba(212,175,55,.14);
+            border: 1px solid rgba(199, 167, 90,.14);
             border-radius: 1rem;
             color: #f5efe1;
             transition: .25s ease;
@@ -42,7 +42,7 @@
             padding: 1.5rem;
         }
         .ecc-address-card {
-            border: 1px solid rgba(212,175,55,.14);
+            border: 1px solid rgba(199, 167, 90,.14);
             background: rgba(255,255,255, .02);
             text-decoration: none;
             display: block;
@@ -60,23 +60,23 @@
         .ecc-address-card:hover,
         .ecc-payment-card:hover,
         .ecc-add-card-panel:hover {
-            border-color: rgba(212,175,55,.45);
+            border-color: rgba(199, 167, 90,.45);
             box-shadow: 0 12px 32px rgba(0,0,0,.18);
             transform: translateY(-1px);
         }
         .ecc-address-card.is-selected,
         .ecc-payment-card.is-selected {
-            border-color: #d4af37;
-            background: rgba(212,175,55, .05);
-            box-shadow: 0 0 0 1px rgba(212,175,55,.2), 0 16px 40px rgba(0,0,0,.22);
+            border-color: var(--ecc-primary);
+            background: rgba(199, 167, 90, .05);
+            box-shadow: 0 0 0 1px rgba(199, 167, 90,.2), 0 16px 40px rgba(0,0,0,.22);
         }
         .ecc-badge-gold {
             display: inline-flex;
             align-items: center;
             padding: .35rem .6rem;
             border-radius: 999px;
-            background: rgba(212,175,55,.12);
-            color: #d4af37;
+            background: rgba(199, 167, 90,.12);
+            color: var(--ecc-primary);
             font-size: .68rem;
             font-weight: 800;
             letter-spacing: .12em;
@@ -87,7 +87,7 @@
             padding: .2rem .45rem;
         }
         .ecc-selected-icon {
-            color: #d4af37;
+            color: var(--ecc-primary);
             font-size: 1.4rem;
         }
         .ecc-card-brand-box,
@@ -126,13 +126,13 @@
         .ecc-radio {
             width: 1.15rem;
             height: 1.15rem;
-            border: 2px solid rgba(212,175,55,.45);
+            border: 2px solid rgba(199, 167, 90,.45);
             box-shadow: none !important;
             background-color: transparent;
         }
         .ecc-radio:checked {
-            background-color: #d4af37;
-            border-color: #d4af37;
+            background-color: var(--ecc-primary);
+            border-color: var(--ecc-primary);
         }
         .ecc-checkout-summary-wrap {
             position: sticky;
@@ -176,12 +176,12 @@
             gap: .8rem;
         }
         .ecc-summary-total {
-            border-top: 2px solid rgba(212,175,55,.18);
+            border-top: 2px solid rgba(199, 167, 90,.18);
             padding-top: 1.5rem;
             margin-top: 1.5rem;
         }
         .ecc-total-amount {
-            color: #d4af37;
+            color: var(--ecc-primary);
             font-size: clamp(1.75rem, 2vw, 2.5rem);
             font-weight: 900;
             letter-spacing: -.04em;
@@ -197,23 +197,23 @@
             color: #f5efe1;
             text-decoration: underline;
         }
-        .ecc-btn-gold {
-            background: linear-gradient(180deg, #e0be52, #cfa52b);
-            border: 1px solid #d4af37;
+        .ecc-btn-primary {
+            background: linear-gradient(180deg, var(--ecc-primary), var(--ecc-gold-500));
+            border: 1px solid var(--ecc-primary);
             color: #16110a;
             border-radius: .9rem;
             letter-spacing: .18em;
             text-transform: uppercase;
         }
-        .ecc-btn-gold:hover,
-        .ecc-btn-gold:focus {
+        .ecc-btn-primary:hover,
+        .ecc-btn-primary:focus {
             background: linear-gradient(180deg, #e6c75c, #d6ad35);
             color: #16110a;
         }
         .ecc-btn-outline-gold {
             background: transparent;
-            border: 1px solid rgba(212,175,55,.35);
-            color: #d4af37;
+            border: 1px solid rgba(199, 167, 90,.35);
+            color: var(--ecc-primary);
             letter-spacing: .14em;
             text-transform: uppercase;
             font-weight: 800;
@@ -221,9 +221,9 @@
         }
         .ecc-btn-outline-gold:hover,
         .ecc-btn-outline-gold:focus {
-            background: rgba(212,175,55,.08);
+            background: rgba(199, 167, 90,.08);
             color: #e7c458;
-            border-color: rgba(212,175,55,.6);
+            border-color: rgba(199, 167, 90,.6);
         }
         .ecc-trust-row {
             display: flex;
@@ -258,7 +258,7 @@
         }
         .ecc-input {
             background: rgba(255,255,255,.03);
-            border: 1px solid rgba(212,175,55,.15);
+            border: 1px solid rgba(199, 167, 90,.15);
             border-radius: .75rem;
             color: #fff;
             padding: .75rem 1rem;
@@ -266,7 +266,7 @@
         .ecc-input:focus {
             background: rgba(255,255,255,.05);
             border-color: var(--luxe-gold);
-            box-shadow: 0 0 0 3px rgba(212,175,55,.1);
+            box-shadow: 0 0 0 3px rgba(199, 167, 90,.1);
             color: #fff;
         }
         .ecc-security-note {
@@ -368,7 +368,7 @@
                                     </div>
                                 </div>
                                 <div class="col-12 mt-4">
-                                    <button type="submit" class="btn ecc-btn-gold px-5 py-2 fw-bold">SAVE ADDRESS</button>
+                                    <button type="submit" class="btn ecc-btn-primary px-5 py-2 fw-bold">SAVE ADDRESS</button>
                                     <button type="button" class="btn text-white px-4 small" wire:click="$set('showAddressForm', false)">CANCEL</button>
                                 </div>
                             </div>
@@ -419,7 +419,7 @@
                                     <div class="fw-bold fs-4 mb-2">No saved address found</div>
                                     <div class="ecc-muted small mb-4">Please add a shipping address to continue checkout.</div>
                                     <button type="button"
-                                            class="btn ecc-btn-gold rounded-pill px-5 py-3 fw-bold"
+                                            class="btn ecc-btn-primary rounded-pill px-5 py-3 fw-bold"
                                             wire:click="openAddressForm">
                                         ADD NEW ADDRESS
                                     </button>
@@ -556,7 +556,7 @@
                                     @if($item->meta)
                                         <div class="ecc-summary-meta mb-1">{{ $item->meta }}</div>
                                     @endif
-                                    <div class="fw-bold ecc-text-gold">{{ $item->formatted_total }}</div>
+                                    <div class="fw-bold ecc-text-primary">{{ $item->formatted_total }}</div>
                                 </div>
                             </div>
                         @endforeach
@@ -610,7 +610,7 @@
                         @endif
 
                         <button type="button"
-                                class="btn ecc-btn-gold w-100 py-3 fw-bold"
+                                class="btn ecc-btn-primary w-100 py-3 fw-bold"
                                 wire:click="placeOrder"
                                 wire:loading.attr="disabled"
                                 @if(!$canPlaceOrder) disabled @endif>

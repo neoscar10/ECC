@@ -84,7 +84,7 @@
                                     <i class="mdi mdi-clock-fast"></i> Early Access
                                 </span>
                             @elseif($hasPremiumBadge)
-                                <span class="luxe-live-pill" style="left: 12px; right: auto; bottom: 12px; top: auto; background: rgba(0,0,0,0.7); font-size: 0.65rem; border: 1px solid rgba(212,175,55,0.4); color: #f2b90d; backdrop-filter: blur(8px);">
+                                <span class="luxe-live-pill" style="left: 12px; right: auto; bottom: 12px; top: auto; background: rgba(0,0,0,0.7); font-size: 0.65rem; border: 1px solid rgba(199, 167, 90,0.4); color: #f2b90d; backdrop-filter: blur(8px);">
                                     <i class="mdi mdi-diamond-stone"></i> {{ $lot['access_badge_label'] ?? 'Platinum Access' }}
                                 </span>
                             @endif
@@ -174,7 +174,7 @@
         </div>
     @else
         <div class="luxe-empty-state">
-            <i class="mdi mdi-gavel fs-1 mb-3" style="color: rgba(212,175,55,0.4)"></i>
+            <i class="mdi mdi-gavel fs-1 mb-3" style="color: rgba(199, 167, 90,0.4)"></i>
             <div class="fs-5 fw-semibold mb-2">No items found</div>
             <div class="text-light-emphasis small">There are no lots available under this section right now.</div>
         </div>

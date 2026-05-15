@@ -323,7 +323,7 @@
     {{-- Enquire Modal --}}
     <div class="modal fade" id="enquireModal" tabindex="-1" aria-labelledby="enquireModalLabel" aria-hidden="true" wire:ignore.self>
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="background:var(--luxe-surface); border:1px solid rgba(212,175,55,.30); border-radius:16px;">
+            <div class="modal-content" style="background:var(--luxe-surface); border:1px solid rgba(199, 167, 90,.30); border-radius:16px;">
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title archive-detail-title fs-4" id="enquireModalLabel" style="margin:0;">Enquire Privately</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -342,7 +342,7 @@
                         
                         <form wire:submit.prevent="submitEnquiry">
                             <div class="mb-4">
-                                <textarea wire:model="enquiryMessage" class="form-control" rows="3" placeholder="Add an optional message..." style="background:rgba(255,255,255,0.05); border:1px solid rgba(212,175,55,0.2); color:#fff; border-radius:12px; box-shadow:none;"></textarea>
+                                <textarea wire:model="enquiryMessage" class="form-control" rows="3" placeholder="Add an optional message..." style="background:rgba(255,255,255,0.05); border:1px solid rgba(199, 167, 90,0.2); color:#fff; border-radius:12px; box-shadow:none;"></textarea>
                                 @error('enquiryMessage') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                             </div>
                             
@@ -388,9 +388,9 @@
         position: relative;
         border-radius: 28px;
         overflow: hidden;
-        border: 1px solid rgba(212,175,55,.14);
+        border: 1px solid rgba(199, 167, 90,.14);
         background:
-            radial-gradient(circle at center, rgba(212,175,55,.06), transparent 60%),
+            radial-gradient(circle at center, rgba(199, 167, 90,.06), transparent 60%),
             linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
             #120f08;
         box-shadow: 0 20px 42px rgba(0,0,0,.28);
@@ -467,7 +467,7 @@
         position: relative;
         border-radius: 18px;
         overflow: hidden;
-        border: 1px solid rgba(212,175,55,.14);
+        border: 1px solid rgba(199, 167, 90,.14);
         background: #120f08;
         min-height: 118px;
         padding: 0;
@@ -478,7 +478,7 @@
     .archive-detail-thumb:hover,
     .archive-detail-thumb.active {
         border-color: var(--luxe-gold);
-        box-shadow: 0 0 0 2px rgba(212,175,55,.12);
+        box-shadow: 0 0 0 2px rgba(199, 167, 90,.12);
     }
 
     .archive-detail-thumb img {
@@ -502,8 +502,8 @@
     .archive-detail-thumb-more {
         min-height: 118px;
         border-radius: 18px;
-        border: 1px solid rgba(212,175,55,.16);
-        background: rgba(212,175,55,.08);
+        border: 1px solid rgba(199, 167, 90,.16);
+        background: rgba(199, 167, 90,.08);
         color: var(--luxe-gold);
         display: flex;
         flex-direction: column;
@@ -525,7 +525,7 @@
         padding-top: .95rem;
         padding-bottom: .2rem;
         scrollbar-width: thin;
-        scrollbar-color: rgba(212,175,55,.45) transparent;
+        scrollbar-color: rgba(199, 167, 90,.45) transparent;
     }
 
     .archive-detail-thumbs-mobile::-webkit-scrollbar {
@@ -533,7 +533,7 @@
     }
 
     .archive-detail-thumbs-mobile::-webkit-scrollbar-thumb {
-        background: rgba(212,175,55,.45);
+        background: rgba(199, 167, 90,.45);
         border-radius: 999px;
     }
 
@@ -551,8 +551,8 @@
         gap: .45rem;
         padding: .42rem .8rem;
         border-radius: 999px;
-        background: rgba(212,175,55,.12);
-        border: 1px solid rgba(212,175,55,.18);
+        background: rgba(199, 167, 90,.12);
+        border: 1px solid rgba(199, 167, 90,.18);
         color: var(--luxe-gold);
         font-size: .72rem;
         font-weight: 900;
@@ -592,8 +592,8 @@
         min-height: 48px;
         padding: .8rem 1rem;
         border-radius: 999px;
-        background: rgba(212,175,55,.08);
-        border: 1px solid rgba(212,175,55,.16);
+        background: rgba(199, 167, 90,.08);
+        border: 1px solid rgba(199, 167, 90,.16);
         color: #fff;
         font-size: .88rem;
         font-weight: 800;
@@ -613,7 +613,7 @@
     .archive-detail-side-card,
     .archive-detail-cert-card {
         border-radius: 22px;
-        border: 1px solid rgba(212,175,55,.14);
+        border: 1px solid rgba(199, 167, 90,.14);
         background:
             linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
             rgba(16,13,7,.78);
@@ -689,7 +689,7 @@
         justify-content: space-between;
         gap: 1.5rem;
         padding: 1rem .15rem;
-        border-bottom: 1px solid rgba(212,175,55,.10);
+        border-bottom: 1px solid rgba(199, 167, 90,.10);
     }
 
     .archive-detail-spec-label {
@@ -752,27 +752,27 @@
     }
 
     .archive-detail-outline-btn {
-        border: 1px solid rgba(212,175,55,.42);
+        border: 1px solid rgba(199, 167, 90,.42);
         background: transparent;
         color: var(--luxe-gold);
     }
 
     .archive-detail-outline-btn:hover {
-        background: rgba(212,175,55,.10);
+        background: rgba(199, 167, 90,.10);
         color: var(--luxe-gold);
         border-color: var(--luxe-gold);
     }
 
     .archive-detail-solid-soft-btn {
-        border: 1px solid rgba(212,175,55,.24);
-        background: rgba(212,175,55,.12);
+        border: 1px solid rgba(199, 167, 90,.24);
+        background: rgba(199, 167, 90,.12);
         color: var(--luxe-gold);
     }
 
     .archive-detail-solid-soft-btn:hover {
-        background: rgba(212,175,55,.18);
+        background: rgba(199, 167, 90,.18);
         color: var(--luxe-gold);
-        border-color: rgba(212,175,55,.38);
+        border-color: rgba(199, 167, 90,.38);
     }
 
     .archive-detail-cert-card {

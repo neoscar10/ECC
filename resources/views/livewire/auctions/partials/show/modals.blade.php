@@ -9,7 +9,7 @@
     @endif
 >
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-light" style="background: var(--luxe-surface); border: 1px solid rgba(212,175,55,.14); border-radius: 20px; box-shadow: 0 24px 60px rgba(0,0,0,.6);">
+        <div class="modal-content text-light" style="background: var(--luxe-surface); border: 1px solid rgba(199, 167, 90,.14); border-radius: 20px; box-shadow: 0 24px 60px rgba(0,0,0,.6);">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold" style="color: var(--luxe-gold);">Confirm Bid</h5>
                 <button type="button" class="btn-close btn-close-white" wire:click="closeBidConfirmModal"></button>
@@ -20,7 +20,7 @@
                     Please confirm your bid before submitting.
                 </p>
 
-                <div class="p-3 mb-3" style="background: rgba(212,175,55,.04); border: 1px solid rgba(212,175,55,.2); border-radius: 16px;">
+                <div class="p-3 mb-3" style="background: rgba(199, 167, 90,.04); border: 1px solid rgba(199, 167, 90,.2); border-radius: 16px;">
                     <div class="small text-uppercase mb-1" style="color: var(--luxe-text-soft); letter-spacing: .08em; font-weight: 800;">Current Highest Bid</div>
                     <div class="fs-4 fw-bold text-white">{{ $currentHighestBidDisplay }}</div>
                 </div>
@@ -74,7 +74,7 @@
     @endif
 >
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-light" style="background: var(--luxe-surface); border: 1px solid rgba(212,175,55,.14); border-radius: 20px; box-shadow: 0 24px 60px rgba(0,0,0,.6);">
+        <div class="modal-content text-light" style="background: var(--luxe-surface); border: 1px solid rgba(199, 167, 90,.14); border-radius: 20px; box-shadow: 0 24px 60px rgba(0,0,0,.6);">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold" style="color: var(--luxe-gold);">
                     {{ $hasAutoBidConfigured ? 'Update Auto Bid' : 'Configure Auto Bid' }}
@@ -87,12 +87,12 @@
                     Set your maximum bid limit and increment amount.
                 </p>
 
-                <div class="p-3 mb-3" style="background: rgba(212,175,55,.03); border: 1px solid rgba(212,175,55,.1); border-radius: 16px;">
+                <div class="p-3 mb-3" style="background: rgba(199, 167, 90,.03); border: 1px solid rgba(199, 167, 90,.1); border-radius: 16px;">
                     <div class="small text-uppercase mb-1" style="color: var(--luxe-text-soft); letter-spacing: .08em; font-weight: 800;">Current Highest Bid</div>
                     <div class="fs-4 fw-bold text-white">{{ $currentHighestBidDisplay }}</div>
                 </div>
 
-                <div class="p-3 mb-4" style="background: rgba(212,175,55,.03); border: 1px solid rgba(212,175,55,.1); border-radius: 16px;">
+                <div class="p-3 mb-4" style="background: rgba(199, 167, 90,.03); border: 1px solid rgba(199, 167, 90,.1); border-radius: 16px;">
                     <div class="small text-uppercase mb-1" style="color: var(--luxe-text-soft); letter-spacing: .08em; font-weight: 800;">Minimum Increment</div>
                     <div class="fs-4 fw-bold text-white">{{ $minIncrementDisplay }}</div>
                 </div>
@@ -105,7 +105,7 @@
 
                 <div class="mb-3">
                     <label class="form-label text-white small fw-bold">Maximum Bid Limit (₹)</label>
-                    <input type="text" class="form-control" style="background: #000; border: 1px solid var(--luxe-gold); color: #fff; padding: .8rem 1rem; border-radius: 12px; box-shadow: 0 0 0 1px rgba(212,175,55,.2);" wire:model.defer="autoBidMaxAmount" placeholder="e.g. 500000">
+                    <input type="text" class="form-control" style="background: #000; border: 1px solid var(--luxe-gold); color: #fff; padding: .8rem 1rem; border-radius: 12px; box-shadow: 0 0 0 1px rgba(199, 167, 90,.2);" wire:model.defer="autoBidMaxAmount" placeholder="e.g. 500000">
                     @error('autoBidMaxAmount') <div class="text-danger small mt-2"><i class="mdi mdi-alert-circle-outline"></i> {{ $message }}</div> @enderror
                 </div>
 

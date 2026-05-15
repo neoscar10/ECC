@@ -13,7 +13,7 @@
                 {{-- Top icon --}}
                 <div class="pt-3 pt-md-4 d-flex justify-content-center">
                     <div class="ecc-gate-badge d-flex align-items-center justify-content-center">
-                        <span class="material-symbols-outlined ecc-gate-diamond">diamond</span>
+                        <img src="{{ asset('ecc_logo_dark.png') }}" class="ecc-gate-diamond" alt="ECC Logo">
                     </div>
                 </div>
 
@@ -125,7 +125,7 @@
         bottom: -40px;
         width: min(520px, 70vw);
         height: 180px;
-        background: rgba(212,175,55,.10);
+        background: rgba(199, 167, 90,.10);
         filter: blur(85px);
         border-radius: 9999px;
         pointer-events: none;
@@ -143,9 +143,10 @@
         animation: eccFadeIn .6s ease-out both;
     }
     .ecc-gate-diamond{
-        font-size: 28px;
-        color: #D4AF37;
-        filter: drop-shadow(0 0 10px rgba(212,175,55,.25));
+        width: 94px;
+        height: 73px;
+        object-fit: contain;
+        filter: drop-shadow(0 0 10px rgba(199, 167, 90,.25));
     }
 
     /* Title + kicker */
@@ -172,7 +173,7 @@
     .ecc-gate-line{
         height: 1px;
         width: 16px;
-        background: rgba(212,175,55,.55);
+        background: rgba(199, 167, 90,.55);
     }
     .ecc-gate-subtitle{
         max-width: 270px;
@@ -204,12 +205,12 @@
         letter-spacing: .06em;
     }
     .ecc-gate-btn-primary{
-        background: #D4AF37;
+        background: var(--ecc-primary);
         color: #050505;
     }
     .ecc-gate-btn-primary:hover{
         background: #EAC855;
-        box-shadow: 0 0 20px rgba(212,175,55,.35);
+        box-shadow: 0 0 20px rgba(199, 167, 90,.35);
         transform: translateY(-1px);
         color: #050505;
     }
@@ -255,12 +256,12 @@
     }
     .ecc-gate-preview-icon{
         font-size: 16px;
-        color: rgba(212,175,55,.70);
+        color: rgba(199, 167, 90,.70);
         transition: all 200ms ease;
     }
     .ecc-gate-preview:hover .ecc-gate-preview-text{ color: rgba(255,255,255,.70); }
     .ecc-gate-preview:hover .ecc-gate-preview-icon{
-        color: #D4AF37;
+        color: var(--ecc-primary);
         transform: translateX(2px);
     }
 

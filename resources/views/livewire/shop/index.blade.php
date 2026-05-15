@@ -30,12 +30,12 @@
                 flex-direction: column;
                 gap: 0;
                 background: rgba(255, 255, 255, 0.02);
-                border: 1px solid rgba(212, 175, 55, 0.12);
+                border: 1px solid rgba(199, 167, 90, 0.12);
                 border-radius: 20px;
                 padding: 0;
                 box-shadow: 0 12px 34px rgba(0,0,0,0.18);
                 scrollbar-width: thin;
-                scrollbar-color: rgba(212, 175, 55, 0.22) transparent;
+                scrollbar-color: rgba(199, 167, 90, 0.22) transparent;
             }
 
             .shop-sidebar-inner::-webkit-scrollbar {
@@ -47,12 +47,12 @@
             }
 
             .shop-sidebar-inner::-webkit-scrollbar-thumb {
-                background: rgba(212, 175, 55, 0.22);
+                background: rgba(199, 167, 90, 0.22);
                 border-radius: 10px;
             }
 
             .shop-sidebar-inner::-webkit-scrollbar-thumb:hover {
-                background: rgba(212, 175, 55, 0.4);
+                background: rgba(199, 167, 90, 0.4);
             }
         }
 
@@ -71,7 +71,7 @@
 
         .shop-filter-section {
             padding: 1.75rem;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+            border-bottom: 1px solid rgba(199, 167, 90, 0.08);
         }
 
         .shop-filter-section:last-child {
@@ -168,7 +168,7 @@
             background: var(--luxe-gold);
             border: 2px solid #110f09;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 0 4px rgba(212,175,55,.08);
+            box-shadow: 0 0 0 4px rgba(199, 167, 90,.08);
             pointer-events: none;
             z-index: 3;
         }
@@ -252,7 +252,7 @@
         .shop-pill-btn {
             min-height: 40px;
             border-radius: 10px;
-            border: 1px solid rgba(212,175,55,.14);
+            border: 1px solid rgba(199, 167, 90,.14);
             background: rgba(255,255,255,.02);
             color: rgba(245,240,231,.92);
             font-size: .78rem;
@@ -263,13 +263,13 @@
         }
 
         .shop-pill-btn:hover {
-            border-color: rgba(212,175,55,.34);
+            border-color: rgba(199, 167, 90,.34);
             color: var(--luxe-gold);
         }
 
         .shop-pill-btn.active {
             border-color: var(--luxe-gold);
-            background: rgba(212,175,55,.12);
+            background: rgba(199, 167, 90,.12);
             color: var(--luxe-gold);
         }
 
@@ -293,7 +293,7 @@
             width: 18px;
             height: 18px;
             border-radius: 4px;
-            border: 1px solid rgba(212,175,55,.20);
+            border: 1px solid rgba(199, 167, 90,.20);
             background: rgba(255,255,255,.03);
             accent-color: var(--luxe-gold);
         }
@@ -305,7 +305,7 @@
 
     .ecc-shop-search-block {
         background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
-        border: 1px solid rgba(212,175,55,.14);
+        border: 1px solid rgba(199, 167, 90,.14);
         border-radius: 1.25rem;
         padding: 1.25rem 1.5rem;
         box-shadow: 0 12px 30px rgba(0,0,0,.14);
@@ -326,13 +326,13 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: rgba(212,175,55,.10);
-        color: #d4af37;
+        background: rgba(199, 167, 90,.10);
+        color: var(--ecc-primary);
         font-size: 1.3rem;
     }
 
     .ecc-shop-search-label {
-        color: #d4af37;
+        color: var(--ecc-primary);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .22em;
@@ -343,14 +343,14 @@
         min-height: 52px;
         border-radius: 1rem;
         background: rgba(255,255,255,.04);
-        border: 1px solid rgba(212,175,55,.12);
+        border: 1px solid rgba(199, 167, 90,.12);
         color: #f5efe1;
         box-shadow: none !important;
     }
 
     .ecc-shop-search-input:focus {
         background: rgba(255,255,255,.06);
-        border-color: rgba(212,175,55,.42);
+        border-color: rgba(199, 167, 90,.42);
         color: #fff;
     }
 
@@ -433,7 +433,7 @@
 
         .shop-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(212,175,55,.18);
+            border-color: rgba(199, 167, 90,.18);
             box-shadow: 0 22px 44px rgba(0,0,0,.32);
         }
 
@@ -584,7 +584,7 @@
             font-weight: 900;
             letter-spacing: .12em;
             text-transform: uppercase;
-            box-shadow: 0 10px 18px rgba(212,175,55,.18);
+            box-shadow: 0 10px 18px rgba(199, 167, 90,.18);
         }
 
         .shop-pagination-wrap {
@@ -604,7 +604,7 @@
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            border: 1px solid rgba(212,175,55,.14);
+            border: 1px solid rgba(199, 167, 90,.14);
             background: transparent;
             color: rgba(245,240,231,.92);
             display: inline-flex;
@@ -623,7 +623,7 @@
 
         .shop-pagination-arrow:hover,
         .shop-pagination-page:hover {
-            border-color: rgba(212,175,55,.38);
+            border-color: rgba(199, 167, 90,.38);
             color: var(--luxe-gold);
         }
 
@@ -636,7 +636,7 @@
             width: 100%;
             min-height: 46px;
             border-radius: 12px;
-            border: 1px solid rgba(212,175,55,.16);
+            border: 1px solid rgba(199, 167, 90,.16);
             background: rgba(255,255,255,.03);
             color: #fff;
             font-size: .82rem;
@@ -648,7 +648,7 @@
 
         .shop-filter-mobile-card {
             border-radius: 18px;
-            border: 1px solid rgba(212,175,55,.14);
+            border: 1px solid rgba(199, 167, 90,.14);
             background:
                 linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
                 rgba(16,13,7,.95);
@@ -733,14 +733,14 @@
         }
         .hover-opacity-100 { transition: opacity 0.2s ease; }
         .hover-opacity-100:hover { opacity: 1 !important; }
-        .text-gold { color: var(--luxe-gold) !important; }
+        .ecc-text-primary { color: var(--luxe-gold) !important; }
         .shop-filter-link.parent-active {
             color: var(--luxe-gold);
             font-weight: 600;
         }
 
         .border-gold-subtle {
-            border-color: rgba(212, 175, 55, 0.2) !important;
+            border-color: rgba(199, 167, 90, 0.2) !important;
         }
 
         .shop-category-item {

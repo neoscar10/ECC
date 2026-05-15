@@ -24,7 +24,7 @@
         <div>
             @if(!empty($content['badge_text']))
                 <div class="ecc-hero-badge mb-2" style="transform: scale(0.8); transform-origin: left;">
-                    <i class="mdi mdi-star-four-points text-gold"></i>
+                    <i class="mdi mdi-star-four-points ecc-text-primary"></i>
                     <span>{{ $content['badge_text'] }}</span>
                 </div>
             @endif
@@ -142,14 +142,14 @@
 
     .cms-slider-block .swiper-button-next,
     .cms-slider-block .swiper-button-prev {
-        color: var(--ecc-gold, #D4AF37);
+        color: var(--ecc-gold, var(--ecc-primary));
         background: rgba(11, 11, 11, 0.8);
         width: 44px;
         height: 44px;
         border-radius: 50%;
         backdrop-filter: blur(8px);
-        border: 1px solid rgba(212,175,55,0.3);
-        box-shadow: 0 0 15px rgba(212,175,55,0.15);
+        border: 1px solid rgba(199, 167, 90,0.3);
+        box-shadow: 0 0 15px rgba(199, 167, 90,0.15);
         transition: all 0.3s ease;
         margin-top: -22px;
         z-index: 20;
@@ -160,9 +160,9 @@
 
     .cms-slider-block .swiper-button-next:hover,
     .cms-slider-block .swiper-button-prev:hover {
-        background: rgba(212, 175, 55, 0.2);
-        border-color: #D4AF37;
-        box-shadow: 0 0 20px rgba(212,175,55,0.4);
+        background: rgba(199, 167, 90, 0.2);
+        border-color: var(--ecc-primary);
+        box-shadow: 0 0 20px rgba(199, 167, 90,0.4);
         transform: scale(1.1);
     }
     .cms-slider-block .swiper-button-next:after,

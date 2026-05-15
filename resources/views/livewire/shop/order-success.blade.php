@@ -17,7 +17,7 @@
             width: 720px;
             height: 720px;
             border-radius: 50%;
-            background: rgba(212, 175, 55, 0.06);
+            background: rgba(199, 167, 90, 0.06);
             filter: blur(120px);
             pointer-events: none;
             z-index: 0;
@@ -37,10 +37,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(212, 175, 55, 0.12);
-            border: 1px solid rgba(212, 175, 55, 0.18);
-            box-shadow: 0 0 40px rgba(212, 175, 55, 0.10);
-            color: #d4af37;
+            background: rgba(199, 167, 90, 0.12);
+            border: 1px solid rgba(199, 167, 90, 0.18);
+            box-shadow: 0 0 40px rgba(199, 167, 90, 0.10);
+            color: var(--ecc-primary);
             font-size: 2.25rem;
         }
 
@@ -66,7 +66,7 @@
         .ecc-confirmation-card,
         .ecc-privilege-banner {
             background: linear-gradient(180deg, rgba(24,19,10,.92), rgba(17,13,7,.96));
-            border: 1px solid rgba(212,175,55,.14);
+            border: 1px solid rgba(199, 167, 90,.14);
             border-radius: 1rem;
             color: #f5efe1;
             box-shadow: 0 12px 32px rgba(0,0,0,.14);
@@ -79,7 +79,7 @@
         }
 
         .ecc-confirmation-card:hover {
-            border-color: rgba(212,175,55,.28);
+            border-color: rgba(199, 167, 90,.28);
         }
 
         .ecc-confirmation-image {
@@ -97,7 +97,7 @@
             font-weight: 800;
             letter-spacing: .22em;
             text-transform: uppercase;
-            color: #d4af37;
+            color: var(--ecc-primary);
         }
 
         .text-muted-gold {
@@ -126,8 +126,8 @@
         }
 
         .ecc-total-amount,
-        .ecc-text-gold {
-            color: #d4af37;
+        .ecc-text-primary {
+            color: var(--ecc-primary);
         }
 
         .ecc-total-amount {
@@ -139,9 +139,9 @@
             min-height: 100%;
         }
 
-        .ecc-btn-gold {
-            background: linear-gradient(180deg, #e0be52, #cfa52b);
-            border: 1px solid #d4af37;
+        .ecc-btn-primary {
+            background: linear-gradient(180deg, var(--ecc-primary), var(--ecc-gold-500));
+            border: 1px solid var(--ecc-primary);
             color: #16110a;
             font-weight: 800;
             border-radius: .9rem;
@@ -152,15 +152,15 @@
             justify-content: center;
         }
 
-        .ecc-btn-gold:hover,
-        .ecc-btn-gold:focus {
+        .ecc-btn-primary:hover,
+        .ecc-btn-primary:focus {
             background: linear-gradient(180deg, #e7c65b, #d5ac34);
             color: #16110a;
         }
 
         .ecc-btn-dark-outline {
             background: transparent;
-            border: 1px solid rgba(212,175,55,.22);
+            border: 1px solid rgba(199, 167, 90,.22);
             color: #f5efe1;
             font-weight: 800;
             border-radius: .9rem;
@@ -173,8 +173,8 @@
 
         .ecc-btn-dark-outline:hover,
         .ecc-btn-dark-outline:focus {
-            background: rgba(212,175,55,.06);
-            border-color: rgba(212,175,55,.4);
+            background: rgba(199, 167, 90,.06);
+            border-color: rgba(199, 167, 90,.4);
             color: #fff;
         }
 
@@ -188,7 +188,7 @@
             right: -80px;
             width: 260px;
             height: 100%;
-            background: linear-gradient(180deg, rgba(212,175,55,.04), rgba(212,175,55,.08));
+            background: linear-gradient(180deg, rgba(199, 167, 90,.04), rgba(199, 167, 90,.08));
             transform: skewX(-18deg);
             pointer-events: none;
         }
@@ -204,7 +204,7 @@
             display: inline-flex;
             align-items: center;
             gap: .45rem;
-            color: #d4af37;
+            color: var(--ecc-primary);
             font-size: .85rem;
             font-weight: 800;
             letter-spacing: .14em;
@@ -294,7 +294,7 @@
                                             @if($discountAmount > 0)
                                                 <div class="d-flex justify-content-between gap-3 flex-wrap">
                                                     <span class="ecc-muted fw-bold">Discount Applied</span>
-                                                    <strong class="ecc-text-gold">-{{ $formattedDiscountAmount }}</strong>
+                                                    <strong class="ecc-text-primary">-{{ $formattedDiscountAmount }}</strong>
                                                 </div>
                                             @endif
 
@@ -310,7 +310,7 @@
                             <!-- Actions -->
                             <div class="d-flex flex-row gap-3 mt-4">
                                 <a href="{{ $continueShoppingUrl }}"
-                                   class="btn ecc-btn-gold flex-fill py-3 text-uppercase-less fw-bold">
+                                   class="btn ecc-btn-primary flex-fill py-3 text-uppercase-less fw-bold">
                                     Continue Shopping
                                 </a>
 
@@ -327,7 +327,7 @@
 
                                 <!-- Shipping Card -->
                                 <div class="ecc-confirmation-card ecc-shipping-card shadow-lg">
-                                    <div class="d-flex align-items-center gap-2 mb-3 ecc-text-gold">
+                                    <div class="d-flex align-items-center gap-2 mb-3 ecc-text-primary">
                                         <span class="material-symbols-outlined fs-5">lock</span>
                                         <span class="ecc-mini-label mb-0">WHITE GLOVE DELIVERY</span>
                                     </div>

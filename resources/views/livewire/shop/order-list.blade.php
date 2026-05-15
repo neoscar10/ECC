@@ -14,7 +14,7 @@
             width: 1000px;
             height: 560px;
             border-radius: 999px;
-            background: rgba(212, 175, 55, 0.05);
+            background: rgba(199, 167, 90, 0.05);
             filter: blur(120px);
             pointer-events: none;
             z-index: 0;
@@ -23,12 +23,12 @@
         .ecc-accent-line {
             width: 48px;
             height: 1px;
-            background: #d4af37;
+            background: var(--ecc-primary);
             display: inline-block;
         }
 
         .ecc-kicker {
-            color: #d4af37;
+            color: var(--ecc-primary);
             font-size: .72rem;
             font-weight: 900;
             letter-spacing: .28em;
@@ -56,7 +56,7 @@
         .ecc-order-history-card,
         .ecc-empty-orders-card {
             background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
-            border: 1px solid rgba(212,175,55,.10);
+            border: 1px solid rgba(199, 167, 90,.10);
             border-radius: 1.25rem;
             color: #f5efe1;
             box-shadow: 0 12px 30px rgba(0,0,0,.14);
@@ -68,7 +68,7 @@
         }
 
         .ecc-stat-card.is-highlight {
-            box-shadow: 0 0 40px rgba(212,175,55,.05), 0 12px 30px rgba(0,0,0,.14);
+            box-shadow: 0 0 40px rgba(199, 167, 90,.05), 0 12px 30px rgba(0,0,0,.14);
         }
 
         .ecc-stat-label {
@@ -93,8 +93,8 @@
             color: rgba(245,239,225,.65);
         }
 
-        .ecc-text-gold {
-            color: #d4af37 !important;
+        .ecc-text-primary {
+            color: var(--ecc-primary) !important;
         }
 
         .ecc-order-history-card {
@@ -103,7 +103,7 @@
         }
 
         .ecc-order-history-card:hover {
-            border-color: rgba(212,175,55,.24);
+            border-color: rgba(199, 167, 90,.24);
             transform: translateY(-1px);
         }
 
@@ -196,9 +196,9 @@
         }
 
         .ecc-status-pill.status-processing {
-            background: rgba(212,175,55,.10);
-            color: #d4af37;
-            border-color: rgba(212,175,55,.18);
+            background: rgba(199, 167, 90,.10);
+            color: var(--ecc-primary);
+            border-color: rgba(199, 167, 90,.18);
         }
 
         .ecc-status-pill.status-shipped {
@@ -269,7 +269,7 @@
             display: inline-flex;
             align-items: center;
             gap: .4rem;
-            color: #d4af37;
+            color: var(--ecc-primary);
             font-size: .78rem;
             font-weight: 800;
             letter-spacing: .02em;
@@ -280,7 +280,7 @@
             display: inline-flex;
             align-items: center;
             gap: .5rem;
-            color: #d4af37;
+            color: var(--ecc-primary);
             text-decoration: none;
             font-size: .82rem;
             font-weight: 900;
@@ -295,8 +295,8 @@
 
         .ecc-btn-outline-gold {
             background: transparent;
-            border: 2px solid rgba(212,175,55,.28);
-            color: #d4af37;
+            border: 2px solid rgba(199, 167, 90,.28);
+            color: var(--ecc-primary);
             font-size: .82rem;
             font-weight: 900;
             letter-spacing: .28em;
@@ -306,13 +306,13 @@
         .ecc-btn-outline-gold:hover,
         .ecc-btn-outline-gold:focus {
             color: #e7c75c;
-            border-color: #d4af37;
-            background: rgba(212,175,55,.05);
+            border-color: var(--ecc-primary);
+            background: rgba(199, 167, 90,.05);
         }
 
-        .ecc-btn-gold {
-            background: linear-gradient(180deg, #e0be52, #cfa52b);
-            border: 1px solid #d4af37;
+        .ecc-btn-primary {
+            background: linear-gradient(180deg, var(--ecc-primary), var(--ecc-gold-500));
+            border: 1px solid var(--ecc-primary);
             color: #16110a;
             font-weight: 900;
             border-radius: .95rem;
@@ -320,9 +320,9 @@
             text-transform: uppercase;
         }
 
-        .ecc-btn-gold:hover,
-        .ecc-btn-gold:focus {
-            background: linear-gradient(180deg, #e7c75c, #d7ad35);
+        .ecc-btn-primary:hover,
+        .ecc-btn-primary:focus {
+            background: var(--ecc-primary-gradient-dark);
             color: #16110a;
         }
 
@@ -346,8 +346,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(212,175,55,.08);
-            color: #d4af37;
+            background: rgba(199, 167, 90,.08);
+            color: var(--ecc-primary);
             font-size: 2rem;
         }
 
@@ -392,7 +392,7 @@
                     <div class="col-12 col-md-4">
                         <div class="ecc-stat-card is-highlight">
                             <div class="ecc-stat-label">TOTAL INVESTED</div>
-                            <div class="ecc-stat-value ecc-text-gold">{{ $formattedTotalInvested }}</div>
+                            <div class="ecc-stat-value ecc-text-primary">{{ $formattedTotalInvested }}</div>
                         </div>
                     </div>
 
@@ -543,7 +543,7 @@
                         </p>
 
                         <a href="{{ $continueShoppingUrl }}"
-                           class="btn ecc-btn-gold px-4 py-3">
+                           class="btn ecc-btn-primary px-4 py-3">
                             CONTINUE SHOPPING
                         </a>
                     </div>

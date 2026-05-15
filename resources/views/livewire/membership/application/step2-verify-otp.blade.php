@@ -143,7 +143,7 @@
 @push('styles')
 <style>
   :root{
-    --ecc-primary:#D4AF37;
+    --ecc-primary:var(--ecc-primary);
     --ecc-bg:#020202;
     --ecc-surface:#181818;
     --ecc-border: rgba(255,255,255,0.1);
@@ -158,14 +158,14 @@
   }
   .ecc-bg-grad{
     position:absolute; inset:0;
-    background: radial-gradient(circle at center, rgba(212,175,55,0.05) 0%, rgba(2,2,2,1) 70%);
+    background: radial-gradient(circle at center, rgba(199, 167, 90,0.05) 0%, rgba(2,2,2,1) 70%);
     pointer-events:none;
   }
   .ecc-bg-glow{
     position:absolute; top:50%; left:50%;
     transform:translate(-50%, -50%);
     width:600px; height:600px;
-    background: rgba(212,175,55,0.03);
+    background: rgba(199, 167, 90,0.03);
     filter: blur(120px);
     border-radius:9999px;
     pointer-events:none;
@@ -206,12 +206,12 @@
     text-transform: uppercase;
   }
   .ecc-dot{ height: 4px; width: 10px; border-radius: 9999px; background: var(--ecc-border); }
-  .ecc-dot--done{ width: 14px; background: rgba(212,175,55,.35); }
-  .ecc-dot--active{ width: 34px; background: var(--ecc-primary); box-shadow: 0 0 10px rgba(212,175,55,.30); }
+  .ecc-dot--done{ width: 14px; background: rgba(199, 167, 90,.35); }
+  .ecc-dot--active{ width: 34px; background: var(--ecc-primary); box-shadow: 0 0 10px rgba(199, 167, 90,.30); }
 
   .ecc-shield{
     width: 64px; height: 64px;
-    background: rgba(212,175,55,0.1);
+    background: rgba(199, 167, 90,0.1);
     border-radius: 20px;
     display: flex; align-items: center; justify-content: center;
     color: var(--ecc-primary);
@@ -245,8 +245,8 @@
   }
   .ecc-otp-input:focus{
     border-color: var(--ecc-primary) !important;
-    background: rgba(212,175,55,0.05) !important;
-    box-shadow: 0 0 15px rgba(212,175,55,0.1) !important;
+    background: rgba(199, 167, 90,0.05) !important;
+    box-shadow: 0 0 15px rgba(199, 167, 90,0.1) !important;
   }
 
   .ecc-timer-text{
@@ -264,7 +264,7 @@
     padding: 16px !important;
     border-radius: 14px !important;
     border: 0 !important;
-    box-shadow: 0 10px 25px rgba(212,175,55,0.2) !important;
+    box-shadow: 0 10px 25px rgba(199, 167, 90,0.2) !important;
     font-family: "Noto Sans", system-ui, sans-serif;
     text-transform: uppercase;
     letter-spacing: 0.02em;

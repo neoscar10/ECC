@@ -6,7 +6,7 @@
 
 <div class="cms-fade-in">
     <x-cms.partials.access-gate :access="$access">
-        <div class="card border-0 rounded-4 overflow-hidden mb-4" style="background: #111; border: 1px solid rgba(212,175,55,0.1) !important; border-radius: 20px !important;">
+        <div class="card border-0 rounded-4 overflow-hidden mb-4" style="background: #111; border: 1px solid rgba(199, 167, 90,0.1) !important; border-radius: 20px !important;">
             <div class="card-body p-4 p-md-5">
                 <x-cms.partials.section-heading 
                     :title="$content['title']" 
@@ -34,16 +34,16 @@
 @once
 <style>
     .cms-btn-gold {
-        background: linear-gradient(135deg, #D4AF37 0%, #B8961E 100%);
+        background: linear-gradient(135deg, var(--ecc-primary) 0%, #B8961E 100%);
         color: #000;
         border: none;
-        box-shadow: 0 4px 20px rgba(212,175,55,0.25);
+        box-shadow: 0 4px 20px rgba(199, 167, 90,0.25);
         transition: all 0.3s ease;
     }
     .cms-btn-gold:hover {
-        background: linear-gradient(135deg, #E5C05B 0%, #D4AF37 100%);
+        background: linear-gradient(135deg, #E5C05B 0%, var(--ecc-primary) 100%);
         transform: scale(1.02);
-        box-shadow: 0 6px 25px rgba(212,175,55,0.35);
+        box-shadow: 0 6px 25px rgba(199, 167, 90,0.35);
         color: #000;
     }
     @keyframes cmsFadeIn {
