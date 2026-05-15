@@ -45,7 +45,7 @@
                     @if($image)
                         <img src="{{ $image }}" alt="{{ $title }}">
                     @else
-                        <div class="d-flex w-100 h-100 align-items-center justify-content-center bg-dark text-muted">
+                        <div class="d-flex w-100 h-100 align-items-center justify-content-center ecc-bg-surface text-muted">
                             No image
                         </div>
                     @endif

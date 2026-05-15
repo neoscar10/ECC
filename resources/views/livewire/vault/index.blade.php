@@ -182,12 +182,12 @@
                             <div class="col-12">
                                 <div class="ecc-empty-state py-5 text-center">
                                     <div class="mb-3">
-                                        <i class="mdi mdi-shield-lock-outline fs-1" style="color: var(--luxe-gold);"></i>
+                                        <i class="mdi mdi-shield-lock-outline fs-1" style="color: var(--ecc-primary);"></i>
                                     </div>
-                                    <h4 class="text-white fw-bold">
+                                    <h4 class="ecc-text-primary fw-bold">
                                         {{ auth('web')->user()?->has_vault_access ? 'NO SECURED ARTIFACTS' : 'VAULT ACCESS RESTRICTED' }}
                                     </h4>
-                                    <p class="text-white-50 mx-auto" style="max-width: 400px;">
+                                    <p class="ecc-text-primary-50 mx-auto" style="max-width: 400px;">
                                         {{ auth('web')->user()?->has_vault_access 
                                             ? 'Your vault is currently empty. Acquire and secure premium assets to view them here.' 
                                             : 'Upgrade your membership to unlock full access to the Executive Vault.' }}
@@ -249,7 +249,7 @@
 
                                 <div class="ecc-vault-modal-desc mb-4">
                                     <div class="ecc-vault-standing-label mb-2" style="font-size: 0.6rem;">MANIFEST NOTES</div>
-                                    <p class="text-white-50 fs-14 lh-lg">{{ $selectedArtifact['description'] ?: 'No additional manifest data available for this artifact.' }}</p>
+                                    <p class="ecc-text-primary-50 fs-14 lh-lg">{{ $selectedArtifact['description'] ?: 'No additional manifest data available for this artifact.' }}</p>
                                 </div>
 
                                 <div class="ecc-vault-valuation-line mb-4 p-3 rounded-3 bg-white-5 border border-white-5">
@@ -286,7 +286,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content ecc-vault-modal-content border-warning-subtle">
                     <div class="modal-header border-0">
-                        <h5 class="modal-title text-white fw-bold">REQUEST PHYSICAL DELIVERY</h5>
+                        <h5 class="modal-title ecc-text-primary fw-bold">REQUEST PHYSICAL DELIVERY</h5>
                         <button type="button" class="btn-close btn-close-white ms-auto" wire:click="$set('showRemovalModal', false)"></button>
                     </div>
                     <div class="modal-body p-4 pt-1">
@@ -300,7 +300,7 @@
                             <div class="d-flex justify-content-between align-items-end mb-3">
                                 <label class="ecc-vault-standing-label mb-0">DELIVERY ADDRESS</label>
                                 @if(count($addresses) > 0)
-                                    <button type="button" class="btn btn-link p-0 text-white-50 fs-12 text-decoration-none fw-semibold" wire:click="toggleAddressForm">
+                                    <button type="button" class="btn btn-link p-0 ecc-text-primary-50 fs-12 text-decoration-none fw-semibold" wire:click="toggleAddressForm">
                                         {{ $showAddressForm ? 'Choose Saved Address' : '+ Add New Address' }}
                                     </button>
                                 @endif
@@ -320,13 +320,13 @@
                                                             </div>
                                                             <div class="flex-grow-1">
                                                                 <div class="d-flex align-items-center gap-2 mb-1">
-                                                                    <h6 class="text-white mb-0 fs-14 fw-bold">{{ $addr->full_name }}</h6>
-                                                                    <span class="badge bg-white-5 text-white-50 fw-semibold px-2 py-0 fs-10 border border-white-5">{{ $addr->label }}</span>
+                                                                    <h6 class="ecc-text-primary mb-0 fs-14 fw-bold">{{ $addr->full_name }}</h6>
+                                                                    <span class="badge bg-white-5 ecc-text-primary-50 fw-semibold px-2 py-0 fs-10 border border-white-5">{{ $addr->label }}</span>
                                                                     @if($addr->is_default)
                                                                         <span class="badge ecc-bg-primary-subtle ecc-text-primary fw-semibold px-2 py-0 fs-10">Default</span>
                                                                     @endif
                                                                 </div>
-                                                                <div class="text-white-50 fs-13 lh-sm">
+                                                                <div class="ecc-text-primary-50 fs-13 lh-sm">
                                                                     {{ $addr->line1 }}{{ $addr->line2 ? ', '.$addr->line2 : '' }}<br>
                                                                     {{ $addr->city }}, {{ $addr->state }} {{ $addr->postal_code }}<br>
                                                                     Ph: {{ $addr->phone }}
@@ -342,37 +342,37 @@
                             @else
                                 <div class="ecc-address-form row g-3 bg-white-5 border border-white-5 rounded-3 p-3">
                                     <div class="col-md-6">
-                                        <label class="form-label fs-12 text-white-50 mb-1">Full Name</label>
+                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">Full Name</label>
                                         <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.full_name">
                                         @error('addressForm.full_name') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fs-12 text-white-50 mb-1">Phone</label>
+                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">Phone</label>
                                         <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.phone">
                                         @error('addressForm.phone') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-12">
-                                        <label class="form-label fs-12 text-white-50 mb-1">Address Line 1</label>
+                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">Address Line 1</label>
                                         <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.line1">
                                         @error('addressForm.line1') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fs-12 text-white-50 mb-1">City</label>
+                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">City</label>
                                         <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.city">
                                         @error('addressForm.city') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fs-12 text-white-50 mb-1">State</label>
+                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">State</label>
                                         <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.state">
                                         @error('addressForm.state') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fs-12 text-white-50 mb-1">Postal Code</label>
+                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">Postal Code</label>
                                         <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.postal_code">
                                         @error('addressForm.postal_code') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fs-12 text-white-50 mb-1">Label</label>
+                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">Label</label>
                                         <select class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.label">
                                             <option value="Home">Home</option>
                                             <option value="Office">Office</option>
@@ -382,7 +382,7 @@
                                     <div class="col-12">
                                         <div class="form-check custom-checkbox-white mt-1">
                                             <input class="form-check-input" type="checkbox" id="saveDef" wire:model="addressForm.is_default">
-                                            <label class="form-check-label fs-13 text-white-50" for="saveDef">
+                                            <label class="form-check-label fs-13 ecc-text-primary-50" for="saveDef">
                                                 Save as default address
                                             </label>
                                         </div>
@@ -397,7 +397,7 @@
                         </div>
 
                         <div class="d-flex gap-3 mt-4">
-                            <button class="btn btn-link text-white-50 text-decoration-none fw-bold fs-13" wire:click="$set('showRemovalModal', false)">CANCEL</button>
+                            <button class="btn btn-link ecc-text-primary-50 text-decoration-none fw-bold fs-13" wire:click="$set('showRemovalModal', false)">CANCEL</button>
                             <button class="btn ecc-btn-primary px-4 ms-auto" wire:click="submitRemovalRequest">
                                 SUBMIT REQUEST
                             </button>
@@ -415,7 +415,7 @@
 @push('styles')
 <style>
     .ecc-vault-page {
-        color: #f5efe1;
+        color: var(--ecc-text-primary);
     }
 
     .ecc-vault-header {
@@ -428,7 +428,7 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: radial-gradient(circle at 50% 0%, rgba(199, 167, 90,.08) 0%, transparent 70%);
+        background: radial-gradient(circle at 50% 0%, var(--ecc-primary-soft) 0%, transparent 70%);
         pointer-events: none;
     }
 
@@ -452,7 +452,7 @@
         line-height: .92;
         font-weight: 900;
         letter-spacing: -.06em;
-        color: #fff;
+        color: var(--ecc-text-primary);
         text-transform: uppercase;
         margin: 0;
     }
@@ -468,11 +468,11 @@
     .ecc-vault-sidebar-card,
     .ecc-vault-artifact-card,
     .ecc-vault-appraisal-card {
-        background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
-        border: 1px solid rgba(199, 167, 90,.14);
+        background: linear-gradient(180deg, var(--ecc-bg-surface), var(--ecc-bg-surface-2));
+        border: 1px solid var(--ecc-primary-border);
         border-radius: 1.25rem;
-        box-shadow: 0 12px 30px rgba(0,0,0,.14);
-        color: #f5efe1;
+        box-shadow: var(--ecc-shadow-soft);
+        color: var(--ecc-text-primary);
     }
 
     .ecc-vault-standing-card {
@@ -481,7 +481,7 @@
 
     .ecc-vault-standing-label,
     .ecc-vault-grid-title {
-        color: rgba(245,239,225,.56);
+        color: var(--ecc-text-muted);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .20em;
@@ -530,7 +530,7 @@
         text-transform: uppercase;
         margin-bottom: 1.25rem;
         padding-bottom: .75rem;
-        border-bottom: 1px solid rgba(199, 167, 90,.08);
+        border-bottom: 1px solid var(--ecc-primary-soft);
     }
 
     .ecc-vault-sidebar-icon {
@@ -541,20 +541,20 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: rgba(255,255,255,.04);
-        border: 1px solid rgba(199, 167, 90,.12);
+        background: var(--ecc-bg-input);
+        border: 1px solid var(--ecc-primary-soft);
         color: var(--ecc-primary);
     }
 
     .ecc-vault-sidebar-item-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: .98rem;
         font-weight: 800;
         margin-bottom: .15rem;
     }
 
     .ecc-vault-sidebar-item-text {
-        color: rgba(245,239,225,.58);
+        color: var(--ecc-text-muted);
         font-size: .84rem;
         line-height: 1.7;
     }
@@ -563,14 +563,14 @@
         padding: 1.5rem;
         border-left: 4px solid var(--ecc-primary);
         border-radius: 1.1rem;
-        background: rgba(255,255,255,.03);
-        border-top: 1px solid rgba(199, 167, 90,.08);
-        border-right: 1px solid rgba(199, 167, 90,.08);
-        border-bottom: 1px solid rgba(199, 167, 90,.08);
+        background: var(--ecc-bg-input);
+        border-top: 1px solid var(--ecc-primary-soft);
+        border-right: 1px solid var(--ecc-primary-soft);
+        border-bottom: 1px solid var(--ecc-primary-soft);
     }
 
     .ecc-vault-value-label {
-        color: rgba(245,239,225,.56);
+        color: var(--ecc-text-muted);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .18em;
@@ -579,7 +579,7 @@
     }
 
     .ecc-vault-value-amount {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: clamp(1.8rem, 3vw, 2.6rem);
         font-weight: 900;
         letter-spacing: -.04em;
@@ -592,7 +592,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        color: rgba(245,239,225,.52);
+        color: var(--ecc-text-subtle);
         font-size: .64rem;
         font-weight: 900;
         letter-spacing: .18em;
@@ -611,9 +611,9 @@
         width: 40px;
         height: 40px;
         border-radius: .85rem;
-        border: 1px solid rgba(199, 167, 90,.12);
-        background: rgba(255,255,255,.03);
-        color: rgba(245,239,225,.56);
+        border: 1px solid var(--ecc-primary-soft);
+        background: var(--ecc-bg-input);
+        color: var(--ecc-text-muted);
     }
 
     .ecc-vault-toggle-btn.is-active,
@@ -672,7 +672,7 @@
     }
 
     .ecc-vault-artifact-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: 1.45rem;
         font-weight: 800;
         letter-spacing: -.03em;
@@ -680,7 +680,7 @@
     }
 
     .ecc-vault-artifact-text {
-        color: rgba(245,239,225,.60);
+        color: var(--ecc-ecc-ecc-text-muted);
         line-height: 1.75;
         margin-bottom: 1rem;
     }
@@ -723,7 +723,7 @@
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: rgba(199, 167, 90,.08);
+        background: var(--ecc-primary-soft);
         color: var(--ecc-primary);
         display: inline-flex;
         align-items: center;
@@ -733,7 +733,7 @@
     }
 
     .ecc-vault-appraisal-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: 1.2rem;
         font-weight: 800;
         letter-spacing: -.02em;
@@ -742,7 +742,7 @@
     }
 
     .ecc-vault-appraisal-text {
-        color: rgba(245,239,225,.58);
+        color: var(--ecc-text-muted);
         line-height: 1.75;
         max-width: 260px;
         margin-bottom: 1.5rem;
@@ -776,7 +776,7 @@
     }
 
     .ecc-vault-mini-stat-value {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: 1.25rem;
         font-weight: 900;
         letter-spacing: -.02em;
@@ -835,7 +835,7 @@
         font-size: 2.25rem;
         font-weight: 900;
         letter-spacing: -0.04em;
-        color: #fff;
+        color: var(--ecc-text-primary);
     }
 
     .ecc-vault-modal-total {
@@ -863,15 +863,15 @@
     }
 
     .bg-white-5 {
-        background: rgba(255,255,255,0.05);
+        background: var(--ecc-bg-input);
     }
     .border-white-5 {
-        border-color: rgba(255,255,255,0.05) !important;
+        border-color: var(--ecc-bg-input) !important;
     }
     .ecc-vault-input {
-        background: rgba(255,255,255,0.03) !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
-        color: #fff !important;
+        background: var(--ecc-bg-surface-2) !important;
+        border: 1px solid var(--ecc-text-primary) !important;
+        color: var(--ecc-text-primary) !important;
         border-radius: 0.75rem !important;
         padding: 0.75rem 1rem !important;
     }
@@ -892,7 +892,7 @@
         background: rgba(199, 167, 90,0.05) !important;
     }
     .custom-radio-dot {
-        width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);
+        width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--ecc-text-primary);
         position: relative; transition: all 0.2s ease;
     }
     .custom-radio-dot.is-checked { border-color: var(--ecc-primary); }
@@ -902,7 +902,7 @@
     .ecc-bg-primary-subtle { background: rgba(199, 167, 90,0.1) !important; }
     .ecc-text-primary { color: var(--ecc-primary) !important; }
     .custom-checkbox-white .form-check-input {
-        background-color: transparent; border-color: rgba(255,255,255,0.2);
+        background-color: transparent; border-color: var(--ecc-text-primary);
     }
     .custom-checkbox-white .form-check-input:checked {
         background-color: var(--ecc-primary); border-color: var(--ecc-primary);

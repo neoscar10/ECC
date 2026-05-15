@@ -7,7 +7,7 @@
           <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-4" aria-label="Close" wire:click="closeAccessModal" onclick="document.getElementById('premiumAccessModal').style.display='none'" style="opacity: 0.8;"></button>
 
           {{-- Icon --}}
-          <div class="ecc-lock-icon mx-auto mb-4" style="width: 64px; height: 64px; background: rgba(199, 167, 90, 0.1); border: 1px solid rgba(199, 167, 90, 0.4); display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+          <div class="ecc-lock-icon mx-auto mb-4" style="width: 64px; height: 64px; background: rgba(199, 167, 90, 0.1); border: 1px solid var(--ecc-primary-border); display: flex; align-items: center; justify-content: center; border-radius: 50%;">
             <span class="material-symbols-outlined" style="color: var(--ecc-primary); font-size: 32px;">
               @if($modalData['icon'] === 'time-lock') lock_clock
               @elseif($modalData['icon'] === 'diamond') diamond
@@ -23,7 +23,7 @@
           </p>
 
           {{-- Required Tier Card --}}
-          <div class="ecc-tier-card text-start p-4 mb-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;">
+          <div class="ecc-tier-card text-start p-4 mb-4" style="background: var(--ecc-bg-surface-2); border: 1px solid var(--ecc-border-soft); border-radius: 12px;">
             <div class="d-flex justify-content-between align-items-start mb-3">
               <h4 style="color: var(--ecc-primary); font-size: 16px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">{{ $modalData['tier_name'] }}</h4>
               <div class="text-end">
@@ -86,7 +86,7 @@
           </div>
 
           {{-- CTA --}}
-          <button class="btn w-100 py-3 mb-3 fw-bold text-uppercase" wire:click="proceedToSubscribe" onclick="document.getElementById('premiumAccessModal').style.display='none'" style="background: linear-gradient(135deg, var(--ecc-primary) 0%, #B8961E 100%); color: #000; border: none; border-radius: 8px; letter-spacing: 0.05em; box-shadow: 0 4px 15px rgba(199, 167, 90, 0.2); transition: all 0.3s ease;" onmouseover="this.style.boxShadow='0 6px 20px rgba(199, 167, 90, 0.4)';" onmouseout="this.style.boxShadow='0 4px 15px rgba(199, 167, 90, 0.2)';">
+          <button class="btn w-100 py-3 mb-3 fw-bold text-uppercase" wire:click="proceedToSubscribe" onclick="document.getElementById('premiumAccessModal').style.display='none'" style="background: linear-gradient(135deg, var(--ecc-primary) 0%, #B8961E 100%); color: var(--ecc-text-primary); border: none; border-radius: 8px; letter-spacing: 0.05em; box-shadow: 0 4px 15px rgba(199, 167, 90, 0.2); transition: all 0.3s ease;" onmouseover="this.style.boxShadow='0 6px 20px var(--ecc-primary-border)';" onmouseout="this.style.boxShadow='0 4px 15px rgba(199, 167, 90, 0.2)';">
             @auth
               @if(auth()->user()->hasActiveMembership())
                 Upgrade Membership

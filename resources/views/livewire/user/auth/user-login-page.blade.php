@@ -712,7 +712,7 @@ document.addEventListener('click', function (e) {
     }
     .ecc-admin-modal__meta-value{
         font-size: 13px;
-        color: rgba(255,255,255,.85);
+        color: var(--ecc-text-primary);
         font-weight: 700;
         text-align: right;
         max-width: 280px;

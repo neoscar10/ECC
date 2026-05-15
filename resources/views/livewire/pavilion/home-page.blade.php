@@ -16,8 +16,8 @@
         {{-- Empty State --}}
         @if(empty($homeHeroBlocks) && empty($exploreBlocks))
             <div class="text-center py-5 cms-fade-in">
-                <span class="material-symbols-outlined text-muted fs-1 mb-3">auto_awesome_motion</span>
-                <p class="text-muted">No content available at the moment. Check back soon!</p>
+                <span class="material-symbols-outlined ecc-ecc-text-muted fs-1 mb-3">auto_awesome_motion</span>
+                <p class="ecc-ecc-text-muted">No content available at the moment. Check back soon!</p>
             </div>
         @endif
         
@@ -31,15 +31,15 @@
 @push('styles')
 <style>
     .ecc-explore-page {
-        color: #f5efe1;
+        color: var(--ecc-text-primary);
     }
 
     /* Hero Block Styles */
     .ecc-hero-block {
         min-height: 500px;
         border-radius: 1.75rem;
-        border: 1px solid rgba(199, 167, 90,.14);
-        background: #17120a;
+        border: 1px solid var(--ecc-primary-border);
+        background: var(--ecc-bg-surface);
         box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     }
 
@@ -60,8 +60,12 @@
     .ecc-hero-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(90deg, rgba(17,13,7,.98) 0%, rgba(17,13,7,.85) 45%, rgba(17,13,7,.25) 100%);
+        background: linear-gradient(90deg, var(--ecc-bg-surface-2) 0%, var(--ecc-overlay-dark) 45%, transparent 100%);
         z-index: 1;
+    }
+
+    html[data-theme="light"] .ecc-hero-overlay {
+        background: linear-gradient(90deg, var(--ecc-bg-surface) 0%, var(--ecc-overlay-light) 45%, transparent 100%);
     }
 
     .ecc-hero-content {
@@ -82,7 +86,7 @@
         margin-bottom: 1.25rem;
         padding: .45rem 1rem;
         border-radius: 999px;
-        background: rgba(199, 167, 90,.12);
+        background: var(--ecc-primary-soft);
         border: 1px solid rgba(199, 167, 90,.24);
         color: var(--ecc-primary);
         font-size: .7rem;
@@ -96,14 +100,14 @@
         line-height: .92;
         font-weight: 900;
         letter-spacing: -.05em;
-        color: #fff;
+        color: var(--ecc-text-primary);
     }
 
     .ecc-text-primary { color: var(--ecc-primary); }
     .ecc-text-italic { font-style: italic; }
 
     .ecc-hero-text {
-        color: rgba(245,239,225,.76);
+        color: var(--ecc-text-secondary);
         font-size: 1.1rem;
         line-height: 1.8;
         max-width: 600px;
@@ -111,7 +115,7 @@
 
     /* Section & Typography */
     .ecc-block-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: 1.55rem;
         font-weight: 800;
         letter-spacing: -.02em;
@@ -119,7 +123,7 @@
     }
 
     .ecc-block-subtitle {
-        color: rgba(245,239,225,.45);
+        color: var(--ecc-text-subtle);
         font-size: 0.85rem;
         font-weight: 400;
     }
@@ -158,9 +162,9 @@
     }
 
     .ecc-btn-glass {
-        background: rgba(255,255,255,.06);
-        border: 1px solid rgba(255,255,255,.12);
-        color: #fff;
+        background: var(--ecc-border-soft);
+        border: 1px solid var(--ecc-border);
+        color: var(--ecc-text-primary);
         border-radius: 1rem;
         font-weight: 700;
         backdrop-filter: blur(12px);
@@ -168,9 +172,9 @@
     }
 
     .ecc-btn-glass:hover {
-        background: rgba(255,255,255,.12);
+        background: var(--ecc-text-primary);
         border-color: var(--ecc-primary);
-        color: #fff;
+        color: var(--ecc-text-primary);
     }
 
     /* Animation */

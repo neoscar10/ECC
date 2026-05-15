@@ -29,13 +29,13 @@
                 display: flex;
                 flex-direction: column;
                 gap: 0;
-                background: rgba(255, 255, 255, 0.02);
-                border: 1px solid rgba(199, 167, 90, 0.12);
+                background: var(--ecc-bg-surface);
+                border: 1px solid var(--ecc-primary-soft);
                 border-radius: 20px;
                 padding: 0;
-                box-shadow: 0 12px 34px rgba(0,0,0,0.18);
+                box-shadow: var(--ecc-shadow-soft);
                 scrollbar-width: thin;
-                scrollbar-color: rgba(199, 167, 90, 0.22) transparent;
+                scrollbar-color: var(--ecc-primary-soft) transparent;
             }
 
             .shop-sidebar-inner::-webkit-scrollbar {
@@ -47,12 +47,12 @@
             }
 
             .shop-sidebar-inner::-webkit-scrollbar-thumb {
-                background: rgba(199, 167, 90, 0.22);
+                background: var(--ecc-primary-soft);
                 border-radius: 10px;
             }
 
             .shop-sidebar-inner::-webkit-scrollbar-thumb:hover {
-                background: rgba(199, 167, 90, 0.4);
+                background: var(--ecc-primary-border);
             }
         }
 
@@ -71,7 +71,7 @@
 
         .shop-filter-section {
             padding: 1.75rem;
-            border-bottom: 1px solid rgba(199, 167, 90, 0.08);
+            border-bottom: 1px solid var(--ecc-primary-soft);
         }
 
         .shop-filter-section:last-child {
@@ -79,7 +79,7 @@
         }
 
         .shop-filter-block-title {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-size: .78rem;
             font-weight: 900;
             letter-spacing: .18em;
@@ -94,7 +94,7 @@
             content: '';
             width: 3px;
             height: 12px;
-            background: var(--luxe-gold);
+            background: var(--ecc-primary);
             border-radius: 999px;
             display: inline-block;
         }
@@ -111,7 +111,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
-            color: rgba(245,240,231,.92);
+            color: var(--ecc-text-secondary);
             text-decoration: none;
             font-size: .96rem;
             font-weight: 600;
@@ -123,16 +123,16 @@
         }
 
         .shop-filter-link:hover {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
         }
 
         .shop-filter-link.active {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-weight: 800;
         }
 
         .shop-filter-count {
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
             font-size: .72rem;
             font-weight: 700;
         }
@@ -145,7 +145,7 @@
             position: relative;
             height: 4px;
             border-radius: 999px;
-            background: rgba(255,255,255,.10);
+            background: var(--ecc-border);
             margin: 1rem 0 .75rem;
             cursor: pointer;
         }
@@ -155,7 +155,7 @@
             top: 0;
             height: 100%;
             border-radius: 999px;
-            background: var(--luxe-gold);
+            background: var(--ecc-primary);
             cursor: pointer;
         }
 
@@ -165,10 +165,10 @@
             width: 14px;
             height: 14px;
             border-radius: 50%;
-            background: var(--luxe-gold);
+            background: var(--ecc-primary);
             border: 2px solid #110f09;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 0 4px rgba(199, 167, 90,.08);
+            box-shadow: 0 0 0 4px var(--ecc-primary-soft);
             pointer-events: none;
             z-index: 3;
         }
@@ -177,7 +177,7 @@
             display: flex;
             justify-content: space-between;
             gap: 1rem;
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
             font-size: .75rem;
             font-weight: 700;
             margin-top: .75rem;
@@ -252,9 +252,9 @@
         .shop-pill-btn {
             min-height: 40px;
             border-radius: 10px;
-            border: 1px solid rgba(199, 167, 90,.14);
-            background: rgba(255,255,255,.02);
-            color: rgba(245,240,231,.92);
+            border: 1px solid var(--ecc-primary-border);
+            background: var(--ecc-bg-input);
+            color: var(--ecc-text-secondary);
             font-size: .78rem;
             font-weight: 800;
             text-transform: uppercase;
@@ -263,14 +263,14 @@
         }
 
         .shop-pill-btn:hover {
-            border-color: rgba(199, 167, 90,.34);
-            color: var(--luxe-gold);
+            border-color: var(--ecc-primary-border);
+            color: var(--ecc-primary);
         }
 
         .shop-pill-btn.active {
-            border-color: var(--luxe-gold);
-            background: rgba(199, 167, 90,.12);
-            color: var(--luxe-gold);
+            border-color: var(--ecc-primary);
+            background: var(--ecc-primary-soft);
+            color: var(--ecc-primary);
         }
 
         .shop-checkbox-list {
@@ -283,7 +283,7 @@
             display: flex;
             align-items: center;
             gap: .75rem;
-            color: rgba(245,240,231,.92);
+            color: var(--ecc-text-secondary);
             font-size: .92rem;
             font-weight: 500;
             cursor: pointer;
@@ -293,9 +293,9 @@
             width: 18px;
             height: 18px;
             border-radius: 4px;
-            border: 1px solid rgba(199, 167, 90,.20);
-            background: rgba(255,255,255,.03);
-            accent-color: var(--luxe-gold);
+            border: 1px solid var(--ecc-primary-soft);
+            background: var(--ecc-bg-input);
+            accent-color: var(--ecc-primary);
         }
 
         .shop-main {
@@ -304,11 +304,11 @@
         }
 
     .ecc-shop-search-block {
-        background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
-        border: 1px solid rgba(199, 167, 90,.14);
+        background: linear-gradient(180deg, var(--ecc-bg-surface), var(--ecc-bg-surface-2));
+        border: 1px solid var(--ecc-primary-border);
         border-radius: 1.25rem;
         padding: 1.25rem 1.5rem;
-        box-shadow: 0 12px 30px rgba(0,0,0,.14);
+        box-shadow: var(--ecc-shadow-soft);
         margin-bottom: 2rem;
     }
 
@@ -342,24 +342,24 @@
     .ecc-shop-search-input {
         min-height: 52px;
         border-radius: 1rem;
-        background: rgba(255,255,255,.04);
-        border: 1px solid rgba(199, 167, 90,.12);
-        color: #f5efe1;
+        background: var(--ecc-bg-input);
+        border: 1px solid var(--ecc-primary-soft);
+        color: var(--ecc-text-primary);
         box-shadow: none !important;
     }
 
     .ecc-shop-search-input:focus {
-        background: rgba(255,255,255,.06);
-        border-color: rgba(199, 167, 90,.42);
-        color: #fff;
+        background: var(--ecc-border-soft);
+        border-color: var(--ecc-primary-border);
+        color: var(--ecc-text-primary);
     }
 
     .ecc-shop-search-input::placeholder {
-        color: rgba(245,239,225,.38);
+        color: var(--ecc-text-subtle);
     }
 
     .ecc-shop-search-helper {
-        color: rgba(245,239,225,.52);
+        color: var(--ecc-text-subtle);
         font-size: .82rem;
         line-height: 1.6;
         padding-left: calc(52px + 1rem);
@@ -374,7 +374,7 @@
         }
 
         .shop-products-title {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: 2.15rem;
             line-height: 1.1;
             font-weight: 900;
@@ -383,7 +383,7 @@
         }
 
         .shop-products-subtitle {
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
             font-size: .92rem;
             margin-top: .35rem;
         }
@@ -392,7 +392,7 @@
             display: inline-flex;
             align-items: center;
             gap: .8rem;
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
             font-size: .78rem;
             font-weight: 900;
             letter-spacing: .16em;
@@ -403,7 +403,7 @@
             min-width: 190px;
             border: 0;
             background-color: transparent;
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: .95rem;
             font-weight: 800;
             box-shadow: none;
@@ -411,7 +411,7 @@
         }
 
         .shop-sort-inline .form-select option {
-            color: #111;
+            color: var(--ecc-text-primary);
         }
 
         .shop-grid {
@@ -425,23 +425,23 @@
             overflow: hidden;
             border: 1px solid transparent;
             background:
-                linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
-                rgba(35,31,23,.90);
-            box-shadow: 0 16px 34px rgba(0,0,0,.22);
+                linear-gradient(180deg, var(--ecc-bg-hover), transparent),
+                var(--ecc-bg-surface);
+            box-shadow: var(--ecc-shadow-card);
             transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
         }
 
         .shop-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(199, 167, 90,.18);
-            box-shadow: 0 22px 44px rgba(0,0,0,.32);
+            border-color: var(--ecc-primary-border);
+            box-shadow: var(--ecc-shadow-card);
         }
 
         .shop-card-media {
             position: relative;
             aspect-ratio: 4 / 5;
             overflow: hidden;
-            background: rgba(255,255,255,.03);
+            background: var(--ecc-bg-input);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -472,7 +472,7 @@
         }
 
         .shop-card-title {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: 1.2rem;
             font-weight: 800;
             line-height: 1.15;
@@ -481,7 +481,7 @@
         }
 
         .shop-card-subtitle {
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
             font-size: .7rem;
             letter-spacing: .18em;
             text-transform: uppercase;
@@ -489,7 +489,7 @@
         }
 
         .shop-card-price {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-size: 1.5rem;
             font-weight: 900;
             letter-spacing: -.03em;
@@ -507,7 +507,7 @@
             border-radius: 10px;
             border: 0;
             background: #3d392f;
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: .72rem;
             font-weight: 900;
             letter-spacing: .14em;
@@ -521,8 +521,8 @@
         }
 
         .shop-card-view-btn:hover {
-            background: var(--luxe-gold);
-            color: #111;
+            background: var(--ecc-primary);
+            color: var(--ecc-text-primary);
         }
 
         .shop-card-cart-btn {
@@ -530,8 +530,8 @@
             min-height: 44px;
             border-radius: 10px;
             border: 0;
-            background: var(--luxe-gold);
-            color: #111;
+            background: var(--ecc-primary);
+            color: var(--ecc-text-primary);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -545,7 +545,7 @@
 
         .shop-card-cart-btn:hover {
             filter: brightness(1.05);
-            color: #111;
+            color: var(--ecc-text-primary);
         }
 
         .shop-card-cart-loading {
@@ -554,12 +554,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: var(--luxe-gold);
+            background: var(--ecc-primary);
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 9px;
-            color: #111;
+            color: var(--ecc-text-primary);
             z-index: 5;
         }
 
@@ -578,13 +578,13 @@
             min-height: 28px;
             padding: .4rem .8rem;
             border-radius: 999px;
-            background: var(--luxe-gold);
-            color: #111;
+            background: var(--ecc-primary);
+            color: var(--ecc-text-primary);
             font-size: .62rem;
             font-weight: 900;
             letter-spacing: .12em;
             text-transform: uppercase;
-            box-shadow: 0 10px 18px rgba(199, 167, 90,.18);
+            box-shadow: 0 10px 18px var(--ecc-primary-border);
         }
 
         .shop-pagination-wrap {
@@ -604,9 +604,9 @@
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            border: 1px solid rgba(199, 167, 90,.14);
+            border: 1px solid var(--ecc-primary-border);
             background: transparent;
-            color: rgba(245,240,231,.92);
+            color: var(--ecc-text-secondary);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -616,19 +616,19 @@
         }
 
         .shop-pagination-page.active {
-            background: var(--luxe-gold);
-            border-color: var(--luxe-gold);
-            color: #111;
+            background: var(--ecc-primary);
+            border-color: var(--ecc-primary);
+            color: var(--ecc-text-primary);
         }
 
         .shop-pagination-arrow:hover,
         .shop-pagination-page:hover {
-            border-color: rgba(199, 167, 90,.38);
-            color: var(--luxe-gold);
+            border-color: var(--ecc-primary-border);
+            color: var(--ecc-primary);
         }
 
         .shop-pagination-page.active:hover {
-            color: #111;
+            color: var(--ecc-text-primary);
         }
 
         .shop-mobile-filter-trigger {
@@ -636,9 +636,9 @@
             width: 100%;
             min-height: 46px;
             border-radius: 12px;
-            border: 1px solid rgba(199, 167, 90,.16);
-            background: rgba(255,255,255,.03);
-            color: #fff;
+            border: 1px solid var(--ecc-primary-soft);
+            background: var(--ecc-bg-input);
+            color: var(--ecc-text-primary);
             font-size: .82rem;
             font-weight: 900;
             letter-spacing: .12em;
@@ -648,10 +648,10 @@
 
         .shop-filter-mobile-card {
             border-radius: 18px;
-            border: 1px solid rgba(199, 167, 90,.14);
+            border: 1px solid var(--ecc-primary-border);
             background:
-                linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
-                rgba(16,13,7,.95);
+                linear-gradient(180deg, var(--ecc-bg-hover), transparent),
+                var(--ecc-bg-surface);
         }
 
         @media (max-width: 1199.98px) {
@@ -733,9 +733,9 @@
         }
         .hover-opacity-100 { transition: opacity 0.2s ease; }
         .hover-opacity-100:hover { opacity: 1 !important; }
-        .ecc-text-primary { color: var(--luxe-gold) !important; }
+        .ecc-text-primary { color: var(--ecc-primary) !important; }
         .shop-filter-link.parent-active {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-weight: 600;
         }
 
@@ -948,7 +948,7 @@
         </aside>
 
         {{-- MOBILE FILTER OFFCANVAS --}}
-        <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="shopFiltersCanvas" aria-labelledby="shopFiltersCanvasLabel" wire:ignore.self>
+        <div class="offcanvas offcanvas-start ecc-bg-surface ecc-text-primary" tabindex="-1" id="shopFiltersCanvas" aria-labelledby="shopFiltersCanvasLabel" wire:ignore.self>
             <div class="offcanvas-body pt-5">
                 {{-- Spacer to clear the fixed navbar --}}
                 <div class="d-lg-none" style="height: 40px;"></div>
@@ -957,7 +957,7 @@
                         <section>
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div class="shop-filter-block-title mb-0">Categories</div>
-                                <button type="button" class="btn btn-icon btn-ghost-light text-white opacity-75 hover-opacity-100 p-0" 
+                                <button type="button" class="btn btn-icon btn-ghost-light ecc-text-primary opacity-75 hover-opacity-100 p-0" 
                                         data-bs-dismiss="offcanvas" aria-label="Close">
                                     <i class="mdi mdi-close fs-22"></i>
                                 </button>
@@ -1216,7 +1216,7 @@
                                             @endif
 
                                             @if($isSoldOut)
-                                                <div class="shop-card-badge bg-dark text-white border border-secondary">Sold Out</div>
+                                                <div class="shop-card-badge ecc-bg-surface ecc-text-primary border border-secondary">Sold Out</div>
                                             @elseif(!empty($badgeLabel))
                                                 <div class="shop-card-badge">{{ $badgeLabel }}</div>
                                             @endif
@@ -1267,7 +1267,7 @@
                         </div>
                     </div>
                 @else
-                    <div class="archive-empty-state text-light-emphasis text-center py-5">
+                    <div class="archive-empty-state ecc-text-muted-emphasis text-center py-5">
                         No products found for the selected filters.
                     </div>
                 @endif

@@ -323,7 +323,7 @@
     {{-- Enquire Modal --}}
     <div class="modal fade" id="enquireModal" tabindex="-1" aria-labelledby="enquireModalLabel" aria-hidden="true" wire:ignore.self>
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="background:var(--luxe-surface); border:1px solid rgba(199, 167, 90,.30); border-radius:16px;">
+            <div class="modal-content" style="background:var(--ecc-bg-surface); border:1px solid rgba(199, 167, 90,.30); border-radius:16px;">
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title archive-detail-title fs-4" id="enquireModalLabel" style="margin:0;">Enquire Privately</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -342,7 +342,7 @@
                         
                         <form wire:submit.prevent="submitEnquiry">
                             <div class="mb-4">
-                                <textarea wire:model="enquiryMessage" class="form-control" rows="3" placeholder="Add an optional message..." style="background:rgba(255,255,255,0.05); border:1px solid rgba(199, 167, 90,0.2); color:#fff; border-radius:12px; box-shadow:none;"></textarea>
+                                <textarea wire:model="enquiryMessage" class="form-control" rows="3" placeholder="Add an optional message..." style="background:var(--ecc-text-primary); border:1px solid rgba(199, 167, 90,0.2); color: var(--ecc-text-primary); border-radius:12px; box-shadow:none;"></textarea>
                                 @error('enquiryMessage') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                             </div>
                             
@@ -361,10 +361,10 @@
     </div>
     
   {{-- Simple Zoom overlay --}}
-  <div class="archive-detail-page bg-black bg-opacity-75" style="position:fixed; inset:0; z-index:9999; backdrop-filter:blur(8px);" id="eccZoom" hidden>
+  <div class="archive-detail-page ecc-bg-page bg-opacity-75" style="position:fixed; inset:0; z-index:9999; backdrop-filter:blur(8px);" id="eccZoom" hidden>
     <div class="position-absolute" style="inset:0" onclick="window.dispatchEvent(new CustomEvent('eccModalClose'))"></div>
-    <div class="position-relative" style="margin: 5vh auto 0; width:min(1000px, calc(100% - 24px)); border-radius:16px; overflow:hidden; background:#000;">
-      <button class="position-absolute d-flex align-items-center justify-content-center" style="top:15px; right:15px; width:44px; height:44px; border-radius:50%; background:rgba(0,0,0,0.5); color:#fff; border:0; z-index:100;" onclick="window.dispatchEvent(new CustomEvent('eccModalClose'))" aria-label="Close">
+    <div class="position-relative" style="margin: 5vh auto 0; width:min(1000px, calc(100% - 24px)); border-radius:16px; overflow:hidden; background: var(--ecc-bg-page);">
+      <button class="position-absolute d-flex align-items-center justify-content-center" style="top:15px; right:15px; width:44px; height:44px; border-radius:50%; background:rgba(0,0,0,0.5); color: var(--ecc-text-primary); border:0; z-index:100;" onclick="window.dispatchEvent(new CustomEvent('eccModalClose'))" aria-label="Close">
         <span class="material-symbols-outlined">close</span>
       </button>
       <div style="height:80vh; background-size:contain; background-position:center; background-repeat: no-repeat; background-image:url('{{ is_array($hero) ? ($hero['url'] ?? '') : $hero }}');" id="eccZoomImg"></div>
@@ -391,7 +391,7 @@
         border: 1px solid rgba(199, 167, 90,.14);
         background:
             radial-gradient(circle at center, rgba(199, 167, 90,.06), transparent 60%),
-            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
+            linear-gradient(180deg, var(--ecc-bg-hover), transparent),
             #120f08;
         box-shadow: 0 20px 42px rgba(0,0,0,.28);
         min-height: 560px;
@@ -423,9 +423,9 @@
         width: 44px;
         height: 44px;
         border-radius: 50%;
-        border: 1px solid rgba(255,255,255,.14);
-        background: rgba(0,0,0,.42);
-        color: #fff;
+        border: 1px solid var(--ecc-border);
+        background: var(--ecc-overlay-dark);
+        color: var(--ecc-text-primary);
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -434,9 +434,9 @@
     }
 
     .archive-detail-stage-btn:hover {
-        background: var(--luxe-gold);
+        background: var(--ecc-primary);
         color: #111;
-        border-color: var(--luxe-gold);
+        border-color: var(--ecc-primary);
     }
 
     .archive-detail-stage-btn.prev {
@@ -468,7 +468,7 @@
         border-radius: 18px;
         overflow: hidden;
         border: 1px solid rgba(199, 167, 90,.14);
-        background: #120f08;
+        background: var(--ecc-bg-surface-2);
         min-height: 118px;
         padding: 0;
         transition: .2s ease;
@@ -477,7 +477,7 @@
 
     .archive-detail-thumb:hover,
     .archive-detail-thumb.active {
-        border-color: var(--luxe-gold);
+        border-color: var(--ecc-primary);
         box-shadow: 0 0 0 2px rgba(199, 167, 90,.12);
     }
 
@@ -504,7 +504,7 @@
         border-radius: 18px;
         border: 1px solid rgba(199, 167, 90,.16);
         background: rgba(199, 167, 90,.08);
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -553,7 +553,7 @@
         border-radius: 999px;
         background: rgba(199, 167, 90,.12);
         border: 1px solid rgba(199, 167, 90,.18);
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .1em;
@@ -561,7 +561,7 @@
     }
 
     .archive-detail-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: clamp(2rem, 3vw, 3.2rem);
         line-height: 1.04;
         font-weight: 900;
@@ -570,7 +570,7 @@
     }
 
     .archive-detail-subtitle {
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
         font-size: 1.08rem;
         line-height: 1.6;
         font-weight: 600;
@@ -594,19 +594,19 @@
         border-radius: 999px;
         background: rgba(199, 167, 90,.08);
         border: 1px solid rgba(199, 167, 90,.16);
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: .88rem;
         font-weight: 800;
         line-height: 1;
     }
 
     .archive-detail-chip i {
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
         font-size: 1rem;
     }
 
     .archive-detail-chip-accent {
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
     }
 
     .archive-detail-description-card,
@@ -615,8 +615,8 @@
         border-radius: 22px;
         border: 1px solid rgba(199, 167, 90,.14);
         background:
-            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
-            rgba(16,13,7,.78);
+            linear-gradient(180deg, var(--ecc-bg-hover), transparent),
+            var(--ecc-bg-surface);
         box-shadow: 0 18px 36px rgba(0,0,0,.22);
     }
 
@@ -629,7 +629,7 @@
     .archive-detail-richtext p,
     .archive-detail-richtext li,
     .archive-detail-richtext span {
-        color: var(--luxe-text-soft);
+        color: var(--ecc-text-secondary);
         line-height: 1.9;
         font-size: .98rem;
     }
@@ -640,7 +640,7 @@
     .archive-detail-richtext h4,
     .archive-detail-richtext h5,
     .archive-detail-richtext h6 {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-weight: 900;
         line-height: 1.2;
         letter-spacing: -.03em;
@@ -651,13 +651,13 @@
     .archive-detail-richtext h1 { font-size: 2rem; }
     .archive-detail-richtext h2 { font-size: 1.7rem; }
     .archive-detail-richtext h3 { font-size: 1.45rem; }
-    .archive-detail-richtext strong { color: #fff; font-weight: 800; }
+    .archive-detail-richtext strong { color: var(--ecc-text-primary); font-weight: 800; }
     .archive-detail-richtext ul,
     .archive-detail-richtext ol { padding-left: 1.1rem; margin-bottom: 1rem; }
     .archive-detail-richtext li { margin-bottom: .45rem; }
 
     .archive-detail-section-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: 1.75rem;
         font-weight: 900;
         letter-spacing: -.03em;
@@ -674,7 +674,7 @@
         width: 4px;
         height: 28px;
         border-radius: 999px;
-        background: var(--luxe-gold);
+        background: var(--ecc-primary);
         flex: 0 0 auto;
     }
 
@@ -693,13 +693,13 @@
     }
 
     .archive-detail-spec-label {
-        color: var(--luxe-text-soft);
+        color: var(--ecc-text-secondary);
         font-size: .96rem;
         font-weight: 500;
     }
 
     .archive-detail-spec-value {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: .96rem;
         font-weight: 800;
         text-align: right;
@@ -718,7 +718,7 @@
     }
 
     .archive-detail-side-kicker {
-        color: var(--luxe-text-soft);
+        color: var(--ecc-text-secondary);
         font-size: .7rem;
         font-weight: 900;
         letter-spacing: .16em;
@@ -727,7 +727,7 @@
     }
 
     .archive-detail-side-value {
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
         font-size: clamp(1.8rem, 2vw, 2.5rem);
         line-height: 1.15;
         font-weight: 900;
@@ -754,24 +754,24 @@
     .archive-detail-outline-btn {
         border: 1px solid rgba(199, 167, 90,.42);
         background: transparent;
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
     }
 
     .archive-detail-outline-btn:hover {
         background: rgba(199, 167, 90,.10);
-        color: var(--luxe-gold);
-        border-color: var(--luxe-gold);
+        color: var(--ecc-primary);
+        border-color: var(--ecc-primary);
     }
 
     .archive-detail-solid-soft-btn {
         border: 1px solid rgba(199, 167, 90,.24);
         background: rgba(199, 167, 90,.12);
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
     }
 
     .archive-detail-solid-soft-btn:hover {
         background: rgba(199, 167, 90,.18);
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
         border-color: rgba(199, 167, 90,.38);
     }
 
@@ -785,12 +785,12 @@
     }
 
     .archive-detail-cert-card i {
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
         font-size: 1.15rem;
     }
 
     .archive-detail-cert-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: .76rem;
         font-weight: 900;
         letter-spacing: .08em;
@@ -798,7 +798,7 @@
     }
 
     .archive-detail-cert-subtitle {
-        color: var(--luxe-text-soft);
+        color: var(--ecc-text-secondary);
         font-size: .72rem;
         line-height: 1.5;
     }

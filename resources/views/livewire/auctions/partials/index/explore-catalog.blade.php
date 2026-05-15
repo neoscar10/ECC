@@ -7,7 +7,7 @@
         </h2>
 
         <div class="luxe-chip-row align-items-center">
-            <span class="text-secondary small text-uppercase fw-bold me-2 tracking-widest">Filter by:</span>
+            <span class="ecc-text-secondary small text-uppercase fw-bold me-2 tracking-widest">Filter by:</span>
             <button type="button"
                 class="luxe-chip {{ ($activeTab ?? 'live') === 'live' ? 'active' : '' }}"
                 wire:click="setTab('live')"
@@ -68,7 +68,7 @@
                             @if($image)
                                 <img src="{{ $image }}" alt="{{ $title }}">
                             @else
-                                <div class="d-flex w-100 h-100 align-items-center justify-content-center bg-dark text-muted">
+                                <div class="d-flex w-100 h-100 align-items-center justify-content-center ecc-bg-surface text-muted">
                                     No image
                                 </div>
                             @endif
@@ -80,7 +80,7 @@
                             @endif
                             
                             @if($lot['is_early_access_active'] ?? false)
-                                <span class="luxe-live-pill" style="left: 12px; right: auto; bottom: 12px; top: auto; background: #e31837; font-size: 0.65rem; border: 1px solid rgba(255,255,255,0.2); color: #fff; backdrop-filter: blur(8px); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">
+                                <span class="luxe-live-pill" style="left: 12px; right: auto; bottom: 12px; top: auto; background: #e31837; font-size: 0.65rem; border: 1px solid var(--ecc-text-primary); color: var(--ecc-text-primary); backdrop-filter: blur(8px); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">
                                     <i class="mdi mdi-clock-fast"></i> Early Access
                                 </span>
                             @elseif($hasPremiumBadge)
@@ -127,13 +127,13 @@
                             <div class="luxe-grid-meta mt-auto">
                                 <div>
                                     <div class="luxe-label">{{ $isUpcomingTab ? 'Starting' : 'Current Bid' }}</div>
-                                    <div class="fw-bold" style="color: var(--luxe-gold);">
+                                    <div class="fw-bold" style="color: var(--ecc-primary);">
                                         {{ $isUpcomingTab ? $formattedStartingBid : $formattedCurrentBid }}
                                     </div>
                                 </div>
                                 <div class="text-end">
                                     <div class="luxe-label">{{ $isUpcomingTab ? 'Opens in' : 'Time Left' }}</div>
-                                    <div class="small fw-semibold text-white">
+                                    <div class="small fw-semibold ecc-text-primary">
                                         {{ $isUpcomingTab ? ($opensIn ?? '--') : ($closesIn ?? '--') }}
                                     </div>
                                 </div>
@@ -176,7 +176,7 @@
         <div class="luxe-empty-state">
             <i class="mdi mdi-gavel fs-1 mb-3" style="color: rgba(199, 167, 90,0.4)"></i>
             <div class="fs-5 fw-semibold mb-2">No items found</div>
-            <div class="text-light-emphasis small">There are no lots available under this section right now.</div>
+            <div class="ecc-text-muted-emphasis small">There are no lots available under this section right now.</div>
         </div>
     @endif
 </section>

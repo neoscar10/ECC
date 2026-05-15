@@ -18,7 +18,7 @@
 
 <div class="cms-fade-in">
     <x-cms.partials.access-gate :access="$access">
-        <section class="cms-card-split mb-5 overflow-hidden rounded-4 border border-secondary border-opacity-25 bg-dark shadow-lg">
+        <section class="cms-card-split mb-5 overflow-hidden rounded-4 border border-secondary border-opacity-25 ecc-bg-surface shadow-lg">
             <div class="row g-0 align-items-stretch">
                 <!-- Image Section -->
                 <div class="col-lg-6 order-1">
@@ -39,12 +39,12 @@
                             </div>
                         @endif
 
-                        <h2 class="ecc-hero-title mb-3 fs-2 text-white">
+                        <h2 class="ecc-hero-title mb-3 fs-2 ecc-text-primary">
                             {!! $formattedTitle !!}
                         </h2>
 
                         @if(!empty($content['subtitle']))
-                            <p class="ecc-hero-text text-light-emphasis mb-4 fs-5">{{ $content['subtitle'] }}</p>
+                            <p class="ecc-hero-text ecc-text-muted-emphasis mb-4 fs-5">{{ $content['subtitle'] }}</p>
                         @endif
 
                         <div class="d-flex flex-wrap gap-3 mt-2">
@@ -103,7 +103,7 @@
 
     .ecc-btn-primary {
         background: linear-gradient(135deg, var(--ecc-primary) 0%, #B8961E 100%);
-        color: #000;
+        color: var(--ecc-text-primary);
         border: none;
         box-shadow: 0 4px 20px rgba(199, 167, 90,0.25);
         transition: all 0.3s ease;
@@ -113,19 +113,19 @@
         background: linear-gradient(135deg, #E5C05B 0%, var(--ecc-primary) 100%);
         transform: scale(1.02);
         box-shadow: 0 6px 25px rgba(199, 167, 90,0.35);
-        color: #000;
+        color: var(--ecc-text-primary);
     }
 
     .ecc-btn-glass {
-        background: rgba(255, 255, 255, 0.05);
+        background: var(--ecc-bg-input);
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #fff;
+        border: 1px solid var(--ecc-text-primary);
+        color: var(--ecc-text-primary);
         transition: all 0.3s ease;
     }
     .ecc-btn-glass:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
+        background: var(--ecc-text-primary);
+        color: var(--ecc-text-primary);
         transform: scale(1.02);
     }
 

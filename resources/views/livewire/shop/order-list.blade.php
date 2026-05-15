@@ -2,7 +2,7 @@
     @push('styles')
     <style>
         .ecc-order-history-page {
-            color: #f5efe1;
+            color: var(--ecc-text-primary);
             position: relative;
         }
 
@@ -40,14 +40,14 @@
             line-height: .95;
             font-weight: 900;
             letter-spacing: -.05em;
-            color: #fff;
+            color: var(--ecc-text-primary);
             margin: 0;
             text-transform: uppercase;
         }
 
         .ecc-history-subtitle {
             max-width: 640px;
-            color: rgba(245,239,225,.68);
+            color: var(--ecc-text-muted);
             font-size: 1.05rem;
             line-height: 1.8;
         }
@@ -55,11 +55,11 @@
         .ecc-stat-card,
         .ecc-order-history-card,
         .ecc-empty-orders-card {
-            background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
+            background: linear-gradient(180deg, var(--ecc-bg-surface), var(--ecc-bg-surface-2));
             border: 1px solid rgba(199, 167, 90,.10);
             border-radius: 1.25rem;
-            color: #f5efe1;
-            box-shadow: 0 12px 30px rgba(0,0,0,.14);
+            color: var(--ecc-text-primary);
+            box-shadow: var(--ecc-shadow-soft);
         }
 
         .ecc-stat-card {
@@ -68,11 +68,11 @@
         }
 
         .ecc-stat-card.is-highlight {
-            box-shadow: 0 0 40px rgba(199, 167, 90,.05), 0 12px 30px rgba(0,0,0,.14);
+            box-shadow: 0 0 40px rgba(199, 167, 90,.05), var(--ecc-shadow-soft);
         }
 
         .ecc-stat-label {
-            color: rgba(245,239,225,.56);
+            color: var(--ecc-text-muted);
             font-size: .72rem;
             font-weight: 800;
             letter-spacing: .18em;
@@ -84,13 +84,13 @@
             font-size: clamp(1.8rem, 3vw, 2.5rem);
             font-weight: 900;
             line-height: 1.05;
-            color: #fff;
+            color: var(--ecc-text-primary);
         }
 
         .ecc-stat-value span {
             font-size: .95rem;
             font-weight: 500;
-            color: rgba(245,239,225,.65);
+            color: var(--ecc-text-muted);
         }
 
         .ecc-text-primary {
@@ -112,7 +112,7 @@
             width: 100%;
             height: 100%;
             min-height: 170px;
-            background: rgba(255,255,255,.04);
+            background: var(--ecc-bg-input);
         }
 
         @media (min-width: 768px) {
@@ -156,14 +156,14 @@
         }
 
         .ecc-order-card-title {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: 1.35rem;
             font-weight: 800;
             letter-spacing: -.02em;
         }
 
         .ecc-order-card-date {
-            color: rgba(245,239,225,.62);
+            color: var(--ecc-text-muted);
             font-size: .95rem;
         }
 
@@ -171,11 +171,11 @@
             font-size: 2rem;
             font-weight: 900;
             line-height: 1;
-            color: #fff;
+            color: var(--ecc-text-primary);
         }
 
         .ecc-order-card-secondary-amount {
-            color: rgba(245,239,225,.52);
+            color: var(--ecc-text-subtle);
             font-size: .62rem;
             font-weight: 800;
             letter-spacing: .16em;
@@ -198,7 +198,7 @@
         .ecc-status-pill.status-processing {
             background: rgba(199, 167, 90,.10);
             color: var(--ecc-primary);
-            border-color: rgba(199, 167, 90,.18);
+            border-color: var(--ecc-primary-border);
         }
 
         .ecc-status-pill.status-shipped {
@@ -216,7 +216,7 @@
         .ecc-status-pill.status-paid,
         .ecc-status-pill.status-default {
             background: rgba(245,239,225,.08);
-            color: #f5efe1;
+            color: var(--ecc-text-primary);
             border-color: rgba(245,239,225,.12);
         }
 
@@ -242,14 +242,14 @@
             border-radius: 999px;
             overflow: hidden;
             border: 2px solid #1a140b;
-            background: rgba(255,255,255,.06);
+            background: var(--ecc-border-soft);
             margin-left: -10px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             font-size: .7rem;
             font-weight: 800;
-            color: #f5efe1;
+            color: var(--ecc-text-primary);
         }
 
         .ecc-order-preview-avatar:first-child {
@@ -257,11 +257,11 @@
         }
 
         .ecc-order-preview-avatar.is-count {
-            background: rgba(255,255,255,.06);
+            background: var(--ecc-border-soft);
         }
 
         .ecc-order-footer-note {
-            color: rgba(245,239,225,.62);
+            color: var(--ecc-text-muted);
             font-size: .82rem;
         }
 
@@ -346,13 +346,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(199, 167, 90,.08);
+            background: var(--ecc-primary-soft);
             color: var(--ecc-primary);
             font-size: 2rem;
         }
 
         .ecc-empty-orders-title {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: 1.5rem;
             font-weight: 800;
         }
@@ -360,7 +360,7 @@
         .ecc-empty-orders-text {
             max-width: 520px;
             margin-inline: auto;
-            color: rgba(245,239,225,.64);
+            color: var(--ecc-ecc-ecc-text-muted);
             line-height: 1.8;
         }
     </style>

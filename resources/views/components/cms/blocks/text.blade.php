@@ -6,7 +6,7 @@
 
 <div class="cms-fade-in">
     <x-cms.partials.access-gate :access="$access">
-        <div class="card border-0 rounded-4 overflow-hidden mb-4" style="background: #111; border: 1px solid rgba(199, 167, 90,0.1) !important; border-radius: 20px !important;">
+        <div class="card border-0 rounded-4 overflow-hidden mb-4" style="background: var(--ecc-bg-page); border: 1px solid rgba(199, 167, 90,0.1) !important; border-radius: 20px !important;">
             <div class="card-body p-4 p-md-5">
                 <x-cms.partials.section-heading 
                     :title="$content['title']" 
@@ -15,7 +15,7 @@
                 />
                 
                 @if(!empty($content['body_text']))
-                    <div class="mt-4" style="line-height: 1.8; color: #FFFFFF; opacity: 0.9; font-size: 15px;">
+                    <div class="mt-4" style="line-height: 1.8; color: var(--ecc-text-primary); opacity: 0.9; font-size: 15px;">
                         {!! nl2br(e($content['body_text'])) !!}
                     </div>
                 @endif
@@ -35,7 +35,7 @@
 <style>
     .cms-btn-gold {
         background: linear-gradient(135deg, var(--ecc-primary) 0%, #B8961E 100%);
-        color: #000;
+        color: var(--ecc-text-primary);
         border: none;
         box-shadow: 0 4px 20px rgba(199, 167, 90,0.25);
         transition: all 0.3s ease;
@@ -44,7 +44,7 @@
         background: linear-gradient(135deg, #E5C05B 0%, var(--ecc-primary) 100%);
         transform: scale(1.02);
         box-shadow: 0 6px 25px rgba(199, 167, 90,0.35);
-        color: #000;
+        color: var(--ecc-text-primary);
     }
     @keyframes cmsFadeIn {
         from { opacity: 0; transform: translateY(10px); }

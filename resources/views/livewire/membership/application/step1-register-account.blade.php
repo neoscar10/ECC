@@ -119,7 +119,7 @@
     --ecc-border:#333333;
   }
 
-  .ecc-bg{ background: var(--ecc-bg); color: #fff; font-family: "Newsreader", serif; }
+  .ecc-bg{ background: var(--ecc-bg); color: var(--ecc-text-primary); font-family: "Newsreader", serif; }
   .ecc-max{ max-width: 520px; }
   @media (min-width: 992px){ .ecc-max{ max-width: 620px; } }
 
@@ -146,7 +146,7 @@
   .ecc-topbar{
     background: rgba(2,2,2,.80);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255,255,255,.05);
+    border-bottom: 1px solid var(--ecc-border-soft);
   }
   .ecc-icon-btn{
     width:40px; height:40px; border-radius:9999px;
@@ -154,11 +154,11 @@
     color: rgba(199, 167, 90,.85);
     display:flex; align-items:center; justify-content:center;
   }
-  .ecc-icon-btn:hover{ background: rgba(255,255,255,.05); }
+  .ecc-icon-btn:hover{ background: var(--ecc-text-primary); }
   .text-ecc{ color: rgba(199, 167, 90,.95); }
   .ecc-topbar-title{
     font-family: "Noto Sans", system-ui, sans-serif;
-    color: rgba(255,255,255,.90);
+    color: var(--ecc-text-primary);
     font-size: 12px;
     letter-spacing: .22em;
     font-weight: 700;
@@ -184,7 +184,7 @@
   }
   .ecc-sub{
     font-family: "Noto Sans", system-ui, sans-serif;
-    color: rgba(255,255,255,.60);
+    color: var(--ecc-text-muted);
     font-size: 16px;
     line-height: 1.6;
   }
@@ -193,25 +193,25 @@
     font-family: "Noto Sans", system-ui, sans-serif;
     font-size: 13px;
     font-weight: 600;
-    color: rgba(255,255,255,.80);
+    color: var(--ecc-text-primary);
     margin-bottom: 8px;
     margin-left: 14px;
   }
   .ecc-input{
-    background: rgba(255,255,255,.05) !important;
-    border: 1px solid rgba(255,255,255,.10) !important;
+    background: var(--ecc-text-primary) !important;
+    border: 1px solid var(--ecc-text-primary) !important;
     border-radius: 12px !important;
     color: #fff !important;
     padding: 14px 18px !important;
     font-family: "Noto Sans", system-ui, sans-serif;
   }
-  .ecc-input::placeholder{ color: rgba(255,255,255,.25) !important; }
+  .ecc-input::placeholder{ color: var(--ecc-text-primary) !important; }
   .ecc-input:focus{ border-color: var(--ecc-primary) !important; box-shadow: 0 0 0 1px var(--ecc-primary) !important; }
 
   .ecc-hint{
     font-family: "Noto Sans", system-ui, sans-serif;
     font-size: 11px;
-    color: rgba(255,255,255,.35);
+    color: var(--ecc-text-subtle);
     margin-top: 6px;
     margin-left: 14px;
   }
@@ -245,7 +245,7 @@
     transform: translateY(-50%);
     background: transparent;
     border: 0;
-    color: rgba(255,255,255,.30);
+    color: var(--ecc-text-primary);
     display: flex;
     align-items: center;
     justify-content: center;

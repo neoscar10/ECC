@@ -18,10 +18,8 @@
             max-height: 1000px;
             border-radius: 22px;
             overflow: hidden;
-            border: 1px solid rgba(199, 167, 90,.14);
-            background:
-                linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
-                rgba(23,19,13,.95);
+            border: 1px solid var(--ecc-primary-border);
+            background: var(--ecc-bg-surface-2);
             box-shadow: 0 12px 32px rgba(0,0,0,.3);
             display: flex;
             align-items: stretch;
@@ -103,13 +101,13 @@
             min-height: 30px;
             padding: .45rem .9rem;
             border-radius: 999px;
-            background: var(--luxe-gold);
-            color: #111;
+            background: var(--ecc-primary);
+            color: var(--ecc-text-primary);
             font-size: .64rem;
             font-weight: 900;
             letter-spacing: .16em;
             text-transform: uppercase;
-            box-shadow: 0 10px 18px rgba(199, 167, 90,.18);
+            box-shadow: 0 10px 18px var(--ecc-primary-border);
         }
 
         .shop-detail-stage-control {
@@ -118,9 +116,9 @@
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            border: 1px solid rgba(255,255,255,.14);
-            background: rgba(0,0,0,.45);
-            color: #fff;
+            border: 1px solid var(--ecc-border);
+            background: var(--ecc-overlay-dark);
+            color: var(--ecc-text-primary);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -129,9 +127,9 @@
         }
 
         .shop-detail-stage-control:hover {
-            background: var(--luxe-gold);
-            color: #111;
-            border-color: var(--luxe-gold);
+            background: var(--ecc-primary);
+            color: var(--ecc-text-primary);
+            border-color: var(--ecc-primary);
         }
 
         .shop-detail-stage-control.prev {
@@ -182,8 +180,8 @@
             position: relative;
             border-radius: 14px;
             overflow: hidden;
-            border: 1px solid rgba(199, 167, 90,.14);
-            background: #120f08;
+            border: 1px solid var(--ecc-primary-border);
+            background: var(--ecc-bg-surface-2);
             aspect-ratio: 1 / 1;
             padding: 0;
             transition: .2s ease;
@@ -208,16 +206,16 @@
         }
 
         .shop-detail-thumb.active {
-            border-color: var(--luxe-gold);
-            box-shadow: 0 0 0 2px rgba(199, 167, 90,.12);
+            border-color: var(--ecc-primary);
+            box-shadow: 0 0 0 2px var(--ecc-primary-soft);
         }
 
         .shop-detail-thumb-placeholder {
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--luxe-gold);
-            background: rgba(255,255,255,.03);
+            color: var(--ecc-primary);
+            background: var(--ecc-bg-input);
             font-size: 1.4rem;
         }
 
@@ -232,16 +230,14 @@
         .shop-detail-side-card,
         .shop-detail-cert-card {
             border-radius: 22px;
-            border: 1px solid rgba(199, 167, 90,.14);
-            background:
-                linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
-                rgba(16,13,7,.78);
-            box-shadow: 0 18px 36px rgba(0,0,0,.22);
+            border: 1px solid var(--ecc-primary-border);
+            background: var(--ecc-bg-surface);
+            box-shadow: var(--ecc-shadow-soft);
             padding: 1.5rem;
         }
 
         .shop-detail-side-kicker {
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
             font-size: .7rem;
             font-weight: 900;
             letter-spacing: .16em;
@@ -258,12 +254,12 @@
         }
 
         .shop-detail-cert-card i {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-size: 1.4rem;
         }
 
         .shop-detail-cert-title {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: .8rem;
             font-weight: 900;
             letter-spacing: .08em;
@@ -271,7 +267,7 @@
         }
 
         .shop-detail-cert-subtitle {
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
             font-size: .7rem;
             line-height: 1.5;
         }
@@ -280,7 +276,7 @@
             display: inline-flex;
             align-items: center;
             gap: .45rem;
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-size: .72rem;
             font-weight: 900;
             letter-spacing: .18em;
@@ -288,7 +284,7 @@
         }
 
         .shop-detail-title {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: clamp(2.3rem, 4vw, 4.25rem);
             line-height: .95;
             font-weight: 900;
@@ -314,7 +310,7 @@
         }
 
         .shop-detail-price {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-size: clamp(1.8rem, 3vw, 2.8rem);
             font-weight: 900;
             letter-spacing: -.02em;
@@ -341,13 +337,13 @@
             display: inline-flex;
             align-items: center;
             gap: .5rem;
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
             font-size: .78rem;
             font-weight: 700;
         }
 
         .shop-detail-rating-stars {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             display: inline-flex;
             align-items: center;
             gap: .08rem;
@@ -355,11 +351,11 @@
 
         .shop-detail-divider {
             height: 1px;
-            background: linear-gradient(90deg, rgba(199, 167, 90,.18), transparent);
+            background: linear-gradient(90deg, var(--ecc-primary-border), transparent);
         }
 
         .shop-detail-field-label {
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
             font-size: .72rem;
             font-weight: 900;
             letter-spacing: .12em;
@@ -367,7 +363,7 @@
         }
 
         .shop-detail-inline-link {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-size: .72rem;
             font-weight: 900;
             letter-spacing: .12em;
@@ -385,9 +381,9 @@
         .shop-detail-size-btn {
             min-height: 48px;
             border-radius: 12px;
-            border: 1px solid rgba(199, 167, 90,.14);
+            border: 1px solid var(--ecc-primary-border);
             background: transparent;
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: .9rem;
             font-weight: 800;
             transition: .2s ease;
@@ -395,20 +391,20 @@
 
         .shop-detail-size-btn:hover {
             border-color: rgba(199, 167, 90,.4);
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
         }
 
         .shop-detail-size-btn.active {
-            border: 2px solid var(--luxe-gold);
+            border: 2px solid var(--ecc-primary);
             background: rgba(199, 167, 90,.06);
-            color: #fff;
+            color: var(--ecc-text-primary);
         }
 
         .shop-detail-size-btn.disabled,
         .shop-detail-size-btn:disabled {
             opacity: .45;
             cursor: not-allowed;
-            background: rgba(255,255,255,.03);
+            background: var(--ecc-bg-input);
         }
 
         .shop-detail-swatches {
@@ -429,7 +425,7 @@
 
         .shop-detail-swatch:hover,
         .shop-detail-swatch.active {
-            border: 2px solid var(--luxe-gold);
+            border: 2px solid var(--ecc-primary);
         }
 
         .shop-detail-swatch-core {
@@ -442,11 +438,9 @@
 
         .shop-detail-purchase-card {
             border-radius: 18px;
-            border: 1px solid rgba(199, 167, 90,.12);
-            background:
-                linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
-                rgba(45,42,33,.86);
-            box-shadow: 0 18px 36px rgba(0,0,0,.18);
+            border: 1px solid var(--ecc-primary-soft);
+            background: var(--ecc-bg-surface);
+            box-shadow: var(--ecc-shadow-soft);
             padding: 1.35rem;
         }
 
@@ -462,8 +456,8 @@
             gap: .6rem;
             padding: .3rem;
             border-radius: 999px;
-            border: 1px solid rgba(199, 167, 90,.12);
-            background: rgba(35,31,23,.92);
+            border: 1px solid var(--ecc-border);
+            background: var(--ecc-bg-input);
         }
 
         .shop-detail-qty-btn {
@@ -472,13 +466,13 @@
             border-radius: 50%;
             border: 0;
             background: transparent;
-            color: #fff;
+            color: var(--ecc-text-primary);
             transition: .2s ease;
         }
 
         .shop-detail-qty-btn:hover {
-            background: rgba(255,255,255,.04);
-            color: var(--luxe-gold);
+            background: var(--ecc-bg-input);
+            color: var(--ecc-primary);
         }
 
         .shop-detail-qty-value {
@@ -493,8 +487,8 @@
             min-height: 52px;
             border-radius: 999px;
             border: 0;
-            background: var(--luxe-gold);
-            color: #111;
+            background: var(--ecc-primary);
+            color: var(--ecc-text-primary);
             font-size: .82rem;
             font-weight: 900;
             letter-spacing: .16em;
@@ -504,7 +498,7 @@
 
         .shop-detail-add-btn:hover {
             filter: brightness(1.05);
-            color: #111;
+            color: var(--ecc-text-primary);
         }
 
         .shop-detail-icon-btn {
@@ -512,9 +506,9 @@
             height: 52px;
             flex: 0 0 auto;
             border-radius: 50%;
-            border: 1px solid rgba(199, 167, 90,.14);
+            border: 1px solid var(--ecc-primary-border);
             background: transparent;
-            color: #fff;
+            color: var(--ecc-text-primary);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -522,8 +516,8 @@
         }
 
         .shop-detail-icon-btn:hover {
-            border-color: rgba(199, 167, 90,.34);
-            color: var(--luxe-gold);
+            border-color: var(--ecc-primary-border);
+            color: var(--ecc-primary);
         }
 
         .shop-detail-micro-features {
@@ -532,7 +526,7 @@
             justify-content: center;
             gap: 1.25rem;
             flex-wrap: wrap;
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
             font-size: .64rem;
             font-weight: 900;
             letter-spacing: .12em;
@@ -547,7 +541,7 @@
         }
 
         .shop-detail-story-title {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: 1.5rem;
             font-weight: 900;
             letter-spacing: -.03em;
@@ -564,14 +558,14 @@
             width: 4px;
             height: 24px;
             border-radius: 999px;
-            background: var(--luxe-gold);
+            background: var(--ecc-primary);
             flex: 0 0 auto;
         }
 
         .shop-detail-story,
         .shop-detail-story p,
         .shop-detail-story li {
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
             font-size: .94rem;
             line-height: 1.9;
         }
@@ -599,7 +593,7 @@
         }
 
         .shop-detail-related-kicker {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-size: .72rem;
             font-weight: 900;
             letter-spacing: .2em;
@@ -608,7 +602,7 @@
         }
 
         .shop-detail-related-title {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: 2.5rem;
             line-height: 1.05;
             font-weight: 900;
@@ -618,13 +612,13 @@
         }
 
         .shop-detail-related-link {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: .78rem;
             font-weight: 900;
             letter-spacing: .16em;
             text-transform: uppercase;
             text-decoration: none;
-            border-bottom: 2px solid var(--luxe-gold);
+            border-bottom: 2px solid var(--ecc-primary);
             padding-bottom: .2rem;
         }
 
@@ -634,8 +628,8 @@
             min-height: 320px;
             border-radius: 18px;
             overflow: hidden;
-            background: rgba(35,31,23,.86);
-            box-shadow: 0 18px 34px rgba(0,0,0,.18);
+            background: var(--ecc-bg-surface);
+            box-shadow: var(--ecc-shadow-soft);
         }
 
         .shop-detail-bento-card img {
@@ -661,7 +655,7 @@
         }
 
         .shop-detail-bento-kicker {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-size: .62rem;
             font-weight: 900;
             letter-spacing: .16em;
@@ -670,7 +664,7 @@
         }
 
         .shop-detail-bento-title {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: 1.35rem;
             font-weight: 900;
             line-height: 1.1;
@@ -680,7 +674,7 @@
         }
 
         .shop-detail-bento-price {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-size: 1.05rem;
             font-weight: 900;
         }
@@ -690,9 +684,9 @@
             min-height: 34px;
             padding: .4rem .9rem;
             border-radius: 999px;
-            border: 1px solid rgba(199, 167, 90,.18);
+            border: 1px solid var(--ecc-primary-border);
             background: transparent;
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: .68rem;
             font-weight: 900;
             letter-spacing: .14em;
@@ -702,9 +696,9 @@
         }
 
         .shop-detail-bento-btn:hover {
-            background: var(--luxe-gold);
-            color: #111;
-            border-color: var(--luxe-gold);
+            background: var(--ecc-primary);
+            color: var(--ecc-text-primary);
+            border-color: var(--ecc-primary);
         }
 
         @media (max-width: 1199.98px) {
@@ -960,13 +954,13 @@
                         </div>
                     </div>
 
-                    <div class="shop-detail-divider mb-4" style="background: linear-gradient(90deg, rgba(199, 167, 90,.18), transparent); height: 1px;"></div>
+                    <div class="shop-detail-divider mb-4" style="background: linear-gradient(90deg, var(--ecc-primary-border), transparent); height: 1px;"></div>
 
                     {{-- VARIATION GROUPS / SPECIFICATIONS --}}
                     @if(count($variationGroups ?? []))
                         <div class="shop-detail-spec-section mb-5">
                             <div class="shop-detail-story-title mb-4">
-                                <span style="color: var(--luxe-gold); margin-right: .5rem;">|</span>Specifications
+                                <span style="color: var(--ecc-primary); margin-right: .5rem;">|</span>Specifications
                             </div>
 
                             <div class="row g-4 leading-relaxed">
@@ -982,7 +976,7 @@
                                     <div class="col-md-6">
                                         <section>
                                             <div class="d-flex align-items-center justify-content-between mb-3">
-                                                <div class="shop-detail-field-label text-white-50 opacity-75 small uppercase font-bold">{{ $groupName }}</div>
+                                                <div class="shop-detail-field-label ecc-text-primary-50 opacity-75 small uppercase font-bold">{{ $groupName }}</div>
 
                                                 @if(strtolower($group['slug'] ?? '') === 'size')
                                                     <button type="button" class="btn p-0 border-0 bg-transparent shop-detail-inline-link">
@@ -1046,10 +1040,10 @@
                         </div>
                     @endif
 
-                    <div class="shop-detail-divider mb-4" style="background: linear-gradient(90deg, rgba(199, 167, 90,.18), transparent); height: 1px;"></div>
+                    <div class="shop-detail-divider mb-4" style="background: linear-gradient(90deg, var(--ecc-primary-border), transparent); height: 1px;"></div>
 
                     <div class="shop-detail-story-title">
-                        <span style="color: var(--luxe-gold); margin-right: .5rem;">|</span>The Craftsmanship
+                        <span style="color: var(--ecc-primary); margin-right: .5rem;">|</span>The Craftsmanship
                     </div>
                     <div class="shop-detail-story">
                         {!! $descriptionHtml !!}
@@ -1066,7 +1060,7 @@
                         
                         {{-- PURCHASE ACTIONS --}}
                         <div class="shop-detail-purchase-row flex-column gap-3">
-                            <div class="shop-detail-qty w-100 d-flex justify-content-between p-2" style="background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div class="shop-detail-qty w-100 d-flex justify-content-between p-2" style="background: var(--ecc-bg-input); border-radius: 12px; border: 1px solid var(--ecc-border);">
                                 <button type="button" class="shop-detail-qty-btn" wire:click="decrementQuantity">
                                     <i class="mdi mdi-minus"></i>
                                 </button>

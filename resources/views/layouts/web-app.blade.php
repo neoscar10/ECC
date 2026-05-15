@@ -1,9 +1,20 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100" data-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ trim($__env->yieldContent('title', $title ?? config('app.name', 'ECC'))) }}</title>
+    <script>
+        (function () {
+            try {
+                var storedTheme = localStorage.getItem('ecc_user_theme');
+                var theme = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (error) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
 
     {{-- Fonts + Icons from original app layout --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,21 +29,21 @@
 
     <style>
         :root {
-            --luxe-bg: #17130b;
-            --luxe-bg-2: #1d170d;
-            --luxe-surface: #221b11;
-            --luxe-surface-2: #2a2115;
-            --luxe-card: rgba(255,255,255,0.04);
-            --luxe-card-2: rgba(255,255,255,0.06);
-            --luxe-border: rgba(199, 167, 90, 0.18);
-            --luxe-border-strong: rgba(199, 167, 90, 0.34);
+            --luxe-bg: var(--ecc-bg-page);
+            --luxe-bg-2: var(--ecc-bg-surface);
+            --luxe-surface: var(--ecc-bg-surface-2);
+            --luxe-surface-2: var(--ecc-bg-elevated);
+            --luxe-card: var(--ecc-bg-input);
+            --luxe-card-2: var(--ecc-border-soft);
+            --luxe-border: var(--ecc-border);
+            --luxe-border-strong: var(--ecc-border-strong);
             --luxe-gold: var(--ecc-primary);
             --luxe-gold-2: var(--ecc-gold-300);
-            --luxe-text: #f5f0e7;
-            --luxe-text-soft: #b8ab91;
-            --luxe-muted: #8f826b;
-            --luxe-danger: #ff4d4f;
-            --luxe-shadow: 0 20px 45px rgba(0,0,0,0.35);
+            --luxe-text: var(--ecc-text-primary);
+            --luxe-text-soft: var(--ecc-text-secondary);
+            --luxe-muted: var(--ecc-text-muted);
+            --luxe-danger: var(--ecc-danger);
+            --luxe-shadow: var(--ecc-shadow-card);
             --luxe-radius-xl: 24px;
             --luxe-radius-lg: 20px;
             --luxe-radius-md: 16px;
@@ -41,10 +52,14 @@
         }
 
         html, body {
+            background: var(--ecc-bg-page);
+            color: var(--ecc-text-primary);
+        }
+
+        html[data-theme="dark"] body {
             background:
                 radial-gradient(circle at top, rgba(199, 167, 90, 0.08), transparent 22%),
                 linear-gradient(180deg, #19140b 0%, #141008 100%);
-            color: var(--luxe-text);
         }
 
         body.web-app-layout {
@@ -74,8 +89,8 @@
             top: 0;
             z-index: 1050;
             backdrop-filter: blur(16px);
-            background: rgba(23, 19, 11, 0.92);
-            border-bottom: 1px solid var(--luxe-border);
+            background: var(--ecc-bg-nav);
+            border-bottom: 1px solid var(--ecc-border);
         }
 
         .luxe-brand {
@@ -83,7 +98,7 @@
             align-items: center;
             gap: .85rem;
             text-decoration: none;
-            color: var(--luxe-text);
+            color: var(--ecc-text-primary);
             font-weight: 800;
             letter-spacing: .01em;
             text-transform: uppercase;
@@ -91,7 +106,7 @@
         }
 
         .luxe-brand:hover {
-            color: var(--luxe-text);
+            color: var(--ecc-text-primary);
         }
 
         .luxe-brand-icon {
@@ -113,22 +128,22 @@
         .luxe-search .form-control {
             height: 48px;
             border-radius: 999px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--luxe-border);
-            color: var(--luxe-text);
+            background: var(--ecc-bg-input);
+            border: 1px solid var(--ecc-border);
+            color: var(--ecc-text-primary);
             padding-left: 46px;
             box-shadow: none;
         }
 
         .luxe-search .form-control::placeholder {
-            color: #8f8878;
+            color: var(--ecc-text-muted);
         }
 
         .luxe-search .form-control:focus {
             border-color: var(--luxe-border-strong);
             box-shadow: 0 0 0 0.2rem rgba(199, 167, 90, .08);
-            background: rgba(255,255,255,0.04);
-            color: var(--luxe-text);
+            background: var(--ecc-bg-hover);
+            color: var(--ecc-text-primary);
         }
 
         .luxe-search-icon {
@@ -136,7 +151,7 @@
             top: 50%;
             left: 16px;
             transform: translateY(-50%);
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             pointer-events: none;
             line-height: 0;
         }
@@ -149,7 +164,7 @@
         }
 
         .luxe-top-link {
-            color: rgba(245,240,231,0.88);
+            color: var(--ecc-text-secondary);
             text-decoration: none;
             font-size: .92rem;
             font-weight: 600;
@@ -164,8 +179,8 @@
 
         .luxe-top-link:hover,
         .luxe-top-link.active {
-            color: #111;
-            background: var(--luxe-gold);
+            color: var(--ecc-text-inverse);
+            background: var(--ecc-primary);
         }
         
         .luxe-top-link .material-symbols-outlined {
@@ -179,18 +194,18 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            border: 1px solid rgba(255,255,255,.06);
-            background: rgba(255,255,255,0.06);
-            color: var(--luxe-text);
+            border: 1px solid var(--ecc-border);
+            background: var(--ecc-bg-input);
+            color: var(--ecc-text-primary);
             transition: .2s ease;
             position: relative;
             text-decoration: none;
         }
 
         .luxe-icon-btn:hover {
-            background: var(--luxe-gold);
-            color: #111;
-            border-color: var(--luxe-gold);
+            background: var(--ecc-primary);
+            color: var(--ecc-text-inverse);
+            border-color: var(--ecc-primary);
         }
         
         .luxe-icon-badge {
@@ -207,7 +222,7 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            border: 2px solid var(--luxe-gold);
+            border: 2px solid var(--ecc-primary);
             object-fit: cover;
             display: block;
         }
@@ -231,7 +246,7 @@
             font-weight: 800;
             line-height: 1.1;
             margin: 0;
-            color: #fff;
+            color: var(--ecc-text-primary);
             letter-spacing: -.02em;
         }
 
@@ -239,7 +254,7 @@
             width: 7px;
             height: 42px;
             border-radius: 999px;
-            background: var(--luxe-gold);
+            background: var(--ecc-primary);
             flex: 0 0 auto;
         }
 
@@ -251,7 +266,7 @@
             font-weight: 800;
             line-height: 1.1;
             margin: 0;
-            color: #fff;
+            color: var(--ecc-text-primary);
             letter-spacing: -.02em;
         }
 
@@ -259,7 +274,7 @@
             width: 6px;
             height: 28px;
             border-radius: 999px;
-            background: var(--luxe-gold);
+            background: var(--ecc-primary);
             flex: 0 0 auto;
         }
 
@@ -267,9 +282,9 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            border: 1px solid var(--luxe-border);
+            border: 1px solid var(--ecc-border);
             background: transparent;
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -277,9 +292,9 @@
         }
 
         .luxe-round-control:hover {
-            background: var(--luxe-gold);
-            color: #111;
-            border-color: var(--luxe-gold);
+            background: var(--ecc-primary);
+            color: var(--ecc-text-inverse);
+            border-color: var(--ecc-primary);
         }
 
         .luxe-scroll-rail {
@@ -289,7 +304,7 @@
             padding-bottom: .5rem;
             scroll-behavior: smooth;
             scrollbar-width: thin;
-            scrollbar-color: var(--luxe-gold) transparent;
+            scrollbar-color: var(--ecc-primary) transparent;
         }
 
         .luxe-scroll-rail::-webkit-scrollbar {
@@ -297,7 +312,7 @@
         }
 
         .luxe-scroll-rail::-webkit-scrollbar-thumb {
-            background: var(--luxe-gold);
+            background: var(--ecc-primary);
             border-radius: 999px;
         }
 
@@ -308,7 +323,7 @@
             overflow: hidden;
             background:
                 linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)),
-                var(--luxe-surface);
+                var(--ecc-bg-surface);
             border: 1px solid rgba(199, 167, 90, 0.12);
             box-shadow: var(--luxe-shadow);
             flex: 0 0 auto;
@@ -324,7 +339,7 @@
             position: relative;
             aspect-ratio: 16 / 9;
             overflow: hidden;
-            background: #0f0c07;
+            background: var(--ecc-bg-page);
         }
 
         .luxe-hero-media img {
@@ -349,7 +364,7 @@
             padding: .35rem .7rem;
             border-radius: 999px;
             background: #ff463f;
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: .72rem;
             font-weight: 800;
             line-height: 1;
@@ -370,9 +385,9 @@
             bottom: 14px;
             padding: .55rem .85rem;
             border-radius: 999px;
-            border: 1px solid rgba(255,255,255,.16);
-            background: rgba(0,0,0,.45);
-            color: #fff;
+            border: 1px solid var(--ecc-border);
+            background: var(--ecc-overlay-dark);
+            color: var(--ecc-text-primary);
             font-size: .72rem;
             font-weight: 700;
             backdrop-filter: blur(10px);
@@ -382,7 +397,7 @@
         .luxe-hero-body {
             padding: 1.2rem 1.15rem 1.15rem;
             background:
-                linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.02)),
+                transparent,
                 #2a2418;
         }
 
@@ -391,12 +406,12 @@
             font-size: 1.55rem;
             font-weight: 800;
             line-height: 1.18;
-            color: #fff;
+            color: var(--ecc-text-primary);
             letter-spacing: -.02em;
         }
 
         .luxe-label {
-            color: var(--luxe-muted);
+            color: var(--ecc-text-muted);
             font-size: .68rem;
             text-transform: uppercase;
             font-weight: 700;
@@ -405,14 +420,14 @@
         }
 
         .luxe-price {
-            color: var(--luxe-gold-2);
+            color: var(--ecc-gold-300);
             font-size: clamp(1.4rem, 2vw, 2rem);
             font-weight: 900;
             line-height: 1;
         }
 
         .luxe-time {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: 1rem;
             font-weight: 800;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -425,7 +440,7 @@
             gap: .6rem;
             height: 52px;
             border-radius: 999px;
-            background: var(--luxe-gold);
+            background: var(--ecc-primary);
             color: #111 !important;
             border: none;
             text-decoration: none;
@@ -450,8 +465,8 @@
             padding-inline: 1.5rem;
             border-radius: 999px;
             background: transparent;
-            color: var(--luxe-gold) !important;
-            border: 1.5px solid var(--luxe-gold);
+            color: var(--ecc-primary) !important;
+            border: 1.5px solid var(--ecc-primary);
             text-decoration: none;
             font-weight: 800;
             letter-spacing: .02em;
@@ -459,7 +474,7 @@
         }
 
         .luxe-gold-outline-btn:hover {
-            background: var(--luxe-gold);
+            background: var(--ecc-primary);
             color: #111 !important;
         }
 
@@ -471,7 +486,7 @@
 
         .luxe-chip {
             border: 1px solid rgba(199, 167, 90, .14);
-            background: rgba(255,255,255,.03);
+            background: var(--ecc-bg-input);
             color: rgba(245,240,231,.92);
             border-radius: 999px;
             padding: .72rem 1rem;
@@ -484,9 +499,9 @@
 
         .luxe-chip:hover,
         .luxe-chip.active {
-            background: var(--luxe-gold);
-            border-color: var(--luxe-gold);
-            color: #111;
+            background: var(--ecc-primary);
+            border-color: var(--ecc-primary);
+            color: var(--ecc-text-inverse);
             box-shadow: 0 8px 18px rgba(199, 167, 90, .18);
         }
 
@@ -494,8 +509,8 @@
             border-radius: 22px;
             overflow: hidden;
             background:
-                linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
-                var(--luxe-surface);
+                linear-gradient(180deg, var(--ecc-bg-hover), transparent),
+                var(--ecc-bg-surface);
             border: 1px solid rgba(199, 167, 90, 0.12);
             box-shadow: 0 18px 38px rgba(0,0,0,.26);
             transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
@@ -512,7 +527,7 @@
             position: relative;
             aspect-ratio: 1 / 1;
             overflow: hidden;
-            background: #0f0c07;
+            background: var(--ecc-bg-page);
         }
 
         .luxe-grid-media img {
@@ -538,7 +553,7 @@
             border: 0;
             background: rgba(255,255,255,.14);
             backdrop-filter: blur(10px);
-            color: #fff;
+            color: var(--ecc-text-primary);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -548,8 +563,8 @@
 
         .luxe-fav-btn:hover,
         .luxe-fav-btn.active {
-            background: var(--luxe-gold);
-            color: #111;
+            background: var(--ecc-primary);
+            color: var(--ecc-text-inverse);
         }
 
         .luxe-grid-body {
@@ -561,12 +576,12 @@
             font-size: 1.15rem;
             font-weight: 800;
             line-height: 1.2;
-            color: #fff;
+            color: var(--ecc-text-primary);
             letter-spacing: -.015em;
         }
 
         .luxe-grid-subtitle {
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
             font-size: .82rem;
             margin-bottom: .9rem;
         }
@@ -580,14 +595,14 @@
         }
 
         .luxe-footer {
-            background: #0f0c07;
+            background: var(--ecc-bg-page);
             border-top: 1px solid rgba(199, 167, 90, .12);
             padding-top: 3.25rem;
             padding-bottom: 1rem;
         }
 
         .luxe-footer-title {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-weight: 800;
             margin-bottom: 1rem;
             font-size: 1rem;
@@ -595,21 +610,21 @@
 
         .luxe-footer-text,
         .luxe-footer-link {
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
             text-decoration: none;
             font-size: .94rem;
             line-height: 1.9;
         }
 
         .luxe-footer-link:hover {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
         }
 
         .luxe-newsletter .form-control {
-            background: rgba(255,255,255,.02);
+            background: var(--ecc-bg-input);
             border: 1px solid rgba(199, 167, 90, .14);
             border-radius: 999px;
-            color: #fff;
+            color: var(--ecc-text-primary);
             height: 46px;
             box-shadow: none;
         }
@@ -619,10 +634,10 @@
         }
 
         .luxe-newsletter .form-control:focus {
-            background: rgba(255,255,255,.03);
+            background: var(--ecc-bg-input);
             border-color: rgba(199, 167, 90, .32);
             box-shadow: 0 0 0 .2rem rgba(199, 167, 90, .08);
-            color: #fff;
+            color: var(--ecc-text-primary);
         }
 
         .luxe-newsletter-btn {
@@ -630,8 +645,8 @@
             height: 46px;
             border-radius: 50%;
             border: 0;
-            background: var(--luxe-gold);
-            color: #111;
+            background: var(--ecc-primary);
+            color: var(--ecc-text-inverse);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -642,7 +657,7 @@
             border-top: 1px solid rgba(199, 167, 90, .08);
             margin-top: 2rem;
             padding-top: 1rem;
-            color: var(--luxe-muted);
+            color: var(--ecc-text-muted);
             font-size: .82rem;
         }
 
@@ -669,9 +684,9 @@
             border: 1px dashed rgba(199, 167, 90, .18);
             border-radius: 24px;
             padding: 2rem 1.25rem;
-            background: rgba(255,255,255,.02);
+            background: var(--ecc-bg-input);
             text-align: center;
-            color: var(--luxe-text-soft);
+            color: var(--ecc-text-secondary);
         }
         
         .ecc-blur {
@@ -689,7 +704,7 @@
             align-items: center;
             justify-content: center;
             padding: 1.25rem;
-            background: rgba(20,16,8,.70);
+            background: var(--ecc-overlay-dark);
             backdrop-filter: blur(3px);
             text-align: center;
             cursor: pointer;
@@ -709,7 +724,7 @@
             border-radius: 50%;
             background: rgba(199, 167, 90, .12);
             border: 1px solid rgba(199, 167, 90, .24);
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -718,7 +733,7 @@
         }
 
         .ecc-lock-title {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-size: .72rem;
             font-weight: 900;
             letter-spacing: .1em;
@@ -726,7 +741,7 @@
         }
 
         .ecc-lock-hint {
-            color: #fff;
+            color: var(--ecc-text-primary);
             opacity: 0.8;
             margin: 0;
             font-size: .76rem;
@@ -741,9 +756,9 @@
             min-height: 38px;
             padding: .6rem .95rem;
             border-radius: 999px;
-            border: 1px solid var(--luxe-gold);
+            border: 1px solid var(--ecc-primary);
             background: rgba(199, 167, 90, .10);
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-size: .76rem;
             font-weight: 800;
             text-decoration: none;
@@ -752,8 +767,8 @@
         }
 
         .ecc-unlock-btn:hover {
-            background: var(--luxe-gold);
-            color: #111;
+            background: var(--ecc-primary);
+            color: var(--ecc-text-inverse);
         }
 
         .luxe-logout-simple {
@@ -762,7 +777,7 @@
         }
 
         .luxe-logout-simple:hover {
-            color: var(--luxe-gold) !important;
+            color: var(--ecc-primary) !important;
             text-decoration: underline !important;
         }
     </style>
@@ -813,7 +828,7 @@
     @endphp
     <div class="luxe-page-shell">
         @if($isDeactivated)
-            <div class="deactivated-banner d-flex align-items-center justify-content-center py-2 px-3 text-white" style="background: linear-gradient(90deg, #842029 0%, #a52834 100%); font-size: 0.82rem; font-weight: 700; letter-spacing: 0.6px; border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 2000;">
+            <div class="deactivated-banner d-flex align-items-center justify-content-center py-2 px-3 ecc-text-primary" style="background: linear-gradient(90deg, #842029 0%, #a52834 100%); font-size: 0.82rem; font-weight: 700; letter-spacing: 0.6px; border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 2000;">
                 <i class="mdi mdi-alert-circle-outline me-2 fs-6"></i>
                 <span class="text-uppercase">{{ $deactivationMessage }}</span>
             </div>
@@ -847,7 +862,7 @@
                             @auth
                                 <form action="{{ route('logout') }}" method="POST" class="d-inline">
                                     @csrf
-                                    <button type="submit" class="border-0 bg-transparent p-0 ms-3 text-white-50 text-decoration-none luxe-logout-simple" title="Logout">
+                                    <button type="submit" class="border-0 bg-transparent p-0 ms-3 ecc-text-primary-50 text-decoration-none luxe-logout-simple" title="Logout">
                                         Logout
                                     </button>
                                 </form>
@@ -855,6 +870,17 @@
                         </nav>
 
                         <div class="d-flex align-items-center gap-2">
+                            <button
+                                type="button"
+                                class="luxe-icon-btn ecc-theme-toggle me-1"
+                                id="eccThemeToggle"
+                                aria-label="Switch color theme"
+                                title="Switch theme"
+                            >
+                                <i class="mdi mdi-weather-night ecc-theme-icon ecc-theme-icon-dark"></i>
+                                <i class="mdi mdi-weather-sunny ecc-theme-icon ecc-theme-icon-light"></i>
+                            </button>
+
                             <a href="{{ $cartUrl }}" class="luxe-icon-btn" aria-label="Cart"
                                x-data="{ count: {{ (int)($cartCount ?? 0) }} }"
                                @refresh-cart-badge.window="count = $event.detail.count">
@@ -865,7 +891,7 @@
                             </a>
 
                             @guest
-                                <a href="{{ route('login') }}" class="luxe-top-link ms-2" style="background: rgba(255,255,255,0.06);">
+                                <a href="{{ route('login') }}" class="luxe-top-link ms-2" style="background: var(--ecc-bg-input);">
                                     <span>Log In</span>
                                 </a>
                             @endguest
@@ -873,6 +899,17 @@
                     </div>
 
                     <div class="d-flex align-items-center d-lg-none gap-2">
+                        <button
+                            type="button"
+                            class="luxe-icon-btn ecc-theme-toggle"
+                            id="eccThemeToggleMobile"
+                            aria-label="Switch color theme"
+                            title="Switch theme"
+                        >
+                            <i class="mdi mdi-weather-night ecc-theme-icon ecc-theme-icon-dark"></i>
+                            <i class="mdi mdi-weather-sunny ecc-theme-icon ecc-theme-icon-light"></i>
+                        </button>
+
                         <a href="{{ $cartUrl }}" class="luxe-icon-btn d-lg-none" aria-label="Cart"
                            x-data="{ count: {{ (int)($cartCount ?? 0) }} }"
                            @refresh-cart-badge.window="count = $event.detail.count">
@@ -882,7 +919,7 @@
                             </template>
                         </a>
                         <button
-                            class="btn btn-link text-decoration-none text-white p-0 border-0 shadow-none"
+                            class="btn btn-link text-decoration-none ecc-text-primary p-0 border-0 shadow-none"
                             type="button"
                             data-bs-toggle="collapse"
                             data-bs-target="#luxeMobileNav"
@@ -989,6 +1026,47 @@
 
     {{-- Bootstrap JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        (function () {
+            var initialized = false;
+
+            function initThemeToggle() {
+                var toggles = document.querySelectorAll('.ecc-theme-toggle');
+                if (toggles.length === 0) return;
+
+                toggles.forEach(function(toggle) {
+                    if (toggle.dataset.themeToggleReady === '1') return;
+                    toggle.dataset.themeToggleReady = '1';
+
+                    toggle.addEventListener('click', function () {
+                        var currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+                        var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                        setTheme(newTheme);
+                    });
+                });
+
+                function setTheme(theme) {
+                    var safeTheme = theme === 'light' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', safeTheme);
+
+                    try {
+                        localStorage.setItem('ecc_user_theme', safeTheme);
+                    } catch (error) {}
+
+                    toggles.forEach(function(t) {
+                        t.setAttribute('aria-label', safeTheme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+                        t.setAttribute('title', safeTheme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+                    });
+                }
+
+                setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+            }
+
+            document.addEventListener('DOMContentLoaded', initThemeToggle);
+            document.addEventListener('livewire:navigated', initThemeToggle);
+        })();
+    </script>
 
     @livewireScripts
     @stack('scripts')

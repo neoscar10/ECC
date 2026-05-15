@@ -15,7 +15,7 @@
             @endif
 
             @if(!empty($lotPrepared->status_label ?? null))
-                <span class="auction-cert-badge text-white">
+                <span class="auction-cert-badge ecc-text-primary">
                     <span>{{ $lotPrepared->status_label }}</span>
                 </span>
             @endif
@@ -127,13 +127,13 @@
                  <div class="col-12 col-md-6">
                      <a href="{{ $attachmentUrl }}" target="_blank" class="text-decoration-none">
                         <div class="auction-related-item d-flex align-items-center p-3 gap-3 h-100">
-                             <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; border-radius: 12px; background: rgba(199, 167, 90, 0.1); border: 1px solid rgba(199, 167, 90, 0.2); color: var(--luxe-gold);">
+                             <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; border-radius: 12px; background: rgba(199, 167, 90, 0.1); border: 1px solid rgba(199, 167, 90, 0.2); color: var(--ecc-primary);">
                                   <i class="mdi mdi-file-document-outline fs-4"></i>
                              </div>
                              <div class="min-w-0">
-                                 <div class="fw-bold text-white mb-1 text-truncate">{{ $attachmentName }}</div>
+                                 <div class="fw-bold ecc-text-primary mb-1 text-truncate">{{ $attachmentName }}</div>
                                  @if($attachmentSize || $attachmentType)
-                                     <div class="small" style="color: var(--luxe-text-soft);">
+                                     <div class="small" style="color: var(--ecc-text-secondary);">
                                          {{ $attachmentType ? strtoupper($attachmentType) : 'FILE' }}{{ ($attachmentType && $attachmentSize) ? ' • ' : '' }}{{ $attachmentSize ?? '' }}
                                      </div>
                                  @endif

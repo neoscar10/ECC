@@ -11,6 +11,6 @@
             <i class="mdi mdi-chevron-right"></i>
         </span>
 
-        <span class="text-white">{{ $auctionTitle }}</span>
+        <span class="ecc-text-primary">{{ $auctionTitle }}</span>
     </div>
 </nav>

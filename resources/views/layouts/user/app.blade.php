@@ -1,9 +1,20 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100" data-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? config('app.name', 'ECC') }}</title>
+    <script>
+        (function () {
+            try {
+                var storedTheme = localStorage.getItem('ecc_user_theme');
+                var theme = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (error) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
 
     {{-- Fonts + Icons (match stitched mobile design style) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -103,6 +114,47 @@
 
     {{-- Bootstrap JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        (function () {
+            var initialized = false;
+
+            function initThemeToggle() {
+                var toggles = document.querySelectorAll('.ecc-theme-toggle');
+                if (toggles.length === 0) return;
+
+                toggles.forEach(function(toggle) {
+                    if (toggle.dataset.themeToggleReady === '1') return;
+                    toggle.dataset.themeToggleReady = '1';
+
+                    toggle.addEventListener('click', function () {
+                        var currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+                        var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                        setTheme(newTheme);
+                    });
+                });
+
+                function setTheme(theme) {
+                    var safeTheme = theme === 'light' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', safeTheme);
+
+                    try {
+                        localStorage.setItem('ecc_user_theme', safeTheme);
+                    } catch (error) {}
+
+                    toggles.forEach(function(t) {
+                        t.setAttribute('aria-label', safeTheme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+                        t.setAttribute('title', safeTheme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+                    });
+                }
+
+                setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+            }
+
+            document.addEventListener('DOMContentLoaded', initThemeToggle);
+            document.addEventListener('livewire:navigated', initThemeToggle);
+        })();
+    </script>
 
     @livewireScripts
     @stack('scripts')

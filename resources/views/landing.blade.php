@@ -449,7 +449,7 @@
                 <div class="row align-items-center gy-4">
                     <div class="col-sm">
                         <div>
-                            <h4 class="text-white mb-0 fw-semibold">Build your web App/SaaS with Velzon dashboard</h4>
+                            <h4 class="ecc-text-primary mb-0 fw-semibold">Build your web App/SaaS with Velzon dashboard</h4>
                         </div>
                     </div>
                     <!-- end col -->
@@ -1130,7 +1130,7 @@
                             <div>
                                 <i class="ri-double-quotes-l text-success display-3"></i>
                             </div>
-                            <h4 class="text-white mb-5"><span class="text-success">19k</span>+ Satisfied clients</h4>
+                            <h4 class="ecc-text-primary mb-5"><span class="text-success">19k</span>+ Satisfied clients</h4>
 
                             <!-- Swiper -->
                             <div class="swiper client-review-swiper rounded" dir="ltr">
@@ -1138,11 +1138,11 @@
                                     <div class="swiper-slide">
                                         <div class="row justify-content-center">
                                             <div class="col-10">
-                                                <div class="text-white-50">
+                                                <div class="ecc-text-primary-50">
                                                     <p class="fs-20 ff-secondary mb-4">" I am givng 5 stars. Theme is great and everyone one stuff everything in theme. Future request should not affect current state of theme. "</p>
 
                                                     <div>
-                                                        <h5 class="text-white">gregoriusus</h5>
+                                                        <h5 class="ecc-text-primary">gregoriusus</h5>
                                                         <p>- Skote User</p>
                                                     </div>
                                                 </div>
@@ -1153,11 +1153,11 @@
                                     <div class="swiper-slide">
                                         <div class="row justify-content-center">
                                             <div class="col-10">
-                                                <div class="text-white-50">
+                                                <div class="ecc-text-primary-50">
                                                     <p class="fs-20 ff-secondary mb-4">" Awesome support. Had few issues while setting up because of my device, the support team helped me fix them up in a day. Everything looks clean and good. Highly recommended! "</p>
 
                                                     <div>
-                                                        <h5 class="text-white">GeekyGreenOwl</h5>
+                                                        <h5 class="ecc-text-primary">GeekyGreenOwl</h5>
                                                         <p>- Skote User</p>
                                                     </div>
                                                 </div>
@@ -1168,11 +1168,11 @@
                                     <div class="swiper-slide">
                                         <div class="row justify-content-center">
                                             <div class="col-10">
-                                                <div class="text-white-50">
+                                                <div class="ecc-text-primary-50">
                                                     <p class="fs-20 ff-secondary mb-4">" Amazing template, Redux store and components is nicely designed. It's a great start point for an admin based project. Clean Code and good documentation. Template is completely in React and absolutely no usage of jQuery "</p>
 
                                                     <div>
-                                                        <h5 class="text-white">sreeks456</h5>
+                                                        <h5 class="ecc-text-primary">sreeks456</h5>
                                                         <p>- Veltrix User</p>
                                                     </div>
                                                 </div>
@@ -1573,7 +1573,7 @@
                 <div class="row align-items-center gy-4">
                     <div class="col-sm">
                         <div>
-                            <h4 class="text-white mb-0 fw-semibold">Build your web App/SaaS with Velzon dashboard</h4>
+                            <h4 class="ecc-text-primary mb-0 fw-semibold">Build your web App/SaaS with Velzon dashboard</h4>
                         </div>
                     </div>
                     <!-- end col -->
@@ -1591,7 +1591,7 @@
         <!-- end cta -->
 
         <!-- Start footer -->
-        <footer class="custom-footer bg-dark py-5 position-relative">
+        <footer class="custom-footer ecc-bg-surface py-5 position-relative">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-4 mt-4">
@@ -1609,7 +1609,7 @@
                     <div class="col-lg-7 ms-lg-auto">
                         <div class="row">
                             <div class="col-sm-4 mt-4">
-                                <h5 class="text-white mb-0">Company</h5>
+                                <h5 class="ecc-text-primary mb-0">Company</h5>
                                 <div class="text-muted mt-3">
                                     <ul class="list-unstyled ff-secondary footer-list">
                                         <li><a href="pages-profile.html">About Us</a></li>
@@ -1620,7 +1620,7 @@
                                 </div>
                             </div>
                             <div class="col-sm-4 mt-4">
-                                <h5 class="text-white mb-0">Apps Pages</h5>
+                                <h5 class="ecc-text-primary mb-0">Apps Pages</h5>
                                 <div class="text-muted mt-3">
                                     <ul class="list-unstyled ff-secondary footer-list">
                                         <li><a href="pages-pricing.html">Calendar</a></li>
@@ -1632,7 +1632,7 @@
                                 </div>
                             </div>
                             <div class="col-sm-4 mt-4">
-                                <h5 class="text-white mb-0">Support</h5>
+                                <h5 class="ecc-text-primary mb-0">Support</h5>
                                 <div class="text-muted mt-3">
                                     <ul class="list-unstyled ff-secondary footer-list">
                                         <li><a href="pages-faqs.html">FAQ</a></li>

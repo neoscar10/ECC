@@ -152,7 +152,7 @@
     --ecc-primary:var(--ecc-primary); --ecc-primary-dark:var(--ecc-gold-600);
     --ecc-bg:#020202; --ecc-surface:#181818; --ecc-border:#333333;
   }
-  .ecc-bg{ background:var(--ecc-bg); color:#fff; font-family:"Newsreader", serif; }
+  .ecc-bg{ background:var(--ecc-bg); color: var(--ecc-text-primary); font-family:"Newsreader", serif; }
   .ecc-max{ max-width:520px; }
   @media(min-width:992px){ .ecc-max{ max-width:820px; } }
 
@@ -169,11 +169,11 @@
   .ecc-bg-grad{ position:absolute; inset:0; background:linear-gradient(to bottom, transparent, rgba(2,2,2,.80), rgba(2,2,2,1)); pointer-events:none;}
   .ecc-bg-glow{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:520px; height:320px; background:rgba(199, 167, 90,.10); filter:blur(110px); border-radius:9999px; pointer-events:none;}
 
-  .ecc-topbar{ background:rgba(2,2,2,.80); backdrop-filter:blur(10px); border-bottom:1px solid rgba(255,255,255,.05);}
+  .ecc-topbar{ background:rgba(2,2,2,.80); backdrop-filter:blur(10px); border-bottom:1px solid var(--ecc-text-primary);}
   .ecc-icon-btn{ width:40px; height:40px; border-radius:9999px; border:0; background:transparent; color:rgba(199, 167, 90,.85); display:flex; align-items:center; justify-content:center;}
-  .ecc-icon-btn:hover{ background:rgba(255,255,255,.05); }
+  .ecc-icon-btn:hover{ background:var(--ecc-text-primary); }
   .text-ecc{ color:rgba(199, 167, 90,.95); }
-  .ecc-topbar-title{ font-family:"Noto Sans",system-ui,sans-serif; color:rgba(255,255,255,.90); font-size:12px; letter-spacing:.22em; font-weight:700;}
+  .ecc-topbar-title{ font-family:"Noto Sans",system-ui,sans-serif; color:var(--ecc-text-primary); font-size:12px; letter-spacing:.22em; font-weight:700;}
 
   .ecc-step-kicker{ color:rgba(199, 167, 90,.95); font-family:"Noto Sans",system-ui,sans-serif; font-size:11px; font-weight:800; letter-spacing:.20em; text-transform:uppercase;}
   .ecc-dot{ height:4px; width:10px; border-radius:9999px; background:var(--ecc-border);}
@@ -181,7 +181,7 @@
   .ecc-dot--active{ width:34px; background:var(--ecc-primary); box-shadow:0 0 10px rgba(199, 167, 90,.30);}
 
   .ecc-h1-lite{ font-family:"Noto Sans",system-ui,sans-serif; font-size:34px; font-weight:700; letter-spacing:-.02em; line-height:1.15;}
-  .ecc-sub{ font-family:"Noto Sans",system-ui,sans-serif; color:rgba(255,255,255,.60); font-size:16px; line-height:1.6;}
+  .ecc-sub{ font-family:"Noto Sans",system-ui,sans-serif; color:var(--ecc-text-primary); font-size:16px; line-height:1.6;}
   .ecc-section-title{ font-family:"Noto Sans",system-ui,sans-serif; color:rgba(199, 167, 90,.90); font-size:12px; font-weight:700; letter-spacing:.22em; text-transform:uppercase;}
 
   .ecc-rec{
@@ -191,14 +191,14 @@
     padding:16px;
   }
   .ecc-rec-tier{ font-family:"Noto Sans",system-ui,sans-serif; font-size:18px; font-weight:800; color:var(--ecc-primary); }
-  .ecc-rec-list{ padding-left:18px; color:rgba(255,255,255,.70); font-family:"Noto Sans",system-ui,sans-serif; font-size:13px; line-height:1.6;}
+  .ecc-rec-list{ padding-left:18px; color:var(--ecc-text-primary); font-family:"Noto Sans",system-ui,sans-serif; font-size:13px; line-height:1.6;}
   .ecc-rec-btn{ border:1px solid rgba(199, 167, 90,.50) !important; color:var(--ecc-primary) !important; background:transparent !important; border-radius:12px !important; padding:10px 14px !important; font-weight:800; font-family:"Noto Sans",system-ui,sans-serif;}
   .ecc-rec-btn:hover{ background:rgba(199, 167, 90,.10) !important; }
 
   .ecc-tier-card{
     width:100%;
-    border:1px solid rgba(255,255,255,.10);
-    background:rgba(255,255,255,.04);
+    border:1px solid var(--ecc-text-primary);
+    background:var(--ecc-text-primary);
     border-radius:16px;
     padding:16px;
     text-align:left;
@@ -210,13 +210,13 @@
     box-shadow:0 0 0 2px rgba(199, 167, 90,.35), 0 18px 50px rgba(199, 167, 90,.08);
     background:rgba(199, 167, 90,.06);
   }
-  .ecc-tier-name{ font-family:"Noto Sans",system-ui,sans-serif; font-size:18px; font-weight:800; color:rgba(255,255,255,.94); }
+  .ecc-tier-name{ font-family:"Noto Sans",system-ui,sans-serif; font-size:18px; font-weight:800; color:var(--ecc-text-primary); }
   .ecc-tier-price{ font-family:"Noto Sans",system-ui,sans-serif; font-size:20px; font-weight:900; color:var(--ecc-primary); margin-top:2px;}
-  .ecc-tier-dur{ font-size:12px; font-weight:700; color:rgba(255,255,255,.45); }
-  .ecc-tier-desc{ margin-top:8px; color:rgba(255,255,255,.65); font-family:"Noto Sans",system-ui,sans-serif; font-size:13px; line-height:1.5; }
+  .ecc-tier-dur{ font-size:12px; font-weight:700; color:var(--ecc-text-primary); }
+  .ecc-tier-desc{ margin-top:8px; color:var(--ecc-text-primary); font-family:"Noto Sans",system-ui,sans-serif; font-size:13px; line-height:1.5; }
 
   .ecc-tier-benefits{ margin-top:12px; padding:0; list-style:none; }
-  .ecc-benefit-li{ display:flex; align-items:start; gap:8px; margin-bottom:4px; font-size:13px; color:rgba(255,255,255,.75); font-family:"Noto Sans",system-ui,sans-serif; }
+  .ecc-benefit-li{ display:flex; align-items:start; gap:8px; margin-bottom:4px; font-size:13px; color:var(--ecc-text-primary); font-family:"Noto Sans",system-ui,sans-serif; }
   .ecc-benefit-li .material-symbols-outlined{ font-size:16px; color:var(--ecc-primary); margin-top:2px; }
   .ecc-benefit-more{ font-size:11px; color:rgba(199, 167, 90,.85); font-weight:800; margin-left:24px; text-transform:uppercase; letter-spacing:.05em; }
 
@@ -227,7 +227,7 @@
     width:28px; height:28px;
     border-radius:9999px;
     display:flex; align-items:center; justify-content:center;
-    border:1px solid rgba(255,255,255,.25);
+    border:1px solid var(--ecc-text-primary);
     background:rgba(0,0,0,.25);
     color:transparent;
   }

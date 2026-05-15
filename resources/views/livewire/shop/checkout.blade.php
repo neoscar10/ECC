@@ -2,27 +2,27 @@
     @push('styles')
     <style>
         .ecc-checkout-page {
-            color: #f5efe1;
+            color: var(--ecc-text-primary);
         }
         .ecc-section-title {
             font-size: clamp(1.75rem, 2vw, 2.75rem);
             font-weight: 900;
             letter-spacing: -.04em;
-            color: #fff;
+            color: var(--ecc-text-primary);
             text-transform: uppercase;
         }
         .ecc-section-label {
             font-size: .78rem;
             letter-spacing: .2em;
             text-transform: uppercase;
-            color: rgba(245, 239, 225, .65);
+            color: var(--ecc-text-muted);
             font-weight: 800;
         }
         .ecc-text-primary {
             color: var(--ecc-primary);
         }
         .ecc-muted {
-            color: rgba(245, 239, 225, .68);
+            color: var(--ecc-text-muted);
         }
         .ecc-address-card,
         .ecc-payment-card,
@@ -30,10 +30,10 @@
         .ecc-add-card-panel,
         .ecc-empty-panel,
         .ecc-form-panel {
-            background: linear-gradient(180deg, rgba(24,19,10,.92), rgba(17,13,7,.96));
-            border: 1px solid rgba(199, 167, 90,.14);
+            background: linear-gradient(180deg, var(--ecc-bg-surface), var(--ecc-bg-surface-2));
+            border: 1px solid var(--ecc-primary-border);
             border-radius: 1rem;
-            color: #f5efe1;
+            color: var(--ecc-text-primary);
             transition: .25s ease;
         }
         .ecc-address-card,
@@ -42,8 +42,8 @@
             padding: 1.5rem;
         }
         .ecc-address-card {
-            border: 1px solid rgba(199, 167, 90,.14);
-            background: rgba(255,255,255, .02);
+            border: 1px solid var(--ecc-primary-border);
+            background: var(--ecc-text-primary);
             text-decoration: none;
             display: block;
             width: 100%;
@@ -60,7 +60,7 @@
         .ecc-address-card:hover,
         .ecc-payment-card:hover,
         .ecc-add-card-panel:hover {
-            border-color: rgba(199, 167, 90,.45);
+            border-color: var(--ecc-primary-border);
             box-shadow: 0 12px 32px rgba(0,0,0,.18);
             transform: translateY(-1px);
         }
@@ -68,14 +68,14 @@
         .ecc-payment-card.is-selected {
             border-color: var(--ecc-primary);
             background: rgba(199, 167, 90, .05);
-            box-shadow: 0 0 0 1px rgba(199, 167, 90,.2), 0 16px 40px rgba(0,0,0,.22);
+            box-shadow: 0 0 0 1px rgba(199, 167, 90,.2), 0 16px 40px var(--ecc-shadow-card);
         }
         .ecc-badge-gold {
             display: inline-flex;
             align-items: center;
             padding: .35rem .6rem;
             border-radius: 999px;
-            background: rgba(199, 167, 90,.12);
+            background: var(--ecc-primary-soft);
             color: var(--ecc-primary);
             font-size: .68rem;
             font-weight: 800;
@@ -99,8 +99,8 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            background: rgba(255,255,255,.08);
-            color: #fff;
+            background: var(--ecc-text-primary);
+            color: var(--ecc-text-primary);
             font-size: .85rem;
             font-weight: 800;
         }
@@ -120,13 +120,13 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255,255,255,.06);
+            background: var(--ecc-border-soft);
             font-size: 1.15rem;
         }
         .ecc-radio {
             width: 1.15rem;
             height: 1.15rem;
-            border: 2px solid rgba(199, 167, 90,.45);
+            border: 2px solid var(--ecc-primary-border);
             box-shadow: none !important;
             background-color: transparent;
         }
@@ -150,14 +150,14 @@
             font-weight: 900;
             letter-spacing: -.03em;
             text-transform: uppercase;
-            color: #fff;
+            color: var(--ecc-text-primary);
         }
         .ecc-summary-thumb {
             width: 68px;
             height: 68px;
             border-radius: .75rem;
             overflow: hidden;
-            background: rgba(255,255,255,.06);
+            background: var(--ecc-border-soft);
             flex-shrink: 0;
         }
         .ecc-summary-meta {
@@ -176,7 +176,7 @@
             gap: .8rem;
         }
         .ecc-summary-total {
-            border-top: 2px solid rgba(199, 167, 90,.18);
+            border-top: 2px solid var(--ecc-primary-border);
             padding-top: 1.5rem;
             margin-top: 1.5rem;
         }
@@ -190,11 +190,11 @@
         .ecc-summary-note {
             font-size: .75rem;
             line-height: 1.7;
-            color: rgba(245,239,225,.62);
+            color: var(--ecc-text-muted);
             text-align: center;
         }
         .ecc-summary-note a {
-            color: #f5efe1;
+            color: var(--ecc-text-primary);
             text-decoration: underline;
         }
         .ecc-btn-primary {
@@ -221,7 +221,7 @@
         }
         .ecc-btn-outline-gold:hover,
         .ecc-btn-outline-gold:focus {
-            background: rgba(199, 167, 90,.08);
+            background: var(--ecc-primary-soft);
             color: #e7c458;
             border-color: rgba(199, 167, 90,.6);
         }
@@ -239,7 +239,7 @@
             gap: .35rem;
             flex: 1 1 0;
             text-align: center;
-            color: rgba(245,239,225,.58);
+            color: var(--ecc-text-muted);
             font-size: .62rem;
             font-weight: 800;
             letter-spacing: .1em;
@@ -249,7 +249,7 @@
             text-align: center;
         }
         .ecc-form-label {
-            color: var(--luxe-gold);
+            color: var(--ecc-primary);
             font-size: .75rem;
             font-weight: 800;
             letter-spacing: .1em;
@@ -257,17 +257,17 @@
             margin-bottom: .5rem;
         }
         .ecc-input {
-            background: rgba(255,255,255,.03);
-            border: 1px solid rgba(199, 167, 90,.15);
+            background: var(--ecc-bg-input);
+            border: 1px solid var(--ecc-primary-border);
             border-radius: .75rem;
-            color: #fff;
+            color: var(--ecc-text-primary);
             padding: .75rem 1rem;
         }
         .ecc-input:focus {
-            background: rgba(255,255,255,.05);
-            border-color: var(--luxe-gold);
+            background: var(--ecc-bg-input);
+            border-color: var(--ecc-primary);
             box-shadow: 0 0 0 3px rgba(199, 167, 90,.1);
-            color: #fff;
+            color: var(--ecc-text-primary);
         }
         .ecc-security-note {
             font-size: .7rem;
@@ -369,7 +369,7 @@
                                 </div>
                                 <div class="col-12 mt-4">
                                     <button type="submit" class="btn ecc-btn-primary px-5 py-2 fw-bold">SAVE ADDRESS</button>
-                                    <button type="button" class="btn text-white px-4 small" wire:click="$set('showAddressForm', false)">CANCEL</button>
+                                    <button type="button" class="btn ecc-text-primary px-4 small" wire:click="$set('showAddressForm', false)">CANCEL</button>
                                 </div>
                             </div>
                         </form>

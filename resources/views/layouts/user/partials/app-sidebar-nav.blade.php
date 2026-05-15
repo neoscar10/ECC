@@ -86,11 +86,11 @@
 
 <style>
   .ecc-sidebar-nav {
-    background: #0a0a0a;
-    border-right: 1px solid rgba(242, 185, 13, 0.12);
+    background: var(--ecc-bg-surface);
+    border-right: 1px solid var(--ecc-border);
   }
   .ecc-sidebar-section-header {
-    color: rgba(242, 185, 13, 0.45);
+    color: var(--ecc-text-subtle);
     font-size: 11px;
     letter-spacing: .15em;
     font-weight: 800;
@@ -99,16 +99,16 @@
     position: relative;
     padding: 12px 16px;
     border-radius: 12px;
-    color: rgba(242, 185, 13, 0.50);
+    color: var(--ecc-text-secondary);
     transition: all 200ms ease;
   }
   .ecc-sidebar-item:hover {
-    background: rgba(242, 185, 13, 0.05);
-    color: rgba(242, 185, 13, 0.85);
+    background: var(--ecc-bg-hover);
+    color: var(--ecc-primary);
   }
   .ecc-sidebar-item.is-active {
-    background: rgba(242, 185, 13, 0.10);
-    color: #f2b90d;
+    background: var(--ecc-primary-soft);
+    color: var(--ecc-primary);
   }
   .ecc-sidebar-icon {
     font-size: 22px;
@@ -116,7 +116,7 @@
   }
   .ecc-sidebar-item.is-active .ecc-sidebar-icon {
     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    filter: drop-shadow(0 0 8px rgba(242, 185, 13, 0.35));
+    filter: drop-shadow(0 0 8px var(--ecc-primary-shadow));
   }
   .ecc-sidebar-label {
     font-size: 14px;
@@ -128,8 +128,8 @@
     right: 12px;
     width: 6px;
     height: 6px;
-    background: #f2b90d;
+    background: var(--ecc-primary);
     border-radius: 50%;
-    box-shadow: 0 0 10px #f2b90d;
+    box-shadow: 0 0 10px var(--ecc-primary);
   }
 </style>

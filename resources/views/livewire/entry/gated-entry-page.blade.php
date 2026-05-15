@@ -73,8 +73,8 @@
     /* Page */
     .ecc-gate{
         min-height: max(884px, 100dvh);
-        background: #050505;
-        color: #fff;
+        background: var(--ecc-bg-page);
+        color: var(--ecc-text-primary);
         font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
         isolation: isolate;
     }
@@ -87,7 +87,7 @@
         border-radius: 18px;
         overflow: hidden;
         box-shadow: 0 35px 110px rgba(0,0,0,.65);
-        border: 1px solid rgba(255,255,255,.06);
+        border: 1px solid var(--ecc-border-soft);
         background: rgba(5,5,5,.55);
         position: relative;
     }
@@ -136,17 +136,17 @@
         width: 56px;
         height: 56px;
         border-radius: 9999px;
-        background: rgba(255,255,255,.05);
-        border: 1px solid rgba(255,255,255,.10);
+        background: var(--ecc-bg-input);
+        border: 1px solid var(--ecc-border);
         backdrop-filter: blur(10px);
-        box-shadow: 0 0 15px rgba(255,255,255,.05);
+        box-shadow: 0 0 15px var(--ecc-bg-input);
         animation: eccFadeIn .6s ease-out both;
     }
     .ecc-gate-diamond{
         width: 94px;
         height: 73px;
         object-fit: contain;
-        filter: drop-shadow(0 0 10px rgba(199, 167, 90,.25));
+        filter: drop-shadow(0 0 10px var(--ecc-primary-soft));
     }
 
     /* Title + kicker */
@@ -158,7 +158,7 @@
         text-shadow: 0 14px 40px rgba(0,0,0,.55);
     }
     .ecc-gate-title-soft{
-        background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,.6));
+        background: linear-gradient(90deg, rgba(255,255,255,1), var(--ecc-text-primary));
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -167,7 +167,7 @@
         font-size: 12px;
         font-weight: 800;
         letter-spacing: .22em;
-        color: rgba(255,255,255,.92);
+        color: var(--ecc-text-primary);
         line-height: 1.2;
     }
     .ecc-gate-line{
@@ -177,7 +177,7 @@
     }
     .ecc-gate-subtitle{
         max-width: 270px;
-        color: rgba(255,255,255,.70);
+        color: var(--ecc-text-secondary);
         font-size: 16px;
         line-height: 1.7;
         margin-top: 6px;
@@ -193,7 +193,7 @@
         position: relative;
         overflow: hidden;
         transition: all 260ms ease;
-        border: 1px solid rgba(255,255,255,.10);
+        border: 1px solid var(--ecc-border);
         backdrop-filter: blur(8px);
         -webkit-tap-highlight-color: transparent;
     }
@@ -206,24 +206,24 @@
     }
     .ecc-gate-btn-primary{
         background: var(--ecc-primary);
-        color: #050505;
+        color: var(--ecc-text-primary);
     }
     .ecc-gate-btn-primary:hover{
         background: #EAC855;
         box-shadow: 0 0 20px rgba(199, 167, 90,.35);
         transform: translateY(-1px);
-        color: #050505;
+        color: var(--ecc-text-primary);
     }
     .ecc-gate-btn-primary:active{ transform: scale(.985); }
 
     .ecc-gate-btn-ghost{
-        background: rgba(255,255,255,.05);
-        color: #fff;
+        background: var(--ecc-bg-input);
+        color: var(--ecc-text-primary);
     }
     .ecc-gate-btn-ghost:hover{
-        background: rgba(255,255,255,.10);
+        background: var(--ecc-border);
         transform: translateY(-1px);
-        color: #fff;
+        color: var(--ecc-text-primary);
     }
     .ecc-gate-btn-ghost:active{ transform: scale(.985); }
 
@@ -232,7 +232,7 @@
         position: absolute;
         inset: 0;
         transform: translateX(-120%);
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent);
+        background: linear-gradient(90deg, transparent, var(--ecc-text-primary), transparent);
         transition: transform 900ms ease;
         z-index: 1;
     }
@@ -246,12 +246,12 @@
         border-radius: 9999px;
         transition: all 200ms ease;
     }
-    .ecc-gate-preview:hover{ background: rgba(255,255,255,.05); }
+    .ecc-gate-preview:hover{ background: var(--ecc-bg-input); }
     .ecc-gate-preview-text{
         font-size: 11px;
         font-weight: 700;
         letter-spacing: .12em;
-        color: rgba(255,255,255,.40);
+        color: var(--ecc-text-primary);
         transition: color 200ms ease;
     }
     .ecc-gate-preview-icon{
@@ -259,7 +259,7 @@
         color: rgba(199, 167, 90,.70);
         transition: all 200ms ease;
     }
-    .ecc-gate-preview:hover .ecc-gate-preview-text{ color: rgba(255,255,255,.70); }
+    .ecc-gate-preview:hover .ecc-gate-preview-text{ color: var(--ecc-text-secondary); }
     .ecc-gate-preview:hover .ecc-gate-preview-icon{
         color: var(--ecc-primary);
         transform: translateX(2px);

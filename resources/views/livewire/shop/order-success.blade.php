@@ -2,7 +2,7 @@
     @push('styles')
     <style>
         .ecc-order-confirmation-page {
-            color: #f5efe1;
+            color: var(--ecc-text-primary);
         }
 
         .ecc-order-confirmation-shell {
@@ -37,8 +37,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(199, 167, 90, 0.12);
-            border: 1px solid rgba(199, 167, 90, 0.18);
+            background: var(--ecc-primary-soft);
+            border: 1px solid var(--ecc-primary-border);
             box-shadow: 0 0 40px rgba(199, 167, 90, 0.10);
             color: var(--ecc-primary);
             font-size: 2.25rem;
@@ -49,7 +49,7 @@
             line-height: .95;
             font-weight: 900;
             letter-spacing: -.05em;
-            color: #fff;
+            color: var(--ecc-text-primary);
             position: relative;
             z-index: 1;
         }
@@ -65,11 +65,11 @@
 
         .ecc-confirmation-card,
         .ecc-privilege-banner {
-            background: linear-gradient(180deg, rgba(24,19,10,.92), rgba(17,13,7,.96));
-            border: 1px solid rgba(199, 167, 90,.14);
+            background: linear-gradient(180deg, var(--ecc-bg-surface), var(--ecc-bg-surface-2));
+            border: 1px solid var(--ecc-primary-border);
             border-radius: 1rem;
-            color: #f5efe1;
-            box-shadow: 0 12px 32px rgba(0,0,0,.14);
+            color: var(--ecc-text-primary);
+            box-shadow: 0 12px 32px var(--ecc-shadow-soft);
         }
 
         .ecc-confirmation-card {
@@ -88,7 +88,7 @@
             aspect-ratio: 1 / 1;
             border-radius: 1rem;
             overflow: hidden;
-            background: rgba(255,255,255,.04);
+            background: var(--ecc-bg-input);
             border: 1px solid rgba(245,239,225,.08);
         }
 
@@ -100,7 +100,7 @@
             color: var(--ecc-primary);
         }
 
-        .text-muted-gold {
+        .ecc-ecc-text-muted-gold {
             color: rgba(245, 239, 225, .55);
         }
 
@@ -108,7 +108,7 @@
             font-size: clamp(1.5rem, 2vw, 2.2rem);
             font-weight: 800;
             letter-spacing: -.03em;
-            color: #fff;
+            color: var(--ecc-text-primary);
         }
 
         .ecc-summary-divider {
@@ -161,7 +161,7 @@
         .ecc-btn-dark-outline {
             background: transparent;
             border: 1px solid rgba(199, 167, 90,.22);
-            color: #f5efe1;
+            color: var(--ecc-text-primary);
             font-weight: 800;
             border-radius: .9rem;
             letter-spacing: .04em;
@@ -175,7 +175,7 @@
         .ecc-btn-dark-outline:focus {
             background: rgba(199, 167, 90,.06);
             border-color: rgba(199, 167, 90,.4);
-            color: #fff;
+            color: var(--ecc-text-primary);
         }
 
         .ecc-privilege-banner {
@@ -188,7 +188,7 @@
             right: -80px;
             width: 260px;
             height: 100%;
-            background: linear-gradient(180deg, rgba(199, 167, 90,.04), rgba(199, 167, 90,.08));
+            background: linear-gradient(180deg, rgba(199, 167, 90,.04), var(--ecc-primary-soft));
             transform: skewX(-18deg);
             pointer-events: none;
         }
@@ -197,7 +197,7 @@
             font-size: 1.35rem;
             font-style: italic;
             font-weight: 800;
-            color: #fff;
+            color: var(--ecc-text-primary);
         }
 
         .ecc-privilege-link {
@@ -276,7 +276,7 @@
                                             </div>
 
                                             <div class="text-md-end">
-                                                <div class="ecc-mini-label text-muted-gold mb-2">EST. DELIVERY</div>
+                                                <div class="ecc-mini-label ecc-ecc-text-muted-gold mb-2">EST. DELIVERY</div>
                                                 <div class="fw-bold">
                                                     {{ $estimatedDeliveryLabel ?? 'To be confirmed' }}
                                                 </div>

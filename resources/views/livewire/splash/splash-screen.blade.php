@@ -96,7 +96,7 @@
                     </div>
                     <div class="text-uppercase fw-medium"
                          style="
-                            color: rgba(255,255,255,.32);
+                            color: var(--ecc-text-primary);
                             font-size: 10px;
                             letter-spacing: .30em;
                          ">
@@ -109,7 +109,7 @@
         {{-- Bottom loader --}}
         <div class="flex-grow-1 d-flex flex-column justify-content-end align-items-center pb-4 gap-3 position-relative">
             <div class="w-100" style="max-width: 140px; opacity: .85;">
-                <div class="progress" style="height:2px; background: rgba(255,255,255,.10);">
+                <div class="progress" style="height:2px; background: var(--ecc-text-primary);">
                     <div class="progress-bar"
                          role="progressbar"
                          style="
@@ -122,7 +122,7 @@
 
                 <div class="d-flex justify-content-between align-items-center px-1 mt-2">
                     <span class="text-uppercase"
-                          style="font-size: 9px; letter-spacing: .20em; color: rgba(255,255,255,.30);">
+                          style="font-size: 9px; letter-spacing: .20em; color: var(--ecc-text-primary);">
                         Loading
                     </span>
                 </div>
@@ -130,7 +130,7 @@
 
             {{-- Version bottom-right --}}
             <div class="position-absolute bottom-0 end-0 me-3 mb-2">
-                <span style="font-size: 10px; color: rgba(255,255,255,.10); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">
+                <span style="font-size: 10px; color: var(--ecc-text-primary); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">
                     {{ $version }}
                 </span>
             </div>

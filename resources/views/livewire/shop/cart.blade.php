@@ -4,8 +4,8 @@
             .ecc-cart-page {
                 background:
                     radial-gradient(circle at top left, rgba(212, 175, 53, 0.05) 0%, transparent 50%),
-                    linear-gradient(180deg, #0a0a05 0%, #120f08 100%);
-                color: #eae2d4;
+                    linear-gradient(180deg, var(--ecc-bg-page), var(--ecc-bg-surface));
+                color: var(--ecc-text-secondary);
                 min-height: 100vh;
                 padding-bottom: 5rem;
             }
@@ -30,23 +30,23 @@
             }
 
             .ecc-cart-subtitle {
-                color: #c3b998;
+                color: var(--ecc-text-muted);
                 font-size: 1rem;
                 font-weight: 500;
                 margin: 0;
             }
 
             .ecc-cart-item {
-                background: #231f17;
-                border: 1px solid rgba(255,255,255,0.06);
+                background: var(--ecc-bg-surface);
+                border: 1px solid var(--ecc-border-soft);
                 border-radius: 1rem;
                 padding: 1.25rem;
                 transition: all .2s ease;
             }
 
             .ecc-cart-item:hover {
-                background: #2d2a21;
-                border-color: rgba(255,255,255,0.12);
+                background: var(--ecc-bg-surface-2);
+                border-color: var(--ecc-text-primary);
             }
 
             .ecc-cart-thumb {
@@ -55,8 +55,8 @@
                 aspect-ratio: 1 / 1;
                 border-radius: 0.85rem;
                 overflow: hidden;
-                background: #0f0c07;
-                border: 1px solid rgba(255,255,255,0.06);
+                background: var(--ecc-bg-page);
+                border: 1px solid var(--ecc-border-soft);
                 flex: 0 0 auto;
             }
 
@@ -71,12 +71,12 @@
                 font-size: 1.65rem;
                 font-weight: 800;
                 letter-spacing: -0.03em;
-                color: #fff;
+                color: var(--ecc-text-primary);
                 margin: 0;
             }
 
             .ecc-cart-meta {
-                color: #c3b998;
+                color: var(--ecc-text-muted);
                 font-size: 0.98rem;
                 font-weight: 500;
             }
@@ -92,8 +92,8 @@
             .ecc-qty-pill {
                 display: inline-flex;
                 align-items: center;
-                background: #0f0c07;
-                border: 1px solid rgba(255,255,255,0.12);
+                background: var(--ecc-bg-page);
+                border: 1px solid var(--ecc-border);
                 border-radius: 999px;
                 overflow: hidden;
             }
@@ -103,7 +103,7 @@
                 height: 40px;
                 border: 0;
                 background: transparent;
-                color: #fff;
+                color: var(--ecc-text-primary);
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -119,7 +119,7 @@
             .ecc-qty-value {
                 min-width: 40px;
                 text-align: center;
-                color: #fff;
+                color: var(--ecc-text-primary);
                 font-weight: 800;
                 font-size: 0.95rem;
             }
@@ -127,7 +127,7 @@
             .ecc-remove-btn {
                 border: 0;
                 background: transparent;
-                color: rgba(255, 180, 171, 0.82);
+                color: var(--ecc-danger);
                 font-size: 0.75rem;
                 font-weight: 800;
                 letter-spacing: 0.18em;
@@ -140,10 +140,10 @@
             }
 
             .ecc-summary-card {
-                background: rgba(10, 10, 5, 0.86);
+                background: var(--ecc-bg-surface);
                 backdrop-filter: blur(16px);
                 -webkit-backdrop-filter: blur(16px);
-                border: 1px solid rgba(255,255,255,0.06);
+                border: 1px solid var(--ecc-border-soft);
                 border-radius: 1rem;
                 padding: 1.75rem;
             }
@@ -159,7 +159,7 @@
                 font-size: 2rem;
                 font-weight: 900;
                 letter-spacing: -0.03em;
-                color: #fff;
+                color: var(--ecc-text-primary);
                 margin-bottom: 1.75rem;
             }
 
@@ -168,13 +168,13 @@
                 align-items: center;
                 justify-content: space-between;
                 gap: 1rem;
-                color: #c3b998;
+                color: var(--ecc-text-muted);
                 font-size: 1rem;
                 margin-bottom: 1rem;
             }
 
             .ecc-summary-row strong {
-                color: #fff;
+                color: var(--ecc-text-primary);
                 font-weight: 800;
             }
 
@@ -193,11 +193,11 @@
                 gap: 1rem;
                 padding-top: 1.25rem;
                 margin-top: 1.25rem;
-                border-top: 1px solid rgba(255,255,255,0.08);
+                border-top: 1px solid var(--ecc-text-primary);
             }
 
             .ecc-summary-total .label {
-                color: #fff;
+                color: var(--ecc-text-primary);
                 font-size: 1.7rem;
                 font-weight: 800;
             }
@@ -232,7 +232,7 @@
 
             .ecc-checkout-btn:disabled {
                 background: #3d392f;
-                color: #c3b998;
+                color: var(--ecc-text-muted);
                 box-shadow: none;
                 cursor: not-allowed;
             }
@@ -251,8 +251,8 @@
                 gap: 0.7rem;
                 padding-top: 1.5rem;
                 margin-top: 1.5rem;
-                border-top: 1px solid rgba(255,255,255,0.08);
-                color: #c3b998;
+                border-top: 1px solid var(--ecc-text-primary);
+                color: var(--ecc-text-muted);
                 font-size: 0.8rem;
                 font-weight: 900;
                 letter-spacing: 0.18em;
@@ -351,8 +351,8 @@
                         </article>
                     @empty
                         <div class="ecc-cart-item text-center py-5">
-                            <h3 class="mb-2 text-white fw-bold">Your cart is empty.</h3>
-                            <p class="mb-4 text-light-emphasis">Start adding curated items from the club store.</p>
+                            <h3 class="mb-2 ecc-text-primary fw-bold">Your cart is empty.</h3>
+                            <p class="mb-4 ecc-text-muted-emphasis">Start adding curated items from the club store.</p>
                             <a href="{{ route('shop.index') }}" class="shop-card-view-btn d-inline-flex px-4" style="text-decoration: none;">
                                 Continue Shopping
                             </a>

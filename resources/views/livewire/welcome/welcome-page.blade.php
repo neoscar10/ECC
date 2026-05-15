@@ -86,8 +86,8 @@
 <style>
     /* Base theme */
     .ecc-welcome-page{
-        background: #050505;
-        color: #fff;
+        background: var(--ecc-bg-page);
+        color: var(--ecc-text-primary);
         font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
         isolation: isolate;
     }
@@ -102,7 +102,7 @@
         width: 108px;
         height: 84px;
         object-fit: contain;
-        filter: drop-shadow(0 0 10px rgba(199, 167, 90,.25));
+        filter: drop-shadow(0 0 10px var(--ecc-primary-soft));
     }
 
     /* Desktop-only placement: same icon, slightly refined sizing */
@@ -134,8 +134,8 @@
         position: relative;
         overflow: hidden;
         border-radius: 18px;
-        background: #0a0a0a;
-        border: 1px solid rgba(255,255,255,.10);
+        background: var(--ecc-bg-surface);
+        border: 1px solid var(--ecc-border);
         box-shadow: 0 24px 90px rgba(0,0,0,.60);
         width: 100%;
         max-width: 420px;
@@ -163,7 +163,7 @@
 
     .ecc-hero-overlay{
         position: absolute; inset: 0;
-        background: linear-gradient(to top, rgba(5,5,5,.96), rgba(5,5,5,0) 55%);
+        background: linear-gradient(to top, var(--ecc-overlay-dark), transparent 55%);
         opacity: .90;
         z-index: 1;
         pointer-events:none;
@@ -171,12 +171,12 @@
 
     /* Members pill */
     .ecc-pill{
-        background: rgba(0,0,0,.40);
-        border: 1px solid rgba(255,255,255,.12);
+        background: var(--ecc-overlay-dark);
+        border: 1px solid var(--ecc-border);
         border-radius: 9999px;
         padding: 8px 14px;
         backdrop-filter: blur(10px);
-        color: rgba(255,255,255,.92);
+        color: var(--ecc-text-primary);
         box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
     .ecc-pill-text{
@@ -224,7 +224,7 @@
     }
 
     .ecc-subtitle{
-        color: rgba(255,255,255,.58);
+        color: var(--ecc-text-muted);
         font-size: 16px;
         line-height: 1.65;
         max-width: 420px;
@@ -232,7 +232,7 @@
 
     /* CTA */
     .ecc-bottom-fade{
-        background: linear-gradient(to top, rgba(5,5,5,1), rgba(5,5,5,1), rgba(5,5,5,0));
+        background: linear-gradient(to top, var(--ecc-bg-page), var(--ecc-bg-page), transparent);
     }
 
     .ecc-enter-btn{
@@ -240,9 +240,9 @@
         max-width: 360px;
         height: 56px;
         border-radius: 14px;
-        border: 1px solid rgba(255,255,255,.12);
-        background: rgba(255,255,255,.03);
-        color: #fff;
+        border: 1px solid var(--ecc-border);
+        background: var(--ecc-bg-input);
+        color: var(--ecc-text-primary);
         font-weight: 800;
         transition: all 260ms ease;
         position: relative;
@@ -257,7 +257,7 @@
     .ecc-enter-btn::before{
         content:"";
         position:absolute; inset:0;
-        background: rgba(199, 167, 90,.08);
+        background: var(--ecc-primary-soft);
         opacity: 0;
         transition: opacity 260ms ease;
     }
@@ -275,7 +275,7 @@
 
     .ecc-arrow{
         font-size: 20px;
-        color: rgba(255,255,255,.55);
+        color: var(--ecc-text-muted);
         transition: all 260ms ease;
         position: relative;
         z-index: 1;
@@ -289,7 +289,7 @@
     .ecc-established{
         font-size: 11px;
         letter-spacing: .22em;
-        color: rgba(255,255,255,.18);
+        color: var(--ecc-text-subtle);
         white-space: nowrap;
     }
 

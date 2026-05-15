@@ -176,7 +176,7 @@
         border-radius: 999px;
         background: rgba(199, 167, 90,.08);
         border: 1px solid rgba(199, 167, 90,.16);
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .12em;
@@ -184,7 +184,7 @@
     }
 
     .archive-page-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: clamp(2rem, 3vw, 3.25rem);
         line-height: 1.02;
         font-weight: 900;
@@ -193,7 +193,7 @@
     }
 
     .archive-page-subtitle {
-        color: var(--luxe-text-soft);
+        color: var(--ecc-text-secondary);
         font-size: 1rem;
         line-height: 1.8;
         max-width: 760px;
@@ -214,12 +214,10 @@
         flex-wrap: wrap;
         padding: 1rem;
         border-radius: 22px;
-        border: 1px solid rgba(199, 167, 90,.12);
-        background:
-            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
-            rgba(23,19,11,.92);
+        border: 1px solid var(--ecc-border);
+        background: var(--ecc-bg-nav);
         backdrop-filter: blur(16px);
-        box-shadow: 0 16px 32px rgba(0,0,0,.24);
+        box-shadow: var(--ecc-shadow-soft);
     }
 
     .archive-filter-rail {
@@ -232,7 +230,7 @@
         min-width: 0;
         padding-bottom: .2rem;
         scrollbar-width: thin;
-        scrollbar-color: rgba(199, 167, 90,.5) transparent;
+        scrollbar-color: var(--ecc-primary) transparent;
     }
 
     .archive-filter-rail::-webkit-scrollbar {
@@ -240,7 +238,7 @@
     }
 
     .archive-filter-rail::-webkit-scrollbar-thumb {
-        background: rgba(199, 167, 90,.45);
+        background: var(--ecc-primary-border);
         border-radius: 999px;
     }
 
@@ -252,9 +250,9 @@
         min-height: 42px;
         padding: .72rem 1rem;
         border-radius: 999px;
-        border: 1px solid rgba(199, 167, 90,.14);
-        background: rgba(255,255,255,.03);
-        color: rgba(245,240,231,.92);
+        border: 1px solid var(--ecc-border);
+        background: var(--ecc-bg-input);
+        color: var(--ecc-text-secondary);
         font-size: .88rem;
         font-weight: 700;
         line-height: 1;
@@ -265,12 +263,12 @@
 
     .archive-chip:hover {
         border-color: rgba(199, 167, 90,.34);
-        color: #fff;
+        color: var(--ecc-text-primary);
     }
 
     .archive-chip.active {
-        background: var(--luxe-gold);
-        border-color: var(--luxe-gold);
+        background: var(--ecc-primary);
+        border-color: var(--ecc-primary);
         color: #111;
         box-shadow: 0 10px 22px rgba(199, 167, 90,.18);
     }
@@ -288,8 +286,8 @@
         height: 42px;
         border-radius: 999px;
         border: 1px solid rgba(199, 167, 90,.14);
-        background-color: rgba(255,255,255,.03);
-        color: #fff;
+        background-color: var(--ecc-text-primary);
+        color: var(--ecc-text-primary);
         box-shadow: none;
         font-size: .9rem;
         font-weight: 700;
@@ -316,8 +314,8 @@
         overflow: hidden;
         border: 1px solid rgba(199, 167, 90,.12);
         background:
-            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
-            var(--luxe-surface);
+            linear-gradient(180deg, var(--ecc-bg-hover), transparent),
+            var(--ecc-bg-surface);
         box-shadow: 0 18px 38px rgba(0,0,0,.26);
         transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
     }
@@ -332,7 +330,7 @@
         position: relative;
         aspect-ratio: 4 / 5;
         overflow: hidden;
-        background: #0f0d09;
+        background: var(--ecc-bg-surface-2);
     }
 
     .archive-card-media img {
@@ -365,7 +363,7 @@
         padding: .34rem .62rem;
         border-radius: 999px;
         background: #1ed760;
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: .62rem;
         font-weight: 900;
         line-height: 1;
@@ -390,7 +388,7 @@
         align-items: center;
         justify-content: center;
         padding: 1.25rem;
-        background: rgba(20,16,8,.70);
+        background: var(--ecc-overlay-dark);
         backdrop-filter: blur(3px);
         text-align: center;
     }
@@ -409,7 +407,7 @@
         border-radius: 50%;
         background: rgba(199, 167, 90,.12);
         border: 1px solid rgba(199, 167, 90,.24);
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -417,7 +415,7 @@
     }
 
     .archive-lock-label {
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .1em;
@@ -431,9 +429,9 @@
         min-height: 38px;
         padding: .6rem .95rem;
         border-radius: 999px;
-        border: 1px solid var(--luxe-gold);
+        border: 1px solid var(--ecc-primary);
         background: rgba(199, 167, 90,.10);
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
         font-size: .76rem;
         font-weight: 800;
         text-decoration: none;
@@ -441,7 +439,7 @@
     }
 
     .archive-unlock-btn:hover {
-        background: var(--luxe-gold);
+        background: var(--ecc-primary);
         color: #111;
     }
 
@@ -456,7 +454,7 @@
     }
 
     .archive-card-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: 1.16rem;
         font-weight: 800;
         line-height: 1.2;
@@ -465,7 +463,7 @@
     }
 
     .archive-card-subtitle {
-        color: var(--luxe-text-soft);
+        color: var(--ecc-text-secondary);
         font-size: .88rem;
         line-height: 1.55;
         margin: 0;
@@ -495,8 +493,8 @@
         padding: .9rem 1.65rem;
         border-radius: 999px;
         border: 1px solid rgba(199, 167, 90,.18);
-        background: rgba(255,255,255,.03);
-        color: #fff;
+        background: var(--ecc-bg-input);
+        color: var(--ecc-text-primary);
         font-size: .95rem;
         font-weight: 800;
         text-decoration: none;
@@ -505,12 +503,12 @@
 
     .archive-load-more-btn:hover {
         border-color: rgba(199, 167, 90,.36);
-        color: var(--luxe-gold);
+        color: var(--ecc-primary);
         background: rgba(199, 167, 90,.06);
     }
 
     .archive-result-note {
-        color: var(--luxe-text-soft);
+        color: var(--ecc-text-secondary);
         font-size: .88rem;
         text-align: center;
     }
@@ -519,9 +517,9 @@
         border: 1px dashed rgba(199, 167, 90,.18);
         border-radius: 24px;
         padding: 2.5rem 1.5rem;
-        background: rgba(255,255,255,.02);
+        background: var(--ecc-bg-input);
         text-align: center;
-        color: var(--luxe-text-soft);
+        color: var(--ecc-text-secondary);
     }
 
     @media (max-width: 1199.98px) {

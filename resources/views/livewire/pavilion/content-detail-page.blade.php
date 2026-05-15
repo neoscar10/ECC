@@ -5,7 +5,7 @@
             <img src="{{ $vm['media']['image_url'] }}" class="w-100" style="height: 300px; object-fit: cover;" alt="{{ $vm['title'] }}">
         @else
             <div class="w-100 bg-secondary d-flex align-items-center justify-content-center" style="height: 300px;">
-                <span class="material-symbols-outlined text-white-50 fs-1">image</span>
+                <span class="material-symbols-outlined ecc-text-primary-50 fs-1">image</span>
             </div>
         @endif
         
@@ -13,9 +13,9 @@
             @if($vm['badge'])
                 <span class="badge bg-warning text-dark mb-2 fw-bold rounded-pill text-uppercase">{{ $vm['badge'] }}</span>
             @endif
-            <h1 class="ecc-outfit fw-bold text-white mb-1">{{ $vm['title'] }}</h1>
+            <h1 class="ecc-outfit fw-bold ecc-text-primary mb-1">{{ $vm['title'] }}</h1>
             @if($vm['subtitle'])
-                <p class="text-white-50 mb-0">{{ $vm['subtitle'] }}</p>
+                <p class="ecc-text-primary-50 mb-0">{{ $vm['subtitle'] }}</p>
             @endif
         </div>
     </div>
@@ -25,7 +25,7 @@
         @if($vm['is_locked'])
             <div class="pavilion-card p-5 text-center border-warning border-opacity-50" style="background: rgba(242, 185, 13, 0.05);">
                 <span class="material-symbols-outlined text-warning mb-3" style="font-size: 48px;">{{ $vm['access']['message']['icon'] ?? 'lock' }}</span>
-                <h3 class="ecc-outfit fw-bold text-white mb-2">{{ $vm['access']['message']['title'] ?? 'Access Restricted' }}</h3>
+                <h3 class="ecc-outfit fw-bold ecc-text-primary mb-2">{{ $vm['access']['message']['title'] ?? 'Access Restricted' }}</h3>
                 <p class="text-muted mb-4">{{ $vm['access']['message']['body'] ?? 'This content is reserved for members.' }}</p>
                 
                 @foreach($vm['access']['actions'] as $action)

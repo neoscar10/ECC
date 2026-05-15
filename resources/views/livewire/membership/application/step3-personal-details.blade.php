@@ -157,7 +157,7 @@
     --ecc-border:#333333;
   }
 
-  .ecc-bg{ background: var(--ecc-bg); color: #fff; font-family: "Newsreader", serif; }
+  .ecc-bg{ background: var(--ecc-bg); color: var(--ecc-text-primary); font-family: "Newsreader", serif; }
   .ecc-max{ max-width: 520px; }
   @media (min-width: 992px){
     .ecc-max{ max-width: 620px; }
@@ -188,7 +188,7 @@
   .ecc-topbar{
     background: rgba(2,2,2,.80);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255,255,255,.05);
+    border-bottom: 1px solid var(--ecc-border-soft);
   }
   .ecc-icon-btn{
     width:40px; height:40px; border-radius:9999px;
@@ -197,12 +197,12 @@
     display:flex; align-items:center; justify-content:center;
     transition: background .2s ease;
   }
-  .ecc-icon-btn:hover{ background: rgba(255,255,255,.05); }
+  .ecc-icon-btn:hover{ background: var(--ecc-text-primary); }
 
   .text-ecc{ color: rgba(199, 167, 90,.95); }
   .ecc-topbar-title{
     font-family: "Noto Sans", system-ui, sans-serif;
-    color: rgba(255,255,255,.90);
+    color: var(--ecc-text-primary);
     font-size: 12px;
     letter-spacing: .22em;
     font-weight: 700;
@@ -231,7 +231,7 @@
   }
   .ecc-sub{
     font-family: "Noto Sans", system-ui, sans-serif;
-    color: rgba(255,255,255,.60);
+    color: var(--ecc-text-muted);
     font-size: 18px;
     line-height: 1.6;
     font-weight: 300;
@@ -258,7 +258,7 @@
     font-family: "Noto Sans", system-ui, sans-serif;
     box-shadow: none !important;
   }
-  .ecc-input::placeholder{ color: rgba(255,255,255,.20); }
+  .ecc-input::placeholder{ color: var(--ecc-text-primary); }
   .ecc-input:focus{
     border-bottom-color: var(--ecc-primary) !important;
   }
@@ -269,7 +269,7 @@
     right: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: rgba(255,255,255,.30);
+    color: var(--ecc-text-primary);
     transition: color .2s ease;
     pointer-events:none;
   }
@@ -326,16 +326,16 @@
     background: #181818 !important;
   }
   .numInputWrapper span.arrowUp:after {
-    border-bottom-color: rgba(255,255,255,0.9) !important;
+    border-bottom-color: var(--ecc-text-primary) !important;
   }
   .numInputWrapper span.arrowDown:after {
-    border-top-color: rgba(255,255,255,0.9) !important;
+    border-top-color: var(--ecc-text-primary) !important;
   }
   .flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month {
     fill: var(--ecc-primary) !important;
   }
   .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover {
-    color: rgba(255,255,255,0.1) !important;
+    color: var(--ecc-text-primary) !important;
   }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">

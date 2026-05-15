@@ -71,7 +71,7 @@
 <style>
     .ecc-apply-intro{
         background: #050505;
-        color: #ffffff;
+        color: var(--ecc-text-primary);
         font-family: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
     }
     .ecc-max{ max-width: 460px; }
@@ -97,7 +97,7 @@
         border: 1px solid rgba(242,185,13,.20);
         box-shadow: 0 28px 90px rgba(0,0,0,.55);
         aspect-ratio: 4 / 3;
-        background: rgba(255,255,255,.02);
+        background: var(--ecc-bg-input);
     }
     .ecc-hero-img{
         position:absolute; inset:0;
@@ -136,7 +136,7 @@
     .ecc-italic{
         font-style: italic;
         font-weight: 500;
-        color: rgba(255,255,255,.92);
+        color: var(--ecc-text-primary);
         margin-right: 8px;
     }
     .ecc-gold{
@@ -147,14 +147,14 @@
 
     .ecc-copy{ max-width: 420px; }
     .ecc-p{
-        color: rgba(255,255,255,.70);
+        color: var(--ecc-text-secondary);
         font-size: 18px;
         line-height: 1.65;
         margin: 0;
         font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
     .ecc-p2{
-        color: rgba(255,255,255,.50);
+        color: var(--ecc-text-muted);
         font-size: 14px;
         line-height: 1.65;
         font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;

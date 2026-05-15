@@ -143,7 +143,7 @@
     --ecc-border:#333333;
   }
 
-  .ecc-bg{ background: var(--ecc-bg); color: #fff; font-family: "Newsreader", serif; }
+  .ecc-bg{ background: var(--ecc-bg); color: var(--ecc-text-primary); font-family: "Newsreader", serif; }
   .ecc-max{ max-width: 520px; }
   @media (min-width: 992px){ .ecc-max{ max-width: 620px; } }
 
@@ -172,7 +172,7 @@
   .ecc-topbar{
     background: rgba(2,2,2,.80);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255,255,255,.05);
+    border-bottom: 1px solid var(--ecc-border-soft);
   }
   .ecc-icon-btn{
     width:40px; height:40px; border-radius:9999px;
@@ -180,11 +180,11 @@
     color: rgba(199, 167, 90,.85);
     display:flex; align-items:center; justify-content:center;
   }
-  .ecc-icon-btn:hover{ background: rgba(255,255,255,.05); }
+  .ecc-icon-btn:hover{ background: var(--ecc-text-primary); }
   .text-ecc{ color: rgba(199, 167, 90,.95); }
   .ecc-topbar-title{
     font-family: "Noto Sans", system-ui, sans-serif;
-    color: rgba(255,255,255,.90);
+    color: var(--ecc-text-primary);
     font-size: 12px;
     letter-spacing: .22em;
     font-weight: 700;
@@ -223,7 +223,7 @@
 
   .ecc-sub{
     font-family: "Noto Sans", system-ui, sans-serif;
-    color: rgba(255,255,255,.60);
+    color: var(--ecc-text-muted);
     font-size: 16px;
     line-height: 1.6;
   }
@@ -241,7 +241,7 @@
   /* Cards */
   .ecc-card{
     width: 100%;
-    border: 1px solid rgba(255,255,255,.10);
+    border: 1px solid var(--ecc-border);
     background: #221f10;
     border-radius: 14px;
     overflow: hidden;
@@ -254,7 +254,7 @@
     background-image: var(--bg);
     background-size: cover;
     background-position: center;
-    color: #fff;
+    color: var(--ecc-text-primary);
   }
   .ecc-card__overlay{
     position:absolute; inset:0;
@@ -278,7 +278,7 @@
     font-size: 10px;
     letter-spacing: .20em;
     text-transform: uppercase;
-    color: rgba(255,255,255,.55);
+    color: var(--ecc-text-muted);
   }
 
   .ecc-card__check{
@@ -287,7 +287,7 @@
     width: 26px; height: 26px;
     border-radius: 9999px;
     display:flex; align-items:center; justify-content:center;
-    border: 1px solid rgba(255,255,255,.28);
+    border: 1px solid var(--ecc-text-primary);
     background: rgba(0,0,0,.25);
     color: transparent;
     z-index: 3;
@@ -311,9 +311,9 @@
   }
   .ecc-chip{
     border-radius: 9999px;
-    border: 1px solid rgba(255,255,255,.10);
+    border: 1px solid var(--ecc-border);
     background: rgba(34,31,16,.55);
-    color: rgba(255,255,255,.70);
+    color: var(--ecc-text-secondary);
     padding: 10px 14px;
     font-family: "Noto Sans", system-ui, sans-serif;
     font-size: 13px;
@@ -324,7 +324,7 @@
   }
   .ecc-chip:hover{
     border-color: rgba(199, 167, 90,.40);
-    color: rgba(255,255,255,.90);
+    color: var(--ecc-text-primary);
   }
   .ecc-chip.is-on{
     background: var(--ecc-primary);
@@ -353,12 +353,12 @@
   .ecc-later{
     background: transparent !important;
     border: 0 !important;
-    color: rgba(255,255,255,.40) !important;
+    color: var(--ecc-text-primary) !important;
     font-family: "Noto Sans", system-ui, sans-serif;
     font-size: 14px !important;
     padding: 10px 0 !important;
   }
-  .ecc-later:hover{ color: rgba(255,255,255,.75) !important; }
+  .ecc-later:hover{ color: var(--ecc-text-primary) !important; }
 
   .ecc-err{
     font-family: "Noto Sans", system-ui, sans-serif;

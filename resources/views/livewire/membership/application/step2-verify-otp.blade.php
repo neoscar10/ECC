@@ -42,7 +42,7 @@
     <h1 class="ecc-h1 mb-2">Verification Code</h1>
     <p class="ecc-sub mb-4">
       We sent a 6-digit code to<br>
-      <span class="text-white fw-bold">{{ $maskedPhone }}</span>
+      <span class="ecc-text-primary fw-bold">{{ $maskedPhone }}</span>
     </p>
 
     @if($errorMessage)
@@ -146,10 +146,10 @@
     --ecc-primary:var(--ecc-primary);
     --ecc-bg:#020202;
     --ecc-surface:#181818;
-    --ecc-border: rgba(255,255,255,0.1);
+    --ecc-border: var(--ecc-text-primary);
   }
 
-  .ecc-bg{ background: var(--ecc-bg); color: #fff; font-family: "Newsreader", serif; }
+  .ecc-bg{ background: var(--ecc-bg); color: var(--ecc-text-primary); font-family: "Newsreader", serif; }
   
   .ecc-bg-layer{
     position:absolute; inset:0;
@@ -179,11 +179,11 @@
   }
 
   .ecc-topbar{
-    border-bottom: 1px solid rgba(255,255,255,.05);
+    border-bottom: 1px solid var(--ecc-border-soft);
   }
   .ecc-topbar-title{
     font-family: "Noto Sans", system-ui, sans-serif;
-    color: rgba(255,255,255,.60);
+    color: var(--ecc-text-muted);
     font-size: 11px;
     letter-spacing: .25em;
     font-weight: 700;
@@ -226,14 +226,14 @@
   }
   .ecc-sub{
     font-family: "Noto Sans", system-ui, sans-serif;
-    color: rgba(255,255,255,.50);
+    color: var(--ecc-text-muted);
     font-size: 15px;
     line-height: 1.6;
   }
 
   .ecc-otp-input{
     width: 15%; height: 64px;
-    background: rgba(255,255,255,0.03) !important;
+    background: var(--ecc-text-primary) !important;
     border: 1px solid var(--ecc-border) !important;
     border-radius: 12px !important;
     color: #fff !important;
@@ -252,7 +252,7 @@
   .ecc-timer-text{
     font-family: "Noto Sans", system-ui, sans-serif;
     font-size: 14px;
-    color: rgba(255,255,255,0.4);
+    color: var(--ecc-text-primary);
   }
   .text-ecc{ color: var(--ecc-primary); }
 
@@ -273,7 +273,7 @@
   .ecc-sub-small{
     font-family: "Noto Sans", system-ui, sans-serif;
     font-size: 13px;
-    color: rgba(255,255,255,0.35);
+    color: var(--ecc-text-primary);
   }
 </style>
 @endpush

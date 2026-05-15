@@ -60,17 +60,17 @@
 @push('styles')
 <style>
     .ecc-club-page {
-        color: #f5efe1;
+        color: var(--ecc-text-primary);
     }
 
     .ecc-club-hero-card,
     .ecc-privilege-card,
     .ecc-club-panel,
     .ecc-club-quote-section {
-        background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
-        border: 1px solid rgba(199, 167, 90,.12);
+        background: linear-gradient(180deg, var(--ecc-bg-surface), var(--ecc-bg-surface-2));
+        border: 1px solid var(--ecc-primary-soft);
         border-radius: 1.25rem;
-        box-shadow: 0 12px 30px rgba(0,0,0,.14);
+        box-shadow: var(--ecc-shadow-soft);
     }
 
     .ecc-club-hero-card {
@@ -91,7 +91,7 @@
         border: 4px solid var(--ecc-primary);
         padding: 4px;
         background: rgba(199, 167, 90,.06);
-        box-shadow: 0 0 24px rgba(199, 167, 90,.12);
+        box-shadow: 0 0 24px var(--ecc-primary-soft);
     }
 
     .ecc-club-avatar img {
@@ -115,14 +115,14 @@
     }
 
     .ecc-club-member-name {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: clamp(2rem, 4vw, 3rem);
         font-weight: 800;
         letter-spacing: -.04em;
     }
 
     .ecc-club-member-meta {
-        color: rgba(245,239,225,.72);
+        color: var(--ecc-text-secondary);
         font-size: .95rem;
     }
 
@@ -137,7 +137,7 @@
     }
 
     .ecc-section-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: 1.45rem;
         font-weight: 800;
         letter-spacing: -.02em;
@@ -164,7 +164,7 @@
     }
 
     .ecc-privilege-card:hover {
-        border-color: rgba(199, 167, 90,.32);
+        border-color: var(--ecc-primary-border);
         transform: translateY(-1px);
     }
 
@@ -175,14 +175,14 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(199, 167, 90,.12);
+        background: var(--ecc-primary-soft);
         color: var(--ecc-primary);
         font-size: 1.5rem;
         margin-bottom: 1rem;
     }
 
     .ecc-privilege-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: 1.15rem;
         font-weight: 800;
         margin-bottom: .45rem;
@@ -191,7 +191,7 @@
     .ecc-privilege-text,
     .ecc-list-subtitle,
     .ecc-empty-inline {
-        color: rgba(245,239,225,.60);
+        color: var(--ecc-ecc-ecc-text-muted);
         font-size: .92rem;
         line-height: 1.7;
     }
@@ -206,9 +206,9 @@
 
     .ecc-table-head {
         padding: .85rem 1.5rem;
-        border-top: 1px solid rgba(199, 167, 90,.08);
-        border-bottom: 1px solid rgba(199, 167, 90,.08);
-        color: rgba(245,239,225,.45);
+        border-top: 1px solid var(--ecc-primary-soft);
+        border-bottom: 1px solid var(--ecc-primary-soft);
+        color: var(--ecc-text-subtle);
         font-size: .72rem;
         font-weight: 800;
         letter-spacing: .16em;
@@ -226,7 +226,7 @@
         align-items: center;
         gap: 1rem;
         padding: 1rem 1.5rem;
-        border-bottom: 1px solid rgba(199, 167, 90,.08);
+        border-bottom: 1px solid var(--ecc-primary-soft);
     }
 
     .ecc-club-list-row:last-child {
@@ -240,13 +240,13 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: rgba(255,255,255,.05);
+        background: var(--ecc-bg-input);
         color: rgba(199, 167, 90,.70);
         flex-shrink: 0;
     }
 
     .ecc-list-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-weight: 700;
         font-size: 1rem;
     }
@@ -298,7 +298,7 @@
     .ecc-status-pill.status-default {
         background: rgba(199, 167, 90,.10);
         color: var(--ecc-primary);
-        border-color: rgba(199, 167, 90,.16);
+        border-color: var(--ecc-primary-soft);
     }
 
     .ecc-dossier-thumb {
@@ -307,33 +307,33 @@
         min-width: 48px;
         border-radius: .75rem;
         overflow: hidden;
-        border: 1px solid rgba(199, 167, 90,.18);
-        background: rgba(255,255,255,.05);
+        border: 1px solid var(--ecc-primary-border);
+        background: var(--ecc-bg-input);
     }
 
     .ecc-list-amount {
-        color: #f5efe1;
+        color: var(--ecc-text-primary);
         font-size: .82rem;
         font-weight: 700;
     }
 
     .ecc-panel-footer {
         padding: 1rem 1.5rem;
-        border-top: 1px solid rgba(199, 167, 90,.08);
+        border-top: 1px solid var(--ecc-primary-soft);
         text-align: center;
     }
 
     .ecc-footer-link-muted {
-        color: rgba(245,239,225,.62);
+        color: var(--ecc-text-muted);
     }
 
     .ecc-footer-link-muted:hover {
-        color: #fff;
+        color: var(--ecc-text-primary);
     }
 
     .ecc-club-quote-section {
         padding: 2rem 1.5rem;
-        border-top: 1px solid rgba(199, 167, 90,.08);
+        border-top: 1px solid var(--ecc-primary-soft);
     }
 
     .ecc-kicker {
@@ -345,7 +345,7 @@
     }
 
     .ecc-club-quote {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: clamp(1.3rem, 3vw, 2rem);
         font-style: italic;
         font-weight: 300;
@@ -353,14 +353,14 @@
     }
 
     .ecc-club-stat-value {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: 2rem;
         font-weight: 800;
         line-height: 1;
     }
 
     .ecc-club-stat-label {
-        color: rgba(245,239,225,.46);
+        color: var(--ecc-text-subtle);
         font-size: .66rem;
         font-weight: 800;
         letter-spacing: .18em;
@@ -371,7 +371,7 @@
     .ecc-club-stat-divider {
         width: 1px;
         height: 40px;
-        background: rgba(199, 167, 90,.15);
+        background: var(--ecc-primary-border);
     }
 
     .ecc-btn-primary {
@@ -390,11 +390,11 @@
 
     /* Concierge Modal Styles */
     .ecc-concierge-modal {
-        background: linear-gradient(180deg, rgba(24,19,10,.98), rgba(17,13,7,.99));
-        border: 1px solid rgba(199, 167, 90,.16);
+        background: linear-gradient(180deg, var(--ecc-bg-surface), var(--ecc-bg-surface-2));
+        border: 1px solid var(--ecc-primary-soft);
         border-radius: 1.25rem;
-        color: #f5efe1;
-        box-shadow: 0 24px 60px rgba(0,0,0,.32);
+        color: var(--ecc-text-primary);
+        box-shadow: 0 24px 60px var(--ecc-shadow-card);
     }
 
     .ecc-modal-kicker {
@@ -406,30 +406,30 @@
     }
 
     .ecc-modal-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: 1.75rem;
         font-weight: 800;
         letter-spacing: -.03em;
     }
 
     .ecc-modal-subtitle {
-        color: rgba(245,239,225,.64);
+        color: var(--ecc-ecc-ecc-text-muted);
         line-height: 1.7;
         max-width: 520px;
         font-size: .95rem;
     }
 
     .ecc-form-label {
-        color: #f5efe1;
+        color: var(--ecc-text-primary);
         font-size: .82rem;
         font-weight: 700;
         margin-bottom: .6rem;
     }
 
     .ecc-form-control {
-        background: rgba(255,255,255,.04) !important;
-        border: 1px solid rgba(199, 167, 90,.15) !important;
-        color: #f5efe1 !important;
+        background: var(--ecc-text-primary) !important;
+        border: 1px solid var(--ecc-primary-border) !important;
+        color: var(--ecc-text-primary) !important;
         border-radius: .9rem !important;
         min-height: 48px;
         box-shadow: none !important;
@@ -437,14 +437,14 @@
     }
 
     .ecc-form-control:focus {
-        background: rgba(255,255,255,.06) !important;
-        border-color: rgba(199, 167, 90,.45) !important;
-        color: #fff !important;
+        background: var(--ecc-border-soft) !important;
+        border-color: var(--ecc-primary-border) !important;
+        color: var(--ecc-text-primary) !important;
     }
 
     .ecc-form-control option {
         background: #1d170d;
-        color: #f5efe1;
+        color: var(--ecc-text-primary);
     }
 
     .ecc-alert-success {
@@ -457,17 +457,17 @@
 
     .ecc-btn-outline-light {
         background: transparent;
-        border: 1px solid rgba(245,239,225,.16);
-        color: #f5efe1;
+        border: 1px solid var(--ecc-border);
+        color: var(--ecc-text-primary);
         font-weight: 700;
         border-radius: .95rem;
         transition: .2s ease;
     }
 
     .ecc-btn-outline-light:hover {
-        background: rgba(255,255,255,.05);
-        color: #fff;
-        border-color: rgba(199, 167, 90,.25);
+        background: var(--ecc-bg-input);
+        color: var(--ecc-text-primary);
+        border-color: var(--ecc-primary-soft);
     }
 
     @media (max-width: 767.98px) {

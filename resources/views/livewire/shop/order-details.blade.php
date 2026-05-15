@@ -2,7 +2,7 @@
     @push('styles')
     <style>
         .ecc-order-detail-page {
-            color: #f5efe1;
+            color: var(--ecc-text-primary);
         }
 
         .ecc-return-link {
@@ -26,7 +26,7 @@
             line-height: .95;
             font-weight: 900;
             letter-spacing: -.05em;
-            color: #fff;
+            color: var(--ecc-text-primary);
             margin: 0;
             text-transform: uppercase;
         }
@@ -37,9 +37,9 @@
             gap: .5rem;
             padding: .7rem 1rem;
             border-radius: .8rem;
-            background: rgba(255,255,255,.04);
+            background: var(--ecc-bg-input);
             border: 1px solid rgba(245,239,225,.08);
-            color: #f5efe1;
+            color: var(--ecc-text-primary);
             font-size: .92rem;
         }
 
@@ -58,7 +58,7 @@
         .ecc-status-pill.status-processing {
             color: #f0c859;
             background: rgba(199, 167, 90,.10);
-            border-color: rgba(199, 167, 90,.18);
+            border-color: var(--ecc-primary-border);
         }
 
         .ecc-status-pill.status-shipped {
@@ -75,18 +75,18 @@
 
         .ecc-status-pill.status-default {
             color: var(--ecc-primary);
-            background: rgba(199, 167, 90,.08);
-            border-color: rgba(199, 167, 90,.16);
+            background: var(--ecc-primary-soft);
+            border-color: var(--ecc-primary-soft);
         }
 
         .ecc-panel,
         .ecc-summary-card,
         .ecc-support-card {
-            background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
-            border: 1px solid rgba(199, 167, 90,.12);
+            background: linear-gradient(180deg, var(--ecc-bg-surface), var(--ecc-bg-surface-2));
+            border: 1px solid var(--ecc-primary-soft);
             border-radius: 1.2rem;
             box-shadow: 0 12px 32px rgba(0,0,0,.16);
-            color: #f5efe1;
+            color: var(--ecc-text-primary);
         }
 
         .ecc-panel {
@@ -101,11 +101,11 @@
         .ecc-panel-title {
             font-size: 1.35rem;
             font-weight: 800;
-            color: #fff;
+            color: var(--ecc-text-primary);
         }
 
         .ecc-panel-subtitle {
-            color: rgba(245,239,225,.58);
+            color: var(--ecc-text-muted);
             font-size: .92rem;
         }
 
@@ -131,7 +131,7 @@
             height: 128px;
             border-radius: .9rem;
             overflow: hidden;
-            background: rgba(255,255,255,.05);
+            background: var(--ecc-bg-input);
             border: 1px solid rgba(245,239,225,.06);
         }
 
@@ -145,14 +145,14 @@
         }
 
         .ecc-item-title {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: 1.08rem;
             font-weight: 800;
             line-height: 1.35;
         }
 
         .ecc-item-subtitle {
-            color: rgba(245,239,225,.62);
+            color: var(--ecc-text-muted);
             font-size: .9rem;
         }
 
@@ -175,7 +175,7 @@
         }
 
         .ecc-section-heading {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: 1.08rem;
             font-weight: 800;
         }
@@ -195,7 +195,7 @@
             gap: 1rem;
             padding: 1rem;
             border-radius: .9rem;
-            background: rgba(255,255,255,.04);
+            background: var(--ecc-bg-input);
             border: 1px solid rgba(245,239,225,.08);
         }
 
@@ -207,7 +207,7 @@
             align-items: center;
             justify-content: center;
             background: #181818;
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: .7rem;
             font-weight: 900;
             letter-spacing: .04em;
@@ -224,7 +224,7 @@
         }
 
         .ecc-summary-title {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: 1.5rem;
             font-weight: 800;
             margin-bottom: 1.5rem;
@@ -240,7 +240,7 @@
         }
 
         .ecc-total-label {
-            color: #fff;
+            color: var(--ecc-text-primary);
             font-size: 1rem;
             font-weight: 900;
             letter-spacing: .03em;
@@ -285,7 +285,7 @@
         .ecc-btn-outline-light {
             background: transparent;
             border: 1px solid rgba(245,239,225,.14);
-            color: #f5efe1;
+            color: var(--ecc-text-primary);
             font-weight: 800;
             border-radius: .95rem;
             letter-spacing: .12em;
@@ -298,13 +298,13 @@
 
         .ecc-btn-outline-light:hover,
         .ecc-btn-outline-light:focus {
-            background: rgba(255,255,255,.04);
-            color: #fff;
+            background: var(--ecc-bg-input);
+            color: var(--ecc-text-primary);
             border-color: rgba(199, 167, 90,.28);
         }
 
         .ecc-summary-note {
-            color: rgba(245,239,225,.58);
+            color: var(--ecc-text-muted);
             font-size: .78rem;
             line-height: 1.8;
             text-align: center;
@@ -492,25 +492,25 @@
                                     <div class="row g-4 mb-4">
                                         <div class="col-6 col-md-3">
                                             <div class="ecc-item-label">Courier</div>
-                                            <div class="text-white fw-bold">{{ $trackingData['courier_name'] ?? 'Pending Selection' }}</div>
+                                            <div class="ecc-text-primary fw-bold">{{ $trackingData['courier_name'] ?? 'Pending Selection' }}</div>
                                         </div>
                                         <div class="col-6 col-md-3">
                                             <div class="ecc-item-label">AWB</div>
-                                            <div class="text-white fw-bold">{{ $trackingData['awb_code'] ?? 'Not Assigned' }}</div>
+                                            <div class="ecc-text-primary fw-bold">{{ $trackingData['awb_code'] ?? 'Not Assigned' }}</div>
                                         </div>
                                         <div class="col-6 col-md-3">
                                             <div class="ecc-item-label">Shipping Paid</div>
-                                            <div class="text-white fw-bold">{{ $trackingData['currency'] }} {{ number_format($trackingData['shipping_charge'], 2) }}</div>
+                                            <div class="ecc-text-primary fw-bold">{{ $trackingData['currency'] }} {{ number_format($trackingData['shipping_charge'], 2) }}</div>
                                         </div>
                                         <div class="col-6 col-md-3">
                                             <div class="ecc-item-label">Estimated Delivery</div>
-                                            <div class="text-white fw-bold">{{ $trackingData['estimated_delivery_days'] ? $trackingData['estimated_delivery_days'] . ' days' : ($trackingData['etd'] ?? 'Pending') }}</div>
+                                            <div class="ecc-text-primary fw-bold">{{ $trackingData['estimated_delivery_days'] ? $trackingData['estimated_delivery_days'] . ' days' : ($trackingData['etd'] ?? 'Pending') }}</div>
                                         </div>
                                     </div>
 
                                     @if(count($trackingData['events']) > 0)
                                         <div class="mt-4 pt-4 border-top" style="border-color: rgba(245,239,225,.08) !important;">
-                                            <h4 class="fs-6 text-white mb-4">Tracking History</h4>
+                                            <h4 class="fs-6 ecc-text-primary mb-4">Tracking History</h4>
                                             <ul class="list-unstyled mb-0">
                                                 @foreach($trackingData['events'] as $event)
                                                     <li class="mb-3 d-flex gap-3">
@@ -521,7 +521,7 @@
                                                             @endif
                                                         </div>
                                                         <div class="pb-3">
-                                                            <div class="text-white fw-bold fs-6">{{ $event['status_label'] }}</div>
+                                                            <div class="ecc-text-primary fw-bold fs-6">{{ $event['status_label'] }}</div>
                                                             @if($event['description'])
                                                                 <div class="ecc-muted small mb-1">{{ $event['description'] }}</div>
                                                             @endif
@@ -558,13 +558,13 @@
                                             </div>
 
                                             <div class="ecc-address-block">
-                                                <div class="fw-bold text-white mb-2 fs-5 text-uppercase-less">{{ $shippingName }}</div>
+                                                <div class="fw-bold ecc-text-primary mb-2 fs-5 text-uppercase-less">{{ $shippingName }}</div>
                                                 <div class="ecc-muted lh-lg small">
                                                     {!! nl2br(e($shippingAddressBlock)) !!}
                                                 </div>
 
                                                 @if($shippingPhone)
-                                                    <div class="mt-3 small text-white-50"><i class="material-symbols-outlined fs-6 align-middle me-1">call</i>{{ $shippingPhone }}</div>
+                                                    <div class="mt-3 small ecc-text-primary-50"><i class="material-symbols-outlined fs-6 align-middle me-1">call</i>{{ $shippingPhone }}</div>
                                                 @endif
                                             </div>
                                         </div>
@@ -586,7 +586,7 @@
                                                 </div>
 
                                                 <div>
-                                                    <div class="fw-bold text-white small text-uppercase">
+                                                    <div class="fw-bold ecc-text-primary small text-uppercase">
                                                         {{ $paymentMethodLabel }}
                                                     </div>
 
@@ -625,17 +625,17 @@
                             <div class="d-flex flex-column gap-3 mb-4">
                                 <div class="d-flex justify-content-between gap-3">
                                     <span class="ecc-muted fw-bold small text-uppercase">Subtotal</span>
-                                    <strong class="text-white">{{ $formattedSubtotal }}</strong>
+                                    <strong class="ecc-text-primary">{{ $formattedSubtotal }}</strong>
                                 </div>
 
                                 <div class="d-flex justify-content-between gap-3">
                                     <span class="ecc-muted fw-bold small text-uppercase">{{ $shippingLabel }}</span>
-                                    <strong class="text-white">{{ $formattedShipping }}</strong>
+                                    <strong class="ecc-text-primary">{{ $formattedShipping }}</strong>
                                 </div>
 
                                 <div class="d-flex justify-content-between gap-3">
                                     <span class="ecc-muted fw-bold small text-uppercase">{{ $taxLabel }}</span>
-                                    <strong class="text-white">{{ $formattedTax }}</strong>
+                                    <strong class="ecc-text-primary">{{ $formattedTax }}</strong>
                                 </div>
 
                                 @if($discountAmount > 0)
@@ -677,7 +677,7 @@
                             </div>
 
                             <div>
-                                <h4 class="fw-bold text-white small mb-1">Need assistance?</h4>
+                                <h4 class="fw-bold ecc-text-primary small mb-1">Need assistance?</h4>
                                 <p class="ecc-muted small mb-2">
                                     Our concierge team is available to assist with delivery, archive care, and premium order support.
                                 </p>

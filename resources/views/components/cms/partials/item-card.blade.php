@@ -209,7 +209,7 @@
         aspect-ratio: {{ $isPreview ? '4/5' : '1/1' }};
         border-radius: 1rem;
         overflow: hidden;
-        border: 1px solid rgba(199, 167, 90,.12);
+        border: 1px solid var(--ecc-primary-soft);
         background: #1a140b;
         box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
@@ -250,7 +250,7 @@
     }
 
     .ecc-countdown {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: .7rem;
         font-weight: 800;
         display: inline-flex;
@@ -276,7 +276,7 @@
     }
 
     .ecc-card-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: {{ $isPreview ? '1.15rem' : '0.95rem' }};
         font-weight: 800;
         margin-bottom: .2rem;
@@ -318,7 +318,7 @@
     }
 
     .ecc-editorial-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: {{ $isPreview ? '1.8rem' : '1.15rem' }};
         line-height: 1.1;
         font-style: italic;

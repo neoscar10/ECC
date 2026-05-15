@@ -6,7 +6,7 @@
             <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);"></div>
         @else
             <div class="w-100 h-100 bg-secondary d-flex align-items-center justify-content-center position-absolute top-0 start-0">
-                <span class="material-symbols-outlined text-white-50 fs-1">image</span>
+                <span class="material-symbols-outlined ecc-text-primary-50 fs-1">image</span>
             </div>
         @endif
         
@@ -14,9 +14,9 @@
             @if($block['badge_text'] ?? null)
                 <span class="badge bg-primary text-uppercase mb-2 fw-bold px-3 py-2 rounded-pill" style="font-size: 11px;">{{ $block['badge_text'] }}</span>
             @endif
-            <h1 class="text-white fw-bold mb-1">{{ $block['title'] }}</h1>
+            <h1 class="ecc-text-primary fw-bold mb-1">{{ $block['title'] }}</h1>
             @if($block['subtitle'] ?? null)
-                <p class="text-white-50 mb-0">{{ $block['subtitle'] }}</p>
+                <p class="ecc-text-primary-50 mb-0">{{ $block['subtitle'] }}</p>
             @endif
         </div>
     </div>
@@ -27,7 +27,7 @@
             {{-- This case is usually handled by access gate but for a dedicated page we show it prominently --}}
             <div class="card border-0 rounded-4 p-5 text-center shadow-lg" style="background: var(--ecc-surface);">
                 <span class="material-symbols-outlined text-primary mb-3" style="font-size: 64px;">{{ $block['access']['message']['icon'] ?? 'lock' }}</span>
-                <h2 class="fw-bold text-white mb-2">{{ $block['access']['message']['title'] ?? 'Access Restricted' }}</h2>
+                <h2 class="fw-bold ecc-text-primary mb-2">{{ $block['access']['message']['title'] ?? 'Access Restricted' }}</h2>
                 <p class="text-muted mb-4 fs-5">{{ $block['access']['message']['body'] ?? 'This content is reserved for members.' }}</p>
                 
                 <div class="d-flex justify-content-center gap-3 mt-2">
@@ -39,7 +39,7 @@
                 </div>
             </div>
         @else
-            <div class="cms-markdown-content text-white-50" style="line-height: 1.8; font-size: 16px;">
+            <div class="cms-markdown-content ecc-text-primary-50" style="line-height: 1.8; font-size: 16px;">
                 @if(!empty($bodyHtml))
                     {!! $bodyHtml !!}
                 @elseif(!empty($block['body_text'] ?? null))

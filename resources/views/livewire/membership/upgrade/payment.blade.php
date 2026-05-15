@@ -179,7 +179,7 @@
     --ecc-primary:var(--ecc-primary); --ecc-primary-dark:var(--ecc-gold-600);
     --ecc-bg:#020202; --ecc-surface:#0a0a0a; --ecc-border:rgba(199, 167, 90,.30);
   }
-  .ecc-bg{ background:var(--ecc-bg); color:#fff; font-family:"Work Sans","Noto Sans",system-ui,sans-serif; }
+  .ecc-bg{ background:var(--ecc-bg); color: var(--ecc-text-primary); font-family:"Work Sans","Noto Sans",system-ui,sans-serif; }
   .ecc-max{ max-width:520px; }
   @media(min-width:992px){ .ecc-max{ max-width:620px; } }
 
@@ -196,11 +196,11 @@
   .ecc-bg-grad{ position:absolute; inset:0; background:linear-gradient(to bottom, transparent, rgba(2,2,2,.80), rgba(2,2,2,1)); pointer-events:none;}
   .ecc-bg-glow{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:520px; height:320px; background:rgba(199, 167, 90,.10); filter:blur(110px); border-radius:9999px; pointer-events:none;}
 
-  .ecc-topbar{ background:rgba(2,2,2,.80); backdrop-filter:blur(10px); border-bottom:1px solid rgba(255,255,255,.05); }
+  .ecc-topbar{ background:rgba(2,2,2,.80); backdrop-filter:blur(10px); border-bottom:1px solid var(--ecc-text-primary); }
   .ecc-icon-btn{ width:40px; height:40px; border-radius:9999px; border:0; background:transparent; color:rgba(199, 167, 90,.85); display:flex; align-items:center; justify-content:center; }
-  .ecc-icon-btn:hover{ background:rgba(255,255,255,.05); }
+  .ecc-icon-btn:hover{ background:var(--ecc-text-primary); }
   .text-ecc{ color:rgba(199, 167, 90,.95); }
-  .ecc-topbar-title{ font-family:"Noto Sans",system-ui,sans-serif; color:rgba(255,255,255,.90); font-size:12px; letter-spacing:.22em; font-weight:700; }
+  .ecc-topbar-title{ font-family:"Noto Sans",system-ui,sans-serif; color:var(--ecc-text-primary); font-size:12px; letter-spacing:.22em; font-weight:700; }
 
   .ecc-step-kicker{ color:rgba(199, 167, 90,.95); font-family:"Noto Sans",system-ui,sans-serif; font-size:11px; font-weight:800; letter-spacing:.20em; text-transform:uppercase; }
   .ecc-dot{ height:4px; width:10px; border-radius:9999px; background:rgba(199, 167, 90,.35); }

@@ -38,17 +38,17 @@
                 <div class="mb-4">
                     <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
                         <div class="auction-section-label">
-                            <i class="mdi mdi-robot-outline" style="color: var(--luxe-gold);"></i>
+                            <i class="mdi mdi-robot-outline" style="color: var(--ecc-primary);"></i>
                             <span>Auto-Bid Settings</span>
                         </div>
                         <div class="form-check form-switch m-0">
-                            <div style="font-size: .8rem; font-weight: 800; color: {{ $hasAutoBidConfigured ? 'var(--luxe-gold)' : 'var(--luxe-text-soft)'}};">
+                            <div style="font-size: .8rem; font-weight: 800; color: {{ $hasAutoBidConfigured ? 'var(--ecc-primary)' : 'var(--ecc-text-secondary)'}};">
                                 {{ $hasAutoBidConfigured ? 'ON' : 'OFF' }}
                             </div>
                         </div>
                     </div>
 
-                    <button type="button" class="auction-place-bid-btn w-100" style="min-height: 48px; font-size: 0.82rem; background: rgba(199, 167, 90,.12); border: 1px solid rgba(199, 167, 90,.2); color: var(--luxe-gold); box-shadow: none;" wire:click="openAutoBidModal" @if(empty($canAutoBid)) disabled @endif>
+                    <button type="button" class="auction-place-bid-btn w-100" style="min-height: 48px; font-size: 0.82rem; background: var(--ecc-primary-soft); border: 1px solid rgba(199, 167, 90,.2); color: var(--ecc-primary); box-shadow: none;" wire:click="openAutoBidModal" @if(empty($canAutoBid)) disabled @endif>
                         <i class="mdi mdi-flash me-2"></i>
                         {{ $hasAutoBidConfigured ? 'Update Auto Bid' : 'Set Auto Bid Limit' }}
                     </button>
@@ -57,7 +57,7 @@
                 {{-- PLACE BID --}}
                 <div>
                     <div class="auction-section-label mb-3">
-                        <i class="mdi mdi-cash-fast" style="color: var(--luxe-gold);"></i>
+                        <i class="mdi mdi-cash-fast" style="color: var(--ecc-primary);"></i>
                         <span>Place New Bid</span>
                     </div>
 
@@ -121,8 +121,8 @@
 
                     @if(!$canBidDirectly && !empty($lotPrepared->access_message))
                         <div class="text-center mb-3 px-2">
-                            <span class="small fw-bold" style="color: var(--luxe-text-soft); font-size: 0.72rem; letter-spacing: 0.02em; line-height: 1.4;">
-                                <i class="mdi mdi-information-outline me-1" style="color: var(--luxe-gold);"></i>
+                            <span class="small fw-bold" style="color: var(--ecc-text-secondary); font-size: 0.72rem; letter-spacing: 0.02em; line-height: 1.4;">
+                                <i class="mdi mdi-information-outline me-1" style="color: var(--ecc-primary);"></i>
                                 {{ $lotPrepared->access_message }}
                             </span>
                         </div>
@@ -130,7 +130,7 @@
 
                     <div class="auction-micro-copy text-center">
                         Highest bidder must pay within 24h.
-                        <a href="" class="text-decoration-underline" style="color: var(--luxe-gold);">Terms apply</a>.
+                        <a href="" class="text-decoration-underline" style="color: var(--ecc-primary);">Terms apply</a>.
                     </div>
                 </div>
             </div>
@@ -139,8 +139,8 @@
         {{-- BID HISTORY --}}
         <div class="auction-history-card overflow-hidden mb-4" x-data="{ showAllBids: false }">
             <div class="auction-history-head px-4 px-lg-5 py-4 d-flex align-items-center justify-content-between gap-3">
-                <div class="fw-black text-uppercase text-white" style="letter-spacing: .08em; font-size: .84rem;">Bid History</div>
-                <div class="small fw-bold text-uppercase" style="color: var(--luxe-muted); letter-spacing: .06em;">
+                <div class="fw-black text-uppercase ecc-text-primary" style="letter-spacing: .08em; font-size: .84rem;">Bid History</div>
+                <div class="small fw-bold text-uppercase" style="color: var(--ecc-text-muted); letter-spacing: .06em;">
                     {{ $bidHistory->count() }} Total Bids
                 </div>
             </div>
@@ -167,12 +167,12 @@
                         </div>
 
                         <div class="text-end {{ $index > 0 ? 'auction-bid-row-muted' : '' }}">
-                            <div class="fw-bold {{ $isHighest ? 'text-success' : 'text-white' }}">{{ $amount }}</div>
-                            <div class="small" style="color: var(--luxe-muted);">{{ $timeAgo }}</div>
+                            <div class="fw-bold {{ $isHighest ? 'text-success' : 'ecc-text-primary' }}">{{ $amount }}</div>
+                            <div class="small" style="color: var(--ecc-text-muted);">{{ $timeAgo }}</div>
                         </div>
                     </div>
                 @empty
-                    <div class="p-4 px-lg-5" style="color: var(--luxe-text-soft);">
+                    <div class="p-4 px-lg-5" style="color: var(--ecc-text-secondary);">
                         No bids yet.
                     </div>
                 @endforelse
@@ -183,8 +183,8 @@
             </div>
 
             @if($bidHistory->count() > 6)
-                <div class="px-4 px-lg-5 py-3 text-center" style="background: rgba(255,255,255,.03); border-top: 1px solid rgba(199, 167, 90,.06);">
-                    <a href="javascript:void(0)" @click.prevent="showAllBids = !showAllBids" class="btn btn-link p-0 text-decoration-none fw-black text-uppercase" style="letter-spacing: .08em; color: var(--luxe-gold); font-size: .72rem;">
+                <div class="px-4 px-lg-5 py-3 text-center" style="background: var(--ecc-bg-input); border-top: 1px solid rgba(199, 167, 90,.06);">
+                    <a href="javascript:void(0)" @click.prevent="showAllBids = !showAllBids" class="btn btn-link p-0 text-decoration-none fw-black text-uppercase" style="letter-spacing: .08em; color: var(--ecc-primary); font-size: .72rem;">
                         <span x-text="showAllBids ? 'Show Less' : 'See All Bids'"></span>
                         <i class="mdi ms-1" :class="showAllBids ? 'mdi-chevron-up' : 'mdi-chevron-down'"></i>
                     </a>

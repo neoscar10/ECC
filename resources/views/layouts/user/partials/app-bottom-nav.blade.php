@@ -68,10 +68,10 @@
 
       .ecc-app-nav {
         pointer-events: auto;
-        background: rgba(12, 12, 12, 0.92);
+        background: var(--ecc-bg-nav);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(242, 185, 13, 0.18);
+        border: 1px solid var(--ecc-border);
         border-radius: 24px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
         min-width: 320px;
@@ -87,17 +87,17 @@
       .ecc-app-nav a.ecc-app-nav__item,
       .ecc-app-nav a.ecc-app-nav__item:link,
       .ecc-app-nav a.ecc-app-nav__item:visited {
-        color: rgba(242, 185, 13, 0.40) !important;
+        color: var(--ecc-text-muted) !important;
       }
 
       .ecc-app-nav a.ecc-app-nav__item:hover {
-        color: rgba(242, 185, 13, 0.75) !important;
+        color: var(--ecc-primary) !important;
       }
 
       .ecc-app-nav a.ecc-app-nav__item.is-active,
       .ecc-app-nav a.ecc-app-nav__item.is-active:link,
       .ecc-app-nav a.ecc-app-nav__item.is-active:visited {
-        color: #f2b90d !important;
+        color: var(--ecc-primary) !important;
       }
 
       .ecc-app-nav__item {
@@ -122,7 +122,7 @@
 
       .ecc-app-nav__item.is-active .ecc-app-nav__icon {
         font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        filter: drop-shadow(0 0 8px rgba(242, 185, 13, 0.45));
+        filter: drop-shadow(0 0 8px var(--ecc-primary-shadow));
       }
 
       .ecc-app-nav__glow {
@@ -133,7 +133,7 @@
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        background: rgba(242, 185, 13, 0.12);
+        background: var(--ecc-primary-soft);
         filter: blur(12px);
         pointer-events: none;
       }
