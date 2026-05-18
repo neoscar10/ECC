@@ -398,7 +398,7 @@ class Index extends Component
                     'package_length_cm' => $this->deliveryMeasurement['length_cm'] ?? null,
                     'package_breadth_cm' => $this->deliveryMeasurement['breadth_cm'] ?? null,
                     'package_height_cm' => $this->deliveryMeasurement['height_cm'] ?? null,
-                    'payment_status' => \App\Models\VaultRemovalRequest::PAYMENT_NONE,
+                    'payment_status' => $this->deliveryFee > 0 ? \App\Models\VaultRemovalRequest::PAYMENT_PENDING : \App\Models\VaultRemovalRequest::PAYMENT_NONE,
                 ];
             }
 
@@ -412,9 +412,14 @@ class Index extends Component
                     'addressForm.postal_code' => 'required|string|max:20',
                     'addressForm.country' => 'required|string|max:100',
                 ]);
-                $service->requestRemoval($item, $user, $this->removalMessage, null, $this->addressForm, $quoteData);
+                $createdRequest = $service->requestRemoval($item, $user, $this->removalMessage, null, $this->addressForm, $quoteData);
             } else {
-                $service->requestRemoval($item, $user, $this->removalMessage, $this->selectedAddressId, null, $quoteData);
+                $createdRequest = $service->requestRemoval($item, $user, $this->removalMessage, $this->selectedAddressId, null, $quoteData);
+            }
+
+            if ($createdRequest && $createdRequest->payment_status === \App\Models\VaultRemovalRequest::PAYMENT_PENDING) {
+                $this->closeArtifactModal();
+                return redirect()->route('vault.delivery-payment.show', $createdRequest->id);
             }
 
             session()->flash('success', 'Physical delivery request submitted successfully. Our team will review it shortly.');
