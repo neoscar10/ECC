@@ -188,10 +188,10 @@
                                     <div class="mb-3">
                                         <i class="mdi mdi-shield-lock-outline fs-1" style="color: var(--ecc-primary);"></i>
                                     </div>
-                                    <h4 class="ecc-text-primary fw-bold">
+                                    <h4 class="text-white fw-bold">
                                         {{ auth('web')->user()?->has_vault_access ? 'NO SECURED ARTIFACTS' : 'VAULT ACCESS RESTRICTED' }}
                                     </h4>
-                                    <p class="ecc-text-primary-50 mx-auto" style="max-width: 400px;">
+                                    <p class="text-white-50 mx-auto" style="max-width: 400px;">
                                         {{ auth('web')->user()?->has_vault_access 
                                             ? 'Your vault is currently empty. Acquire and secure premium assets to view them here.' 
                                             : 'Upgrade your membership to unlock full access to the Executive Vault.' }}
@@ -253,7 +253,7 @@
 
                                 <div class="ecc-vault-modal-desc mb-4">
                                     <div class="ecc-vault-standing-label mb-2" style="font-size: 0.6rem;">MANIFEST NOTES</div>
-                                    <p class="ecc-text-primary-50 fs-14 lh-lg">{{ $selectedArtifact['description'] ?: 'No additional manifest data available for this artifact.' }}</p>
+                                    <p class="text-white-50 fs-14 lh-lg">{{ $selectedArtifact['description'] ?: 'No additional manifest data available for this artifact.' }}</p>
                                 </div>
 
                                 <div class="ecc-vault-valuation-line mb-4 p-3 rounded-3 bg-white-5 border border-white-5">
@@ -281,18 +281,18 @@
                                         <div class="row g-3 mb-4 fs-13">
                                             @if($track['awb_code'])
                                                 <div class="col-6">
-                                                    <div class="ecc-text-primary-50 mb-1" style="font-size: 10px;">AWB CODE</div>
+                                                    <div class="text-white-50 mb-1" style="font-size: 10px;">AWB CODE</div>
                                                     <div class="fw-semibold text-white">{{ $track['awb_code'] }}</div>
                                                 </div>
                                             @endif
                                             @if($track['courier_name'])
                                                 <div class="col-6">
-                                                    <div class="ecc-text-primary-50 mb-1" style="font-size: 10px;">COURIER</div>
+                                                    <div class="text-white-50 mb-1" style="font-size: 10px;">COURIER</div>
                                                     <div class="fw-semibold text-white">{{ $track['courier_name'] }}</div>
                                                 </div>
                                             @endif
                                             <div class="col-12">
-                                                <div class="ecc-text-primary-50 mb-1" style="font-size: 10px;">DELIVERY FEE PAID</div>
+                                                <div class="text-white-50 mb-1" style="font-size: 10px;">DELIVERY FEE PAID</div>
                                                 <div class="fw-semibold text-white">{{ number_format($track['delivery_fee'], 2) }} {{ $track['delivery_currency'] }}</div>
                                             </div>
                                         </div>
@@ -303,7 +303,7 @@
                                                     <div class="mb-4 position-relative">
                                                         <span class="position-absolute translate-middle p-1 rounded-circle bg-primary" style="top: 10px; left: -18px; border: 2px solid var(--ecc-surface);"></span>
                                                         <div class="fs-14 fw-bold text-white mb-1">{{ $event['status_label'] }}</div>
-                                                        <div class="fs-12 ecc-text-primary-50 mb-1">{{ $event['description'] }}</div>
+                                                        <div class="fs-12 text-white-50 mb-1">{{ $event['description'] }}</div>
                                                         <div class="d-flex align-items-center gap-2 fs-10 opacity-50">
                                                             <span><i class="mdi mdi-clock-outline me-1"></i>{{ \Carbon\Carbon::parse($event['event_time'])->format('M d, Y h:i A') }}</span>
                                                             @if(!empty($event['location']))
@@ -350,7 +350,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content ecc-vault-modal-content border-warning-subtle">
                     <div class="modal-header border-0">
-                        <h5 class="modal-title ecc-text-primary fw-bold">REQUEST PHYSICAL DELIVERY</h5>
+                        <h5 class="modal-title text-white fw-bold">REQUEST PHYSICAL DELIVERY</h5>
                         <button type="button" class="btn-close btn-close-white ms-auto" wire:click="$set('showRemovalModal', false)"></button>
                     </div>
                     <div class="modal-body p-4 pt-1">
@@ -370,7 +370,7 @@
                             <div class="d-flex justify-content-between align-items-end mb-3">
                                 <label class="ecc-vault-standing-label mb-0">DELIVERY ADDRESS</label>
                                 @if(count($addresses) > 0)
-                                    <button type="button" class="btn btn-link p-0 ecc-text-primary-50 fs-12 text-decoration-none fw-semibold" wire:click="toggleAddressForm">
+                                    <button type="button" class="btn btn-link p-0 text-white-50 fs-12 text-decoration-none fw-semibold" wire:click="toggleAddressForm">
                                         {{ $showAddressForm ? 'Choose Saved Address' : '+ Add New Address' }}
                                     </button>
                                 @endif
@@ -390,13 +390,13 @@
                                                             </div>
                                                             <div class="flex-grow-1">
                                                                 <div class="d-flex align-items-center gap-2 mb-1">
-                                                                    <h6 class="ecc-text-primary mb-0 fs-14 fw-bold">{{ $addr->full_name }}</h6>
-                                                                    <span class="badge bg-white-5 ecc-text-primary-50 fw-semibold px-2 py-0 fs-10 border border-white-5">{{ $addr->label }}</span>
+                                                                    <h6 class="text-white mb-0 fs-14 fw-bold">{{ $addr->full_name }}</h6>
+                                                                    <span class="badge bg-white-5 text-white-50 fw-semibold px-2 py-0 fs-10 border border-white-5">{{ $addr->label }}</span>
                                                                     @if($addr->is_default)
-                                                                        <span class="badge ecc-bg-primary-subtle ecc-text-primary fw-semibold px-2 py-0 fs-10">Default</span>
+                                                                        <span class="badge ecc-bg-primary-subtle text-white fw-semibold px-2 py-0 fs-10">Default</span>
                                                                     @endif
                                                                 </div>
-                                                                <div class="ecc-text-primary-50 fs-13 lh-sm">
+                                                                <div class="text-white-50 fs-13 lh-sm">
                                                                     {{ $addr->line1 }}{{ $addr->line2 ? ', '.$addr->line2 : '' }}<br>
                                                                     {{ $addr->city }}, {{ $addr->state }} {{ $addr->postal_code }}<br>
                                                                     Ph: {{ $addr->phone }}
@@ -412,37 +412,37 @@
                             @else
                                 <div class="ecc-address-form row g-3 bg-white-5 border border-white-5 rounded-3 p-3">
                                     <div class="col-md-6">
-                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">Full Name</label>
+                                        <label class="form-label fs-12 text-white-50 mb-1">Full Name</label>
                                         <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.blur="addressForm.full_name">
                                         @error('addressForm.full_name') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">Phone</label>
+                                        <label class="form-label fs-12 text-white-50 mb-1">Phone</label>
                                         <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.blur="addressForm.phone">
                                         @error('addressForm.phone') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-12">
-                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">Address Line 1</label>
+                                        <label class="form-label fs-12 text-white-50 mb-1">Address Line 1</label>
                                         <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.blur="addressForm.line1">
                                         @error('addressForm.line1') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">City</label>
+                                        <label class="form-label fs-12 text-white-50 mb-1">City</label>
                                         <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.blur="addressForm.city">
                                         @error('addressForm.city') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">State</label>
+                                        <label class="form-label fs-12 text-white-50 mb-1">State</label>
                                         <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.blur="addressForm.state">
                                         @error('addressForm.state') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">Postal Code</label>
+                                        <label class="form-label fs-12 text-white-50 mb-1">Postal Code</label>
                                         <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.live.debounce.500ms="addressForm.postal_code">
                                         @error('addressForm.postal_code') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fs-12 ecc-text-primary-50 mb-1">Label</label>
+                                        <label class="form-label fs-12 text-white-50 mb-1">Label</label>
                                         <select class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.label">
                                             <option value="Home">Home</option>
                                             <option value="Office">Office</option>
@@ -452,7 +452,7 @@
                                     <div class="col-12">
                                         <div class="form-check custom-checkbox-white mt-1">
                                             <input class="form-check-input" type="checkbox" id="saveDef" wire:model="addressForm.is_default">
-                                            <label class="form-check-label fs-13 ecc-text-primary-50" for="saveDef">
+                                            <label class="form-check-label fs-13 text-white-50" for="saveDef">
                                                 Save as default address
                                             </label>
                                         </div>
@@ -468,16 +468,16 @@
                             <div class="p-3 rounded-3 border border-white-5 bg-white-5 position-relative">
                                 <!-- Loading State -->
                                 <div wire:loading wire:target="calculateDeliveryQuote, selectedAddressId, addressForm.postal_code, toggleAddressForm" class="w-100 text-center py-3">
-                                    <div class="spinner-border spinner-border-sm ecc-text-primary mb-2" role="status"></div>
-                                    <div class="ecc-text-primary-50 fs-12 fw-semibold">Calculating Shiprocket shipping rates...</div>
+                                    <div class="spinner-border spinner-border-sm text-white mb-2" role="status"></div>
+                                    <div class="text-white-50 fs-12 fw-semibold">Calculating Shiprocket shipping rates...</div>
                                 </div>
 
                                 <!-- Actual Content (hidden when loading) -->
                                 <div wire:loading.remove wire:target="calculateDeliveryQuote, selectedAddressId, addressForm.postal_code, toggleAddressForm">
                                     @if($deliveryQuoteLoading)
                                         <div class="w-100 text-center py-3">
-                                            <div class="spinner-border spinner-border-sm ecc-text-primary mb-2" role="status"></div>
-                                            <div class="ecc-text-primary-50 fs-12 fw-semibold">Calculating Shiprocket shipping rates...</div>
+                                            <div class="spinner-border spinner-border-sm text-white mb-2" role="status"></div>
+                                            <div class="text-white-50 fs-12 fw-semibold">Calculating Shiprocket shipping rates...</div>
                                         </div>
                                     @elseif($deliveryQuoteError)
                                         <div class="d-flex align-items-center gap-2 text-danger">
@@ -489,29 +489,29 @@
                                             <!-- Courier and Price -->
                                             <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white-5">
                                                 <div>
-                                                    <div class="fs-11 ecc-text-primary-50 fw-semibold text-uppercase tracking-wider">Courier Partner</div>
-                                                    <div class="ecc-text-primary fw-bold fs-15">{{ $selectedDeliveryCourier['courier_name'] }}</div>
+                                                    <div class="fs-11 text-white-50 fw-semibold text-uppercase tracking-wider">Courier Partner</div>
+                                                    <div class="text-white fw-bold fs-15">{{ $selectedDeliveryCourier['courier_name'] }}</div>
                                                     <div class="fs-10 text-white opacity-50">
                                                         Rating: {{ number_format($selectedDeliveryCourier['rating'], 1) }} ★
                                                     </div>
                                                 </div>
                                                 <div class="text-end">
-                                                    <div class="fs-11 ecc-text-primary-50 fw-semibold text-uppercase tracking-wider">Estimated Fee</div>
-                                                    <div class="ecc-text-primary fw-extrabold fs-18">INR {{ number_format($deliveryFee, 2) }}</div>
+                                                    <div class="fs-11 text-white-50 fw-semibold text-uppercase tracking-wider">Estimated Fee</div>
+                                                    <div class="text-white fw-extrabold fs-18">INR {{ number_format($deliveryFee, 2) }}</div>
                                                 </div>
                                             </div>
 
                                             <!-- Package Metrics and ETA -->
                                             <div class="row g-2">
                                                 <div class="col-6">
-                                                    <div class="fs-10 ecc-text-primary-50 text-uppercase">Chargeable Weight</div>
+                                                    <div class="fs-10 text-white-50 text-uppercase">Chargeable Weight</div>
                                                     <div class="fs-12 fw-semibold text-white">
                                                         {{ number_format($deliveryMeasurement['chargeable_weight_kg'], 3) }} kg
                                                         <span class="fs-9 text-white opacity-50 d-block">(Volumetric: {{ number_format($deliveryMeasurement['volumetric_weight_kg'], 3) }} kg)</span>
                                                     </div>
                                                 </div>
                                                 <div class="col-6">
-                                                    <div class="fs-10 ecc-text-primary-50 text-uppercase">Estimated Delivery</div>
+                                                    <div class="fs-10 text-white-50 text-uppercase">Estimated Delivery</div>
                                                     <div class="fs-12 fw-semibold text-white">
                                                         {{ $selectedDeliveryCourier['etd'] ? \Carbon\Carbon::parse($selectedDeliveryCourier['etd'])->format('M d, Y') : $selectedDeliveryCourier['estimated_delivery_days'] . ' Days' }}
                                                         <span class="fs-9 text-white opacity-50 d-block">(Transit duration)</span>
@@ -541,7 +541,7 @@
                         </div>
 
                         <div class="d-flex gap-3 mt-4">
-                            <button class="btn btn-link ecc-text-primary-50 text-decoration-none fw-bold fs-13" wire:click="closeArtifactModal">CANCEL</button>
+                            <button class="btn btn-link text-white-50 text-decoration-none fw-bold fs-13" wire:click="closeArtifactModal">CANCEL</button>
                             <button class="btn ecc-btn-primary px-4 ms-auto" 
                                     wire:click="submitRemovalRequest"
                                     wire:loading.attr="disabled"
@@ -564,7 +564,7 @@
 @push('styles')
 <style>
     .ecc-vault-page {
-        color: var(--ecc-text-primary);
+        color: #fff;
     }
 
     .ecc-vault-header {
@@ -577,7 +577,7 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: radial-gradient(circle at 50% 0%, var(--ecc-primary-soft) 0%, transparent 70%);
+        background: radial-gradient(circle at 50% 0%, rgba(199, 167, 90,.08) 0%, transparent 70%);
         pointer-events: none;
     }
 
@@ -601,7 +601,7 @@
         line-height: .92;
         font-weight: 900;
         letter-spacing: -.06em;
-        color: var(--ecc-text-primary);
+        color: #fff;
         text-transform: uppercase;
         margin: 0;
     }
@@ -617,11 +617,11 @@
     .ecc-vault-sidebar-card,
     .ecc-vault-artifact-card,
     .ecc-vault-appraisal-card {
-        background: linear-gradient(180deg, var(--ecc-bg-surface), var(--ecc-bg-surface-2));
-        border: 1px solid var(--ecc-primary-border);
+        background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
+        border: 1px solid rgba(199, 167, 90,.14);
         border-radius: 1.25rem;
-        box-shadow: var(--ecc-shadow-soft);
-        color: var(--ecc-text-primary);
+        box-shadow: 0 12px 30px rgba(0,0,0,.14);
+        color: #fff;
     }
 
     .ecc-vault-standing-card {
@@ -630,7 +630,7 @@
 
     .ecc-vault-standing-label,
     .ecc-vault-grid-title {
-        color: var(--ecc-text-muted);
+        color: rgba(245,239,225,.56);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .20em;
@@ -679,7 +679,7 @@
         text-transform: uppercase;
         margin-bottom: 1.25rem;
         padding-bottom: .75rem;
-        border-bottom: 1px solid var(--ecc-primary-soft);
+        border-bottom: 1px solid rgba(199, 167, 90,.08);
     }
 
     .ecc-vault-sidebar-icon {
@@ -690,20 +690,20 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: var(--ecc-bg-input);
-        border: 1px solid var(--ecc-primary-soft);
+        background: rgba(255,255,255,.03);
+        border: 1px solid rgba(199, 167, 90,.08);
         color: var(--ecc-primary);
     }
 
     .ecc-vault-sidebar-item-title {
-        color: var(--ecc-text-primary);
+        color: #fff;
         font-size: .98rem;
         font-weight: 800;
         margin-bottom: .15rem;
     }
 
     .ecc-vault-sidebar-item-text {
-        color: var(--ecc-text-muted);
+        color: rgba(245,239,225,.56);
         font-size: .84rem;
         line-height: 1.7;
     }
@@ -712,14 +712,14 @@
         padding: 1.5rem;
         border-left: 4px solid var(--ecc-primary);
         border-radius: 1.1rem;
-        background: var(--ecc-bg-input);
-        border-top: 1px solid var(--ecc-primary-soft);
-        border-right: 1px solid var(--ecc-primary-soft);
-        border-bottom: 1px solid var(--ecc-primary-soft);
+        background: rgba(255,255,255,.03);
+        border-top: 1px solid rgba(199, 167, 90,.08);
+        border-right: 1px solid rgba(199, 167, 90,.08);
+        border-bottom: 1px solid rgba(199, 167, 90,.08);
     }
 
     .ecc-vault-value-label {
-        color: var(--ecc-text-muted);
+        color: rgba(245,239,225,.56);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .18em;
@@ -728,7 +728,7 @@
     }
 
     .ecc-vault-value-amount {
-        color: var(--ecc-text-primary);
+        color: #fff;
         font-size: clamp(1.8rem, 3vw, 2.6rem);
         font-weight: 900;
         letter-spacing: -.04em;
@@ -741,7 +741,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        color: var(--ecc-text-subtle);
+        color: rgba(245,239,225,.52);
         font-size: .64rem;
         font-weight: 900;
         letter-spacing: .18em;
@@ -760,9 +760,9 @@
         width: 40px;
         height: 40px;
         border-radius: .85rem;
-        border: 1px solid var(--ecc-primary-soft);
-        background: var(--ecc-bg-input);
-        color: var(--ecc-text-muted);
+        border: 1px solid rgba(199, 167, 90,.08);
+        background: rgba(255,255,255,.03);
+        color: rgba(245,239,225,.56);
     }
 
     .ecc-vault-toggle-btn.is-active,
@@ -821,7 +821,7 @@
     }
 
     .ecc-vault-artifact-title {
-        color: var(--ecc-text-primary);
+        color: #fff;
         font-size: 1.45rem;
         font-weight: 800;
         letter-spacing: -.03em;
@@ -829,7 +829,7 @@
     }
 
     .ecc-vault-artifact-text {
-        color: var(--ecc-ecc-ecc-text-muted);
+        color: rgba(245,239,225,.60);
         line-height: 1.75;
         margin-bottom: 1rem;
     }
@@ -872,7 +872,7 @@
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: var(--ecc-primary-soft);
+        background: rgba(199, 167, 90,.08);
         color: var(--ecc-primary);
         display: inline-flex;
         align-items: center;
@@ -882,7 +882,7 @@
     }
 
     .ecc-vault-appraisal-title {
-        color: var(--ecc-text-primary);
+        color: #fff;
         font-size: 1.2rem;
         font-weight: 800;
         letter-spacing: -.02em;
@@ -891,7 +891,7 @@
     }
 
     .ecc-vault-appraisal-text {
-        color: var(--ecc-text-muted);
+        color: rgba(245,239,225,.56);
         line-height: 1.75;
         max-width: 260px;
         margin-bottom: 1.5rem;
@@ -925,7 +925,7 @@
     }
 
     .ecc-vault-mini-stat-value {
-        color: var(--ecc-text-primary);
+        color: #fff;
         font-size: 1.25rem;
         font-weight: 900;
         letter-spacing: -.02em;
@@ -984,7 +984,7 @@
         font-size: 2.25rem;
         font-weight: 900;
         letter-spacing: -0.04em;
-        color: var(--ecc-text-primary);
+        color: #fff;
     }
 
     .ecc-vault-modal-total {
@@ -1011,16 +1011,12 @@
         color: var(--ecc-primary);
     }
 
-    .bg-white-5 {
-        background: var(--ecc-bg-input);
-    }
-    .border-white-5 {
-        border-color: var(--ecc-bg-input) !important;
-    }
+    .bg-white-5 { background: rgba(255,255,255,0.05); }
+    .border-white-5 { border-color: rgba(255,255,255,0.05) !important; }
     .ecc-vault-input {
-        background: var(--ecc-bg-surface-2) !important;
-        border: 1px solid var(--ecc-text-primary) !important;
-        color: var(--ecc-text-primary) !important;
+        background: rgba(17,13,7,.98) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: #fff !important;
         border-radius: 0.75rem !important;
         padding: 0.75rem 1rem !important;
     }
@@ -1041,7 +1037,7 @@
         background: rgba(199, 167, 90,0.05) !important;
     }
     .custom-radio-dot {
-        width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--ecc-text-primary);
+        width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);
         position: relative; transition: all 0.2s ease;
     }
     .custom-radio-dot.is-checked { border-color: var(--ecc-primary); }
@@ -1049,9 +1045,9 @@
         content: ''; position: absolute; inset: 2px; border-radius: 50%; background: var(--ecc-primary);
     }
     .ecc-bg-primary-subtle { background: rgba(199, 167, 90,0.1) !important; }
-    .ecc-text-primary { color: var(--ecc-primary) !important; }
+
     .custom-checkbox-white .form-check-input {
-        background-color: transparent; border-color: var(--ecc-text-primary);
+        background-color: transparent; border-color: rgba(255,255,255,0.2);
     }
     .custom-checkbox-white .form-check-input:checked {
         background-color: var(--ecc-primary); border-color: var(--ecc-primary);
