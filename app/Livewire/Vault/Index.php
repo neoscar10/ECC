@@ -418,7 +418,7 @@ class Index extends Component
             }
 
             if ($createdRequest && $createdRequest->payment_status === \App\Models\VaultRemovalRequest::PAYMENT_PENDING) {
-                return $this->redirect(route('vault.delivery-payment.show', ['requestId' => $createdRequest->id]), navigate: true);
+                return $this->redirect(route('shop.checkout', ['vault_request_id' => $createdRequest->id]), navigate: true);
             }
 
             session()->flash('success', 'Physical delivery request submitted successfully. Our team will review it shortly.');

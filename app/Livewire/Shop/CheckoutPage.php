@@ -9,9 +9,15 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
+use Livewire\Attributes\Url;
 
 class CheckoutPage extends Component
 {
+    #[Url(as = 'vault_request_id')]
+    public $vaultRequestId = null;
+    
+    public $isVaultDelivery = false;
+
     public $addresses = [];
     public $selectedAddressId = null;
     
@@ -72,70 +78,117 @@ class CheckoutPage extends Component
             $this->selectedAddressId = $default->id;
         }
 
-        $checkoutService = app(CheckoutService::class);
-        try {
-            $summaryData = $checkoutService->getCheckoutSummary($user, $this->selectedAddressId);
+        if ($this->vaultRequestId) {
+            $this->isVaultDelivery = true;
+            $request = \App\Models\VaultRemovalRequest::with('vaultItem')->find($this->vaultRequestId);
             
-            if (empty($summaryData['items'])) {
-                return redirect()->route('shop.cart');
+            if (!$request || $request->user_id !== $user->id || !in_array($request->payment_status, ['pending_payment', 'payment_failed'])) {
+                session()->flash('error', 'Invalid or expired vault delivery request.');
+                return redirect()->route('vault.index');
             }
 
-            // Shipping state
-            $this->shippingError = $summaryData['shipping_error'] ?? null;
-            $this->canPlaceOrder = $summaryData['can_place_order'] ?? false;
-
-            // Determine shipping display text
-            $shippingFee = $summaryData['shipping_fee'];
-            if (!$this->selectedAddressId) {
-                $formattedShipping = 'Select address';
-                $shippingDisplayClass = 'ecc-muted';
-            } elseif ($this->shippingError) {
-                $formattedShipping = 'Unavailable';
-                $shippingDisplayClass = 'text-danger';
-            } elseif ($shippingFee > 0) {
-                $formattedShipping = '₹' . number_format($shippingFee, 2);
-                $shippingDisplayClass = '';
-            } else {
-                $formattedShipping = 'FREE';
-                $shippingDisplayClass = 'ecc-text-gold';
+            if ($request->address_id && is_null($this->selectedAddressId)) {
+                $this->selectedAddressId = $request->address_id;
             }
 
-            // Courier info from quote
-            $shippingQuote = $summaryData['shipping_quote'] ?? null;
-            $this->shippingCourierName = $shippingQuote['selected_courier']['courier_name'] ?? null;
-            $this->shippingEtd = $shippingQuote['selected_courier']['etd'] ?? null;
-
+            $shippingFee = (float) $request->delivery_fee;
+            
             $this->summary = [
-                'subtotal' => $summaryData['subtotal'],
+                'subtotal' => 0.0,
                 'shipping_fee' => $shippingFee,
-                'tax_amount' => $summaryData['tax_amount'],
-                'discount_amount' => $summaryData['discount_amount'],
-                'total_amount' => $summaryData['total_amount'],
-                'formatted_subtotal' => '₹' . number_format($summaryData['subtotal'], 2),
-                'formatted_shipping' => $formattedShipping,
-                'formatted_shipping_class' => $shippingDisplayClass,
-                'formatted_tax' => '₹' . number_format($summaryData['tax_amount'], 2),
-                'formatted_discount' => '₹' . number_format($summaryData['discount_amount'], 2),
-                'formatted_total' => '₹' . number_format($summaryData['total_amount'], 2),
+                'tax_amount' => 0.0,
+                'discount_amount' => 0.0,
+                'total_amount' => $shippingFee,
+                'formatted_subtotal' => '₹0.00',
+                'formatted_shipping' => '₹' . number_format($shippingFee, 2),
+                'formatted_shipping_class' => '',
+                'formatted_tax' => '₹0.00',
+                'formatted_discount' => '₹0.00',
+                'formatted_total' => '₹' . number_format($shippingFee, 2),
             ];
 
-            $this->summaryItems = collect($summaryData['items'])->map(function($item) {
-                $product = \App\Models\Shop\ShopProduct::find($item['shop_product_id']);
-                $img = collect($product->images)->first();
-                
-                return (object) [
-                    'title' => $item['title'],
-                    'quantity' => $item['quantity'],
-                    'image_url' => $img ? Storage::url($img->image_path) : 'https://placehold.co/100x100/17130b/d4af37?text=No+Image',
-                    'formatted_total' => '₹' . number_format($item['line_total'], 2),
-                    'meta' => collect($item['variation_values'])->pluck('caption')->implode(' / '),
-                ];
-            });
+            $img = $request->vaultItem->display_image_url ?? 'https://placehold.co/100x100/17130b/d4af37?text=Secured+Asset';
 
-        } catch (Exception $e) {
-            session()->flash('error', 'Unable to load checkout summary.');
-            return redirect()->route('shop.cart');
+            $this->summaryItems = collect([
+                (object) [
+                    'title' => $request->vaultItem->item_title ?? 'Secured Asset',
+                    'quantity' => 1,
+                    'image_url' => $img,
+                    'formatted_total' => '₹' . number_format($shippingFee, 2),
+                    'meta' => 'Physical Delivery Fee',
+                ]
+            ]);
+
+            $this->canPlaceOrder = true;
+            $this->shippingCourierName = $request->selected_courier_name ?? null;
+            $this->shippingEtd = null;
+        } else {
+            $checkoutService = app(CheckoutService::class);
+            try {
+                $summaryData = $checkoutService->getCheckoutSummary($user, $this->selectedAddressId);
+                
+                if (empty($summaryData['items'])) {
+                    return redirect()->route('shop.cart');
+                }
+
+                // Shipping state
+                $this->shippingError = $summaryData['shipping_error'] ?? null;
+                $this->canPlaceOrder = $summaryData['can_place_order'] ?? false;
+
+                // Determine shipping display text
+                $shippingFee = $summaryData['shipping_fee'];
+                if (!$this->selectedAddressId) {
+                    $formattedShipping = 'Select address';
+                    $shippingDisplayClass = 'ecc-muted';
+                } elseif ($this->shippingError) {
+                    $formattedShipping = 'Unavailable';
+                    $shippingDisplayClass = 'text-danger';
+                } elseif ($shippingFee > 0) {
+                    $formattedShipping = '₹' . number_format($shippingFee, 2);
+                    $shippingDisplayClass = '';
+                } else {
+                    $formattedShipping = 'FREE';
+                    $shippingDisplayClass = 'ecc-text-gold';
+                }
+
+                // Courier info from quote
+                $shippingQuote = $summaryData['shipping_quote'] ?? null;
+                $this->shippingCourierName = $shippingQuote['selected_courier']['courier_name'] ?? null;
+                $this->shippingEtd = $shippingQuote['selected_courier']['etd'] ?? null;
+
+                $this->summary = [
+                    'subtotal' => $summaryData['subtotal'],
+                    'shipping_fee' => $shippingFee,
+                    'tax_amount' => $summaryData['tax_amount'],
+                    'discount_amount' => $summaryData['discount_amount'],
+                    'total_amount' => $summaryData['total_amount'],
+                    'formatted_subtotal' => '₹' . number_format($summaryData['subtotal'], 2),
+                    'formatted_shipping' => $formattedShipping,
+                    'formatted_shipping_class' => $shippingDisplayClass,
+                    'formatted_tax' => '₹' . number_format($summaryData['tax_amount'], 2),
+                    'formatted_discount' => '₹' . number_format($summaryData['discount_amount'], 2),
+                    'formatted_total' => '₹' . number_format($summaryData['total_amount'], 2),
+                ];
+
+                $this->summaryItems = collect($summaryData['items'])->map(function($item) {
+                    $product = \App\Models\Shop\ShopProduct::find($item['shop_product_id']);
+                    $img = collect($product->images)->first();
+                    
+                    return (object) [
+                        'title' => $item['title'],
+                        'quantity' => $item['quantity'],
+                        'image_url' => $img ? Storage::url($img->image_path) : 'https://placehold.co/100x100/17130b/d4af37?text=No+Image',
+                        'formatted_total' => '₹' . number_format($item['line_total'], 2),
+                        'meta' => collect($item['variation_values'])->pluck('caption')->implode(' / '),
+                    ];
+                });
+
+            } catch (Exception $e) {
+                session()->flash('error', 'Unable to load checkout summary.');
+                return redirect()->route('shop.cart');
+            }
         }
+        // Payment Methods code is loaded next
 
         // Mock Payment Methods
         $this->savedPaymentMethods = [
@@ -220,6 +273,26 @@ class CheckoutPage extends Component
         }
 
         $user = Auth::user();
+
+        if ($this->isVaultDelivery) {
+            $request = \App\Models\VaultRemovalRequest::find($this->vaultRequestId);
+            
+            if ($request && in_array($request->payment_status, ['pending_payment', 'payment_failed'])) {
+                $request->update([
+                    'payment_status' => \App\Models\VaultRemovalRequest::PAYMENT_PAID,
+                    'paid_at' => now(),
+                    'payment_reference' => 'PAY-ECC-' . strtoupper(uniqid()),
+                    'address_id' => $this->selectedAddressId, // Update address if they changed it
+                ]);
+
+                session()->flash('success', 'Delivery fee paid successfully. Your request is now pending admin review.');
+                return redirect()->route('vault.index');
+            }
+            
+            session()->flash('error', 'Unable to process vault payment.');
+            return;
+        }
+
         $checkoutService = app(CheckoutService::class);
 
         try {
