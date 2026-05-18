@@ -317,7 +317,7 @@
 
                                         @if($track['payment_status'] === 'pending_payment' || $track['payment_status'] === 'payment_failed')
                                             <div class="mt-4 text-center">
-                                                <a href="{{ route('vault.delivery-payment.show', $track['id']) }}" class="btn btn-warning w-100 fw-bold">
+                                                <a href="{{ route('shop.checkout', ['vault_request_id' => $track['id']]) }}" class="btn btn-warning w-100 fw-bold">
                                                     <i class="mdi mdi-credit-card-outline me-2"></i> PAY DELIVERY FEE
                                                 </a>
                                             </div>
