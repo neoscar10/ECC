@@ -410,7 +410,7 @@ class Index extends Component
                     'addressForm.city' => 'required|string|max:100',
                     'addressForm.state' => 'required|string|max:100',
                     'addressForm.postal_code' => 'required|string|max:20',
-                    'addressForm.country' => 'required|string|max:100',
+                    'addressForm.country' => 'nullable|string|max:100',
                 ]);
                 $createdRequest = $service->requestRemoval($item, $user, $this->removalMessage, null, $this->addressForm, $quoteData);
             } else {
