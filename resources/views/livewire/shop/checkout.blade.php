@@ -43,7 +43,7 @@
         }
         .ecc-address-card {
             border: 1px solid var(--ecc-primary-border);
-            background: var(--ecc-text-primary);
+            background: transparent;
             text-decoration: none;
             display: block;
             width: 100%;
@@ -542,7 +542,9 @@
         <div class="col-12 col-xl-4">
             <div class="ecc-checkout-summary-wrap">
                 <div class="ecc-summary-card">
-                    <div class="ecc-summary-title">ORDER SUMMARY</div>
+                    <div class="ecc-summary-title">
+                        {{ $isVaultDelivery ? 'DELIVERY SUMMARY' : 'ORDER SUMMARY' }}
+                    </div>
 
                     <div class="d-flex flex-column gap-3 mb-4">
                         @foreach($summaryItems as $item)
@@ -563,10 +565,12 @@
                     </div>
 
                     <div class="ecc-summary-breakdown">
+                        @if(!$isVaultDelivery)
                         <div class="d-flex justify-content-between gap-3">
                             <span class="ecc-muted">Subtotal</span>
                             <strong>{{ $summary['formatted_subtotal'] }}</strong>
                         </div>
+                        @endif
 
                         <div class="d-flex flex-column gap-1">
                             <div class="d-flex justify-content-between gap-3">
@@ -583,10 +587,12 @@
                             @endif
                         </div>
 
+                        @if(!$isVaultDelivery)
                         <div class="d-flex justify-content-between gap-3">
                             <span class="ecc-muted">Estimated Tax</span>
                             <strong>{{ $summary['formatted_tax'] }}</strong>
                         </div>
+                        @endif
 
                         @if(($summary['discount_amount'] ?? 0) > 0)
                             <div class="d-flex justify-content-between gap-3">
@@ -614,7 +620,7 @@
                                 wire:click="placeOrder"
                                 wire:loading.attr="disabled"
                                 @if(!$canPlaceOrder) disabled @endif>
-                            <span wire:loading.remove wire:target="placeOrder">PLACE ORDER</span>
+                            <span wire:loading.remove wire:target="placeOrder">{{ $isVaultDelivery ? 'PAY DELIVERY FEE' : 'PLACE ORDER' }}</span>
                             <span wire:loading wire:target="placeOrder">
                                 <span class="spinner-border spinner-border-sm me-2"></span> PROCESSING...
                             </span>
