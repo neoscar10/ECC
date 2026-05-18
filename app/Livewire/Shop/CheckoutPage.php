@@ -13,7 +13,7 @@ use Livewire\Attributes\Url;
 
 class CheckoutPage extends Component
 {
-    #[Url(as = 'vault_request_id')]
+    #[Url(as: 'vault_request_id')]
     public $vaultRequestId = null;
     
     public $isVaultDelivery = false;
