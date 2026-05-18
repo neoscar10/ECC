@@ -62,101 +62,109 @@
 
       {{-- Payment method --}}
       <section class="mb-4">
-        <div class="ecc-pay-title mb-2">Payment Method</div>
-        <div class="ecc-method">
-          <label class="ecc-method__opt {{ $method==='card' ? 'is-on' : '' }}">
-            <input type="radio" class="d-none" wire:model.live="method" value="card">
-            <span class="d-inline-flex align-items-center gap-2">
-              <span class="material-symbols-outlined">credit_card</span> Card
-            </span>
-          </label>
-          <label class="ecc-method__opt {{ $method==='upi' ? 'is-on' : '' }}">
-            <input type="radio" class="d-none" wire:model.live="method" value="upi">
-            <span class="d-inline-flex align-items-center gap-2">
-              <span class="material-symbols-outlined">qr_code_scanner</span> UPI
-            </span>
-          </label>
-        </div>
+          <div class="d-flex flex-column gap-4">
+              <!-- Saved Cards -->
+              <div>
+                  <div class="ecc-pay-title mb-3">SAVED CARDS</div>
+                  <div class="d-flex flex-column gap-3">
+                      @forelse($savedPaymentMethods as $method)
+                          <label class="ecc-payment-card mb-0 {{ (string) $selectedPaymentMethod === (string) $method->id ? 'is-selected' : '' }}">
+                              <div class="d-flex align-items-center gap-3 flex-grow-1">
+                                  <div class="ecc-card-brand-box">
+                                      {{ $method->brand_label }}
+                                  </div>
+                                  <div class="flex-grow-1">
+                                      <div class="d-flex flex-wrap align-items-center gap-2">
+                                          <div class="fw-bold text-white">
+                                              {{ $method->display_name }}
+                                          </div>
+                                          @if($method->is_default)
+                                              <span class="ecc-badge-gold subtle">DEFAULT</span>
+                                          @endif
+                                      </div>
+                                      <div class="ecc-mini mt-1 opacity-75 text-white" style="font-size: 10px;">
+                                          Expires {{ $method->expiry_label }}
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="ms-3">
+                                  <input class="form-check-input ecc-radio" type="radio" wire:model.live="selectedPaymentMethod" value="{{ $method->id }}">
+                              </div>
+                          </label>
+                      @empty
+                          <div class="ecc-empty-panel py-4">
+                              <div class="fw-bold mb-1">No saved cards</div>
+                          </div>
+                      @endforelse
+                  </div>
+              </div>
+
+              <!-- Wallets -->
+              @if(!empty($walletOptions) && count($walletOptions))
+                  <div>
+                      <div class="ecc-pay-title mb-3 mt-2">DIGITAL WALLETS</div>
+                      <div class="d-flex flex-column gap-3">
+                          @foreach($walletOptions as $wallet)
+                              <label class="ecc-payment-card mb-0 {{ (string) $selectedPaymentMethod === (string) $wallet['value'] ? 'is-selected' : '' }}">
+                                  <div class="d-flex align-items-center gap-3 flex-grow-1">
+                                      <div class="ecc-wallet-box">
+                                          <i class="{{ $wallet['icon'] }} fs-4"></i>
+                                      </div>
+                                      <div class="fw-bold text-white">{{ $wallet['label'] }}</div>
+                                  </div>
+                                  <div class="ms-3">
+                                      <input class="form-check-input ecc-radio" type="radio" wire:model.live="selectedPaymentMethod" value="{{ $wallet['value'] }}">
+                                  </div>
+                              </label>
+                          @endforeach
+                      </div>
+                  </div>
+              @endif
+
+              <!-- Add Card CTA -->
+              <button type="button" class="ecc-add-card-panel" wire:click="handleAddPaymentMethod">
+                  <div class="d-flex align-items-center gap-3">
+                      <div class="ecc-add-icon">
+                          <i class="mdi mdi-plus text-secondary"></i>
+                      </div>
+                      <div class="text-start">
+                          <div class="fw-bold text-white">Add New Card</div>
+                          <div class="ecc-mini opacity-75 mt-1" style="font-size: 10px; color: white;">Save securely for future premium acquisitions</div>
+                      </div>
+                  </div>
+                  <i class="mdi mdi-chevron-right text-secondary"></i>
+              </button>
+          </div>
       </section>
 
-      {{-- Card form --}}
-      <form wire:submit.prevent="submit" class="d-flex flex-column gap-3">
+      <form wire:submit.prevent="submit" class="d-flex flex-column gap-3 mt-4">
         @if($errorMessage)
-          <div class="alert alert-danger py-2 small">{{ $errorMessage }}</div>
+          <div class="alert alert-danger py-2 small border-0 rounded-3" style="background: rgba(220, 53, 69, 0.1); color: #ff8e99;">{{ $errorMessage }}</div>
+        @endif
+        @if (session()->has('info'))
+            <div class="alert alert-info py-2 small border-0 rounded-3" style="background: rgba(13, 110, 253, 0.1); color: #8ec5ff;">{{ session('info') }}</div>
         @endif
 
-        <div class="ecc-field">
-          <div class="ecc-lab mb-2">Card Number</div>
-          <div class="position-relative">
-            <input type="text" wire:model.defer="card_number" class="form-control ecc-inp"
-                   placeholder="0000 0000 0000 0000" @if($method!=='card') disabled @endif>
-            <span class="material-symbols-outlined ecc-ic">credit_card</span>
-          </div>
-          @error('card_number') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
-        </div>
-
-        <div class="row g-3">
-          <div class="col-6">
-            <div class="ecc-field">
-              <div class="ecc-lab mb-2">Expiry Date</div>
-              <div class="position-relative">
-                <input type="text" wire:model.defer="expiry" class="form-control ecc-inp"
-                       placeholder="MM/YY" @if($method!=='card') disabled @endif>
-                <span class="material-symbols-outlined ecc-ic">calendar_month</span>
-              </div>
-              @error('expiry') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="ecc-field">
-              <div class="ecc-lab mb-2">CVV</div>
-              <div class="position-relative">
-                <input type="password" wire:model.defer="cvv" class="form-control ecc-inp"
-                       placeholder="123" @if($method!=='card') disabled @endif>
-                <span class="material-symbols-outlined ecc-ic">lock</span>
-              </div>
-              @error('cvv') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
-            </div>
-          </div>
-        </div>
-
-        <div class="ecc-field">
-          <div class="ecc-lab mb-2">Cardholder Name</div>
-          <div class="position-relative">
-            <input type="text" wire:model.defer="cardholder_name" class="form-control ecc-inp"
-                   placeholder="John Doe" @if($method!=='card') disabled @endif>
-            <span class="material-symbols-outlined ecc-ic">person</span>
-          </div>
-          @error('cardholder_name') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
-        </div>
-
-        <div class="d-flex align-items-center gap-3 mt-1">
-          <div class="form-check">
-            <input class="form-check-input ecc-check" type="checkbox" id="saveCard" wire:model.defer="save_card" @if($method!=='card') disabled @endif>
-          </div>
-          <label class="ecc-save" for="saveCard">Save this card for future payments</label>
-        </div>
-
-        <div class="pt-3">
+        <div class="pt-2">
           <button type="submit"
                   class="btn ecc-paybtn w-100 d-flex align-items-center justify-content-center gap-2"
                   wire:loading.attr="disabled"
                   wire:target="submit">
             
             <span wire:loading.remove wire:target="submit" class="ecc-btn-load-wrapper">
-                <span>Confirm & Pay {{ $amountFormatted }}</span>
+                <span>CONFIRM & PAY {{ $amountFormatted }}</span>
                 <span class="material-symbols-outlined">arrow_forward</span>
             </span>
 
             <span wire:loading wire:target="submit" class="ecc-btn-load-wrapper">
-              <span>Processing Payment...</span>
+              <span>PROCESSING PAYMENT...</span>
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             </span>
           </button>
 
           <div class="ecc-sec mt-3 d-flex align-items-center justify-content-center gap-2">
             <span class="material-symbols-outlined">lock</span>
-            <span>Payments are secure and encrypted</span>
+            <span>PAYMENTS ARE SECURE AND ENCRYPTED</span>
           </div>
         </div>
 
@@ -217,54 +225,108 @@
   }
   .ecc-tier-img:after{ content:""; position:absolute; inset:0; background:rgba(0,0,0,.20); }
 
-  .ecc-pay-title{ color:rgba(199, 167, 90,.95); font-weight:700; font-size:16px; padding-left:2px; }
-  .ecc-method{
-    display:flex; border-radius:14px; padding:6px;
-    border:1px solid rgba(199, 167, 90,.55);
-    background:rgba(10,10,10,.85);
-    gap:6px;
-  }
-  .ecc-method__opt{
-    flex:1; border-radius:12px; padding:10px 12px;
-    display:flex; justify-content:center; align-items:center;
-    color:rgba(199, 167, 90,.85);
-    cursor:pointer; font-weight:800;
-    transition:all .18s ease;
-  }
-  .ecc-method__opt.is-on{
-    background:var(--ecc-primary);
-    color:#111;
-    box-shadow:0 6px 18px rgba(199, 167, 90,.18);
-  }
+  .ecc-pay-title{ color:rgba(199, 167, 90,.95); font-weight:800; font-size:12px; letter-spacing:.15em; text-transform:uppercase; padding-left:2px; }
 
-  .ecc-lab{ color:rgba(199, 167, 90,.85); font-weight:700; font-size:14px; padding-left:2px; }
-  .ecc-inp{
-    height:56px;
-    border-radius:14px;
-    background:rgba(10,10,10,.90) !important;
-    border:1px solid rgba(199, 167, 90,.55) !important;
-    color:rgba(199, 167, 90,.95) !important;
-    padding-left:48px !important;
-    box-shadow:none !important;
+  /* New Payment Method Styles ported from checkout */
+  .ecc-payment-card {
+      padding: 1.25rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      cursor: pointer;
+      margin-bottom: 0.75rem;
+      background: rgba(10,10,10,.85);
+      border: 1px solid rgba(199, 167, 90,.30);
+      border-radius: 14px;
+      transition: .25s ease;
   }
-  .ecc-inp::placeholder{ color:rgba(199, 167, 90,.35); }
-  .ecc-inp:focus{ border-color:var(--ecc-primary) !important; box-shadow:0 0 0 .15rem rgba(199, 167, 90,.15) !important; }
-  .ecc-ic{ position:absolute; left:14px; top:50%; transform:translateY(-50%); color:rgba(199, 167, 90,.95); }
-  .ecc-check{ background:rgba(10,10,10,.90) !important; border-color:rgba(199, 167, 90,.55) !important; }
-  .ecc-check:checked{ background:var(--ecc-primary) !important; border-color:var(--ecc-primary) !important; }
-  .ecc-save{ color:rgba(199, 167, 90,.85); font-size:14px; font-weight:600; }
+  .ecc-payment-card:hover {
+      border-color: rgba(199, 167, 90,.60);
+      box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  }
+  .ecc-payment-card.is-selected {
+      border-color: var(--ecc-primary);
+      background: rgba(199, 167, 90, .10);
+      box-shadow: 0 0 0 1px rgba(199, 167, 90,.2), 0 12px 30px rgba(0,0,0,.4);
+  }
+  .ecc-card-brand-box, .ecc-wallet-box {
+      width: 56px;
+      height: 38px;
+      border-radius: .55rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: rgba(255,255,255,.9);
+      color: #111;
+      font-size: .85rem;
+      font-weight: 900;
+  }
+  .ecc-wallet-box { background: rgba(255,255,255,.1); color: white; border: 1px solid rgba(255,255,255,.2); }
+  .ecc-radio {
+      width: 1.15rem;
+      height: 1.15rem;
+      border: 2px solid rgba(199, 167, 90,.55);
+      box-shadow: none !important;
+      background-color: transparent;
+      border-radius: 50% !important;
+  }
+  .ecc-radio:checked {
+      background-color: var(--ecc-primary);
+      border-color: var(--ecc-primary);
+  }
+  .ecc-badge-gold {
+      display: inline-flex;
+      align-items: center;
+      padding: .35rem .6rem;
+      border-radius: 999px;
+      background: rgba(199, 167, 90,.15);
+      color: var(--ecc-primary);
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+  }
+  .ecc-badge-gold.subtle { font-size: .55rem; padding: .2rem .45rem; }
+  .ecc-add-card-panel {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-style: dashed;
+      background: transparent;
+      padding: 1.25rem;
+      border: 1px dashed rgba(199, 167, 90,.40);
+      border-radius: 14px;
+      margin-top: 0.5rem;
+      transition: .25s ease;
+  }
+  .ecc-add-card-panel:hover {
+      border-color: var(--ecc-primary);
+      background: rgba(199, 167, 90,.05);
+  }
+  .ecc-add-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,.1);
+      font-size: 1.15rem;
+  }
 
   .ecc-paybtn{
     background:var(--ecc-primary) !important; border:0 !important; color:#111 !important;
-    font-size:18px !important; font-weight:900 !important; padding:16px !important; border-radius:14px !important;
+    font-size:16px !important; font-weight:900 !important; padding:16px !important; border-radius:14px !important;
     box-shadow:0 0 15px rgba(199, 167, 90,.30) !important;
+    letter-spacing: 0.1em;
   }
   .ecc-paybtn:hover{ background:#eac855 !important; }
-  .ecc-sec{ color:rgba(199, 167, 90,.80); font-size:12px; opacity:.9; }
+  .ecc-sec{ color:rgba(199, 167, 90,.80); font-size:10px; font-weight:800; letter-spacing: 0.1em; text-transform: uppercase; opacity:.9; }
   .ecc-sec .material-symbols-outlined{ font-size:16px; }
 
-  .ecc-err{ font-family:"Noto Sans",system-ui,sans-serif; color:rgba(255,120,120,.95); font-size:12px; font-weight:600; }
-
-  [wire:loading] { display: none; }
+  [wire\:loading] { display: none; }
 </style>
 @endpush

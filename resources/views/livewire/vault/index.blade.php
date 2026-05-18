@@ -360,6 +360,12 @@
                         </div>
 
                         <!-- Address Section -->
+                        @if (session()->has('error'))
+                            <div class="alert alert-danger fs-13 lh-base border-0 rounded-3 mb-4">
+                                <i class="ri-error-warning-fill me-2 fs-16 align-middle"></i>
+                                {{ session('error') }}
+                            </div>
+                        @endif
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-end mb-3">
                                 <label class="ecc-vault-standing-label mb-0">DELIVERY ADDRESS</label>

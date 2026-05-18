@@ -12,12 +12,9 @@ class DeliveryPaymentPage extends Component
 {
     public int $requestId;
     
-    public string $method = 'card';
-    public string $card_number = '';
-    public string $expiry = '';
-    public string $cvv = '';
-    public string $cardholder_name = '';
-    public bool $save_card = false;
+    public string $selectedPaymentMethod = 'card_mock_1';
+    public array $savedPaymentMethods = [];
+    public array $walletOptions = [];
 
     public float $amount = 0.0;
     public string $amountFormatted = '';
@@ -53,24 +50,44 @@ class DeliveryPaymentPage extends Component
         $this->itemTitle = $request->vaultItem->item_title ?? 'Secured Asset';
         $this->itemRef = $request->vaultItem->item_ref;
         $this->courierName = $request->selected_courier_name ?? 'Standard Delivery';
+
+        // Mock Payment Methods
+        $this->savedPaymentMethods = [
+            (object) [
+                'id' => 'card_mock_1',
+                'brand_label' => 'VISA',
+                'display_name' => '•••• 4242',
+                'expiry_label' => '12/26',
+                'is_default' => true,
+            ],
+            (object) [
+                'id' => 'card_mock_2',
+                'brand_label' => 'MC',
+                'display_name' => '•••• 5555',
+                'expiry_label' => '08/25',
+                'is_default' => false,
+            ],
+        ];
+
+        $this->walletOptions = [
+            ['label' => 'Apple Pay', 'value' => 'apple_pay', 'icon' => 'mdi mdi-apple'],
+            ['label' => 'Google Pay', 'value' => 'google_pay', 'icon' => 'mdi mdi-google'],
+        ];
+    }
+
+    public function handleAddPaymentMethod()
+    {
+        session()->flash('info', 'Secure payment gateway integration is currently in preview mode.');
     }
 
     public function submit()
     {
         $this->errorMessage = null;
 
-        $rules = [
-            'method' => 'required|in:card,upi',
-        ];
-
-        if ($this->method === 'card') {
-            $rules['card_number'] = 'required|string|min:12|max:19';
-            $rules['expiry'] = 'required|string|regex:/^\d{2}\/\d{2}$/';
-            $rules['cvv'] = 'required|string|min:3|max:4';
-            $rules['cardholder_name'] = 'required|string|min:2|max:80';
+        if (!$this->selectedPaymentMethod) {
+            $this->errorMessage = 'Please select a payment method.';
+            return;
         }
-
-        $this->validate($rules);
 
         try {
             $user = Auth::user();
