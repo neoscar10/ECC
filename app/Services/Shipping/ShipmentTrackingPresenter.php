@@ -8,6 +8,149 @@ use Illuminate\Support\Arr;
 class ShipmentTrackingPresenter
 {
     /**
+     * Compile customer-safe tracking info for a vault physical delivery request.
+     */
+    public function forVaultDeliveryRequest(?\App\Models\VaultRemovalRequest $request): ?array
+    {
+        if (!$request) {
+            return null;
+        }
+
+        $shipmentData = null;
+        if ($request->shippingShipment) {
+            $shipmentData = $this->forCustomer($request->shippingShipment);
+        }
+
+        // Build request-level status labels for timeline mapping
+        $statusMapping = [
+            'pending' => 'Awaiting Admin Review',
+            'approved' => 'Approved, Preparing Shipment',
+            'rejected' => 'Request Rejected',
+            'completed' => 'Delivery Completed',
+        ];
+
+        $currentLabel = $statusMapping[$request->status] ?? ucfirst($request->status);
+
+        if ($request->payment_status === 'pending_payment') {
+            $currentLabel = 'Awaiting Delivery Payment';
+        } elseif ($request->payment_status === 'refund_required') {
+            $currentLabel = 'Rejected - Refund Required';
+        } elseif ($shipmentData) {
+            $currentLabel = $shipmentData['status_label'];
+        }
+
+        // Safe address snapshot
+        $address = [
+            'name' => $request->delivery_name,
+            'phone' => $request->delivery_phone,
+            'line1' => $request->delivery_line1,
+            'line2' => $request->delivery_line2,
+            'city' => $request->delivery_city,
+            'state' => $request->delivery_state,
+            'postal_code' => $request->delivery_postal_code,
+            'country' => $request->delivery_country,
+        ];
+
+        // Safely map default chronological timeline milestones if shipment events aren't ready yet
+        $events = [];
+        
+        // Milestone 1: Requested
+        if ($request->requested_at) {
+            $events[] = [
+                'status' => 'requested',
+                'status_label' => 'Delivery Requested',
+                'description' => 'Delivery request submitted to the vault administration.',
+                'location' => 'Digital Vault',
+                'event_time' => $request->requested_at->toIso8601String(),
+            ];
+        }
+
+        // Milestone 2: Paid
+        if ($request->paid_at) {
+            $events[] = [
+                'status' => 'paid',
+                'status_label' => 'Delivery Fee Paid',
+                'description' => 'Payment has been processed successfully.',
+                'location' => 'Secure Checkout',
+                'event_time' => $request->paid_at->toIso8601String(),
+            ];
+        }
+
+        // Milestone 3: Rejected / Refund Required / Approved / Completed
+        if ($request->status === 'rejected') {
+            $desc = 'Request rejected by admin.';
+            if ($request->payment_status === 'refund_required') {
+                $desc = 'Request rejected after payment. Refund pending administration action.';
+            } elseif ($request->payment_status === 'refunded') {
+                $desc = 'Request rejected after payment. Refund processed successfully.';
+            }
+            $events[] = [
+                'status' => 'rejected',
+                'status_label' => $request->payment_status === 'refund_required' ? 'Refund Required' : 'Request Rejected',
+                'description' => $desc,
+                'location' => 'Vault Administration',
+                'event_time' => ($request->reviewed_at ?? $request->updated_at)->toIso8601String(),
+            ];
+        } elseif ($request->status === 'approved') {
+            $events[] = [
+                'status' => 'approved',
+                'status_label' => 'Request Approved',
+                'description' => 'Vault request approved. Preparing physical dispatch.',
+                'location' => 'ECC Vault',
+                'event_time' => ($request->reviewed_at ?? $request->updated_at)->toIso8601String(),
+            ];
+        }
+
+        // If shipment events exist, merge/supersede request milestones with direct shipment tracking events
+        if ($shipmentData && !empty($shipmentData['events'])) {
+            // Prepend request milestones to shipment tracking events to show a single continuous timeline
+            // Shipment events are sorted desc by default, let's keep all sorted chronologically desc
+            $shipmentEvents = $shipmentData['events'];
+            foreach ($events as $milestone) {
+                // Ensure we don't duplicate
+                $exists = false;
+                foreach ($shipmentEvents as $se) {
+                    if ($se['status'] === $milestone['status']) {
+                        $exists = true;
+                        break;
+                    }
+                }
+                if (!$exists) {
+                    $shipmentEvents[] = $milestone;
+                }
+            }
+            // Sort combined events chronologically desc
+            usort($shipmentEvents, function($a, $b) {
+                return strcmp($b['event_time'], $a['event_time']);
+            });
+            $events = $shipmentEvents;
+        } else {
+            // Sort default milestones desc
+            usort($events, function($a, $b) {
+                return strcmp($b['event_time'], $a['event_time']);
+            });
+        }
+
+        return [
+            'id' => $request->id,
+            'status' => $shipmentData['status'] ?? $request->status,
+            'status_label' => $currentLabel,
+            'payment_status' => $request->payment_status,
+            'payment_status_label' => $request->payment_status_label,
+            'delivery_fee' => (float) $request->delivery_fee,
+            'delivery_currency' => $request->delivery_currency ?? 'INR',
+            'courier_name' => $request->selected_courier_name,
+            'address' => $address,
+            'awb_code' => $shipmentData['awb_code'] ?? null,
+            'tracking_url' => $shipmentData['tracking_url'] ?? null,
+            'is_test_mode' => $shipmentData['is_test_mode'] ?? false,
+            'initiated_at' => $shipmentData['initiated_at'] ?? null,
+            'last_tracked_at' => $shipmentData['last_tracked_at'] ?? null,
+            'events' => $events,
+        ];
+    }
+
+    /**
      * Expose shipment and tracking info safely to the customer/web/API.
      * Returns null if no shipment exists.
      */

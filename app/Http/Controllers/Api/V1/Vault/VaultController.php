@@ -155,7 +155,7 @@ class VaultController extends Controller
             return $this->summary($request); // Reuse 403 logic
         }
 
-        $query = $user->vaultItems();
+        $query = $user->vaultItems()->with(['latestDeliveryRequest.shippingShipment.events', 'pendingRemovalRequest']);
 
         // Filters
         // Status: locked (default), removed, all
@@ -217,7 +217,7 @@ class VaultController extends Controller
             return $this->summary($request);
         }
 
-        $item = $user->vaultItems()->find($id);
+        $item = $user->vaultItems()->with(['latestDeliveryRequest.shippingShipment.events', 'pendingRemovalRequest'])->find($id);
 
         if (!$item) {
             return response()->json([

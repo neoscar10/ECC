@@ -434,7 +434,7 @@ document.addEventListener('click', function (e) {
     .ecc-user-login{
         min-height: 100dvh;
         background: #020202;
-        color: #f2b90d;
+        color: var(--ecc-gold-400);
         font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
         isolation: isolate;
     }
@@ -443,7 +443,7 @@ document.addEventListener('click', function (e) {
     .ecc-glow-1{
         width: 560px; height: 560px;
         top: -22%;
-        background: rgba(242,185,13,.10);
+        background: rgba(199,167,90,.10);
         border-radius: 9999px;
         filter: blur(140px);
         pointer-events: none !important;
@@ -452,7 +452,7 @@ document.addEventListener('click', function (e) {
         width: 520px; height: 520px;
         bottom: -18%;
         right: -12%;
-        background: rgba(242,185,13,.06);
+        background: rgba(199,167,90,.06);
         border-radius: 9999px;
         filter: blur(120px);
         pointer-events: none !important;
@@ -474,7 +474,7 @@ document.addEventListener('click', function (e) {
         height: 112px;
         border-radius: 9999px;
         background: linear-gradient(to bottom, #0a0a0a, #000);
-        border: 1px solid rgba(242,185,13,.30);
+        border: 1px solid rgba(199,167,90,.30);
         position: relative;
         overflow: hidden;
         box-shadow: 0 30px 80px rgba(0,0,0,.60);
@@ -485,7 +485,7 @@ document.addEventListener('click', function (e) {
 
     .ecc-crest-sheen{
         position:absolute; inset:0;
-        background: rgba(242,185,13,.06);
+        background: rgba(199,167,90,.06);
         opacity: 0;
         transition: opacity 600ms ease;
     }
@@ -507,7 +507,7 @@ document.addEventListener('click', function (e) {
         letter-spacing: .26em;
         font-size: clamp(20px, 4.4vw, 26px);
         font-weight: 800;
-        color: #f2b90d;
+        color: var(--ecc-gold-400);
         white-space: nowrap; /* prevents ugly wrapping on mobile */
     }
     .ecc-subtext{
@@ -515,7 +515,7 @@ document.addEventListener('click', function (e) {
         max-width: 360px;
         font-size: 14px;
         font-weight: 600;
-        color: rgba(242,185,13,.60);
+        color: rgba(199,167,90,.60);
         letter-spacing: .03em;
         line-height: 1.6;
     }
@@ -526,7 +526,7 @@ document.addEventListener('click', function (e) {
         font-size: 10px;
         font-weight: 800;
         letter-spacing: .20em;
-        color: rgba(242,185,13,.80);
+        color: rgba(199,167,90,.80);
         margin-bottom: 10px;
         margin-left: 4px;
     }
@@ -535,9 +535,9 @@ document.addEventListener('click', function (e) {
     .ecc-input{
         height: 56px;
         border-radius: 12px;
-        background: rgba(242,185,13,.03);
-        border: 1px solid rgba(242,185,13,.20);
-        color: #f2b90d;
+        background: rgba(199,167,90,.03);
+        border: 1px solid rgba(199,167,90,.20);
+        color: var(--ecc-gold-300);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         transition: all 220ms ease;
@@ -545,14 +545,14 @@ document.addEventListener('click', function (e) {
         position: relative;
         z-index: 2;
         cursor: text;
-        caret-color: #f2b90d;
+        caret-color: var(--ecc-gold-400);
     }
-    .ecc-input::placeholder{ color: rgba(242,185,13,.30); }
+    .ecc-input::placeholder{ color: rgba(199,167,90,.30); }
     .ecc-input:focus{
-        background: rgba(242,185,13,.08);
-        border-color: rgba(242,185,13,.80);
+        background: rgba(199,167,90,.08);
+        border-color: rgba(199,167,90,.80);
         box-shadow: none;
-        color: #f2b90d;
+        color: var(--ecc-gold-300);
     }
 
     .ecc-input-icon{
@@ -560,7 +560,7 @@ document.addEventListener('click', function (e) {
         left: 16px;
         top: 50%;
         transform: translateY(-50%);
-        color: rgba(242,185,13,.60);
+        color: rgba(199,167,90,.60);
         font-size: 22px;
         pointer-events: none !important;
         z-index: 3;
@@ -576,7 +576,7 @@ document.addEventListener('click', function (e) {
         width: 44px;
         border: 0;
         background: transparent;
-        color: rgba(242,185,13,.55);
+        color: rgba(199,167,90,.55);
         display:flex;
         align-items:center;
         justify-content:center;
@@ -585,20 +585,20 @@ document.addEventListener('click', function (e) {
         z-index: 4;
         pointer-events: auto;
     }
-    .ecc-eye-btn:hover{ color: #f2b90d; background: rgba(242,185,13,.06); }
+    .ecc-eye-btn:hover{ color: var(--ecc-gold-400); background: rgba(199,167,90,.06); }
 
     /* Submit */
     .ecc-submit-btn{
         height: 56px;
         border-radius: 12px;
-        border: 1px solid rgba(242,185,13,.55);
-        background: linear-gradient(90deg, #f2b90d, #dcb44a);
+        border: 1px solid rgba(199,167,90,.55);
+        background: linear-gradient(90deg, var(--ecc-gold-400), var(--ecc-gold-500));
         color: #020202;
         font-weight: 900;
         letter-spacing: .15em;
         text-transform: uppercase;
         font-size: 13px;
-        box-shadow: 0 18px 50px rgba(242,185,13,.12);
+        box-shadow: 0 18px 50px rgba(199,167,90,.12);
         transition: all 240ms ease;
         display: flex;
         align-items: center;
@@ -623,17 +623,17 @@ document.addEventListener('click', function (e) {
     .ecc-link{
         font-size: 11px;
         letter-spacing: .18em;
-        color: rgba(242,185,13,.60);
+        color: rgba(199,167,90,.60);
         text-decoration: none;
         font-weight: 700;
     }
-    .ecc-link:hover{ color: #f2b90d; text-decoration: underline; }
+    .ecc-link:hover{ color: var(--ecc-gold-400); text-decoration: underline; }
 
     /* Footer */
     .ecc-footer{
         font-size: 10px;
         letter-spacing: .25em;
-        color: rgba(242,185,13,.30);
+        color: rgba(199,167,90,.30);
         text-align: center;
     }
 
@@ -648,7 +648,7 @@ document.addEventListener('click', function (e) {
     input:-webkit-autofill:hover,
     input:-webkit-autofill:focus,
     input:-webkit-autofill:active{
-        -webkit-text-fill-color: #f2b90d !important;
+        -webkit-text-fill-color: var(--ecc-gold-400) !important;
         -webkit-box-shadow: 0 0 0 30px #050505 inset !important;
         transition: background-color 5000s ease-in-out 0s;
     }
@@ -657,44 +657,44 @@ document.addEventListener('click', function (e) {
     .ecc-admin-modal .modal-dialog{ max-width: 520px; }
     .ecc-admin-modal__content{
         background: rgba(2,2,2,.94);
-        border: 1px solid rgba(242,185,13,.22);
+        border: 1px solid rgba(199,167,90,.22);
         border-radius: 18px;
         box-shadow: 0 40px 140px rgba(0,0,0,.75);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
-        color: #f2b90d;
+        color: var(--ecc-gold-400);
     }
     .ecc-admin-modal__badge{
         width: 64px; height: 64px;
         border-radius: 9999px;
         display:flex; align-items:center; justify-content:center;
-        background: rgba(242,185,13,.08);
-        border: 1px solid rgba(242,185,13,.28);
-        box-shadow: 0 0 0 1px rgba(242,185,13,.08), 0 18px 60px rgba(242,185,13,.10);
+        background: rgba(199,167,90,.08);
+        border: 1px solid rgba(199,167,90,.28);
+        box-shadow: 0 0 0 1px rgba(199,167,90,.08), 0 18px 60px rgba(199,167,90,.10);
     }
     .ecc-admin-modal__badge .material-symbols-outlined{
         font-size: 30px;
-        color: #f2b90d;
+        color: var(--ecc-gold-400);
     }
     .ecc-admin-modal__title{
-        color: #f2b90d;
+        color: var(--ecc-gold-400);
         font-weight: 900;
         letter-spacing: .08em;
         text-transform: uppercase;
     }
     .ecc-admin-modal__subtitle{
-        color: rgba(242,185,13,.62);
+        color: rgba(199,167,90,.62);
         font-weight: 600;
         line-height: 1.55;
         max-width: 420px;
     }
-    .ecc-admin-modal__gold{ color: #f2b90d; }
+    .ecc-admin-modal__gold{ color: var(--ecc-gold-400); }
 
     .ecc-admin-modal__meta{
         max-width: 440px;
         border-radius: 14px;
-        border: 1px solid rgba(242,185,13,.18);
-        background: rgba(242,185,13,.04);
+        border: 1px solid rgba(199,167,90,.18);
+        background: rgba(199,167,90,.04);
         padding: 14px 14px;
         text-align: left;
     }
@@ -707,7 +707,7 @@ document.addEventListener('click', function (e) {
         font-size: 11px;
         letter-spacing: .18em;
         text-transform: uppercase;
-        color: rgba(242,185,13,.55);
+        color: rgba(199,167,90,.55);
         font-weight: 800;
     }
     .ecc-admin-modal__meta-value{
@@ -724,28 +724,28 @@ document.addEventListener('click', function (e) {
     .ecc-admin-modal__btn{
         height: 54px;
         border-radius: 14px;
-        border: 1px solid rgba(242,185,13,.22);
+        border: 1px solid rgba(199,167,90,.22);
         font-weight: 900;
         letter-spacing: .08em;
         text-transform: uppercase;
         transition: all 220ms ease;
     }
     .ecc-admin-modal__btn--primary{
-        background: linear-gradient(90deg, #f2b90d, #dcb44a);
+        background: linear-gradient(90deg, var(--ecc-gold-400), var(--ecc-gold-500));
         color: #020202;
-        border-color: rgba(242,185,13,.55);
+        border-color: rgba(199,167,90,.55);
     }
     .ecc-admin-modal__btn--primary:hover{
         filter: brightness(1.06);
         transform: translateY(-1px);
     }
     .ecc-admin-modal__btn--ghost{
-        background: rgba(242,185,13,.03);
-        color: rgba(242,185,13,.80);
+        background: rgba(199,167,90,.03);
+        color: rgba(199,167,90,.80);
     }
     .ecc-admin-modal__btn--ghost:hover{
-        background: rgba(242,185,13,.08);
-        color: #f2b90d;
+        background: rgba(199,167,90,.08);
+        color: var(--ecc-gold-400);
     }
 
     /* Ensure modal sits above backdrop and is clickable */

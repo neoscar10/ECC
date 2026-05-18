@@ -91,6 +91,8 @@ class VaultItemResource extends JsonResource
                 'status' => $this->status === 'removed' ? 'completed' : 'not_requested',
                 'removed_note' => $this->status === 'removed' ? $this->notes : null,
             ],
+
+            'delivery_request' => app(\App\Services\Shipping\ShipmentTrackingPresenter::class)->forVaultDeliveryRequest($this->latestDeliveryRequest),
         ];
     }
 }

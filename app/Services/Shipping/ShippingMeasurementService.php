@@ -96,6 +96,87 @@ class ShippingMeasurementService
     }
 
     /**
+     * Calculate total package measurement from a Vault Item.
+     */
+    public function measurementFromVaultItem(\App\Models\UserVaultItem $vaultItem): array
+    {
+        $sourceType = $vaultItem->source_type;
+        $sourceId = $vaultItem->source_id;
+        $quantity = $vaultItem->quantity ?? 1;
+
+        $sourceModel = null;
+        $sourceClass = null;
+
+        if ($sourceType === 'archive_product') {
+            $sourceModel = \App\Models\Archive\ArchiveProduct::find($sourceId);
+            $sourceClass = 'ArchiveProduct';
+        } elseif ($sourceType === 'auction_lot' || $sourceType === 'auction') {
+            $sourceModel = \App\Models\Auctions\AuctionLot::find($sourceId);
+            $sourceClass = 'AuctionLot';
+        }
+
+        $weight = null;
+        $length = null;
+        $breadth = null;
+        $height = null;
+        $source = 'fallback';
+        $hasFallback = true;
+
+        if ($sourceModel) {
+            $weight = $sourceModel->weight_kg ? (float) $sourceModel->weight_kg : null;
+            $length = $sourceModel->length_cm ? (float) $sourceModel->length_cm : null;
+            $breadth = $sourceModel->breadth_cm ? (float) $sourceModel->breadth_cm : null;
+            $height = $sourceModel->height_cm ? (float) $sourceModel->height_cm : null;
+
+            if ($weight !== null || ($length !== null && $breadth !== null && $height !== null)) {
+                $source = $sourceType;
+                $hasFallback = false;
+            }
+        }
+
+        if ($hasFallback) {
+            $weight = (float) config('shipping.default_weight_kg', 0.5);
+            $length = (float) config('shipping.default_length_cm', 10);
+            $breadth = (float) config('shipping.default_breadth_cm', 10);
+            $height = (float) config('shipping.default_height_cm', 10);
+        }
+
+        // Multiply weight and height by quantity (vertical stacking model)
+        $totalWeight = $weight * $quantity;
+        $totalHeight = $height * $quantity;
+
+        $volumetricWeight = $this->volumetricWeightKg($length, $breadth, $totalHeight);
+        $chargeableWeight = $this->chargeableWeightKg($totalWeight, $volumetricWeight);
+
+        return [
+            'weight_kg' => round($totalWeight, 3),
+            'length_cm' => round($length, 2),
+            'breadth_cm' => round($breadth, 2),
+            'height_cm' => round($totalHeight, 2),
+            'volumetric_weight_kg' => $volumetricWeight,
+            'chargeable_weight_kg' => $chargeableWeight,
+            'source' => $source,
+            'source_model' => $sourceClass,
+            'source_id' => $sourceId,
+            'quantity' => $quantity,
+            'has_fallback' => $hasFallback,
+            'items' => [
+                [
+                    'vault_item_id' => $vaultItem->id,
+                    'source_type' => $sourceType,
+                    'source_id' => $sourceId,
+                    'quantity' => $quantity,
+                    'measurement_source' => $hasFallback ? 'fallback' : 'source',
+                    'weight_kg' => $weight,
+                    'length_cm' => $length,
+                    'breadth_cm' => $breadth,
+                    'height_cm' => $height,
+                ]
+            ],
+        ];
+    }
+
+    /**
      * Calculate total package measurement from an order.
      */
     public function measurementFromShopOrder($order): array

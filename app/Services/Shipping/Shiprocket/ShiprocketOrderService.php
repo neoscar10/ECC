@@ -177,32 +177,70 @@ class ShiprocketOrderService
     /**
      * Create the order on Shiprocket.
      */
+    /**
+     * Create the order on Shiprocket.
+     */
     public function createOrderFromShipment(ShippingShipment $shipment): array
     {
         $order = $shipment->shippable;
         $customer = $order->user;
-        $address = $shipment->delivery_address_snapshot ?? $order->shipping_address_snapshot;
+        $address = $shipment->delivery_address_snapshot ?? (method_exists($order, 'shipping_address_snapshot') ? $order->shipping_address_snapshot : null);
 
-        // Build Payload
+        // Build Payload Polymorphically
         $orderItems = [];
-        foreach ($order->items as $item) {
+        if ($order instanceof \App\Models\Shop\ShopOrder) {
+            foreach ($order->items as $item) {
+                $orderItems[] = [
+                    'name' => $item->title_snapshot ?? $item->product?->title ?? 'Product',
+                    'sku' => 'ECC-ITM-' . $item->id,
+                    'units' => $item->quantity,
+                    'selling_price' => $item->unit_price,
+                    'discount' => 0,
+                    'tax' => 0,
+                    'hsn' => ''
+                ];
+            }
+            $firstName = $address['full_name'] ?? $customer?->name ?? 'Customer';
+            $firstNameParts = explode(' ', $firstName, 2);
+            $orderId = $order->order_number ?? 'ECC-' . $order->id;
+            $orderDate = $order->created_at->format('Y-m-d H:i');
+            $paymentMethod = $order->payment_status === 'paid' ? 'Prepaid' : 'COD';
+            $shippingCharges = $order->shipping_charge ?? 0;
+            $discountAmount = $order->discount_amount ?? 0;
+            $subTotal = $order->subtotal ?? 0;
+        } elseif ($order instanceof \App\Models\VaultRemovalRequest) {
+            $vaultItem = $order->vaultItem;
+            // Declare value based on price or unit_price, fallback to delivery fee, fallback to 1.0
+            $sellingPrice = (float)($vaultItem->source_item?->price ?? $vaultItem->source_item?->unit_price ?? $order->delivery_fee ?? 1.0);
+            if ($sellingPrice <= 0) {
+                $sellingPrice = 1.0;
+            }
+
             $orderItems[] = [
-                'name' => $item->title_snapshot ?? $item->product?->title ?? 'Product',
-                'sku' => 'ECC-ITM-' . $item->id,
-                'units' => $item->quantity,
-                'selling_price' => $item->unit_price,
+                'name' => $vaultItem->item_title ?? 'Vault Item',
+                'sku' => $vaultItem->item_ref ?? "VAULT-ITEM-" . $vaultItem->id,
+                'units' => $vaultItem->quantity ?? 1,
+                'selling_price' => $sellingPrice,
                 'discount' => 0,
                 'tax' => 0,
                 'hsn' => ''
             ];
+
+            $firstName = $order->delivery_name ?? $customer?->name ?? 'Customer';
+            $firstNameParts = explode(' ', $firstName, 2);
+            $orderId = 'ECC-VAULT-' . $order->id;
+            $orderDate = ($order->paid_at ?? $order->created_at)->format('Y-m-d H:i');
+            $paymentMethod = 'Prepaid';
+            $shippingCharges = $order->delivery_fee ?? 0;
+            $discountAmount = 0;
+            $subTotal = $sellingPrice * ($vaultItem->quantity ?? 1);
+        } else {
+            throw new \RuntimeException('Unsupported shipment type.');
         }
 
-        $firstName = $address['full_name'] ?? $customer?->name ?? 'Customer';
-        $firstNameParts = explode(' ', $firstName, 2);
-
         $payload = [
-            'order_id' => $order->order_number ?? 'ECC-' . $order->id,
-            'order_date' => $order->created_at->format('Y-m-d H:i'),
+            'order_id' => $orderId,
+            'order_date' => $orderDate,
             'pickup_location' => $shipment->pickup_location ?? config('shiprocket.pickup_location'),
             'billing_customer_name' => $firstNameParts[0],
             'billing_last_name' => $firstNameParts[1] ?? '',
@@ -216,12 +254,12 @@ class ShiprocketOrderService
             'billing_phone' => $address['phone'] ?? $customer?->phone ?? '9999999999',
             'shipping_is_billing' => true,
             'order_items' => $orderItems,
-            'payment_method' => $order->payment_status === 'paid' ? 'Prepaid' : 'COD',
-            'shipping_charges' => $order->shipping_charge ?? 0,
+            'payment_method' => $paymentMethod,
+            'shipping_charges' => $shippingCharges,
             'giftwrap_charges' => 0,
             'transaction_charges' => 0,
-            'total_discount' => $order->discount_amount ?? 0,
-            'sub_total' => $order->subtotal ?? 0,
+            'total_discount' => $discountAmount,
+            'sub_total' => $subTotal,
             'length' => $shipment->length_cm ?? 1,
             'breadth' => $shipment->breadth_cm ?? 1,
             'height' => $shipment->height_cm ?? 1,
@@ -241,6 +279,7 @@ class ShiprocketOrderService
 
         return $response;
     }
+
 
     /**
      * Assign AWB.

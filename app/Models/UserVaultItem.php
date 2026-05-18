@@ -45,6 +45,11 @@ class UserVaultItem extends Model
         return $this->hasOne(VaultRemovalRequest::class, 'vault_item_id')->where('status', 'pending');
     }
 
+    public function latestDeliveryRequest()
+    {
+        return $this->hasOne(VaultRemovalRequest::class, 'vault_item_id')->latestOfMany();
+    }
+
     public function getTotalValueAttribute()
     {
         return ($this->unit_price ?? $this->price ?? 0) * ($this->quantity ?? 1);
@@ -85,5 +90,52 @@ class UserVaultItem extends Model
         }
 
         return \Illuminate\Support\Facades\Storage::url($url);
+    }
+
+    // ── Source Item & Shipping Dimensions Delegates ──
+
+    public function getSourceItemAttribute()
+    {
+        if ($this->source_type === 'archive_product') {
+            return \App\Models\Archive\ArchiveProduct::find($this->source_id);
+        }
+        if ($this->source_type === 'auction_lot' || $this->source_type === 'auction') {
+            return \App\Models\Auctions\AuctionLot::find($this->source_id);
+        }
+        return null;
+    }
+
+    public function getWeightKgAttribute(): ?float
+    {
+        $item = $this->source_item;
+        return $item ? (float) $item->weight_kg : null;
+    }
+
+    public function getLengthCmAttribute(): ?float
+    {
+        $item = $this->source_item;
+        return $item ? (float) $item->length_cm : null;
+    }
+
+    public function getBreadthCmAttribute(): ?float
+    {
+        $item = $this->source_item;
+        return $item ? (float) $item->breadth_cm : null;
+    }
+
+    public function getHeightCmAttribute(): ?float
+    {
+        $item = $this->source_item;
+        return $item ? (float) $item->height_cm : null;
+    }
+
+    public function getVolumetricWeightKgAttribute(): ?float
+    {
+        return $this->source_item?->volumetric_weight_kg;
+    }
+
+    public function getChargeableWeightKgAttribute(): ?float
+    {
+        return $this->source_item?->chargeable_weight_kg;
     }
 }

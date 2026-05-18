@@ -70,13 +70,26 @@
 
 @push('styles')
 <style>
-    /* Page */
+    /* Page — always dark regardless of global theme */
     .ecc-gate{
         min-height: max(884px, 100dvh);
-        background: var(--ecc-bg-page);
-        color: var(--ecc-text-primary);
+        background: #0b0b08;
+        color: #ffffff;
         font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
         isolation: isolate;
+
+        /* Force dark-mode tokens within this component */
+        --ecc-bg-page: #0b0b08;
+        --ecc-bg-surface: #11110c;
+        --ecc-bg-input: rgba(255, 255, 255, 0.055);
+        --ecc-bg-hover: rgba(199, 167, 90, 0.10);
+        --ecc-text-primary: #ffffff;
+        --ecc-text-secondary: rgba(255, 255, 255, 0.78);
+        --ecc-text-muted: rgba(255, 255, 255, 0.58);
+        --ecc-text-subtle: rgba(255, 255, 255, 0.42);
+        --ecc-border: rgba(255, 255, 255, 0.10);
+        --ecc-border-soft: rgba(255, 255, 255, 0.065);
+        --ecc-primary-soft: rgba(199, 167, 90, 0.12);
     }
 
     /* Shell (keeps mobile look centered on desktop) */

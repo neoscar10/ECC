@@ -14,6 +14,7 @@ Route::middleware(['auth', 'ensure_registration_complete'])->group(function () {
     Route::get('/content/blocks/{id}', \App\Livewire\Pavilion\ContentBlockDetailPage::class)->name('content.block.detail');
     Route::get('/archive', \App\Livewire\Archive\ArchiveBrowse::class)->name('archive.index');
     Route::get('/vault', \App\Livewire\Vault\Index::class)->name('vault.index');
+    Route::get('/vault/delivery-payment/{requestId}', \App\Livewire\Vault\DeliveryPaymentPage::class)->name('vault.delivery-payment.show');
     Route::get('/archive/products/{id}', \App\Livewire\Archive\ArchiveProductShow::class)->name('archive.products.show');
     Route::get('/pavilion/{type}/{slugOrId}', \App\Livewire\Pavilion\ContentDetailPage::class)->name('pavilion.detail');
     Route::get('/club', \App\Livewire\Club\ClubPage::class)->name('club');

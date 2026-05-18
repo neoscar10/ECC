@@ -60,9 +60,14 @@ class ShipmentServiceTest extends TestCase
     public function test_prepare_courier_selection_for_shop_order()
     {
         \Illuminate\Support\Facades\Config::set('shiprocket.pickup_pincode', '110001');
+        \Illuminate\Support\Facades\Config::set('shiprocket.email', 'test@example.com');
+        \Illuminate\Support\Facades\Config::set('shiprocket.password', 'secret');
         
         \Illuminate\Support\Facades\Http::fake([
-            '*/courier/serviceability/*' => \Illuminate\Support\Facades\Http::response([
+            '*auth/login' => \Illuminate\Support\Facades\Http::response([
+                'token' => 'dummy-token'
+            ]),
+            '*courier/serviceability*' => \Illuminate\Support\Facades\Http::response([
                 'status' => 200,
                 'data' => [
                     'available_courier_companies' => [
@@ -77,25 +82,40 @@ class ShipmentServiceTest extends TestCase
             ])
         ]);
 
-        $order = \App\Models\Shop\ShopOrder::factory()->create([
-            'shipping_address_snapshot' => ['pincode' => '400001'],
-            'payment_status' => 'paid',
+        $user = User::factory()->create();
+
+        $order = \App\Models\Shop\ShopOrder::create([
+            'user_id' => $user->id,
+            'order_number' => 'ORD-123',
             'status' => 'paid',
+            'payment_status' => 'paid',
+            'currency' => 'INR',
+            'subtotal' => 100,
+            'shipping_fee' => 0,
+            'tax_amount' => 0,
+            'discount_amount' => 0,
+            'total_amount' => 100,
+            'shipping_address_snapshot' => ['pincode' => '400001', 'postal_code' => '400001'],
+            'billing_address_snapshot' => ['pincode' => '400001', 'postal_code' => '400001'],
         ]);
         
         $product = \App\Models\Shop\ShopProduct::factory()->create(['weight_kg' => 0.5]);
-        \App\Models\Shop\ShopOrderItem::factory()->create([
+        
+        \App\Models\Shop\ShopOrderItem::create([
             'shop_order_id' => $order->id,
             'shop_product_id' => $product->id,
-            'quantity' => 1
+            'title_snapshot' => $product->title,
+            'quantity' => 1,
+            'unit_price' => 100,
+            'line_total' => 100,
         ]);
 
         $shipment = $this->service->prepareCourierSelectionForShopOrder($order);
 
         $this->assertNotNull($shipment);
         $this->assertEquals('courier_selected', $shipment->status);
-        $this->assertEquals('Delhivery', $shipment->selected_courier_name);
-        $this->assertEquals('1', $shipment->selected_courier_company_id);
+        $this->assertEquals('Delhivery', $shipment->courier_name);
+        $this->assertEquals('1', $shipment->courier_company_id);
         
         // Verify rate quote exists
         $this->assertDatabaseHas('shipping_rate_quotes', [

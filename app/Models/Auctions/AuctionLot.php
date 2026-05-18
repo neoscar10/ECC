@@ -2,6 +2,7 @@
 
 namespace App\Models\Auctions;
 
+use App\Models\Concerns\HasShippingDimensions;
 use App\Models\MembershipTier;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AuctionLot extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasShippingDimensions;
 
     protected $guarded = [];
 
@@ -30,6 +31,10 @@ class AuctionLot extends Model
         'early_access_enabled' => 'boolean',
         'blur_strategy' => 'string',
         'decision_made_at' => 'datetime',
+        'weight_kg' => 'decimal:3',
+        'length_cm' => 'decimal:2',
+        'breadth_cm' => 'decimal:2',
+        'height_cm' => 'decimal:2',
     ];
 
     // --- Relationships ---

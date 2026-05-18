@@ -33,6 +33,39 @@
         @error('quantity') <span class="text-danger text-sm">{{ $message }}</span> @enderror
     </div>
     
+    <!-- Shipping Dimensions -->
+    <div class="col-12 mt-2">
+        <div class="border rounded p-3" style="border-color: var(--bs-border-color) !important;">
+            <h6 class="mb-1 fw-semibold" style="font-size: 0.85rem;">
+                <i class="mdi mdi-package-variant-closed me-1"></i>Shipping Dimensions
+                <span class="text-muted fw-normal">(optional)</span>
+            </h6>
+            <p class="text-muted mb-3" style="font-size: 0.75rem;">Used for physical delivery courier fee calculation. Volumetric weight = L × B × H ÷ 5000.</p>
+            <div class="row g-2">
+                <div class="col-md-3 col-6">
+                    <label class="form-label" style="font-size: 0.8rem;">Weight (kg)</label>
+                    <input type="number" step="0.001" min="0.001" max="999.999" class="form-control form-control-sm" wire:model="weight_kg" placeholder="e.g. 0.5">
+                    @error('weight_kg') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+                </div>
+                <div class="col-md-3 col-6">
+                    <label class="form-label" style="font-size: 0.8rem;">Length (cm)</label>
+                    <input type="number" step="0.01" min="0.1" max="999.99" class="form-control form-control-sm" wire:model="length_cm" placeholder="e.g. 20">
+                    @error('length_cm') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+                </div>
+                <div class="col-md-3 col-6">
+                    <label class="form-label" style="font-size: 0.8rem;">Breadth (cm)</label>
+                    <input type="number" step="0.01" min="0.1" max="999.99" class="form-control form-control-sm" wire:model="breadth_cm" placeholder="e.g. 15">
+                    @error('breadth_cm') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+                </div>
+                <div class="col-md-3 col-6">
+                    <label class="form-label" style="font-size: 0.8rem;">Height (cm)</label>
+                    <input type="number" step="0.01" min="0.1" max="999.99" class="form-control form-control-sm" wire:model="height_cm" placeholder="e.g. 10">
+                    @error('height_cm') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Descriptions -->
     <div class="col-12">
         <label class="form-label">Description</label>

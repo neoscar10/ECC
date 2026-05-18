@@ -136,7 +136,11 @@
                                              alt="{{ $artifact->title }}"
                                              class="w-100 h-100 object-fit-cover">
 
-                                        @if($artifact->status_badge_label)
+                                        @if($artifact->delivery_badge_label)
+                                            <span class="position-absolute top-0 end-0 m-2 badge border {{ $artifact->delivery_badge_class }}" style="background: var(--ecc-surface); backdrop-filter: blur(4px); font-size: 0.65rem; padding: 0.4rem 0.6rem; letter-spacing: 0.5px;">
+                                                {{ $artifact->delivery_badge_label }}
+                                            </span>
+                                        @elseif($artifact->status_badge_label)
                                             <span class="ecc-vault-artifact-badge">
                                                 {{ $artifact->status_badge_label }}
                                             </span>
@@ -261,17 +265,77 @@
                                     </div>
                                 </div>
 
-                                <div class="d-flex gap-3">
-                                    @if($selectedArtifact['has_pending_request'])
-                                        <div class="flex-grow-1 p-3 rounded-3 bg-warning-subtle border border-warning-subtle text-warning text-center fw-bold fs-12">
-                                           <i class="ri-time-line me-2"></i> REMOVAL REQUEST PENDING REVIEW
+                                @if(isset($selectedArtifact['tracking']) && $selectedArtifact['tracking'])
+                                    @php $track = $selectedArtifact['tracking']; @endphp
+                                    <div class="ecc-vault-tracking-drawer mt-4 p-4 rounded-4 bg-white-5 border border-white-5">
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <div>
+                                                <div class="ecc-vault-standing-label mb-1">PHYSICAL DELIVERY STATUS</div>
+                                                <div class="fs-16 fw-bold ecc-text-primary">{{ $track['status_label'] }}</div>
+                                            </div>
+                                            @if($track['is_test_mode'])
+                                                <span class="badge bg-warning text-dark opacity-75">Simulated</span>
+                                            @endif
                                         </div>
-                                    @else
-                                        <button class="btn ecc-vault-btn-outline w-100" wire:click="openRemovalModal">
-                                            REQUEST PHYSICAL DELIVERY
-                                        </button>
-                                    @endif
-                                </div>
+
+                                        <div class="row g-3 mb-4 fs-13">
+                                            @if($track['awb_code'])
+                                                <div class="col-6">
+                                                    <div class="ecc-text-primary-50 mb-1" style="font-size: 10px;">AWB CODE</div>
+                                                    <div class="fw-semibold text-white">{{ $track['awb_code'] }}</div>
+                                                </div>
+                                            @endif
+                                            @if($track['courier_name'])
+                                                <div class="col-6">
+                                                    <div class="ecc-text-primary-50 mb-1" style="font-size: 10px;">COURIER</div>
+                                                    <div class="fw-semibold text-white">{{ $track['courier_name'] }}</div>
+                                                </div>
+                                            @endif
+                                            <div class="col-12">
+                                                <div class="ecc-text-primary-50 mb-1" style="font-size: 10px;">DELIVERY FEE PAID</div>
+                                                <div class="fw-semibold text-white">{{ number_format($track['delivery_fee'], 2) }} {{ $track['delivery_currency'] }}</div>
+                                            </div>
+                                        </div>
+
+                                        @if(!empty($track['events']))
+                                            <div class="ecc-vault-timeline mt-4 border-start border-white-10 ms-2 ps-3 position-relative">
+                                                @foreach($track['events'] as $event)
+                                                    <div class="mb-4 position-relative">
+                                                        <span class="position-absolute translate-middle p-1 rounded-circle bg-primary" style="top: 10px; left: -18px; border: 2px solid var(--ecc-surface);"></span>
+                                                        <div class="fs-14 fw-bold text-white mb-1">{{ $event['status_label'] }}</div>
+                                                        <div class="fs-12 ecc-text-primary-50 mb-1">{{ $event['description'] }}</div>
+                                                        <div class="d-flex align-items-center gap-2 fs-10 opacity-50">
+                                                            <span><i class="mdi mdi-clock-outline me-1"></i>{{ \Carbon\Carbon::parse($event['event_time'])->format('M d, Y h:i A') }}</span>
+                                                            @if(!empty($event['location']))
+                                                                <span><i class="mdi mdi-map-marker-outline mx-1"></i>{{ $event['location'] }}</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+
+                                        @if($track['payment_status'] === 'pending_payment' || $track['payment_status'] === 'payment_failed')
+                                            <div class="mt-4 text-center">
+                                                <a href="{{ route('vault.delivery-payment.show', $track['id']) }}" class="btn btn-warning w-100 fw-bold">
+                                                    <i class="mdi mdi-credit-card-outline me-2"></i> PAY DELIVERY FEE
+                                                </a>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @else
+                                    <div class="d-flex gap-3">
+                                        @if($selectedArtifact['has_pending_request'])
+                                            <div class="flex-grow-1 p-3 rounded-3 bg-warning-subtle border border-warning-subtle text-warning text-center fw-bold fs-12">
+                                               <i class="ri-time-line me-2"></i> REMOVAL REQUEST PENDING REVIEW
+                                            </div>
+                                        @else
+                                            <button class="btn ecc-vault-btn-outline w-100" wire:click="openRemovalModal">
+                                                REQUEST PHYSICAL DELIVERY
+                                            </button>
+                                        @endif
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -343,32 +407,32 @@
                                 <div class="ecc-address-form row g-3 bg-white-5 border border-white-5 rounded-3 p-3">
                                     <div class="col-md-6">
                                         <label class="form-label fs-12 ecc-text-primary-50 mb-1">Full Name</label>
-                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.full_name">
+                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.blur="addressForm.full_name">
                                         @error('addressForm.full_name') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fs-12 ecc-text-primary-50 mb-1">Phone</label>
-                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.phone">
+                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.blur="addressForm.phone">
                                         @error('addressForm.phone') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label fs-12 ecc-text-primary-50 mb-1">Address Line 1</label>
-                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.line1">
+                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.blur="addressForm.line1">
                                         @error('addressForm.line1') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fs-12 ecc-text-primary-50 mb-1">City</label>
-                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.city">
+                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.blur="addressForm.city">
                                         @error('addressForm.city') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fs-12 ecc-text-primary-50 mb-1">State</label>
-                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.state">
+                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.blur="addressForm.state">
                                         @error('addressForm.state') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fs-12 ecc-text-primary-50 mb-1">Postal Code</label>
-                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model="addressForm.postal_code">
+                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.live.debounce.500ms="addressForm.postal_code">
                                         @error('addressForm.postal_code') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6">
@@ -391,14 +455,94 @@
                             @endif
                         </div>
 
+                        <!-- Shipping Quote Section -->
+                        <div class="mb-4">
+                            <label class="ecc-vault-standing-label mb-2">SHIPPING & SERVICEABILITY</label>
+                            
+                            <div class="p-3 rounded-3 border border-white-5 bg-white-5 position-relative">
+                                <!-- Loading State -->
+                                <div wire:loading wire:target="calculateDeliveryQuote, selectedAddressId, addressForm.postal_code, toggleAddressForm" class="w-100 text-center py-3">
+                                    <div class="spinner-border spinner-border-sm ecc-text-primary mb-2" role="status"></div>
+                                    <div class="ecc-text-primary-50 fs-12 fw-semibold">Calculating Shiprocket shipping rates...</div>
+                                </div>
+
+                                <!-- Actual Content (hidden when loading) -->
+                                <div wire:loading.remove wire:target="calculateDeliveryQuote, selectedAddressId, addressForm.postal_code, toggleAddressForm">
+                                    @if($deliveryQuoteLoading)
+                                        <div class="w-100 text-center py-3">
+                                            <div class="spinner-border spinner-border-sm ecc-text-primary mb-2" role="status"></div>
+                                            <div class="ecc-text-primary-50 fs-12 fw-semibold">Calculating Shiprocket shipping rates...</div>
+                                        </div>
+                                    @elseif($deliveryQuoteError)
+                                        <div class="d-flex align-items-center gap-2 text-danger">
+                                            <i class="ri-error-warning-fill fs-16"></i>
+                                            <span class="fs-13 fw-semibold">{{ $deliveryQuoteError }}</span>
+                                        </div>
+                                    @elseif($deliveryQuote && ($deliveryQuote['success'] ?? false))
+                                        <div class="ecc-quote-details">
+                                            <!-- Courier and Price -->
+                                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white-5">
+                                                <div>
+                                                    <div class="fs-11 ecc-text-primary-50 fw-semibold text-uppercase tracking-wider">Courier Partner</div>
+                                                    <div class="ecc-text-primary fw-bold fs-15">{{ $selectedDeliveryCourier['courier_name'] }}</div>
+                                                    <div class="fs-10 text-muted">
+                                                        Rating: {{ number_format($selectedDeliveryCourier['rating'], 1) }} ★
+                                                    </div>
+                                                </div>
+                                                <div class="text-end">
+                                                    <div class="fs-11 ecc-text-primary-50 fw-semibold text-uppercase tracking-wider">Estimated Fee</div>
+                                                    <div class="ecc-text-primary fw-extrabold fs-18">INR {{ number_format($deliveryFee, 2) }}</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Package Metrics and ETA -->
+                                            <div class="row g-2">
+                                                <div class="col-6">
+                                                    <div class="fs-10 ecc-text-primary-50 text-uppercase">Chargeable Weight</div>
+                                                    <div class="fs-12 fw-semibold text-white">
+                                                        {{ number_format($deliveryMeasurement['chargeable_weight_kg'], 3) }} kg
+                                                        <span class="fs-9 text-muted d-block">(Volumetric: {{ number_format($deliveryMeasurement['volumetric_weight_kg'], 3) }} kg)</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="fs-10 ecc-text-primary-50 text-uppercase">Estimated Delivery</div>
+                                                    <div class="fs-12 fw-semibold text-white">
+                                                        {{ $selectedDeliveryCourier['etd'] ? \Carbon\Carbon::parse($selectedDeliveryCourier['etd'])->format('M d, Y') : $selectedDeliveryCourier['estimated_delivery_days'] . ' Days' }}
+                                                        <span class="fs-9 text-muted d-block">(Transit duration)</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 mt-2 pt-2 border-top border-white-5 d-flex justify-content-between fs-11 text-muted">
+                                                    <div>Pickup: <strong>{{ $deliveryQuote['pickup_pincode'] }}</strong></div>
+                                                    <div>Delivery: <strong>{{ $deliveryQuote['delivery_pincode'] }}</strong></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="d-flex align-items-center gap-2 text-warning">
+                                            <i class="ri-information-line fs-16"></i>
+                                            <span class="fs-13 fw-semibold">Please select/provide an address to calculate delivery.</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                            @error('deliveryQuote')
+                                <div class="text-danger fs-11 mt-1 fw-semibold">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <div class="mb-4">
                             <label class="ecc-vault-standing-label mb-2">ADDITIONAL INSTRUCTIONS (OPTIONAL)</label>
                             <textarea wire:model="removalMessage" class="form-control ecc-vault-input" rows="2" placeholder="Delivery notes or special instructions..."></textarea>
                         </div>
 
                         <div class="d-flex gap-3 mt-4">
-                            <button class="btn btn-link ecc-text-primary-50 text-decoration-none fw-bold fs-13" wire:click="$set('showRemovalModal', false)">CANCEL</button>
-                            <button class="btn ecc-btn-primary px-4 ms-auto" wire:click="submitRemovalRequest">
+                            <button class="btn btn-link ecc-text-primary-50 text-decoration-none fw-bold fs-13" wire:click="closeArtifactModal">CANCEL</button>
+                            <button class="btn ecc-btn-primary px-4 ms-auto" 
+                                    wire:click="submitRemovalRequest"
+                                    wire:loading.attr="disabled"
+                                    wire:target="submitRemovalRequest, calculateDeliveryQuote"
+                                    @if(!$this->canSubmitDeliveryRequest()) disabled @endif>
+                                <span wire:loading wire:target="submitRemovalRequest" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                 SUBMIT REQUEST
                             </button>
                         </div>

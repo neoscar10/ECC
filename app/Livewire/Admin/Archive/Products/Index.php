@@ -56,6 +56,12 @@ class Index extends Component
     public $priceMax;
     public $quantity = 1;
     public $currency = 'INR';
+
+    // Shipping Dimensions
+    public $weight_kg;
+    public $length_cm;
+    public $breadth_cm;
+    public $height_cm;
     public $descriptionUnlocked;
     public $descriptionLocked;
     public $goLiveNow = true;
@@ -313,6 +319,12 @@ class Index extends Component
         $this->priceMin = $product->price_min_amount;
         $this->priceMax = $product->price_max_amount;
         $this->quantity = $product->quantity ?? 1;
+
+        // Shipping Dimensions
+        $this->weight_kg = $product->weight_kg;
+        $this->length_cm = $product->length_cm;
+        $this->breadth_cm = $product->breadth_cm;
+        $this->height_cm = $product->height_cm;
         $this->descriptionUnlocked = $product->description_unlocked; 
         // Note: We ignore description_locked in UI as consolidated
         
@@ -413,6 +425,10 @@ class Index extends Component
                 'restricted_min_tier_id' => $this->restrictedMinTierId,
                 'restricted_private_tier_id' => $this->restrictedPrivateTierId,
                 'blur_enabled' => $this->blurEnabled,
+                'weight_kg' => $this->weight_kg,
+                'length_cm' => $this->length_cm,
+                'breadth_cm' => $this->breadth_cm,
+                'height_cm' => $this->height_cm,
             ]);
 
 
@@ -513,6 +529,10 @@ class Index extends Component
             'restricted_min_tier_id' => $this->restrictedMinTierId,
             'restricted_private_tier_id' => $this->restrictedPrivateTierId,
             'blur_enabled' => $this->blurEnabled,
+            'weight_kg' => $this->weight_kg,
+            'length_cm' => $this->length_cm,
+            'breadth_cm' => $this->breadth_cm,
+            'height_cm' => $this->height_cm,
         ]);
 
         // Sync Clear View Tiers
@@ -1120,6 +1140,7 @@ class Index extends Component
         $this->reset(['blurEnabled', 'clearViewTierIds', 'computedVisibilityTierIds']);
         $this->selectedRandomTiers = [];
         $this->reset(['newImages', 'existingImages', 'new360Images', 'existing360Images', 'earlyAccessRows', 'attachmentRows']);
+        $this->reset(['weight_kg', 'length_cm', 'breadth_cm', 'height_cm']);
         
         $this->goLiveNow = true;
         $this->quantity = 1;

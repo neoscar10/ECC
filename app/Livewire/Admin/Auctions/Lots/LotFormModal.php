@@ -29,6 +29,12 @@ class LotFormModal extends Component
     public $lot_no; 
     public $title;
     public $description;
+
+    // Shipping Dimensions
+    public $weight_kg;
+    public $length_cm;
+    public $breadth_cm;
+    public $height_cm;
     
     // Pricing
     public $starting_price;
@@ -103,6 +109,12 @@ class LotFormModal extends Component
         $this->ends_at = $lot->ends_at?->format('Y-m-d\TH:i');
         $this->goLiveNow = $lot->status === 'live' && $lot->starts_at <= now(); // Approximate logic
 
+        // Shipping Dimensions
+        $this->weight_kg = $lot->weight_kg;
+        $this->length_cm = $lot->length_cm;
+        $this->breadth_cm = $lot->breadth_cm;
+        $this->height_cm = $lot->height_cm;
+
         $this->anti_sniping_enabled = (bool) $lot->anti_sniping_enabled;
         $this->trigger_window_seconds = $lot->trigger_window_seconds;
         $this->extend_by_seconds = $lot->extend_by_seconds;
@@ -146,7 +158,8 @@ class LotFormModal extends Component
             'restrictionMode', 'selectedVisibilityTiers',
             'blurEnabled', 'restrictionType', 'restrictedMinTierId', 'selectedRandomTiers', 'restrictedPrivateTierId',
             'newImages', 'existingImages', 'new360Images', 'existing360Images',
-            'allowsEarlyAccess', 'outcome_decision_mode'
+            'allowsEarlyAccess', 'outcome_decision_mode',
+            'weight_kg', 'length_cm', 'breadth_cm', 'height_cm',
         ]);
         
         // Defaults
@@ -173,6 +186,12 @@ class LotFormModal extends Component
         $this->starting_price = $sourceLot->starting_price;
         $this->min_selling_price = $sourceLot->min_selling_price;
         $this->min_increment = $sourceLot->min_increment;
+
+        // Copy shipping dimensions from source lot
+        $this->weight_kg = $sourceLot->weight_kg;
+        $this->length_cm = $sourceLot->length_cm;
+        $this->breadth_cm = $sourceLot->breadth_cm;
+        $this->height_cm = $sourceLot->height_cm;
         
         // Settings copy
         $this->outcome_decision_mode = $sourceLot->outcome_decision_mode;
@@ -431,6 +450,10 @@ class LotFormModal extends Component
                 'restricted_min_tier_id' => $this->restrictedMinTierId,
                 'restricted_private_tier_id' => $this->restrictedPrivateTierId,
                 'blur_enabled' => $this->blurEnabled,
+                'weight_kg' => $this->weight_kg,
+                'length_cm' => $this->length_cm,
+                'breadth_cm' => $this->breadth_cm,
+                'height_cm' => $this->height_cm,
             ];
             
             if ($this->restrictionMode == 'public') {

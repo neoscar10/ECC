@@ -2,6 +2,7 @@
 
 namespace App\Models\Archive;
 
+use App\Models\Concerns\HasShippingDimensions;
 use App\Models\MembershipTier;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ArchiveProduct extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasShippingDimensions;
 
     protected $guarded = [];
 
@@ -26,6 +27,10 @@ class ArchiveProduct extends Model
         'price_max_amount' => 'integer',
         'quantity' => 'integer',
         'blur_enabled' => 'boolean',
+        'weight_kg' => 'decimal:3',
+        'length_cm' => 'decimal:2',
+        'breadth_cm' => 'decimal:2',
+        'height_cm' => 'decimal:2',
     ];
 
     public function category(): BelongsTo

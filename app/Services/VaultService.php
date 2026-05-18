@@ -92,7 +92,7 @@ class VaultService
     /**
      * Create a removal (physical delivery) request for a vault item.
      */
-    public function requestRemoval(UserVaultItem $item, User $user, ?string $message = null, $addressId = null, $addressData = null): \App\Models\VaultRemovalRequest
+    public function requestRemoval(UserVaultItem $item, User $user, ?string $message = null, $addressId = null, $addressData = null, ?array $quoteData = null): \App\Models\VaultRemovalRequest
     {
         // 1. Authorization
         if ($item->user_id !== $user->id) {
@@ -168,6 +168,23 @@ class VaultService
              // completely legacy calls, it's optional, though the UI will enforce it.
         }
 
+        // Quote & payment attributes
+        $quoteAttributes = [];
+        if ($quoteData) {
+            $quoteAttributes = [
+                'delivery_fee' => $quoteData['delivery_fee'] ?? null,
+                'delivery_currency' => $quoteData['delivery_currency'] ?? 'INR',
+                'shipping_rate_quote_id' => $quoteData['shipping_rate_quote_id'] ?? null,
+                'selected_courier_company_id' => $quoteData['selected_courier_company_id'] ?? null,
+                'selected_courier_name' => $quoteData['selected_courier_name'] ?? null,
+                'package_weight_kg' => $quoteData['package_weight_kg'] ?? null,
+                'package_length_cm' => $quoteData['package_length_cm'] ?? null,
+                'package_breadth_cm' => $quoteData['package_breadth_cm'] ?? null,
+                'package_height_cm' => $quoteData['package_height_cm'] ?? null,
+                'payment_status' => $quoteData['payment_status'] ?? \App\Models\VaultRemovalRequest::PAYMENT_NONE,
+            ];
+        }
+
         // 4. Create request
         return \App\Models\VaultRemovalRequest::create(array_merge([
             'user_id' => $user->id,
@@ -176,7 +193,7 @@ class VaultService
             'message' => $message,
             'requested_at' => now(),
             'address_id' => $resolvedAddressId,
-        ], $snapshot));
+        ], $snapshot, $quoteAttributes));
     }
 
     /**
@@ -184,6 +201,11 @@ class VaultService
      */
     public function approveRemoval(\App\Models\VaultRemovalRequest $request, User $admin, ?string $note = null): \App\Models\VaultRemovalRequest
     {
+        // Block approval if there is a delivery fee and the user hasn't paid it yet
+        if ($request->delivery_fee !== null && $request->payment_status !== \App\Models\VaultRemovalRequest::PAYMENT_PAID) {
+            throw new \Exception("Delivery fee must be paid before this request can be approved.");
+        }
+
         $request->update([
             'status' => \App\Models\VaultRemovalRequest::STATUS_APPROVED,
             'admin_note' => $note,
@@ -199,11 +221,38 @@ class VaultService
      */
     public function rejectRemoval(\App\Models\VaultRemovalRequest $request, User $admin, ?string $note = null): \App\Models\VaultRemovalRequest
     {
+        if ($request->payment_status === \App\Models\VaultRemovalRequest::PAYMENT_PAID) {
+            $request->update([
+                'status' => \App\Models\VaultRemovalRequest::STATUS_REJECTED,
+                'payment_status' => \App\Models\VaultRemovalRequest::PAYMENT_REFUND_REQUIRED,
+                'admin_note' => $note ? ($note . "\n[System]: Request rejected after payment. Manual refund required.") : 'Request rejected after payment. Manual refund required.',
+                'reviewed_at' => now(),
+                'reviewed_by_admin_id' => $admin->id,
+                'rejected_after_payment_at' => now(),
+                'refund_required_at' => now(),
+            ]);
+        } else {
+            $request->update([
+                'status' => \App\Models\VaultRemovalRequest::STATUS_REJECTED,
+                'admin_note' => $note,
+                'reviewed_at' => now(),
+                'reviewed_by_admin_id' => $admin->id,
+            ]);
+        }
+
+        return $request;
+    }
+
+    /**
+     * ADMIN: Mark refund as handled for a rejected request.
+     */
+    public function markRefundHandled(\App\Models\VaultRemovalRequest $request, User $admin, string $refundReference, ?string $note = null): \App\Models\VaultRemovalRequest
+    {
         $request->update([
-            'status' => \App\Models\VaultRemovalRequest::STATUS_REJECTED,
-            'admin_note' => $note,
-            'reviewed_at' => now(),
-            'reviewed_by_admin_id' => $admin->id,
+            'payment_status' => \App\Models\VaultRemovalRequest::PAYMENT_REFUNDED,
+            'refund_reference' => $refundReference,
+            'refunded_at' => now(),
+            'admin_note' => $note ? ($request->admin_note . "\n[Refund Handled]: " . $note) : $request->admin_note,
         ]);
 
         return $request;
@@ -214,6 +263,10 @@ class VaultService
      */
     public function completeRemoval(\App\Models\VaultRemovalRequest $request, User $admin, ?string $note = null): \App\Models\VaultRemovalRequest
     {
+        if ($request->delivery_fee !== null && !$request->isReadyForFulfillment()) {
+            throw new \Exception("This paid delivery request must be approved by admin before completion.");
+        }
+
         DB::transaction(function() use ($request, $admin, $note) {
             // 1. Mark vault item as removed
             $this->markRemoved($request->vaultItem, $admin, $note ?: $request->admin_note);

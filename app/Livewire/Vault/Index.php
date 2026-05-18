@@ -28,6 +28,15 @@ class Index extends Component
         'label' => 'Home', 'is_default' => false,
     ];
 
+    // Delivery Quote State
+    public ?array $deliveryQuote = null;
+    public bool $deliveryQuoteLoading = false;
+    public ?string $deliveryQuoteError = null;
+    public ?int $deliveryRateQuoteId = null;
+    public ?float $deliveryFee = null;
+    public ?array $selectedDeliveryCourier = null;
+    public ?array $deliveryMeasurement = null;
+
     public function setVaultView(string $mode)
     {
         $this->vaultViewMode = in_array($mode, ['grid', 'list']) ? $mode : 'grid';
@@ -136,12 +145,16 @@ class Index extends Component
     public function selectArtifact(int $id)
     {
         $user = auth('web')->user();
-        $item = $user->vaultItems()->find($id);
+        $item = $user->vaultItems()->with(['latestDeliveryRequest.shippingShipment.events', 'pendingRemovalRequest'])->find($id);
         
         if (!$item) return;
 
         $img = 'https://placehold.co/800x600/17130b/d4af37?text=Secured+Asset';
         $img = $item->display_image_url ?? $img;
+
+        $latestReq = $item->latestDeliveryRequest;
+        $presenter = app(\App\Services\Shipping\ShipmentTrackingPresenter::class);
+        $trackingData = $presenter->forVaultDeliveryRequest($latestReq);
 
         $this->selectedArtifact = [
             'id' => $item->id,
@@ -156,6 +169,7 @@ class Index extends Component
             'currency' => $item->currency ?? 'INR',
             'locked_at_human' => $item->locked_at ? $item->locked_at->format('d M Y') : 'N/A',
             'has_pending_request' => $item->pendingRemovalRequest()->exists(),
+            'tracking' => $trackingData,
         ];
     }
 
@@ -165,6 +179,16 @@ class Index extends Component
         $this->removalMessage = '';
         $this->showRemovalModal = false;
         $this->showAddressForm = false;
+        
+        // Reset quote state
+        $this->deliveryQuote = null;
+        $this->deliveryQuoteLoading = false;
+        $this->deliveryQuoteError = null;
+        $this->deliveryRateQuoteId = null;
+        $this->deliveryFee = null;
+        $this->selectedDeliveryCourier = null;
+        $this->deliveryMeasurement = null;
+
         $this->resetValidation();
     }
 
@@ -172,14 +196,39 @@ class Index extends Component
     {
         if (!$this->selectedArtifact) return;
         $this->showRemovalModal = true;
+        
+        // Reset quote state
+        $this->deliveryQuote = null;
+        $this->deliveryQuoteLoading = false;
+        $this->deliveryQuoteError = null;
+        $this->deliveryRateQuoteId = null;
+        $this->deliveryFee = null;
+        $this->selectedDeliveryCourier = null;
+        $this->deliveryMeasurement = null;
+
         if(empty($this->addresses) && auth('web')->check()) {
             $this->showAddressForm = true;
+        }
+
+        // Auto-calculate if we have a selected address
+        if ($this->selectedAddressId) {
+            $this->calculateDeliveryQuote();
         }
     }
 
     public function toggleAddressForm()
     {
         $this->showAddressForm = !$this->showAddressForm;
+        
+        // Reset quote state
+        $this->deliveryQuote = null;
+        $this->deliveryQuoteLoading = false;
+        $this->deliveryQuoteError = null;
+        $this->deliveryRateQuoteId = null;
+        $this->deliveryFee = null;
+        $this->selectedDeliveryCourier = null;
+        $this->deliveryMeasurement = null;
+
         if($this->showAddressForm) {
             $this->selectedAddressId = null;
         } else {
@@ -187,23 +236,172 @@ class Index extends Component
                 $this->selectedAddressId = $this->addresses->first()->id;
             }
         }
+
+        // Auto-calculate if switching back to address book with an address selected
+        if (!$this->showAddressForm && $this->selectedAddressId) {
+            $this->calculateDeliveryQuote();
+        }
+    }
+
+    /**
+     * Listen to Livewire property updates for reactive quote calculations.
+     */
+    public function updated($name)
+    {
+        if ($name === 'selectedAddressId') {
+            $this->calculateDeliveryQuote();
+        }
+        if ($name === 'addressForm.postal_code') {
+            $this->calculateDeliveryQuote();
+        }
+    }
+
+    /**
+     * Calculate delivery quote for the selected vault item and destination.
+     */
+    public function calculateDeliveryQuote(): void
+    {
+        $this->deliveryQuote = null;
+        $this->deliveryQuoteLoading = true;
+        $this->deliveryQuoteError = null;
+        $this->deliveryRateQuoteId = null;
+        $this->deliveryFee = null;
+        $this->selectedDeliveryCourier = null;
+        $this->deliveryMeasurement = null;
+
+        if (!$this->selectedArtifact) {
+            $this->deliveryQuoteLoading = false;
+            return;
+        }
+
+        $user = auth('web')->user();
+        if (!$user) {
+            $this->deliveryQuoteLoading = false;
+            return;
+        }
+
+        $vaultItem = $user->vaultItems()->find($this->selectedArtifact['id']);
+        if (!$vaultItem) {
+            $this->deliveryQuoteError = 'Selected vault item is invalid.';
+            $this->deliveryQuoteLoading = false;
+            return;
+        }
+
+        $postalCode = null;
+        $address = null;
+
+        if ($this->showAddressForm) {
+            $postalCode = $this->addressForm['postal_code'] ?? null;
+        } else {
+            if ($this->selectedAddressId) {
+                $address = $user->addresses()->find($this->selectedAddressId);
+                if ($address) {
+                    $postalCode = $address->postal_code;
+                }
+            }
+        }
+
+        if (empty($postalCode)) {
+            $this->deliveryQuoteLoading = false;
+            if (!$this->showAddressForm) {
+                $this->deliveryQuoteError = 'Please select a delivery address.';
+            }
+            return;
+        }
+
+        try {
+            $quoteService = app(\App\Services\Shipping\VaultDeliveryQuoteService::class);
+            
+            if ($address) {
+                $result = $quoteService->quoteForVaultItem($vaultItem, $address, $user);
+            } else {
+                $result = $quoteService->quoteForVaultItemAndPincode($vaultItem, $postalCode, $user);
+            }
+
+            if ($result['success'] ?? false) {
+                $this->deliveryQuote = $result;
+                $this->deliveryFee = (float) $result['delivery_fee'];
+                $this->selectedDeliveryCourier = $result['selected_courier'];
+                $this->deliveryMeasurement = $result['measurement'];
+                $this->deliveryRateQuoteId = $result['rate_quote_id'];
+            } else {
+                $this->deliveryQuoteError = $result['message'] ?? 'Delivery is not available for this address.';
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Livewire calculateDeliveryQuote failed', [
+                'vault_item_id' => $vaultItem->id,
+                'error' => $e->getMessage()
+            ]);
+            $this->deliveryQuoteError = 'Unable to calculate delivery fee at this time.';
+        } finally {
+            $this->deliveryQuoteLoading = false;
+        }
+    }
+
+    /**
+     * Determine if physical delivery request can be submitted.
+     */
+    public function canSubmitDeliveryRequest(): bool
+    {
+        if (!$this->selectedArtifact) {
+            return false;
+        }
+
+        if ($this->showAddressForm) {
+            if (empty($this->addressForm['full_name']) ||
+                empty($this->addressForm['phone']) ||
+                empty($this->addressForm['line1']) ||
+                empty($this->addressForm['city']) ||
+                empty($this->addressForm['state']) ||
+                empty($this->addressForm['postal_code'])) {
+                return false;
+            }
+        } else {
+            if (!$this->selectedAddressId) {
+                return false;
+            }
+        }
+
+        return $this->deliveryQuote !== null &&
+               ($this->deliveryQuote['success'] ?? false) === true &&
+               $this->deliveryRateQuoteId !== null &&
+               $this->deliveryFee !== null &&
+               $this->selectedDeliveryCourier !== null &&
+               $this->deliveryQuoteError === null &&
+               !$this->deliveryQuoteLoading;
     }
 
     public function submitRemovalRequest(\App\Services\VaultService $service)
     {
         if (!$this->selectedArtifact) return;
 
+        if (!$this->canSubmitDeliveryRequest()) {
+            $this->addError('deliveryQuote', 'Please select a valid delivery address with a supported quote.');
+            return;
+        }
+
         $user = auth('web')->user();
         $item = $user->vaultItems()->find($this->selectedArtifact['id']);
 
         if (!$item) return;
 
-        if (!$this->selectedAddressId && !$this->showAddressForm) {
-            session()->flash('error', 'Please select or provide a delivery address.');
-            return;
-        }
-
         try {
+            $quoteData = null;
+            if ($this->deliveryQuote) {
+                $quoteData = [
+                    'delivery_fee' => $this->deliveryFee,
+                    'delivery_currency' => $this->deliveryQuote['currency'] ?? 'INR',
+                    'shipping_rate_quote_id' => $this->deliveryRateQuoteId,
+                    'selected_courier_company_id' => $this->selectedDeliveryCourier['courier_company_id'] ?? null,
+                    'selected_courier_name' => $this->selectedDeliveryCourier['courier_name'] ?? null,
+                    'package_weight_kg' => $this->deliveryMeasurement['weight_kg'] ?? null,
+                    'package_length_cm' => $this->deliveryMeasurement['length_cm'] ?? null,
+                    'package_breadth_cm' => $this->deliveryMeasurement['breadth_cm'] ?? null,
+                    'package_height_cm' => $this->deliveryMeasurement['height_cm'] ?? null,
+                    'payment_status' => \App\Models\VaultRemovalRequest::PAYMENT_NONE,
+                ];
+            }
+
             if ($this->showAddressForm) {
                 $this->validate([
                     'addressForm.full_name' => 'required|string|max:255',
@@ -214,9 +412,9 @@ class Index extends Component
                     'addressForm.postal_code' => 'required|string|max:20',
                     'addressForm.country' => 'required|string|max:100',
                 ]);
-                $service->requestRemoval($item, $user, $this->removalMessage, null, $this->addressForm);
+                $service->requestRemoval($item, $user, $this->removalMessage, null, $this->addressForm, $quoteData);
             } else {
-                $service->requestRemoval($item, $user, $this->removalMessage, $this->selectedAddressId);
+                $service->requestRemoval($item, $user, $this->removalMessage, $this->selectedAddressId, null, $quoteData);
             }
 
             session()->flash('success', 'Physical delivery request submitted successfully. Our team will review it shortly.');
@@ -277,7 +475,7 @@ class Index extends Component
 
         // Fetch user's secured items
         $vaultArtifacts = $user->vaultItems()
-            ->with('pendingRemovalRequest')
+            ->with(['latestDeliveryRequest.shippingShipment.events', 'pendingRemovalRequest'])
             ->locked()
             ->orderBy('locked_at', 'desc')
             ->get();
@@ -285,6 +483,43 @@ class Index extends Component
         $mappedArtifacts = $vaultArtifacts->map(function($item) {
             $img = 'https://placehold.co/800x600/17130b/d4af37?text=Secured+Asset';
             $img = $item->display_image_url ?? $img;
+
+            $latestReq = $item->latestDeliveryRequest;
+            $deliveryBadgeLabel = null;
+            $deliveryBadgeClass = null;
+
+            if ($latestReq) {
+                $reqStatus = $latestReq->status;
+                $payStatus = $latestReq->payment_status;
+                $shipmentStatus = $latestReq->shippingShipment?->status;
+
+                if ($reqStatus === 'pending' && $payStatus === 'pending_payment') {
+                    $deliveryBadgeLabel = 'Payment Pending';
+                    $deliveryBadgeClass = 'bg-warning-subtle text-warning border-warning-subtle';
+                } elseif ($reqStatus === 'pending' && $payStatus === 'paid') {
+                    $deliveryBadgeLabel = 'Pending Review';
+                    $deliveryBadgeClass = 'bg-info-subtle text-info border-info-subtle';
+                } elseif ($reqStatus === 'approved' && $payStatus === 'paid') {
+                    if ($shipmentStatus) {
+                        $pres = app(\App\Services\Shipping\ShipmentTrackingPresenter::class);
+                        $shipmentData = $pres->forCustomer($latestReq->shippingShipment);
+                        $deliveryBadgeLabel = $shipmentData['status_label'] ?? 'Approved';
+                        $deliveryBadgeClass = $shipmentData['status_badge_class'] ?? 'bg-success-subtle text-success border-success-subtle';
+                    } else {
+                        $deliveryBadgeLabel = 'Approved';
+                        $deliveryBadgeClass = 'bg-success-subtle text-success border-success-subtle';
+                    }
+                } elseif ($reqStatus === 'rejected' && $payStatus === 'refund_required') {
+                    $deliveryBadgeLabel = 'Refund Required';
+                    $deliveryBadgeClass = 'bg-danger text-white border-danger';
+                } elseif ($reqStatus === 'completed') {
+                    $deliveryBadgeLabel = 'Delivered';
+                    $deliveryBadgeClass = 'bg-success text-white border-success';
+                } elseif ($reqStatus === 'rejected') {
+                    $deliveryBadgeLabel = 'Rejected';
+                    $deliveryBadgeClass = 'bg-danger-subtle text-danger border-danger-subtle';
+                }
+            }
 
             return (object) [
                 'id' => $item->id,
@@ -299,6 +534,8 @@ class Index extends Component
                 'currency' => $item->currency ?? 'INR',
                 'locked_at_human' => $item->locked_at ? $item->locked_at->format('d M Y') : 'N/A',
                 'has_pending_request' => (bool) $item->pendingRemovalRequest,
+                'delivery_badge_label' => $deliveryBadgeLabel,
+                'delivery_badge_class' => $deliveryBadgeClass,
             ];
         });
 

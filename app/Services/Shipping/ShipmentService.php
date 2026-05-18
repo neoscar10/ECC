@@ -214,6 +214,62 @@ class ShipmentService
     }
 
     /**
+     * Get or create a draft/prepared shipment for a Vault Removal Request.
+     */
+    public function getOrCreateForVaultRequest(\App\Models\VaultRemovalRequest $request): ShippingShipment
+    {
+        $shipment = ShippingShipment::where('shippable_type', \App\Models\VaultRemovalRequest::class)
+            ->where('shippable_id', $request->id)
+            ->first();
+
+        if (!$shipment) {
+            $pickupPincode = config('shiprocket.pickup_pincode') ?? '110001';
+            
+            // Build delivery address snapshot matching standard format
+            $addressSnapshot = [
+                'full_name' => $request->delivery_name,
+                'phone' => $request->delivery_phone,
+                'line1' => $request->delivery_line1,
+                'line2' => $request->delivery_line2,
+                'city' => $request->delivery_city,
+                'state' => $request->delivery_state,
+                'postal_code' => $request->delivery_postal_code,
+                'country' => $request->delivery_country ?? 'India',
+                'email' => $request->user->email ?? 'noemail@example.com',
+            ];
+
+            $shipment = ShippingShipment::create([
+                'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                'shippable_type' => \App\Models\VaultRemovalRequest::class,
+                'shippable_id' => $request->id,
+                'user_id' => $request->user_id,
+                'shipping_provider' => 'shiprocket',
+                'status' => 'courier_selected',
+                'pickup_location' => config('shiprocket.pickup_location'),
+                'pickup_pincode' => $pickupPincode,
+                'delivery_pincode' => $request->delivery_postal_code,
+                'payment_mode' => 'prepaid',
+                'courier_company_id' => $request->selected_courier_company_id,
+                'courier_name' => $request->selected_courier_name,
+                'courier_rating' => $request->selected_courier_rating,
+                'courier_total_charge' => $request->delivery_fee,
+                'shipping_charge' => $request->delivery_fee,
+                'currency' => $request->delivery_currency ?? 'INR',
+                'weight_kg' => $request->package_weight_kg ?? 0.5,
+                'length_cm' => $request->package_length_cm ?? 10.00,
+                'breadth_cm' => $request->package_breadth_cm ?? 10.00,
+                'height_cm' => $request->package_height_cm ?? 10.00,
+                'volumetric_weight_kg' => $request->volumetric_weight_kg ?? 0.00,
+                'chargeable_weight_kg' => $request->chargeable_weight_kg ?? 0.5,
+                'delivery_address_snapshot' => $addressSnapshot,
+                'package_snapshot' => $request->package_snapshot,
+            ]);
+        }
+
+        return $shipment;
+    }
+
+    /**
      * Mark shipment as failed.
      */
     public function failShipment(ShippingShipment $shipment, string $message, array $context = []): ShippingShipment
@@ -222,3 +278,4 @@ class ShipmentService
         return $shipment;
     }
 }
+
