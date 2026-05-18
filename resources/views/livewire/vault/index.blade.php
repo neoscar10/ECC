@@ -376,7 +376,7 @@
                                         @foreach($addresses as $addr)
                                             <div class="col-12">
                                                 <label class="ecc-address-card w-100 m-0">
-                                                    <input type="radio" wire:model="selectedAddressId" value="{{ $addr->id }}" class="btn-check">
+                                                    <input type="radio" wire:model.live="selectedAddressId" value="{{ $addr->id }}" class="btn-check">
                                                     <div class="ecc-address-card-inner p-3 rounded-3 border border-white-5 bg-white-5 position-relative c-pointer transition-all">
                                                         <div class="d-flex align-items-start gap-3">
                                                             <div class="pt-1">
@@ -485,7 +485,7 @@
                                                 <div>
                                                     <div class="fs-11 ecc-text-primary-50 fw-semibold text-uppercase tracking-wider">Courier Partner</div>
                                                     <div class="ecc-text-primary fw-bold fs-15">{{ $selectedDeliveryCourier['courier_name'] }}</div>
-                                                    <div class="fs-10 text-muted">
+                                                    <div class="fs-10 text-white opacity-50">
                                                         Rating: {{ number_format($selectedDeliveryCourier['rating'], 1) }} ★
                                                     </div>
                                                 </div>
@@ -501,19 +501,18 @@
                                                     <div class="fs-10 ecc-text-primary-50 text-uppercase">Chargeable Weight</div>
                                                     <div class="fs-12 fw-semibold text-white">
                                                         {{ number_format($deliveryMeasurement['chargeable_weight_kg'], 3) }} kg
-                                                        <span class="fs-9 text-muted d-block">(Volumetric: {{ number_format($deliveryMeasurement['volumetric_weight_kg'], 3) }} kg)</span>
+                                                        <span class="fs-9 text-white opacity-50 d-block">(Volumetric: {{ number_format($deliveryMeasurement['volumetric_weight_kg'], 3) }} kg)</span>
                                                     </div>
                                                 </div>
                                                 <div class="col-6">
                                                     <div class="fs-10 ecc-text-primary-50 text-uppercase">Estimated Delivery</div>
                                                     <div class="fs-12 fw-semibold text-white">
                                                         {{ $selectedDeliveryCourier['etd'] ? \Carbon\Carbon::parse($selectedDeliveryCourier['etd'])->format('M d, Y') : $selectedDeliveryCourier['estimated_delivery_days'] . ' Days' }}
-                                                        <span class="fs-9 text-muted d-block">(Transit duration)</span>
+                                                        <span class="fs-9 text-white opacity-50 d-block">(Transit duration)</span>
                                                     </div>
                                                 </div>
-                                                <div class="col-12 mt-2 pt-2 border-top border-white-5 d-flex justify-content-between fs-11 text-muted">
-                                                    <div>Pickup: <strong>{{ $deliveryQuote['pickup_pincode'] }}</strong></div>
-                                                    <div>Delivery: <strong>{{ $deliveryQuote['delivery_pincode'] }}</strong></div>
+                                                <div class="col-12 mt-2 pt-2 border-top border-white-5 text-end fs-11 text-white opacity-75">
+                                                    Delivery Pincode: <strong>{{ $deliveryQuote['delivery_pincode'] }}</strong>
                                                 </div>
                                             </div>
                                         </div>
