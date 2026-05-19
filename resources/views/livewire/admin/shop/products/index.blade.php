@@ -113,8 +113,8 @@
                                 <td>
                                     @php
                                         $stock = $product->computed_stock;
-                                        $isLow = $stock > 0 && $stock <= 10;
-                                        $isOut = $stock === 0;
+                                        $isLow = $product->is_low_stock;
+                                        $isOut = $product->is_out_of_stock;
                                         $badgeClass = $isOut ? 'bg-danger' : ($isLow ? 'bg-warning text-dark' : 'bg-success');
                                         $stockLabel = $isOut ? 'Out of Stock' : ($isLow ? 'Low Stock' : 'In Stock');
                                     @endphp

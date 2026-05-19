@@ -130,6 +130,7 @@ class Index extends Component
                 'categories', 
                 'tags', 
                 'images',
+                'variants',
                 'variationGroups' => fn($q) => $q->select('id', 'shop_product_id'),
                 'variationGroups.values' => fn($q) => $q->select('id', 'group_id', 'stock_qty')
             ])

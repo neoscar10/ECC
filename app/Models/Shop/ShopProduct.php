@@ -163,12 +163,58 @@ class ShopProduct extends Model
     public function getComputedStockAttribute(): int
     {
         // 1. Variable Product
-        if ($this->variants()->exists()) {
-            return (int) $this->variants()->sum('stock_qty');
+        if ($this->relationLoaded('variants')) {
+            if ($this->variants->isNotEmpty()) {
+                return (int) $this->variants->sum('stock_qty');
+            }
+        } else {
+            if ($this->variants()->exists()) {
+                return (int) $this->variants()->sum('stock_qty');
+            }
         }
 
         // 2. Simple Product
         return (int) ($this->stock_qty ?? 0);
+    }
+
+    public function getIsOutOfStockAttribute(): bool
+    {
+        // 1. Variable Product
+        if ($this->relationLoaded('variants')) {
+            if ($this->variants->isNotEmpty()) {
+                return !$this->variants->contains(fn($v) => $v->stock_qty > 0);
+            }
+        } else {
+            if ($this->variants()->exists()) {
+                return !$this->variants()->where('stock_qty', '>', 0)->exists();
+            }
+        }
+
+        // 2. Simple Product
+        return ($this->stock_qty ?? 0) <= 0;
+    }
+
+    public function getIsLowStockAttribute(): bool
+    {
+        $threshold = $this->low_stock_threshold ?? 5;
+
+        if ($this->is_out_of_stock) {
+            return false;
+        }
+
+        // 1. Variable Product
+        if ($this->relationLoaded('variants')) {
+            if ($this->variants->isNotEmpty()) {
+                return $this->variants->contains(fn($v) => $v->stock_qty < $threshold);
+            }
+        } else {
+            if ($this->variants()->exists()) {
+                return $this->variants()->where('stock_qty', '<', $threshold)->exists();
+            }
+        }
+
+        // 2. Simple Product
+        return $this->stock_qty < $threshold;
     }
 
     public function getDisplayIdAttribute(): string
