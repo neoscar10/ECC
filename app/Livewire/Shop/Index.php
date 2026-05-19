@@ -272,6 +272,11 @@ class Index extends Component
         }
     }
 
+    public function updatedSelectedVariationValues($value, $key)
+    {
+        $this->recomputeQuickViewDynamicState();
+    }
+
     public function selectVariationValue($groupId, $valueId)
     {
         if (isset($this->availableOptions[$groupId]) && !in_array($valueId, $this->availableOptions[$groupId])) {

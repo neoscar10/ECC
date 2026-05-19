@@ -1495,7 +1495,7 @@
     </div>
 
     {{-- QUICK VIEW MODAL OVERLAY --}}
-    <div class="ecc-quick-view-overlay @if($quickViewProduct) show @endif" wire:ignore.self>
+    <div class="ecc-quick-view-overlay @if($quickViewProduct) show @endif">
         @if($quickViewProduct)
             <div class="ecc-quick-view-modal">
                 <button type="button" class="ecc-quick-view-close" wire:click="closeQuickView" aria-label="Close">
@@ -1556,7 +1556,7 @@
                                         @endphp
                                         <div>
                                             <div class="ecc-quick-view-label">{{ $groupName }}:</div>
-                                            <select class="ecc-quick-view-select" wire:change="selectVariationValue({{ $groupId }}, $event.target.value)">
+                                            <select class="ecc-quick-view-select" wire:model.live="selectedVariationValues.{{ $groupId }}">
                                                 @foreach($group['values'] as $value)
                                                     @php
                                                         $valueId = $value['id'];
