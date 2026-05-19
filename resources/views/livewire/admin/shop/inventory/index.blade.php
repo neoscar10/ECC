@@ -95,12 +95,13 @@
                         @forelse($products as $product)
                             @php
                                 $totalStock = $product->total_computed_stock;
-                                $threshold = $product->low_stock_threshold;
-                                $statusBadge = $totalStock == 0 ? 'bg-danger' : ($totalStock <= $threshold ? 'bg-warning text-dark' : 'bg-success');
-                                $statusLabel = $totalStock == 0 ? 'Out of Stock' : ($totalStock <= $threshold ? 'Low Stock' : 'In Stock');
+                                $isLow = $product->is_low_stock;
+                                $isOut = $product->is_out_of_stock;
+                                $statusBadge = $isOut ? 'bg-danger' : ($isLow ? 'bg-warning text-dark' : 'bg-success');
+                                $statusLabel = $isOut ? 'Out of Stock' : ($isLow ? 'Low Stock' : 'In Stock');
                                 $isVariant = $product->variation_groups_count > 0;
                             @endphp
-                            <tr class="{{ $totalStock <= $threshold ? ($totalStock == 0 ? 'table-danger-subtle' : 'table-warning-subtle') : '' }}">
+                            <tr class="{{ $isOut ? 'table-danger-subtle' : ($isLow ? 'table-warning-subtle' : '') }}">
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="flex-shrink-0 me-2">

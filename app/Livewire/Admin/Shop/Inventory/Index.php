@@ -108,7 +108,8 @@ class Index extends Component
 
         // 1. Eager load sum of variation stock for performance AND count for type detection
         $query->withSum('variants', 'stock_qty')
-              ->withCount('variationGroups');
+              ->withCount('variationGroups')
+              ->with(['variants', 'images']);
 
         // 2. Search
         if ($this->search) {
