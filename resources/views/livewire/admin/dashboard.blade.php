@@ -547,6 +547,14 @@
                 modal.show();
             }
         });
+
+        // Handle scrolling to low stock table on pagination
+        Livewire.on('scroll-to-low-stock', () => {
+            const el = document.getElementById('low-stock-card');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
     });
 </script>
 @include('livewire.admin.membership.applications.partials._scripts')

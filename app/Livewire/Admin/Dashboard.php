@@ -28,7 +28,12 @@ class Dashboard extends Component
 
     public function scrollTo()
     {
-        return '#low-stock-card';
+        return false;
+    }
+
+    public function updatedPage()
+    {
+        $this->dispatch('scroll-to-low-stock');
     }
 
     // Modal states
