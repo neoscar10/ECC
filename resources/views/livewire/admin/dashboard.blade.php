@@ -236,7 +236,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($queues['low_stock'] as $variation)
+                                @forelse($lowStockItems as $variation)
                                     <tr>
                                         <td>{{ $variation->display_product_title }}</td>
                                         <td>{{ $variation->display_caption }}</td>
@@ -257,6 +257,11 @@
                             </tbody>
                         </table>
                     </div>
+                    @if($lowStockItems->hasPages())
+                        <div class="d-flex justify-content-end mt-3 px-3">
+                            {{ $lowStockItems->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

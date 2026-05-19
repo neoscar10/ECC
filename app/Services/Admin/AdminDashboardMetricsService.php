@@ -48,7 +48,7 @@ class AdminDashboardMetricsService
                 ->limit(5)
                 ->get(),
             'new_enquiries' => $this->getLatestNewEnquiries(5),
-            'low_stock' => $this->getLowStockItems(5),
+            'low_stock' => $this->getLowStockItemsCollection()->take(5),
         ];
     }
 
@@ -210,9 +210,9 @@ class AdminDashboardMetricsService
     }
 
     /**
-     * Get combined low stock items (variants + simple products) using dynamic thresholds.
+     * Get combined low stock items (variants + simple products) using dynamic thresholds without limit.
      */
-    private function getLowStockItems(int $limit): \Illuminate\Support\Collection
+    public function getLowStockItemsCollection(): \Illuminate\Support\Collection
     {
         // 1. Get Variants with low stock
         $variants = \App\Models\Shop\ShopProductVariant::with(['product', 'optionValues'])
@@ -220,21 +220,19 @@ class AdminDashboardMetricsService
             ->whereNull('shop_products.deleted_at')
             ->whereColumn('shop_product_variants.stock_qty', '<', 'shop_products.low_stock_threshold')
             ->select('shop_product_variants.*')
-
-            ->limit($limit)
+            ->orderBy('shop_product_variants.stock_qty', 'asc')
             ->get();
 
         // 2. Get Simple Products with low stock
         $simple = \App\Models\Shop\ShopProduct::whereDoesntHave('variationGroups')
             ->whereNotNull('stock_qty')
             ->whereColumn('stock_qty', '<', 'low_stock_threshold')
-            ->limit($limit)
+            ->orderBy('stock_qty', 'asc')
             ->get();
 
         // 3. Combine and prepare for display
         return $variants->concat($simple)
             ->sortBy('stock_qty')
-            ->take($limit)
             ->map(function($item) {
                 // Add helper properties to the models
                 if ($item instanceof \App\Models\Shop\ShopProductVariant) {

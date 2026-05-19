@@ -391,13 +391,6 @@ class ShiprocketOrderService
     public function refreshTracking(ShippingShipment $shipment): ShippingShipment
     {
         if (!$this->canUseLiveShiprocket()) {
-            $this->shipmentService->recordEvent($shipment, [
-                'event_code' => 'test_tracking_refreshed',
-                'event_status' => 'Simulated Tracking Refresh',
-                'event_description' => 'Tracking refreshed in test mode.',
-                'event_time' => now(),
-                'raw_payload' => ['simulated' => true],
-            ]);
             $shipment->update(['last_tracked_at' => now()]);
             return $shipment;
         }

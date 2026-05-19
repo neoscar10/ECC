@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Services\Admin\AdminDashboardMetricsService;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\WithPagination;
 use App\Models\MembershipApplication;
 use App\Models\Membership;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,10 @@ use Illuminate\Support\Facades\Log;
 #[Layout('layouts.admin')]
 class Dashboard extends Component
 {
+    use WithPagination;
+
+    protected $paginationTheme = 'bootstrap';
+
     public $kpis = [];
     public $queues = [];
 
@@ -90,9 +95,24 @@ class Dashboard extends Component
         $this->queues = $service->getNeedsAttentionQueues();
     }
 
-    public function render()
+    public function render(AdminDashboardMetricsService $service)
     {
-        return view('livewire.admin.dashboard');
+        $allItems = $service->getLowStockItemsCollection();
+        
+        $currentPage = $this->getPage();
+        $perPage = 10;
+        
+        $paginatedLowStock = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allItems->forPage($currentPage, $perPage)->values(),
+            $allItems->count(),
+            $perPage,
+            $currentPage,
+            ['path' => '/admin/dashboard']
+        );
+
+        return view('livewire.admin.dashboard', [
+            'lowStockItems' => $paginatedLowStock
+        ]);
     }
 
     public function view($id)
