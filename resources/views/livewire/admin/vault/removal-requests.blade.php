@@ -74,7 +74,7 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="flex-grow-1">
-                                                    <h5 class="fs-14 mb-1">{{ $request->user->name }}</h5>
+                                                    <h5 class="fs-14 mb-1">{{ $request->user?->name ?? 'Unknown Member' }}</h5>
                                                     <p class="text-muted mb-0 fs-11">{{ $request->requested_at->format('d M Y, h:i A') }}</p>
                                                 </div>
                                             </div>
@@ -154,7 +154,7 @@
                                                     {{-- Awaiting Payment message --}}
                                                     <span class="text-muted fs-11 align-self-center fst-italic">Awaiting payment...</span>
                                                 @elseif($request->payment_status === 'paid' && $request->status === 'pending')
-                                                    <button onclick="confirmApproval({{ $request->id }}, '{{ addslashes($request->user->name) }}', '{{ addslashes($request->vaultItem->item_title) }}', '{{ $request->delivery_currency ?? 'INR' }} {{ number_format($request->delivery_fee, 2) }}', '{{ $request->selected_courier_name ?? 'Standard' }}', '{{ $request->delivery_postal_code }}', '{{ $request->chargeable_weight_kg ?? 0.0 }}')" class="btn btn-sm btn-soft-info" title="Approve for Fulfillment">
+                                                    <button onclick="confirmApproval({{ $request->id }}, '{{ addslashes($request->user?->name ?? 'Unknown Member') }}', '{{ addslashes($request->vaultItem->item_title) }}', '{{ $request->delivery_currency ?? 'INR' }} {{ number_format($request->delivery_fee, 2) }}', '{{ $request->selected_courier_name ?? 'Standard' }}', '{{ $request->delivery_postal_code }}', '{{ $request->chargeable_weight_kg ?? 0.0 }}')" class="btn btn-sm btn-soft-info" title="Approve for Fulfillment">
                                                         <i class="ri-check-line"></i> Approve
                                                     </button>
                                                     <button onclick="confirmRejection({{ $request->id }}, true)" class="btn btn-sm btn-soft-danger" title="Reject Request">
@@ -237,11 +237,11 @@
                                 </div>
                                 <div class="mb-3">
                                     <span class="text-muted d-block fs-11">Member Name:</span>
-                                    <span class="fs-13 fw-semibold text-dark">{{ $selectedRequest->user->name }}</span>
+                                    <span class="fs-13 fw-semibold text-dark">{{ $selectedRequest->user?->name ?? 'Unknown Member' }}</span>
                                 </div>
                                 <div class="mb-3">
                                     <span class="text-muted d-block fs-11">Member Email:</span>
-                                    <span class="fs-13">{{ $selectedRequest->user->email }}</span>
+                                    <span class="fs-13">{{ $selectedRequest->user?->email ?? 'N/A' }}</span>
                                 </div>
                                 <div class="mb-3">
                                     <span class="text-muted d-block fs-11">Requested On:</span>
@@ -562,7 +562,7 @@
                                 {{-- Actions inside modal --}}
                                 @if($selectedRequest->payment_status === 'paid' && $selectedRequest->status === 'pending')
                                     <button type="button" class="btn btn-soft-success btn-sm"
-                                            onclick="confirmApproval({{ $selectedRequest->id }}, '{{ addslashes($selectedRequest->user->name) }}', '{{ addslashes($selectedRequest->vaultItem->item_title) }}', '{{ $selectedRequest->delivery_currency ?? 'INR' }} {{ number_format($selectedRequest->delivery_fee, 2) }}', '{{ $selectedRequest->selected_courier_name ?? 'Standard' }}', '{{ $selectedRequest->delivery_postal_code }}', '{{ $selectedRequest->chargeable_weight_kg ?? 0.0 }}')">
+                                            onclick="confirmApproval({{ $selectedRequest->id }}, '{{ addslashes($selectedRequest->user?->name ?? 'Unknown Member') }}', '{{ addslashes($selectedRequest->vaultItem->item_title) }}', '{{ $selectedRequest->delivery_currency ?? 'INR' }} {{ number_format($selectedRequest->delivery_fee, 2) }}', '{{ $selectedRequest->selected_courier_name ?? 'Standard' }}', '{{ $selectedRequest->delivery_postal_code }}', '{{ $selectedRequest->chargeable_weight_kg ?? 0.0 }}')">
                                         <i class="ri-check-line"></i> Approve for Fulfillment
                                     </button>
                                     <button type="button" class="btn btn-soft-danger btn-sm" onclick="confirmRejection({{ $selectedRequest->id }}, true)">
