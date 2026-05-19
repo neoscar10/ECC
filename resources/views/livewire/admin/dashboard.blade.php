@@ -259,7 +259,7 @@
                     </div>
                     @if($lowStockItems->hasPages())
                         <div class="d-flex justify-content-end mt-3 px-3">
-                            {{ $lowStockItems->links() }}
+                            {{ $lowStockItems->links(data: ['scrollTo' => false]) }}
                         </div>
                     @endif
                 </div>
