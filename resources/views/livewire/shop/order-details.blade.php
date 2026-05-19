@@ -669,25 +669,6 @@
                                 </p>
                             </div>
                         </div>
-
-                        <!-- Support -->
-                        <div class="ecc-support-card mt-4 shadow-lg">
-                            <div class="ecc-support-icon">
-                                <span class="material-symbols-outlined">headset_mic</span>
-                            </div>
-
-                            <div>
-                                <h4 class="fw-bold ecc-text-primary small mb-1">Need assistance?</h4>
-                                <p class="ecc-muted small mb-2">
-                                    Our concierge team is available to assist with delivery, archive care, and premium order support.
-                                </p>
-
-                                <a href="{{ $conciergeUrl }}"
-                                   class="ecc-support-link fw-bold text-uppercase-less">
-                                    Contact Concierge
-                                </a>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
