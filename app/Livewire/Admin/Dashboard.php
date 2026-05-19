@@ -26,6 +26,11 @@ class Dashboard extends Component
     public $kpis = [];
     public $queues = [];
 
+    public function scrollTo()
+    {
+        return '#low-stock-card';
+    }
+
     // Modal states
     public $selectedApplication = null;
     public $adminNote = '';
