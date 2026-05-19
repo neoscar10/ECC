@@ -32,6 +32,7 @@
                     <select class="form-select" wire:model.live="filterStatus">
                         <option value="">All Fulfillment</option>
                         <option value="placed">Placed</option>
+                        <option value="paid">Paid</option>
                         <option value="confirmed">Confirmed</option>
                         <option value="processing">Processing</option>
                         <option value="packed">Packed</option>
@@ -107,6 +108,7 @@
                                         $statusClass = match($order->status) {
                                             'delivered', 'fulfilled' => 'success',
                                             'shipped' => 'warning text-dark',
+                                            'paid' => 'primary',
                                             'packed', 'processing', 'confirmed' => 'info',
                                             'cancelled', 'returned' => 'danger',
                                             default => 'secondary'
@@ -180,6 +182,7 @@
                         <label class="form-label">Fulfillment Status</label>
                         <select class="form-select" wire:model="statusDraft">
                             <option value="placed">Placed</option>
+                            <option value="paid">Paid</option>
                             <option value="confirmed">Confirmed</option>
                             <option value="processing">Processing</option>
                             <option value="packed">Packed</option>

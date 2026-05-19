@@ -55,7 +55,7 @@ class Index extends Component
     public function saveStatus()
     {
         $this->validate([
-            'statusDraft' => 'required|in:placed,confirmed,processing,packed,shipped,delivered,cancelled,returned',
+            'statusDraft' => 'required|in:placed,paid,confirmed,processing,packed,shipped,delivered,cancelled,returned',
             'paymentStatusDraft' => 'required|in:unpaid,pending,paid,failed,refunded',
         ]);
 
