@@ -371,15 +371,6 @@
                     </div>
 
                     <div class="ecc-summary-row">
-                        <span>Shipping</span>
-                        @if(($summary['shipping_is_free'] ?? false) === true)
-                            <span class="ecc-summary-free">Free</span>
-                        @else
-                            <strong>{{ $summary['shipping_display'] ?? '₹0.00' }}</strong>
-                        @endif
-                    </div>
-
-                    <div class="ecc-summary-row">
                         <span>Estimated Tax</span>
                         <strong>{{ $summary['tax_display'] ?? '₹0.00' }}</strong>
                     </div>
