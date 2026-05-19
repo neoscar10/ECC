@@ -890,6 +890,10 @@
         .ecc-quick-view-select:focus {
             border-color: var(--ecc-primary) !important;
         }
+        .ecc-quick-view-select option {
+            background-color: var(--ecc-bg-surface) !important;
+            color: var(--ecc-text-primary) !important;
+        }
         .ecc-quick-view-badge {
             background: #d11243;
             color: #fff;
@@ -1582,11 +1586,6 @@
 
                                 <div class="ecc-quick-view-price">
                                     <span class="ecc-quick-view-price-currency">₹</span>{{ number_format((float)($computedPriceDisplay ?? $quickViewProduct->base_price), 2) }}
-                                </div>
-
-                                <div class="ecc-quick-view-delivery">
-                                    <i class="mdi mdi-truck-fast-outline"></i>
-                                    <span>Free delivery</span> by <span>{{ now()->addDays(3)->format('D, M j') }}</span>
                                 </div>
                             </div>
                         </div>
