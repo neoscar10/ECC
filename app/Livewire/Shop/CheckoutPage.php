@@ -73,7 +73,7 @@ class CheckoutPage extends Component
         }
 
         $this->addresses = $user->addresses()->latest()->get();
-        if ($this->addresses->count() > 0 && is_null($this->selectedAddressId)) {
+        if (!$this->vaultRequestId && $this->addresses->count() > 0 && is_null($this->selectedAddressId)) {
             $default = $this->addresses->where('is_default', true)->first() ?? $this->addresses->first();
             $this->selectedAddressId = $default->id;
         }
@@ -87,7 +87,7 @@ class CheckoutPage extends Component
                 return redirect()->route('vault.index');
             }
 
-            if ($request->address_id && is_null($this->selectedAddressId)) {
+            if ($request->address_id) {
                 $this->selectedAddressId = $request->address_id;
             }
 

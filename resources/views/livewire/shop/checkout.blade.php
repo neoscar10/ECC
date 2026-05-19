@@ -307,7 +307,7 @@
                             <h1 class="ecc-section-title mb-0">SHIPPING DETAILS</h1>
                         </div>
 
-                        @if(!$showAddressForm)
+                        @if(!$showAddressForm && !$isVaultDelivery)
                         <button type="button"
                                 class="btn ecc-btn-outline-gold rounded-pill px-4 py-2"
                                 wire:click="openAddressForm">
@@ -315,6 +315,33 @@
                         </button>
                         @endif
                     </div>
+
+                    @if($isVaultDelivery)
+                        <!-- Vault Static Address View -->
+                        @php
+                            $vaultAddress = $addresses->firstWhere('id', $selectedAddressId);
+                        @endphp
+                        @if($vaultAddress)
+                            <div class="ecc-address-card is-selected" style="cursor: default; pointer-events: none;">
+                                <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                                    <div>
+                                        <span class="ecc-badge-gold">VAULT DELIVERY ADDRESS</span>
+                                    </div>
+                                    <span class="material-symbols-outlined ecc-selected-icon">lock</span>
+                                </div>
+                                <div class="fw-bold fs-5 text-uppercase-less mb-2">{{ $vaultAddress->full_name }}</div>
+                                <div class="ecc-muted small lh-lg">
+                                    {{ $vaultAddress->line1 }}<br>
+                                    @if($vaultAddress->line2) {{ $vaultAddress->line2 }}<br> @endif
+                                    {{ $vaultAddress->city }}, {{ $vaultAddress->state }}<br>
+                                    {{ $vaultAddress->country }} - {{ $vaultAddress->postal_code }}
+                                </div>
+                                <div class="mt-3 fw-semibold">{{ $vaultAddress->phone }}</div>
+                            </div>
+                        @else
+                            <div class="alert alert-danger">Delivery address not found for this request.</div>
+                        @endif
+                    @else
 
                     @if($showAddressForm)
                     <div class="ecc-form-panel mb-4 shadow-lg">
@@ -428,6 +455,7 @@
                             @endif
                         @endforelse
                     </div>
+                    @endif
                 </section>
 
                 <!-- Payment Section -->
