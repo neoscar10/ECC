@@ -1016,7 +1016,7 @@
                             <div class="shop-category-item">
                                 <button
                                     type="button"
-                                    wire:click="$set('activeCategoryId', '{{ $categoryId }}')"
+                                    wire:click="$set('activeCategoryId', {{ $categoryActive ? 'null' : "'$categoryId'" }})"
                                     class="shop-filter-link {{ $categoryActive ? 'active' : '' }} {{ $childActive ? 'parent-active' : '' }}"
                                 >
                                     <span>{{ $categoryName }}</span>
@@ -1207,7 +1207,7 @@
                                     <div class="shop-category-item">
                                         <button
                                             type="button"
-                                            wire:click="$set('activeCategoryId', '{{ $categoryId }}')"
+                                            wire:click="$set('activeCategoryId', {{ $categoryActive ? 'null' : "'$categoryId'" }})"
                                             class="shop-filter-link {{ $categoryActive ? 'active' : '' }} {{ $childActive ? 'parent-active' : '' }}"
                                         >
                                             <span>{{ $categoryName }}</span>
