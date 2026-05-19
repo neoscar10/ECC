@@ -746,6 +746,225 @@
         .shop-category-item {
             transition: all 0.3s ease;
         }
+
+        /* PREMIUM QUICK VIEW MODAL CSS */
+        .ecc-quick-view-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ecc-quick-view-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .ecc-quick-view-modal {
+            background: var(--ecc-bg-surface);
+            border: 1px solid var(--ecc-primary-soft);
+            border-radius: 20px;
+            width: 95%;
+            max-width: 620px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.65);
+            transform: scale(0.93);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            position: relative;
+            padding: 2rem;
+            color: var(--ecc-text-primary);
+        }
+        .ecc-quick-view-overlay.show .ecc-quick-view-modal {
+            transform: scale(1);
+        }
+        .ecc-quick-view-close {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--ecc-primary-border);
+            background: var(--ecc-bg-hover);
+            color: var(--ecc-text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        .ecc-quick-view-close:hover {
+            background: var(--ecc-primary);
+            color: var(--ecc-bg-surface);
+            border-color: var(--ecc-primary);
+        }
+        .ecc-quick-view-grid {
+            display: grid;
+            grid-template-columns: 185px 1fr;
+            gap: 2rem;
+        }
+        @media (max-width: 576px) {
+            .ecc-quick-view-grid {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+            .ecc-quick-view-modal {
+                padding: 1.5rem;
+            }
+        }
+        .ecc-quick-view-img-wrap {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--ecc-primary-border);
+            background: var(--ecc-bg-hover);
+            aspect-ratio: 4 / 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ecc-quick-view-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .ecc-quick-view-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--ecc-text-primary);
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+            padding-right: 2rem;
+        }
+        .ecc-quick-view-meta {
+            font-size: 0.9rem;
+            color: var(--ecc-text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        .ecc-quick-view-meta span {
+            color: var(--ecc-primary);
+            font-weight: 700;
+        }
+        .ecc-quick-view-details-link {
+            font-size: 0.82rem;
+            font-weight: 900;
+            color: var(--ecc-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-decoration: underline;
+            transition: color 0.2s ease;
+        }
+        .ecc-quick-view-details-link:hover {
+            color: var(--ecc-text-primary);
+        }
+        .ecc-quick-view-divider {
+            height: 1px;
+            background: var(--ecc-primary-border);
+            margin: 1.25rem 0;
+        }
+        .ecc-quick-view-label {
+            font-size: 0.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ecc-text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        .ecc-quick-view-select {
+            background-color: var(--ecc-bg-input) !important;
+            border: 1px solid var(--ecc-primary-border) !important;
+            color: var(--ecc-text-primary) !important;
+            border-radius: 10px;
+            padding: 0.6rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        .ecc-quick-view-select:focus {
+            border-color: var(--ecc-primary) !important;
+        }
+        .ecc-quick-view-badge {
+            background: #d11243;
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            width: fit-content;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+        .ecc-quick-view-price {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--ecc-primary);
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+        .ecc-quick-view-price-currency {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--ecc-text-secondary);
+            vertical-align: super;
+            margin-right: 2px;
+        }
+        .ecc-quick-view-delivery {
+            font-size: 0.78rem;
+            color: var(--ecc-text-secondary);
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .ecc-quick-view-delivery span {
+            color: var(--ecc-text-primary);
+            font-weight: 700;
+        }
+        .ecc-quick-view-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .ecc-quick-view-btn-cancel {
+            background: transparent;
+            border: 1px solid var(--ecc-primary-border);
+            color: var(--ecc-text-primary);
+            border-radius: 999px;
+            padding: 0.65rem 1.75rem;
+            font-size: 0.85rem;
+            font-weight: 800;
+            transition: all 0.2s ease;
+        }
+        .ecc-quick-view-btn-cancel:hover {
+            background: var(--ecc-bg-hover);
+            border-color: var(--ecc-text-secondary);
+        }
+        .ecc-quick-view-btn-submit {
+            background: var(--ecc-primary);
+            border: 0;
+            color: var(--ecc-text-primary);
+            border-radius: 999px;
+            padding: 0.65rem 2.2rem;
+            font-size: 0.85rem;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            box-shadow: 0 4px 15px rgba(199, 167, 90, 0.2);
+            transition: all 0.2s ease;
+        }
+        .ecc-quick-view-btn-submit:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 6px 20px rgba(199, 167, 90, 0.35);
+        }
     </style>
     @endpush
 
@@ -1273,6 +1492,123 @@
                 @endif
             </section>
         </div>
+    </div>
+
+    {{-- QUICK VIEW MODAL OVERLAY --}}
+    <div class="ecc-quick-view-overlay @if($quickViewProduct) show @endif" wire:ignore.self>
+        @if($quickViewProduct)
+            <div class="ecc-quick-view-modal">
+                <button type="button" class="ecc-quick-view-close" wire:click="closeQuickView" aria-label="Close">
+                    <i class="mdi mdi-close"></i>
+                </button>
+
+                <div class="ecc-quick-view-grid">
+                    {{-- LEFT SIDE: Image Thumbnail --}}
+                    <div class="ecc-quick-view-left">
+                        <div class="ecc-quick-view-img-wrap">
+                            @php
+                                $mainImg = collect($currentGallery)->first()['url'] ?? 'https://placehold.co/800x1000/17130b/d4af37?text=No+Image';
+                            @endphp
+                            <img src="{{ $mainImg }}" alt="{{ $quickViewProduct->title }}">
+                        </div>
+                    </div>
+
+                    {{-- RIGHT SIDE: Product details and Selectors --}}
+                    <div class="ecc-quick-view-right d-flex flex-column justify-content-between h-100">
+                        <div>
+                            <h2 class="ecc-quick-view-title">{{ $quickViewProduct->title }}</h2>
+                            
+                            {{-- Meta line: Color / Size or Category --}}
+                            <div class="ecc-quick-view-meta">
+                                @php
+                                    $selectedLabels = [];
+                                    foreach ($variationGroups as $group) {
+                                        $valId = $selectedVariationValues[$group['id']] ?? null;
+                                        if ($valId) {
+                                            $val = collect($group['values'])->firstWhere('id', $valId);
+                                            if ($val) {
+                                                $selectedLabels[] = $group['name'] . ': <span>' . $val['caption'] . '</span>';
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                @if(!empty($selectedLabels))
+                                    {!! implode(' &bull; ', $selectedLabels) !!}
+                                @else
+                                    Collection: <span>{{ $quickViewProduct->categories->first()->name ?? 'ECC Store' }}</span>
+                                @endif
+                            </div>
+
+                            <a href="{{ route('shop.show', $quickViewProduct->slug) }}" class="ecc-quick-view-details-link">
+                                See all item details
+                            </a>
+
+                            <div class="ecc-quick-view-divider"></div>
+
+                            {{-- DYNAMIC VARIATION SELECTORS --}}
+                            @if(count($variationGroups))
+                                <div class="d-flex flex-column gap-3 mb-4">
+                                    @foreach($variationGroups as $group)
+                                        @php
+                                            $groupId = $group['id'];
+                                            $groupName = $group['name'];
+                                            $selectedValueId = $selectedVariationValues[$groupId] ?? null;
+                                        @endphp
+                                        <div>
+                                            <div class="ecc-quick-view-label">{{ $groupName }}:</div>
+                                            <select class="ecc-quick-view-select" wire:change="selectVariationValue({{ $groupId }}, $event.target.value)">
+                                                @foreach($group['values'] as $value)
+                                                    @php
+                                                        $valueId = $value['id'];
+                                                        $label = $value['caption'];
+                                                        $isAvailable = in_array((int)$valueId, $availableOptions[$groupId] ?? []);
+                                                        $disabled = !$isAvailable;
+                                                    @endphp
+                                                    <option value="{{ $valueId }}" @selected((string)$selectedValueId === (string)$valueId) @disabled($disabled)>
+                                                        {{ $label }} @if($disabled) (Unavailable) @endif
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            {{-- BADGES AND PRICE --}}
+                            <div class="mt-3">
+                                @if($quickViewProduct->is_featured)
+                                    <div class="ecc-quick-view-badge">Limited time deal</div>
+                                @endif
+
+                                <div class="ecc-quick-view-price">
+                                    <span class="ecc-quick-view-price-currency">₹</span>{{ number_format((float)($computedPriceDisplay ?? $quickViewProduct->base_price), 2) }}
+                                </div>
+
+                                <div class="ecc-quick-view-delivery">
+                                    <i class="mdi mdi-truck-fast-outline"></i>
+                                    <span>Free delivery</span> by <span>{{ now()->addDays(3)->format('D, M j') }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- ACTIONS --}}
+                        <div class="ecc-quick-view-actions">
+                            <button type="button" class="ecc-quick-view-btn-cancel" wire:click="closeQuickView">
+                                Cancel
+                            </button>
+                            <button type="button" class="ecc-quick-view-btn-submit" wire:click="addQuickViewToCart" wire:loading.attr="disabled" @disabled(!$inStock)>
+                                <span wire:loading.remove wire:target="addQuickViewToCart">
+                                    Add to cart
+                                </span>
+                                <span wire:loading wire:target="addQuickViewToCart">
+                                    Adding...
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 
