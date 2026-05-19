@@ -138,12 +138,11 @@ class Index extends Component
         // 5. Filter Status
         if ($this->filterStatus !== 'all') {
             if ($this->filterStatus === 'out_of_stock') {
-                $query->having('total_computed_stock', '=', 0);
+                $query->outOfStock();
             } elseif ($this->filterStatus === 'low_stock') {
-                $query->having('total_computed_stock', '>', 0)
-                      ->havingRaw('total_computed_stock <= low_stock_threshold');
+                $query->lowStock();
             } elseif ($this->filterStatus === 'in_stock') {
-                $query->havingRaw('total_computed_stock > low_stock_threshold');
+                $query->inStock();
             }
         }
 
