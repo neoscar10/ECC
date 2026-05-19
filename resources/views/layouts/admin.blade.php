@@ -434,7 +434,7 @@
                                     </li>
                                     <li class="nav-item">
                                         <a href="{{ route('admin.vault.removal-requests') }}" class="nav-link {{ request()->routeIs('admin.vault.removal-requests') ? 'active' : '' }}" data-key="t-removal-requests">
-                                            <span>Removal Requests</span>
+                                            <span>Delivery Requests</span>
                                             @if(($pendingVaultRemovalRequestsCount ?? 0) > 0)
                                                 <span class="badge bg-warning text-dark ms-auto">{{ $pendingVaultRemovalRequestsCount }}</span>
                                             @endif

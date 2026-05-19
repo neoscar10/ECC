@@ -23,6 +23,16 @@
         {{-- Left Column (Main) --}}
         <div class="col-xl-9">
             @include('livewire.admin.shop.orders.partials._items-table')
+            
+            <div class="row">
+                <div class="col-md-6">
+                    @include('livewire.admin.shop.orders.partials._sidebar-customer')
+                </div>
+                <div class="col-md-6">
+                    @include('livewire.admin.shop.orders.partials._sidebar-shipping')
+                </div>
+            </div>
+
             @include('livewire.admin.shop.orders.partials._timeline')
         </div>
 
@@ -30,8 +40,6 @@
         <div class="col-xl-3">
             @include('livewire.admin.shop.orders.partials._sidebar-status-manager')
             @include('livewire.admin.shop.orders.partials._sidebar-fulfillment')
-            @include('livewire.admin.shop.orders.partials._sidebar-customer')
-            @include('livewire.admin.shop.orders.partials._sidebar-shipping')
         </div>
     </div>
 

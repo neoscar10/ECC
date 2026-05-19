@@ -13,7 +13,7 @@ class RemovalRequests extends Component
     use WithPagination;
  
     public $search = '';
-    public $statusFilter = 'pending';
+    public $statusFilter = '';
     public $selectedRequestId = null;
  
     protected $paginationTheme = 'bootstrap';

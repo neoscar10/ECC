@@ -482,20 +482,8 @@ class ShiprocketOrderService
                 'label_url' => $labelUrl,
                 'metadata' => $metadata,
             ]);
-            $this->shipmentService->recordEvent($shipment, [
-                'event_code' => 'label_generated',
-                'event_status' => $shipment->status,
-                'event_description' => 'Label generated successfully.',
-                'raw_payload' => $response,
-            ]);
         } else {
              $shipment->update(['metadata' => $metadata]);
-             $this->shipmentService->recordEvent($shipment, [
-                'event_code' => 'label_generation_failed',
-                'event_status' => $shipment->status,
-                'event_description' => 'Label generation successful, but no URL was returned.',
-                'raw_payload' => $response,
-             ]);
              throw new \Exception("Label URL not found in response. Check Shiprocket panel.");
         }
 
@@ -543,20 +531,8 @@ class ShiprocketOrderService
                 'invoice_url' => $invoiceUrl,
                 'metadata' => $metadata,
             ]);
-            $this->shipmentService->recordEvent($shipment, [
-                'event_code' => 'invoice_generated',
-                'event_status' => $shipment->status,
-                'event_description' => 'Invoice generated successfully.',
-                'raw_payload' => $response,
-            ]);
         } else {
              $shipment->update(['metadata' => $metadata]);
-             $this->shipmentService->recordEvent($shipment, [
-                'event_code' => 'invoice_generation_failed',
-                'event_status' => $shipment->status,
-                'event_description' => 'Invoice generation successful, but no URL was returned.',
-                'raw_payload' => $response,
-             ]);
              throw new \Exception("Invoice URL not found in response. Check Shiprocket panel.");
         }
 
@@ -614,20 +590,8 @@ class ShiprocketOrderService
                 'manifest_url' => $manifestUrl,
                 'metadata' => $metadata,
             ]);
-            $this->shipmentService->recordEvent($shipment, [
-                'event_code' => 'manifest_generated',
-                'event_status' => $shipment->status,
-                'event_description' => 'Manifest generated successfully.',
-                'raw_payload' => $response,
-            ]);
         } else {
              $shipment->update(['metadata' => $metadata]);
-             $this->shipmentService->recordEvent($shipment, [
-                'event_code' => 'manifest_generation_failed',
-                'event_status' => $shipment->status,
-                'event_description' => 'Manifest generation successful, but no URL was returned.',
-                'raw_payload' => $response,
-             ]);
              throw new \Exception("Manifest URL not found in response. Check Shiprocket panel.");
         }
 
@@ -653,13 +617,6 @@ class ShiprocketOrderService
         ];
 
         $shipment->update(['metadata' => $metadata]);
-
-        $this->shipmentService->recordEvent($shipment, [
-            'event_code' => "test_{$type}_generated",
-            'event_status' => $shipment->status,
-            'event_description' => ucfirst($type) . ' generated in test mode.',
-            'raw_payload' => ['simulated' => true],
-        ]);
 
         return ['simulated' => true, 'type' => $type];
     }
