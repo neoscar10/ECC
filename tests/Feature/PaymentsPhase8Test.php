@@ -699,4 +699,87 @@ class PaymentsPhase8Test extends TestCase
         $this->assertEquals(VaultRemovalRequest::STATUS_PENDING, $vaultRequest->status);
         $this->assertNull($vaultRequest->shippingShipment);
     }
+
+    /** @test */
+    public function test_razorpay_payment_page_renders_successfully()
+    {
+        $order = ShopOrder::create([
+            'user_id' => $this->user->id,
+            'order_number' => 'ORD-WEB-RENDER-TEST',
+            'status' => 'pending_payment',
+            'payment_status' => 'unpaid',
+            'currency' => 'INR',
+            'subtotal' => 1000.00,
+            'total_amount' => 1000.00,
+            'shipping_address_snapshot' => $this->address->toArray(),
+            'billing_address_snapshot' => $this->address->toArray(),
+            'placed_at' => now(),
+        ]);
+
+        $payment = Payment::create([
+            'user_id' => $this->user->id,
+            'payable_type' => ShopOrder::class,
+            'payable_id' => $order->id,
+            'amount' => 1000.00,
+            'status' => PaymentStatus::PENDING,
+            'purpose' => 'shop_order',
+            'gateway' => 'razorpay',
+            'gateway_order_id' => 'order_render_123',
+            'meta' => [
+                'checkout' => [
+                    'key' => 'rzp_test_key_123',
+                    'amount' => 100000,
+                    'currency' => 'INR',
+                    'name' => 'ECC',
+                    'description' => 'Payment for ORD-WEB-RENDER-TEST',
+                    'order_id' => 'order_render_123',
+                ]
+            ]
+        ]);
+
+        $response = $this->actingAs($this->user)->get(route('payments.razorpay.pay', $payment->id));
+
+        $response->assertStatus(200);
+        $response->assertSee('Processing Payment');
+        $response->assertSee('rzp-button');
+    }
+
+    /** @test */
+    public function test_payment_failed_page_renders_successfully()
+    {
+        $order = ShopOrder::create([
+            'user_id' => $this->user->id,
+            'order_number' => 'ORD-WEB-RENDER-FAIL',
+            'status' => 'pending_payment',
+            'payment_status' => 'unpaid',
+            'currency' => 'INR',
+            'subtotal' => 1000.00,
+            'total_amount' => 1000.00,
+            'shipping_address_snapshot' => $this->address->toArray(),
+            'billing_address_snapshot' => $this->address->toArray(),
+            'placed_at' => now(),
+        ]);
+
+        $payment = Payment::create([
+            'user_id' => $this->user->id,
+            'payable_type' => ShopOrder::class,
+            'payable_id' => $order->id,
+            'amount' => 1000.00,
+            'status' => PaymentStatus::FAILED,
+            'purpose' => 'shop_order',
+            'gateway' => 'razorpay',
+            'gateway_order_id' => 'order_render_fail',
+            'failure_message' => 'Card declined',
+            'meta' => []
+        ]);
+
+        $response = $this->actingAs($this->user)->get(route('payments.failed', ['payment_id' => $payment->id]));
+
+        $response->assertStatus(200);
+        $response->assertSee('Payment Failed');
+        $response->assertSee('Reason:');
+        $response->assertSee('Card declined');
+    }
 }
+
+

@@ -26,5 +26,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Share cart count with web header
         \Illuminate\Support\Facades\View::composer('layouts.web-app', \App\Http\View\Composers\WebLayoutComposer::class);
+
+        // Register layouts.web-app view as a Blade component
+        \Illuminate\Support\Facades\Blade::component('layouts.web-app', 'layouts.web-app');
     }
 }
+
