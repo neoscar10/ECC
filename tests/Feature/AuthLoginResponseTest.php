@@ -23,7 +23,7 @@ class AuthLoginResponseTest extends TestCase
             'email' => 'test@example.com'
         ]);
 
-        $app = \App\Domain\Membership\MembershipApplication::create([
+        $app = \App\Models\MembershipApplication::create([
             'user_id' => $user->id, 
             'status' => 'approved'
         ]);

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Domain\Membership\Payment;
+use App\Models\Payment;
 
 class MembershipApplication extends Model
 {
@@ -16,6 +16,17 @@ class MembershipApplication extends Model
     protected static function newFactory()
     {
         return \Database\Factories\MembershipApplicationFactory::new();
+    }
+
+    protected static function booted()
+    {
+        static::saving(function ($model) {
+            if ($model->selected_tier_id && !$model->membership_tier_id) {
+                $model->membership_tier_id = $model->selected_tier_id;
+            } elseif ($model->membership_tier_id && !$model->selected_tier_id) {
+                $model->selected_tier_id = $model->membership_tier_id;
+            }
+        });
     }
 
     protected $guarded = [];
@@ -34,9 +45,9 @@ class MembershipApplication extends Model
         return $this->belongsTo(User::class)->withTrashed();
     }
 
-    public function payments(): HasMany
+    public function payments(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
-        return $this->hasMany(Payment::class);
+        return $this->morphMany(Payment::class, 'payable');
     }
 
     public function membershipTier(): BelongsTo

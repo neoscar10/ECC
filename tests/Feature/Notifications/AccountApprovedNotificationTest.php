@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Notifications;
 
-use App\Domain\Membership\MembershipApplication;
+use App\Models\MembershipApplication;
 use App\Jobs\Notifications\SendFcmToUserJob;
 use App\Livewire\Admin\Membership\Applications\Index;
 use App\Models\User;

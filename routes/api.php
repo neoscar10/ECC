@@ -156,6 +156,11 @@ Route::prefix('v1')->group(function () {
             Route::post('/{id}/confirm-payment', [\App\Http\Controllers\Api\V1\Shop\ShopOrderController::class, 'confirmPayment']);
             Route::post('/{id}/cancel', [\App\Http\Controllers\Api\V1\Shop\ShopOrderController::class, 'cancel']);
         });
+
+        // Payments
+        Route::prefix('payments')->group(function () {
+            Route::post('razorpay/verify', [\App\Http\Controllers\Api\V1\Payment\RazorpayPaymentController::class, 'verify']);
+        });
     });
 
 
@@ -201,6 +206,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'index']);
         Route::get('{id}', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'show']);
         Route::post('{id}/request-removal', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'requestRemoval']);
+        Route::match(['get', 'post'], '{id}/delivery-quote', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'deliveryQuote']);
     });
 
     // Auction Subscriptions

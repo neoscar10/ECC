@@ -27,9 +27,9 @@ class MembershipRules
     public static function cricketProfile(): array
     {
         return [
-            'preferred_formats' => 'array|min:1',
+            'preferred_formats' => 'required|array|min:1',
             'preferred_formats.*' => 'in:TEST,ODI,T20,LEAGUES',
-            'eras' => 'array',
+            'eras' => 'required|array',
             'eras.*' => 'in:GOLDEN_AGE_1890_1914,POST_WAR_50S,WEST_INDIES_DOMINANCE,ODI_90S_ERA,MODERN_ERA,WOMENS_CRICKET',
         ];
     }

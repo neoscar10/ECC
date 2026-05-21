@@ -83,7 +83,7 @@ class Index extends Component
 
     public function render()
     {
-        $orders = ShopOrder::with('user')
+        $orders = ShopOrder::with(['user', 'latestPayment'])
             ->when($this->search, function ($query) {
                 $query->where('order_number', 'like', '%' . $this->search . '%')
                     ->orWhereHas('user', function ($q) {

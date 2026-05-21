@@ -25,7 +25,7 @@ class MembershipTierSyncTest extends TestCase
         $user = User::factory()->create();
         
         // Setup initial membership (Observer 'created' might fire, but we focus on update)
-        $app = \App\Domain\Membership\MembershipApplication::create([
+        $app = \App\Models\MembershipApplication::create([
             'user_id' => $user->id, 
             'status' => 'approved'
         ]);

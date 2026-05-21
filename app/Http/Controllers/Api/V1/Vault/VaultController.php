@@ -229,4 +229,71 @@ class VaultController extends Controller
 
         return new \App\Http\Resources\Vault\VaultItemResource($item);
     }
+
+    /**
+     * Get a delivery quote for a vault item.
+     */
+    public function deliveryQuote(Request $request, $id, \App\Services\Shipping\VaultDeliveryQuoteService $quoteService)
+    {
+        $user = $request->user();
+
+        if (!$user->has_vault_access) {
+            return $this->summary($request);
+        }
+
+        $item = $user->vaultItems()->find($id);
+
+        if (!$item) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vault item not found.',
+                'errors' => ['id' => ['Item not found or does not belong to user.']]
+            ], 404);
+        }
+
+        $request->validate([
+            'address_id' => 'required_without:postal_code|nullable|integer',
+            'postal_code' => 'required_without:address_id|nullable|string',
+        ]);
+
+        $addressId = $request->input('address_id');
+        $postalCode = $request->input('postal_code');
+
+        try {
+            if ($addressId) {
+                $address = $user->addresses()->find($addressId);
+                if (!$address) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Address not found or does not belong to you.',
+                        'errors' => ['address_id' => ['Address not found or does not belong to you.']]
+                    ], 404);
+                }
+                $result = $quoteService->quoteForVaultItem($item, $address, $user);
+            } else {
+                $result = $quoteService->quoteForVaultItemAndPincode($item, $postalCode, $user);
+            }
+
+            if ($result['success'] ?? false) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Delivery quote retrieved successfully.',
+                    'data' => $result
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => $result['message'] ?? 'Delivery is not available for this address.',
+                    'errors' => ['shipping' => [$result['message'] ?? 'Delivery is not available for this address.']]
+                ], 422);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to calculate delivery quote.',
+                'errors' => ['exception' => [$e->getMessage()]]
+            ], 500);
+        }
+    }
 }
+

@@ -74,4 +74,14 @@ class ShopOrder extends Model
     {
         return $this->morphOne(\App\Models\Shipping\ShippingShipment::class, 'shippable')->latestOfMany();
     }
+
+    public function payments()
+    {
+        return $this->morphMany(\App\Models\Payment::class, 'payable');
+    }
+
+    public function latestPayment()
+    {
+        return $this->morphOne(\App\Models\Payment::class, 'payable')->latestOfMany();
+    }
 }

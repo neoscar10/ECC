@@ -3,7 +3,7 @@
 namespace Tests\Feature\Membership;
 
 use App\Models\User;
-use App\Domain\Membership\MembershipApplication;
+use App\Models\MembershipApplication;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

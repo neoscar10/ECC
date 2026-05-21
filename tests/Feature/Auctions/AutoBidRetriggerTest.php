@@ -90,7 +90,7 @@ class AutoBidRetriggerTest extends TestCase
 
     protected function setupMembership($user, $tier)
     {
-        $app = \App\Domain\Membership\MembershipApplication::create(['user_id' => $user->id, 'status' => 'approved']);
+        $app = \App\Models\MembershipApplication::create(['user_id' => $user->id, 'status' => 'approved']);
         \App\Models\Membership::create([
             'user_id' => $user->id,
             'membership_tier_id' => $tier->id,

@@ -294,31 +294,28 @@ class CheckoutPage extends Component
         }
 
         $checkoutService = app(CheckoutService::class);
+        $paymentManager = app(\App\Services\Payments\PaymentManager::class);
 
         try {
-            // 1. Prepare Mock/Dummy Payment Details
-            // This mimics the post-success data structure from the tier payment pattern
-            $paymentDetails = [
-                'gateway' => 'dummy',
-                'method' => $this->selectedPaymentMethod,
-                'last4' => '4242', // Mocked for the dummy flow
-                'brand' => 'Visa',
-                'currency' => 'INR',
-                'amount' => $this->summary['total_amount'],
-                'confirmed_at' => now()->toDateTimeString(),
-            ];
-
-            // 2. Finalize Order (Atomic: Stock deduction + Order creation + Cart clearing)
-            // This only happens AFTER the mock payment "success" orchestration
+            // 1. Create Order (Atomic: Stock deduction + Order creation + Cart clearing)
+            // Pass null for paymentDetails to create as pending_payment/unpaid
             $order = $checkoutService->placeOrder($user, [
                 'shipping_address_id' => $this->selectedAddressId,
                 'billing_same_as_shipping' => true,
                 'notes' => 'Placed via Web Storefront',
-            ], $paymentDetails);
+            ], null);
 
-            // 3. Clear session/local state if any (Service already clears the database cart)
-            
-            return redirect()->route('shop.order-success', ['orderId' => $order->id]);
+            // 2. Initiate Payment
+            $paymentInitiation = $paymentManager->initiatePayment(
+                payable: $order,
+                amount: $order->total_amount,
+                purpose: 'shop_order',
+                user: $user,
+                gateway: 'razorpay'
+            );
+
+            // 3. Redirect to gateway payment page
+            return redirect()->route('payments.razorpay.pay', $paymentInitiation['payment']->id);
 
         } catch (Exception $e) {
             // If payment/finalization fails (e.g. stock goes out of sync at last second), 

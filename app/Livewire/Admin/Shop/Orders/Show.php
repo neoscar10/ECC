@@ -33,7 +33,14 @@ class Show extends Component
 
     public function getOrderProperty()
     {
-        return ShopOrder::with(['items.product.images', 'items.variationValues', 'user', 'shippingShipment.events'])->findOrFail($this->orderId);
+        return ShopOrder::with([
+            'items.product.images', 
+            'items.variationValues', 
+            'user', 
+            'shippingShipment.events',
+            'payments.events',
+            'latestPayment'
+        ])->findOrFail($this->orderId);
     }
 
     /**

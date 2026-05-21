@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\MembershipTier;
-use App\Domain\Membership\MembershipApplication;
+use App\Models\MembershipApplication;
 
 class MembershipApprovalTest extends TestCase
 {
@@ -24,7 +24,7 @@ class MembershipApprovalTest extends TestCase
         $this->seed(\Database\Seeders\PrivilegesSeeder::class);
         $this->seed(\Database\Seeders\MembershipTiersSeeder::class);
 
-        $this->user = User::factory()->create();
+        $this->user = User::factory()->create(['phone_verified_at' => now(), 'phone' => '+447700900000']);
         $this->user->assignRole('user');
 
         $this->admin = User::factory()->create(['email' => 'admin@ecc.com']);

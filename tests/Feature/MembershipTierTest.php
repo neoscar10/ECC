@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\MembershipTier;
-use App\Domain\Membership\MembershipApplication;
+use App\Models\MembershipApplication;
 
 class MembershipTierTest extends TestCase
 {
@@ -23,7 +23,7 @@ class MembershipTierTest extends TestCase
         $this->seed(\Database\Seeders\PrivilegesSeeder::class);
         $this->seed(\Database\Seeders\MembershipTiersSeeder::class);
 
-        $this->user = User::factory()->create();
+        $this->user = User::factory()->create(['phone_verified_at' => now(), 'phone' => '+447700900000']);
         $this->user->assignRole('user');
         $this->token = auth('api')->login($this->user);
     }

@@ -46,6 +46,19 @@ class ShopOrderResource extends JsonResource
                 ? (app(\App\Services\Shipping\ShipmentTrackingPresenter::class)->forCustomer($this->shippingShipment) 
                     ?? ['available' => false, 'message' => 'Shipment information is not available yet.']) 
                 : ['available' => false, 'message' => 'Shipment information is not available yet.'],
+            'payment' => $this->when($this->relationLoaded('latestPayment') && $this->latestPayment, function () {
+                return [
+                    'id' => $this->latestPayment->id,
+                    'gateway' => $this->latestPayment->gateway,
+                    'status' => $this->latestPayment->status,
+                    'amount' => (float) $this->latestPayment->amount,
+                    'currency' => $this->latestPayment->currency,
+                    'gateway_order_id' => $this->latestPayment->gateway_order_id,
+                    'gateway_payment_id' => $this->latestPayment->gateway_payment_id,
+                    'paid_at' => $this->latestPayment->paid_at?->toIso8601String(),
+                    'failure_message' => $this->latestPayment->failure_message,
+                ];
+            }),
         ];
     }
 }

@@ -87,6 +87,7 @@ class MembershipService
 
         $updateData = [
             'selected_tier_id' => $tierId,
+            'membership_tier_id' => $tierId,
         ];
 
         if ($isFree) {

@@ -127,6 +127,184 @@ class VaultEndpointsTest extends TestCase
             ->assertJsonStructure(['data' => ['vault' => ['can_access', 'counts']]]);
     }
 
+    public function test_vault_delivery_quote_successful_with_address_id()
+    {
+        $user = User::factory()->create();
+        $this->assignTier($user, 'Gold');
+
+        $product = ArchiveProduct::factory()->create([
+            'weight_kg' => 1.5,
+            'length_cm' => 12,
+            'breadth_cm' => 12,
+            'height_cm' => 12,
+        ]);
+
+        $vaultItem = UserVaultItem::create([
+            'user_id' => $user->id,
+            'source_type' => 'archive_product',
+            'source_id' => $product->id,
+            'quantity' => 1,
+            'status' => 'locked',
+            'item_title' => 'Vault Item',
+        ]);
+
+        $address = \App\Models\Shop\UserAddress::create([
+            'user_id' => $user->id,
+            'label' => 'Home',
+            'full_name' => 'John Doe',
+            'phone' => '9999999999',
+            'line1' => 'Test Street',
+            'city' => 'Delhi',
+            'state' => 'Delhi',
+            'postal_code' => '110055',
+            'country' => 'India',
+        ]);
+
+        \Illuminate\Support\Facades\Config::set('shiprocket.pickup_pincode', '110001');
+
+        $mock = $this->createMock(\App\Services\Shipping\Shiprocket\ShiprocketClient::class);
+        $mockResponse = [
+            'success' => true,
+            'data' => [
+                'available_courier_companies' => [
+                    [
+                        'courier_company_id' => '12',
+                        'courier_name' => 'Blue Dart Air',
+                        'rating' => '4.8',
+                        'freight_charge' => '72.00',
+                        'cod_charges' => '0.00',
+                        'total_charge' => '72.00',
+                        'etd' => '2026-05-20',
+                        'estimated_delivery_days' => 3,
+                        'cod' => 0,
+                        'prepaid' => 1,
+                    ]
+                ]
+            ]
+        ];
+        $mock->expects($this->exactly(2))
+            ->method('get')
+            ->willReturn($mockResponse);
+        $this->app->instance(\App\Services\Shipping\Shiprocket\ShiprocketClient::class, $mock);
+
+        // Test GET request
+        $response = $this->actingAs($user, 'api')->getJson("/api/v1/me/vault/{$vaultItem->id}/delivery-quote?address_id={$address->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.delivery_fee', 72)
+            ->assertJsonPath('data.selected_courier.courier_name', 'Blue Dart Air');
+
+        // Test POST request
+        $responsePost = $this->actingAs($user, 'api')->postJson("/api/v1/me/vault/{$vaultItem->id}/delivery-quote", [
+            'address_id' => $address->id
+        ]);
+
+        $responsePost->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.delivery_fee', 72);
+    }
+
+    public function test_vault_delivery_quote_successful_with_postal_code()
+    {
+        $user = User::factory()->create();
+        $this->assignTier($user, 'Gold');
+
+        $product = ArchiveProduct::factory()->create([
+            'weight_kg' => 1.5,
+            'length_cm' => 12,
+            'breadth_cm' => 12,
+            'height_cm' => 12,
+        ]);
+
+        $vaultItem = UserVaultItem::create([
+            'user_id' => $user->id,
+            'source_type' => 'archive_product',
+            'source_id' => $product->id,
+            'quantity' => 1,
+            'status' => 'locked',
+            'item_title' => 'Vault Item',
+        ]);
+
+        \Illuminate\Support\Facades\Config::set('shiprocket.pickup_pincode', '110001');
+
+        $mock = $this->createMock(\App\Services\Shipping\Shiprocket\ShiprocketClient::class);
+        $mockResponse = [
+            'success' => true,
+            'data' => [
+                'available_courier_companies' => [
+                    [
+                        'courier_company_id' => '12',
+                        'courier_name' => 'Blue Dart Air',
+                        'rating' => '4.8',
+                        'freight_charge' => '72.00',
+                        'cod_charges' => '0.00',
+                        'total_charge' => '72.00',
+                        'etd' => '2026-05-20',
+                        'estimated_delivery_days' => 3,
+                        'cod' => 0,
+                        'prepaid' => 1,
+                    ]
+                ]
+            ]
+        ];
+        $mock->expects($this->once())
+            ->method('get')
+            ->willReturn($mockResponse);
+        $this->app->instance(\App\Services\Shipping\Shiprocket\ShiprocketClient::class, $mock);
+
+        $response = $this->actingAs($user, 'api')->getJson("/api/v1/me/vault/{$vaultItem->id}/delivery-quote?postal_code=110055");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.delivery_fee', 72)
+            ->assertJsonPath('data.selected_courier.courier_name', 'Blue Dart Air');
+    }
+
+    public function test_vault_delivery_quote_validation_errors()
+    {
+        $user = User::factory()->create();
+        $this->assignTier($user, 'Gold');
+
+        $product = ArchiveProduct::factory()->create();
+        $vaultItem = UserVaultItem::create([
+            'user_id' => $user->id,
+            'source_type' => 'archive_product',
+            'source_id' => $product->id,
+            'quantity' => 1,
+            'status' => 'locked',
+            'item_title' => 'Vault Item',
+        ]);
+
+        // Empty parameters
+        $response = $this->actingAs($user, 'api')->getJson("/api/v1/me/vault/{$vaultItem->id}/delivery-quote");
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['address_id', 'postal_code']);
+    }
+
+    public function test_vault_delivery_quote_access_restricted()
+    {
+        $user = User::factory()->create();
+        $this->assignTier($user, 'Silver'); // No vault access
+
+        $product = ArchiveProduct::factory()->create();
+        $vaultItem = UserVaultItem::create([
+            'user_id' => $user->id,
+            'source_type' => 'archive_product',
+            'source_id' => $product->id,
+            'quantity' => 1,
+            'status' => 'locked',
+            'item_title' => 'Vault Item',
+        ]);
+
+        $response = $this->actingAs($user, 'api')->getJson("/api/v1/me/vault/{$vaultItem->id}/delivery-quote?postal_code=110055");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.can_access_vault', false);
+    }
+
     private function assignTier($user, $tierName)
     {
         $tier = MembershipTier::where('name', $tierName)->first();
@@ -138,3 +316,4 @@ class VaultEndpointsTest extends TestCase
         ]);
     }
 }
+

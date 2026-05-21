@@ -10,6 +10,21 @@ class MembershipTier extends Model
     use HasFactory;
     protected $guarded = [];
 
+    protected static function booted()
+    {
+        static::saving(function ($model) {
+            if ($model->isDirty('price_amount') && !$model->isDirty('price')) {
+                $model->price = (float) $model->price_amount / 100;
+            } elseif ($model->isDirty('price') && !$model->isDirty('price_amount')) {
+                $model->price_amount = (int) ($model->price * 100);
+            } elseif (!$model->price_amount && $model->price) {
+                $model->price_amount = (int) ($model->price * 100);
+            } elseif ($model->price_amount && !$model->price) {
+                $model->price = (float) $model->price_amount / 100;
+            }
+        });
+    }
+
     protected $casts = [
         'is_active' => 'boolean',
         'has_early_access' => 'boolean', // [NEW] Capability flag
@@ -19,7 +34,7 @@ class MembershipTier extends Model
     ];
 
     protected $hidden = [
-        'price_amount',
+        // 'price_amount',
     ];
 
     public function privileges()

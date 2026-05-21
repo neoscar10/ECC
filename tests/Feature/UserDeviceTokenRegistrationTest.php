@@ -33,7 +33,7 @@ class UserDeviceTokenRegistrationTest extends TestCase
         
         // Assign membership manually if needed or via factory state if available
         // For simplicity, create membership record locally
-        $app = \App\Domain\Membership\MembershipApplication::create([
+        $app = \App\Models\MembershipApplication::create([
             'user_id' => $user->id, 
             'status' => 'approved'
         ]);

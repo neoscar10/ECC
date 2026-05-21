@@ -26,7 +26,7 @@ class UserDeviceTokenUnregisterTest extends TestCase
         ]);
         
         $user = User::factory()->create();
-        $app = \App\Domain\Membership\MembershipApplication::create([
+        $app = \App\Models\MembershipApplication::create([
             'user_id' => $user->id, 
             'status' => 'approved'
         ]);

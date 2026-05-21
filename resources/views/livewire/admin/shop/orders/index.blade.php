@@ -102,6 +102,11 @@
                                         };
                                     @endphp
                                     <span class="badge bg-{{ $pymtClass }}">{{ ucfirst($order->payment_status) }}</span>
+                                    @if($order->latestPayment)
+                                        <div class="text-muted small mt-1 text-capitalize" style="font-size: 10px;">
+                                            {{ $order->latestPayment->gateway }}
+                                        </div>
+                                    @endif
                                 </td>
                                 <td>
                                     @php

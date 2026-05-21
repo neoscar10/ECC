@@ -4,6 +4,7 @@ namespace App\Domain\Membership;
 
 use Exception;
 use App\Models\MembershipApplication;
+use App\Models\Payment;
 
 class PaymentService
 {

@@ -27,7 +27,7 @@ class InitialAutoBidTest extends TestCase
         $tier = MembershipTier::create(['name' => 'Gold', 'level' => 2, 'price' => 100, 'code' => 'gold_tier', 'is_auto_bidding_enabled' => true]);
         $user = User::factory()->create();
         // Setup membership manually
-        $app = \App\Domain\Membership\MembershipApplication::create(['user_id' => $user->id, 'status' => 'approved']);
+        $app = \App\Models\MembershipApplication::create(['user_id' => $user->id, 'status' => 'approved']);
         \App\Models\Membership::create([
             'user_id' => $user->id,
             'membership_tier_id' => $tier->id,
@@ -84,7 +84,7 @@ class InitialAutoBidTest extends TestCase
         // User B (Auto Bidder)
         $tier = MembershipTier::create(['name' => 'Plat', 'level' => 3, 'price' => 200, 'code' => 'plat_tier', 'is_auto_bidding_enabled' => true]);
         $userB = User::factory()->create();
-        $app = \App\Domain\Membership\MembershipApplication::create(['user_id' => $userB->id, 'status' => 'approved']);
+        $app = \App\Models\MembershipApplication::create(['user_id' => $userB->id, 'status' => 'approved']);
         \App\Models\Membership::create([
             'user_id' => $userB->id,
             'membership_tier_id' => $tier->id,
@@ -132,7 +132,7 @@ class InitialAutoBidTest extends TestCase
         // 1. Arrange
         $user = User::factory()->create();
         $tier = MembershipTier::create(['name' => 'Plat', 'level' => 3, 'price' => 200, 'code' => 'plat_tier_2', 'is_auto_bidding_enabled' => true]);
-        $app = \App\Domain\Membership\MembershipApplication::create(['user_id' => $user->id, 'status' => 'approved']);
+        $app = \App\Models\MembershipApplication::create(['user_id' => $user->id, 'status' => 'approved']);
         \App\Models\Membership::create([
             'user_id' => $user->id,
             'membership_tier_id' => $tier->id,

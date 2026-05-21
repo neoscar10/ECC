@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Api;
 
-use App\Domain\Membership\MembershipApplication;
+use App\Models\MembershipApplication;
 use App\Models\User;
 use App\Models\MembershipTier;
 use Illuminate\Foundation\Testing\RefreshDatabase;

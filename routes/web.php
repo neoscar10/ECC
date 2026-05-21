@@ -30,7 +30,16 @@ Route::middleware(['auth', 'ensure_registration_complete'])->group(function () {
     Route::get('/order-details/{orderId}', \App\Livewire\Shop\OrderDetailsPage::class)->name('shop.order-details');
     Route::get('/order-success/{orderId}', \App\Livewire\Shop\OrderSuccessPage::class)->name('shop.order-success');
     Route::get('/shop/{slug}', \App\Livewire\Shop\Show::class)->name('shop.show');
+    
+    // Payments
+    Route::get('/payments/razorpay/{payment}/pay', [\App\Http\Controllers\Web\Payment\RazorpayPaymentController::class, 'pay'])->name('payments.razorpay.pay');
+    Route::post('/payments/razorpay/verify', [\App\Http\Controllers\Web\Payment\RazorpayPaymentController::class, 'verify'])->name('payments.razorpay.verify');
+    Route::get('/payments/razorpay/{payment}/retry', [\App\Http\Controllers\Web\Payment\RazorpayPaymentController::class, 'retry'])->name('payments.razorpay.retry');
+    Route::get('/payments/failed', function () {
+        return view('shop.payment.failed');
+    })->name('payments.failed');
 });
+
 Route::get('/home', \App\Livewire\Pavilion\HomePage::class)
     ->middleware(['ensure_registration_complete'])
     ->name('home');

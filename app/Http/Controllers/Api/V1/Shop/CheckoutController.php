@@ -52,8 +52,30 @@ class CheckoutController extends Controller
 
             $order = $this->checkoutService->placeOrder($request->user(), $request->all());
             
+            // Initiate Razorpay payment
+            $paymentManager = app(\App\Services\Payments\PaymentManager::class);
+            $paymentInitiation = $paymentManager->initiatePayment(
+                payable: $order,
+                amount: $order->total_amount,
+                purpose: 'shop_order',
+                user: $request->user(),
+                gateway: 'razorpay'
+            );
+
+            $paymentData = [
+                'id' => $paymentInitiation['payment']->id,
+                'gateway' => $paymentInitiation['payment']->gateway,
+                'status' => $paymentInitiation['payment']->status,
+                'amount' => (float) $paymentInitiation['payment']->amount,
+                'currency' => $paymentInitiation['payment']->currency,
+                'checkout' => $paymentInitiation['checkout'],
+            ];
+
+            $responseData = (new ShopOrderResource($order))->resolve($request);
+            $responseData['payment'] = $paymentData;
+
             return $this->success(
-                new ShopOrderResource($order),
+                $responseData,
                 'Order placed successfully.', 
                 201
             );
