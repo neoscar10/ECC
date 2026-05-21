@@ -7,6 +7,7 @@ use App\Services\Shop\CartService;
 use App\Services\Shop\CheckoutService;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\Attributes\Url;
@@ -36,9 +37,7 @@ class CheckoutPage extends Component
         'is_default' => false,
     ];
 
-    public $selectedPaymentMethod = 'card_mock_1';
-    public $savedPaymentMethods = [];
-    public $walletOptions = [];
+    // Razorpay is the sole payment method; no mock card state needed.
 
     public $summary = [];
     public $summaryItems = [];
@@ -188,31 +187,8 @@ class CheckoutPage extends Component
                 return redirect()->route('shop.cart');
             }
         }
-        // Payment Methods code is loaded next
-
-        // Mock Payment Methods
-        $this->savedPaymentMethods = [
-            (object) [
-                'id' => 'card_mock_1',
-                'brand_label' => 'VISA',
-                'display_name' => '•••• 4242',
-                'expiry_label' => '12/26',
-                'is_default' => true,
-            ],
-            (object) [
-                'id' => 'card_mock_2',
-                'brand_label' => 'MC',
-                'display_name' => '•••• 5555',
-                'expiry_label' => '08/25',
-                'is_default' => false,
-            ],
-        ];
-
-        $this->walletOptions = [
-            ['label' => 'Apple Pay', 'value' => 'apple_pay', 'icon' => 'mdi mdi-apple'],
-            ['label' => 'Google Pay', 'value' => 'google_pay', 'icon' => 'mdi mdi-google'],
-        ];
     }
+    // Note: Payment method selection is handled by Razorpay Checkout popup.
 
     public function selectAddress($id)
     {
@@ -259,11 +235,6 @@ class CheckoutPage extends Component
         session()->flash('success', 'Address added successfully.');
     }
 
-    public function handleAddPaymentMethod()
-    {
-        // Placeholder
-        session()->flash('info', 'Secure payment gateway integration is currently in preview mode.');
-    }
 
     public function placeOrder()
     {
@@ -303,29 +274,57 @@ class CheckoutPage extends Component
         $paymentManager = app(\App\Services\Payments\PaymentManager::class);
 
         try {
+            Log::info('Checkout: Place order started.', [
+                'user_id' => $user->id,
+                'address_id' => $this->selectedAddressId,
+            ]);
+
             // 1. Create Order (Atomic: Stock deduction + Order creation + Cart clearing)
-            // Pass null for paymentDetails to create as pending_payment/unpaid
             $order = $checkoutService->placeOrder($user, [
                 'shipping_address_id' => $this->selectedAddressId,
                 'billing_same_as_shipping' => true,
                 'notes' => 'Placed via Web Storefront',
             ], null);
 
-            // 2. Initiate Payment
+            Log::info('Checkout: Order created, initiating payment.', [
+                'user_id' => $user->id,
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'amount' => $order->total_amount,
+            ]);
+
+            // 2. Initiate Payment via PaymentManager → RazorpayGateway
             $paymentInitiation = $paymentManager->initiatePayment(
                 payable: $order,
                 amount: $order->total_amount,
                 purpose: 'shop_order',
                 user: $user,
-                gateway: 'razorpay'
+                gateway: 'razorpay',
+                context: [
+                    'description' => 'ECC Shop Order #' . $order->order_number,
+                ]
             );
 
-            // 3. Redirect to gateway payment page
-            return redirect()->route('payments.razorpay.pay', $paymentInitiation['payment']->id);
+            $payment = $paymentInitiation['payment'];
+
+            Log::info('Checkout: Razorpay payment initiated, redirecting to pay page.', [
+                'user_id' => $user->id,
+                'order_id' => $order->id,
+                'payment_id' => $payment->id,
+                'gateway_order_id' => $payment->gateway_order_id,
+                'amount' => $payment->amount,
+            ]);
+
+            // 3. Redirect to Razorpay payment page
+            return redirect()->route('payments.razorpay.pay', $payment->id);
 
         } catch (Exception $e) {
-            // If payment/finalization fails (e.g. stock goes out of sync at last second), 
-            // the order is NOT created and the cart is NOT cleared.
+            Log::error('Checkout: Place order failed.', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            // Order is NOT created if exception is thrown before placeOrder() completes.
             session()->flash('error', 'Checkout failed: ' . $e->getMessage());
         }
     }

@@ -464,105 +464,42 @@
                         <h2 class="ecc-section-title mb-0">PAYMENT METHOD</h2>
                     </div>
 
-                    <div class="d-flex flex-column gap-4">
+                    <!-- Razorpay Secure Checkout Option -->
+                    <div class="ecc-payment-card is-selected" style="cursor: default; border-color: var(--ecc-primary); background: rgba(199, 167, 90, .05);">
+                        <div class="d-flex align-items-center gap-3 flex-grow-1">
+                            <!-- Razorpay Icon area -->
+                            <div style="width:56px; height:38px; border-radius:.55rem; background:rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <svg width="28" height="20" viewBox="0 0 38 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M18.8 0L0 14.4H8.4L12 6.4L10.8 14.4H19.6L22.4 0H18.8Z" fill="#2D81EF"/>
+                                    <path d="M20.4 9.6L17.6 24H21.2L24.4 9.6H20.4Z" fill="#A9CAFF"/>
+                                    <path d="M22 9.6L25.6 0H22L20.4 9.6H22Z" fill="#2D81EF"/>
+                                </svg>
+                            </div>
 
-                        <!-- Saved Cards -->
-                        <div>
-                            <div class="ecc-section-label mb-3">SAVED CARDS</div>
-
-                            <div class="d-flex flex-column gap-3">
-                                @forelse($savedPaymentMethods as $method)
-                                    <label class="ecc-payment-card mb-0 {{ (string) $selectedPaymentMethod === (string) $method->id ? 'is-selected' : '' }}">
-                                        <div class="d-flex align-items-center gap-3 gap-md-4 flex-grow-1">
-                                            <div class="ecc-card-brand-box">
-                                                {{ $method->brand_label }}
-                                            </div>
-
-                                            <div class="flex-grow-1">
-                                                <div class="d-flex flex-wrap align-items-center gap-2">
-                                                    <div class="fw-bold">
-                                                        {{ $method->display_name }}
-                                                    </div>
-
-                                                    @if($method->is_default)
-                                                        <span class="ecc-badge-gold subtle">DEFAULT</span>
-                                                    @endif
-                                                </div>
-
-                                                <div class="ecc-muted small">
-                                                    Expires {{ $method->expiry_label }}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="ms-3">
-                                            <input class="form-check-input ecc-radio"
-                                                   type="radio"
-                                                   wire:model.live="selectedPaymentMethod"
-                                                   value="{{ $method->id }}">
-                                        </div>
-                                    </label>
-                                @empty
-                                    <div class="ecc-empty-panel py-4">
-                                        <div class="fw-bold mb-1">No saved cards</div>
-                                    </div>
-                                @endforelse
+                            <div class="flex-grow-1">
+                                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                    <div class="fw-bold">Razorpay Secure Checkout</div>
+                                    <span class="ecc-badge-gold subtle" style="background: rgba(45,129,239,.15); color:#7db9ff; letter-spacing:.08em;">
+                                        TEST MODE
+                                    </span>
+                                </div>
+                                <div class="ecc-muted small">
+                                    UPI · Cards · Netbanking · Wallets &amp; more
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Wallets -->
-                        @if(!empty($walletOptions) && count($walletOptions))
-                            <div>
-                                <div class="ecc-section-label mb-3">DIGITAL WALLETS</div>
+                        <span class="material-symbols-outlined ecc-selected-icon" style="flex-shrink:0;">check_circle</span>
+                    </div>
 
-                                <div class="d-flex flex-column gap-3">
-                                    @foreach($walletOptions as $wallet)
-                                        <label class="ecc-payment-card mb-0 {{ (string) $selectedPaymentMethod === (string) $wallet['value'] ? 'is-selected' : '' }}">
-                                            <div class="d-flex align-items-center gap-3 flex-grow-1">
-                                                <div class="ecc-wallet-box">
-                                                    <i class="{{ $wallet['icon'] }} fs-4"></i>
-                                                </div>
-                                                <div class="fw-bold">{{ $wallet['label'] }}</div>
-                                            </div>
-
-                                            <div class="ms-3">
-                                                <input class="form-check-input ecc-radio"
-                                                       type="radio"
-                                                       wire:model.live="selectedPaymentMethod"
-                                                       value="{{ $wallet['value'] }}">
-                                            </div>
-                                        </label>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-
-                        <!-- Add Card CTA -->
-                        <button type="button"
-                                class="ecc-add-card-panel border-secondary-subtle"
-                                wire:click="handleAddPaymentMethod">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="ecc-add-icon">
-                                    <i class="mdi mdi-plus text-secondary"></i>
-                                </div>
-
-                                <div class="text-start">
-                                    <div class="fw-bold text-secondary">Add New Card</div>
-                                    <div class="ecc-muted small">Save securely for future premium acquisitions</div>
-                                </div>
-                            </div>
-
-                            <i class="mdi mdi-chevron-right text-secondary"></i>
-                        </button>
-
-                        <div class="text-center pt-2">
-                            <div class="d-inline-flex align-items-center gap-2 ecc-security-note">
-                                <i class="mdi mdi-lock-outline"></i>
-                                <span>PAYMENTS ARE SSL ENCRYPTED AND SECURE</span>
-                            </div>
+                    <div class="text-center pt-3">
+                        <div class="d-inline-flex align-items-center gap-2 ecc-security-note">
+                            <i class="mdi mdi-lock-outline"></i>
+                            <span>PAYMENTS ARE SSL ENCRYPTED AND PROCESSED BY RAZORPAY</span>
                         </div>
                     </div>
                 </section>
+
             </div>
         </div>
 

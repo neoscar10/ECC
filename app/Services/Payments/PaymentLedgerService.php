@@ -47,13 +47,22 @@ class PaymentLedgerService
 
     /**
      * Atomically transition a payment status to pending.
+     *
+     * @param Payment $payment
+     * @param array   $meta  Checkout payload from the gateway driver. Stored under the
+     *                       'checkout' key so that RazorpayPaymentController can read
+     *                       $payment->meta['checkout'] reliably.
      */
     public function markPending(Payment $payment, array $meta = []): Payment
     {
         return DB::transaction(function () use ($payment, $meta) {
+            // Wrap gateway checkout data under 'checkout' key so controllers can
+            // reliably access it via $payment->meta['checkout'].
+            $wrappedMeta = !empty($meta) ? ['checkout' => $meta] : [];
+
             $payment->update([
                 'status' => \App\Support\Payments\PaymentStatus::PENDING,
-                'meta' => $this->mergeMeta($payment, $meta),
+                'meta' => $this->mergeMeta($payment, $wrappedMeta),
             ]);
             return $payment->fresh();
         });

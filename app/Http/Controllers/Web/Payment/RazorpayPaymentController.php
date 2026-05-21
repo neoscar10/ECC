@@ -23,8 +23,6 @@ class RazorpayPaymentController extends Controller
 
     /**
      * Show the Razorpay payment gateway page.
-     *
-     * @param Payment $payment
      */
     public function pay(Payment $payment)
     {
@@ -32,39 +30,59 @@ class RazorpayPaymentController extends Controller
             abort(403, 'Unauthorized access to payment.');
         }
 
+        Log::info('RazorpayPaymentController: pay() called.', [
+            'payment_id' => $payment->id,
+            'status'     => $payment->status,
+            'gateway_order_id' => $payment->gateway_order_id,
+            'meta_keys'  => array_keys($payment->meta ?? []),
+        ]);
+
         if ($payment->status === PaymentStatus::PAID) {
             return $this->redirectSuccess($payment);
         }
 
         if (!in_array($payment->status, [PaymentStatus::PENDING, PaymentStatus::INITIATED])) {
-            return redirect()->route('payments.failed')->with('error', 'Payment cannot be processed.');
+            Log::warning('RazorpayPaymentController: Payment not in processable state.', [
+                'payment_id' => $payment->id,
+                'status'     => $payment->status,
+            ]);
+            return redirect()->route('payments.failed', ['payment_id' => $payment->id])
+                ->with('error', 'Payment cannot be processed.');
         }
 
         $checkoutData = $payment->meta['checkout'] ?? null;
 
         if (!$checkoutData) {
-            Log::error('RazorpayPaymentController: Missing checkout data on payment', ['payment_id' => $payment->id]);
-            return redirect()->route('payments.failed')->with('error', 'Payment configuration missing.');
+            Log::error('RazorpayPaymentController: Missing checkout data in payment meta.', [
+                'payment_id' => $payment->id,
+                'meta'       => $payment->meta,
+            ]);
+            return redirect()->route('payments.failed', ['payment_id' => $payment->id])
+                ->with('error', 'Payment configuration missing. Please contact support.');
         }
 
+        Log::info('RazorpayPaymentController: Rendering Razorpay pay page.', [
+            'payment_id'       => $payment->id,
+            'gateway_order_id' => $payment->gateway_order_id,
+            'amount'           => $payment->amount,
+        ]);
+
         return view('shop.payment.razorpay', [
-            'payment' => $payment,
+            'payment'      => $payment,
             'checkoutData' => $checkoutData,
         ]);
     }
 
     /**
-     * Verify the Razorpay payment signature via AJAX.
-     *
-     * @param Request $request
+     * Verify the Razorpay payment signature via AJAX/fetch.
      */
     public function verify(Request $request)
     {
         $request->validate([
             'internal_payment_id' => 'required|exists:payments,id',
             'razorpay_payment_id' => 'required|string',
-            'razorpay_order_id' => 'required|string',
-            'razorpay_signature' => 'required|string',
+            'razorpay_order_id'   => 'required|string',
+            'razorpay_signature'  => 'required|string',
         ]);
 
         $payment = Payment::findOrFail($request->input('internal_payment_id'));
@@ -75,47 +93,63 @@ class RazorpayPaymentController extends Controller
 
         if ($payment->status === PaymentStatus::PAID) {
             return response()->json([
-                'success' => true,
+                'success'      => true,
                 'redirect_url' => $this->getSuccessUrl($payment)
             ]);
         }
 
+        Log::info('RazorpayPaymentController: Verify received.', [
+            'payment_id'          => $payment->id,
+            'razorpay_order_id'   => $request->input('razorpay_order_id'),
+            'razorpay_payment_id' => $request->input('razorpay_payment_id'),
+        ]);
+
         try {
             $verificationData = [
-                'gateway' => 'razorpay',
-                'gateway_order_id' => $request->input('razorpay_order_id'),
-                'gateway_payment_id' => $request->input('razorpay_payment_id'),
+                'gateway'           => 'razorpay',
+                'gateway_order_id'  => $request->input('razorpay_order_id'),
+                'gateway_payment_id'=> $request->input('razorpay_payment_id'),
                 'gateway_signature' => $request->input('razorpay_signature'),
-                'payload' => $request->all(),
+                'payload'           => $request->all(),
             ];
 
             $result = $this->paymentManager->verifyPayment($payment, $verificationData);
 
             if ($result['result']->success && $result['payment']->status === PaymentStatus::PAID) {
-                // Finalize payment polymorphically
+                Log::info('RazorpayPaymentController: Verify success, finalizing.', [
+                    'payment_id'          => $result['payment']->id,
+                    'gateway_payment_id'  => $result['payment']->gateway_payment_id,
+                ]);
+
+                // Finalize payment polymorphically (marks order as paid, etc.)
                 $this->finalizationService->finalizePaidPayment($result['payment']);
 
                 return response()->json([
-                    'success' => true,
+                    'success'      => true,
                     'redirect_url' => $this->getSuccessUrl($result['payment'])
                 ]);
             } else {
+                Log::warning('RazorpayPaymentController: Verify failed (signature/status mismatch).', [
+                    'payment_id' => $payment->id,
+                ]);
+
                 $this->finalizationService->markPaymentFailed($result['payment'], 'Verification failed');
+
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Payment verification failed',
+                    'success'      => false,
+                    'message'      => 'Payment verification failed.',
                     'redirect_url' => route('payments.failed', ['payment_id' => $payment->id])
                 ]);
             }
         } catch (\Exception $e) {
-            Log::error('Razorpay verification exception: ' . $e->getMessage(), [
+            Log::error('RazorpayPaymentController: Verify exception.', [
                 'payment_id' => $payment->id,
-                'trace' => $e->getTraceAsString(),
+                'error'      => $e->getMessage(),
             ]);
 
             return response()->json([
-                'success' => false,
-                'message' => 'Internal Server Error during verification.',
+                'success'      => false,
+                'message'      => 'Internal Server Error during verification.',
                 'redirect_url' => route('payments.failed', ['payment_id' => $payment->id])
             ], 500);
         }
