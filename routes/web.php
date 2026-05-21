@@ -160,3 +160,6 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/membership/upgrade/payment', \App\Livewire\Membership\Upgrade\Payment::class)->name('membership.upgrade.payment');
     Route::get('/membership/upgrade/success', \App\Livewire\Membership\Upgrade\Success::class)->name('membership.upgrade.success');
 });
+
+Route::post('/webhooks/razorpay', [\App\Http\Controllers\Webhooks\RazorpayWebhookController::class, 'handle'])->name('webhooks.razorpay');
+

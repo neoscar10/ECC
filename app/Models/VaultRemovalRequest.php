@@ -78,6 +78,11 @@ class VaultRemovalRequest extends Model
         return $this->belongsTo(\App\Models\Shipping\ShippingRateQuote::class, 'shipping_rate_quote_id');
     }
 
+    public function payments(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(\App\Models\Payment::class, 'payable');
+    }
+
     /**
      * Polymorphic shipping shipment (via shippable morph on ShippingShipment).
      */

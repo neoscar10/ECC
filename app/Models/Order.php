@@ -47,4 +47,9 @@ class Order extends Model
     {
         return $this->belongsTo(User::class, 'logged_by');
     }
+
+    public function payments(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(\App\Models\Payment::class, 'payable');
+    }
 }

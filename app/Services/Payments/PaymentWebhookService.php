@@ -31,18 +31,50 @@ class PaymentWebhookService
             // Delegate to driver handleWebhook method
             $result = $driver->handleWebhook($payload, $signature, $rawBody);
 
+            // Retrieve payment entity notes or order ID to locate internal payment
+            $entity = $payload['payload']['payment']['entity'] ?? [];
+            $internalPaymentId = $entity['notes']['internal_payment_id'] ?? null;
+            $gatewayOrderId = $result->gatewayOrderId ?: ($entity['order_id'] ?? null);
+
+            $payment = null;
+            if ($internalPaymentId) {
+                $payment = \App\Models\Payment::find($internalPaymentId);
+            }
+            if (!$payment && $gatewayOrderId) {
+                $payment = \App\Models\Payment::where('gateway_order_id', $gatewayOrderId)->first();
+            }
+
+            // Evaluate signature validity
+            $signatureValid = !in_array($result->failureCode, ['missing_webhook_signature', 'invalid_webhook_signature']);
+
             // If webhook successfully processes or is valid, record the event
             $this->ledger->recordEvent([
+                'payment_id' => $payment ? $payment->id : null,
                 'gateway' => $gateway,
                 'event_type' => $payload['event'] ?? 'webhook.received',
                 'gateway_event_id' => $payload['id'] ?? null,
                 'payload' => $payload,
-                'signature_valid' => true,
+                'signature_valid' => $signatureValid,
                 'processed_at' => now(),
             ]);
 
+            if ($signatureValid && $payment) {
+                $finalizer = app(\App\Services\Payments\PaymentFinalizationService::class);
+                if ($result->success && $result->status === \App\Support\Payments\PaymentStatus::PAID) {
+                    $payment = $this->ledger->markPaid($payment, $result->gatewayPaymentId, $result->raw);
+                    $finalizer->finalizePaidPayment($payment);
+                } elseif ($result->status === \App\Support\Payments\PaymentStatus::FAILED) {
+                    // Protect PAID payments from being downgraded to FAILED
+                    if (!$payment->isPaid()) {
+                        $payment = $this->ledger->markFailed($payment, $result->failureCode, $result->failureMessage, $result->raw);
+                        $finalizer->markPaymentFailed($payment, $result->failureMessage ?? 'Webhook verification failed.');
+                    }
+                }
+            }
+
             return [
-                'status' => 'processed',
+                'status' => $signatureValid ? 'processed' : 'ignored',
+                'signature_valid' => $signatureValid,
                 'gateway' => $gateway,
                 'result' => $result->toArray(),
             ];

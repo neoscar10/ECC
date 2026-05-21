@@ -198,7 +198,11 @@ class PaymentsServiceLayerTest extends TestCase
     /** @test */
     public function test_razorpay_gateway_adapter_throws_controlled_exceptions()
     {
-        $gateway = app(\App\Services\Payments\Gateways\RazorpayGateway::class);
+        config([
+            'payments.gateways.razorpay.key_id' => null,
+            'payments.gateways.razorpay.key_secret' => null,
+        ]);
+        $gateway = new \App\Services\Payments\Gateways\RazorpayGateway();
         $payment = Payment::create(['amount' => 100]);
 
         $this->assertEquals('razorpay', $gateway->gatewayName());
@@ -221,6 +225,9 @@ class PaymentsServiceLayerTest extends TestCase
     /** @test */
     public function test_webhook_service_gracefully_handles_placeholder_runtime_exceptions()
     {
+        config([
+            'payments.gateways.razorpay.webhook_secret' => null,
+        ]);
         $webhookService = app(PaymentWebhookService::class);
         
         $payload = [

@@ -7,7 +7,8 @@ use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\Membership\MembershipUpgradeService;
-use App\Domain\Membership\PaymentService;
+use App\Services\Payments\PaymentManager;
+use App\Support\Payments\PaymentPurpose;
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Validator;
 use Exception;
@@ -36,15 +37,15 @@ class MembershipUpgradeController extends Controller
         return $this->success($quote, 'Upgrade quote generated successfully.');
     }
 
-    public function upgrade(Request $request, MembershipUpgradeService $upgradeService, PaymentService $paymentService)
+    public function upgrade(Request $request, MembershipUpgradeService $upgradeService, PaymentManager $paymentManager)
     {
         $validator = Validator::make($request->all(), [
             'tier_id'         => 'required|exists:membership_tiers,id',
-            'method'          => 'required|in:card,wallet',
-            'card_number'     => 'required_if:method,card|string|min:12|max:19',
-            'expiry'          => 'required_if:method,card|string|regex:/^\d{2}\/\d{2}$/',
-            'cvv'             => 'required_if:method,card|string|min:3|max:4',
-            'cardholder_name' => 'required_if:method,card|string|min:2|max:80',
+            'method'          => 'nullable|string',
+            'card_number'     => 'nullable|string',
+            'expiry'          => 'nullable|string',
+            'cvv'             => 'nullable|string',
+            'cardholder_name' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -61,36 +62,6 @@ class MembershipUpgradeController extends Controller
         }
 
         try {
-            $paymentData = [
-                'amount'   => $quote['payable_amount'],
-                'method'   => $request->method,
-                'currency' => 'INR',
-                // Proration audit trail stored in payment meta_json
-                'upgrade_context' => [
-                    'current_membership_id' => $quote['current_membership_id'],
-                    'current_tier_id'       => $quote['current_tier']['id'] ?? null,
-                    'current_tier_name'     => $quote['current_tier']['name'] ?? null,
-                    'current_tier_price'    => $quote['current_tier_price'],
-                    'target_tier_id'        => $quote['target_tier']['id'],
-                    'target_tier_name'      => $quote['target_tier']['name'],
-                    'target_tier_price'     => $quote['target_tier_price'],
-                    'total_duration_days'   => $quote['total_duration_days'],
-                    'remaining_days'        => $quote['remaining_days'],
-                    'unused_credit'         => $quote['unused_credit'],
-                    'payable_amount'        => $quote['payable_amount'],
-                    'currency'              => $quote['currency'],
-                    'is_prorated'           => ($quote['unused_credit'] > 0),
-                    'calculated_at'         => now()->toIso8601String(),
-                    'source'                => 'api_upgrade_flow',
-                ],
-            ];
-
-            if ($request->method === 'card') {
-                $paymentData['cardholder_name'] = $request->cardholder_name;
-                $paymentData['last4'] = substr(str_replace(' ', '', $request->card_number), -4);
-                $paymentData['brand'] = 'Visa';
-            }
-
             // Sync with a draft application to fulfil payment service model constraints.
             // Use firstOrCreate to avoid duplicates; prefer an existing upgrade_completed draft
             // only if no cleaner draft already exists for this user+tier combination.
@@ -108,17 +79,37 @@ class MembershipUpgradeController extends Controller
 
             $draft->update(['selected_tier_id' => $request->tier_id]);
             
-            $paymentService->processTestPayment($draft, $paymentData);
+            $paymentInitiation = $paymentManager->initiatePayment(
+                payable: $draft,
+                amount: $quote['payable_amount'],
+                purpose: PaymentPurpose::MEMBERSHIP_UPGRADE,
+                user: $user,
+                gateway: 'razorpay',
+                context: [
+                    'meta' => [
+                        'upgrade_context' => $quote
+                    ]
+                ]
+            );
 
-            $upgradeData = $upgradeService->upgradeUserMembership($user, $request->tier_id, $quote);
+            $payment = $paymentInitiation['payment'];
+            $checkout = $paymentInitiation['checkout'];
 
-            // Mark the draft as consumed so it is not reused
-            $upgradeService->consumeUpgradeDraft($draft);
-
-            return $this->success($upgradeData, 'Membership upgraded successfully.');
+            return $this->success([
+                'payment' => [
+                    'id' => $payment->id,
+                    'gateway' => $payment->gateway,
+                    'status' => $payment->status,
+                    'amount' => (float) $payment->amount,
+                    'currency' => $payment->currency,
+                    'gateway_order_id' => $payment->gateway_order_id,
+                    'checkout' => $checkout,
+                ]
+            ], 'Payment initiated successfully.');
             
         } catch (Exception $e) {
-            return $this->error('Upgrade failed: ' . $e->getMessage(), 500);
+            return $this->error('Upgrade initiation failed: ' . $e->getMessage(), 500);
         }
     }
 }
+

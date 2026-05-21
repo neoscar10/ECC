@@ -277,16 +277,22 @@ class CheckoutPage extends Component
         if ($this->isVaultDelivery) {
             $request = \App\Models\VaultRemovalRequest::find($this->vaultRequestId);
             
-            if ($request && in_array($request->payment_status, ['pending_payment', 'payment_failed'])) {
+            if ($request && in_array($request->payment_status, [\App\Models\VaultRemovalRequest::PAYMENT_PENDING, \App\Models\VaultRemovalRequest::PAYMENT_FAILED])) {
                 $request->update([
-                    'payment_status' => \App\Models\VaultRemovalRequest::PAYMENT_PAID,
-                    'paid_at' => now(),
-                    'payment_reference' => 'PAY-ECC-' . strtoupper(uniqid()),
                     'address_id' => $this->selectedAddressId, // Update address if they changed it
                 ]);
 
-                session()->flash('success', 'Delivery fee paid successfully. Your request is now pending admin review.');
-                return redirect()->route('vault.index');
+                $paymentManager = app(\App\Services\Payments\PaymentManager::class);
+
+                $paymentInitiation = $paymentManager->initiatePayment(
+                    payable: $request,
+                    amount: $request->delivery_fee,
+                    purpose: \App\Support\Payments\PaymentPurpose::VAULT_DELIVERY,
+                    user: $user,
+                    gateway: 'razorpay'
+                );
+
+                return redirect()->route('payments.razorpay.pay', $paymentInitiation['payment']->id);
             }
             
             session()->flash('error', 'Unable to process vault payment.');

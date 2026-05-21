@@ -69,79 +69,30 @@
 
       {{-- Payment method --}}
       <section class="mb-4">
-        <div class="ecc-pay-title mb-2">Payment Method</div>
+        <div class="ecc-pay-title mb-2">Payment Gateway</div>
         <div class="ecc-method">
-          <label class="ecc-method__opt {{ $method==='card' ? 'is-on' : '' }}">
-            <input type="radio" class="d-none" wire:model.live="method" value="card">
+          <div class="ecc-method__opt is-on">
             <span class="d-inline-flex align-items-center gap-2">
-              <span class="material-symbols-outlined">credit_card</span> Card
+              <span class="material-symbols-outlined">payments</span> Razorpay Secure Checkout
             </span>
-          </label>
-          <label class="ecc-method__opt {{ $method==='wallet' ? 'is-on' : '' }}">
-            <input type="radio" class="d-none" wire:model.live="method" value="wallet">
-            <span class="d-inline-flex align-items-center gap-2">
-              <span class="material-symbols-outlined">account_balance_wallet</span> Wallet
-            </span>
-          </label>
+          </div>
         </div>
       </section>
 
-      {{-- Card form --}}
+      {{-- Checkout Info & Button --}}
       <form wire:submit.prevent="submit" class="d-flex flex-column gap-3">
         @if($errorMessage)
           <div class="alert alert-danger py-2 small">{{ $errorMessage }}</div>
         @endif
 
-        <div class="ecc-field">
-          <div class="ecc-lab mb-2">Card Number</div>
-          <div class="position-relative">
-            <input type="text" wire:model.defer="card_number" class="form-control ecc-inp"
-                   placeholder="0000 0000 0000 0000" @if($method!=='card') disabled @endif>
-            <span class="material-symbols-outlined ecc-ic">credit_card</span>
-          </div>
-          @error('card_number') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
-        </div>
-
-        <div class="row g-3">
-          <div class="col-6">
-            <div class="ecc-field">
-              <div class="ecc-lab mb-2">Expiry Date</div>
-              <div class="position-relative">
-                <input type="text" wire:model.defer="expiry" class="form-control ecc-inp"
-                       placeholder="MM/YY" @if($method!=='card') disabled @endif>
-                <span class="material-symbols-outlined ecc-ic">calendar_month</span>
-              </div>
-              @error('expiry') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
+        <div class="ecc-pay-info-box p-4 rounded-4 mb-3" style="background: rgba(10,10,10,0.85); border: 1px solid rgba(199, 167, 90, 0.3);">
+          <div class="d-flex align-items-start gap-3">
+            <span class="material-symbols-outlined text-ecc" style="font-size: 32px;">verified_user</span>
+            <div>
+              <h5 class="ecc-pay-subtitle mb-1" style="color: rgba(199, 167, 90, 0.95); font-weight: 700; font-size: 16px;">Secure Payment Routing</h5>
+              <p class="mb-0 text-muted small" style="line-height: 1.5; color: rgba(255,255,255,0.6) !important;">You will be redirected to the secure Razorpay payment gateway to complete your transaction. You can pay via Credit/Debit Cards, UPI, Netbanking, or Wallets.</p>
             </div>
           </div>
-          <div class="col-6">
-            <div class="ecc-field">
-              <div class="ecc-lab mb-2">CVV</div>
-              <div class="position-relative">
-                <input type="password" wire:model.defer="cvv" class="form-control ecc-inp"
-                       placeholder="123" @if($method!=='card') disabled @endif>
-                <span class="material-symbols-outlined ecc-ic">lock</span>
-              </div>
-              @error('cvv') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
-            </div>
-          </div>
-        </div>
-
-        <div class="ecc-field">
-          <div class="ecc-lab mb-2">Cardholder Name</div>
-          <div class="position-relative">
-            <input type="text" wire:model.defer="cardholder_name" class="form-control ecc-inp"
-                   placeholder="John Doe" @if($method!=='card') disabled @endif>
-            <span class="material-symbols-outlined ecc-ic">person</span>
-          </div>
-          @error('cardholder_name') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
-        </div>
-
-        <div class="d-flex align-items-center gap-3 mt-1">
-          <div class="form-check">
-            <input class="form-check-input ecc-check" type="checkbox" id="saveCard" wire:model.defer="save_card" @if($method!=='card') disabled @endif>
-          </div>
-          <label class="ecc-save" for="saveCard">Save this card for future payments</label>
         </div>
 
         <div class="pt-3">
@@ -156,7 +107,7 @@
             </span>
 
             <span wire:loading wire:target="submit" class="ecc-btn-load-wrapper">
-              <span>Processing Upgrade...</span>
+              <span>Redirecting to Razorpay...</span>
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             </span>
           </button>

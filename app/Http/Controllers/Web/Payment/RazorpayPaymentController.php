@@ -13,12 +13,12 @@ use Illuminate\Support\Facades\Log;
 class RazorpayPaymentController extends Controller
 {
     protected PaymentManager $paymentManager;
-    protected OrderPaymentService $orderPaymentService;
+    protected \App\Services\Payments\PaymentFinalizationService $finalizationService;
 
-    public function __construct(PaymentManager $paymentManager, OrderPaymentService $orderPaymentService)
+    public function __construct(PaymentManager $paymentManager, \App\Services\Payments\PaymentFinalizationService $finalizationService)
     {
         $this->paymentManager = $paymentManager;
-        $this->orderPaymentService = $orderPaymentService;
+        $this->finalizationService = $finalizationService;
     }
 
     /**
@@ -92,15 +92,15 @@ class RazorpayPaymentController extends Controller
             $result = $this->paymentManager->verifyPayment($payment, $verificationData);
 
             if ($result['result']->success && $result['payment']->status === PaymentStatus::PAID) {
-                // Finalize order if applicable
-                $this->orderPaymentService->finalizePaidOrder($result['payment']);
+                // Finalize payment polymorphically
+                $this->finalizationService->finalizePaidPayment($result['payment']);
 
                 return response()->json([
                     'success' => true,
                     'redirect_url' => $this->getSuccessUrl($result['payment'])
                 ]);
             } else {
-                $this->orderPaymentService->markPaymentFailedOrder($result['payment'], 'Verification failed');
+                $this->finalizationService->markPaymentFailed($result['payment'], 'Verification failed');
                 return response()->json([
                     'success' => false,
                     'message' => 'Payment verification failed',
@@ -172,7 +172,18 @@ class RazorpayPaymentController extends Controller
             return route('shop.order-success', ['orderId' => $payment->payable_id]);
         }
 
-        // Fallback or handle other payable types in the future (e.g., Vault, Membership)
+        if ($payment->payable_type === \App\Models\MembershipApplication::class) {
+            if ($payment->purpose === \App\Support\Payments\PaymentPurpose::MEMBERSHIP_UPGRADE) {
+                return route('membership.upgrade.success');
+            }
+            return route('membership.application.step8');
+        }
+
+        if ($payment->payable_type === \App\Models\VaultRemovalRequest::class) {
+            return route('vault.index');
+        }
+
+        // Fallback
         return route('home');
     }
 

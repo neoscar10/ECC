@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Shop\ShopOrderResource;
 use App\Models\Payment;
 use App\Services\Payments\PaymentManager;
-use App\Services\Shop\OrderPaymentService;
+use App\Services\Payments\PaymentFinalizationService;
 use App\Support\ApiResponse;
 use App\Support\Payments\PaymentStatus;
+use App\Support\Payments\PaymentPurpose;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -18,12 +19,12 @@ class RazorpayPaymentController extends Controller
     use ApiResponse;
 
     protected PaymentManager $paymentManager;
-    protected OrderPaymentService $orderPaymentService;
+    protected PaymentFinalizationService $finalizationService;
 
-    public function __construct(PaymentManager $paymentManager, OrderPaymentService $orderPaymentService)
+    public function __construct(PaymentManager $paymentManager, PaymentFinalizationService $finalizationService)
     {
         $this->paymentManager = $paymentManager;
-        $this->orderPaymentService = $orderPaymentService;
+        $this->finalizationService = $finalizationService;
     }
 
     /**
@@ -65,12 +66,12 @@ class RazorpayPaymentController extends Controller
             $result = $this->paymentManager->verifyPayment($payment, $verificationData);
 
             if ($result['result']->success && $result['payment']->status === PaymentStatus::PAID) {
-                // Finalize order
-                $this->orderPaymentService->finalizePaidOrder($result['payment']);
+                // Finalize payment polymorphically
+                $this->finalizationService->finalizePaidPayment($result['payment']);
 
                 return $this->buildSuccessResponse($result['payment'], 'Payment verified successfully.');
             } else {
-                $this->orderPaymentService->markPaymentFailedOrder($result['payment'], 'Verification failed');
+                $this->finalizationService->markPaymentFailed($result['payment'], 'Verification failed');
                 
                 return $this->buildFailureResponse($result['payment'], 'Payment verification failed.');
             }
@@ -104,8 +105,41 @@ class RazorpayPaymentController extends Controller
             ]
         ];
 
-        if ($payable && $payment->payable_type === \App\Models\Shop\ShopOrder::class) {
-            $data['order'] = new ShopOrderResource($payable);
+        if ($payable) {
+            if ($payment->payable_type === \App\Models\Shop\ShopOrder::class) {
+                $data['order'] = new ShopOrderResource($payable);
+            } elseif ($payment->payable_type === \App\Models\MembershipApplication::class) {
+                if ($payment->purpose === PaymentPurpose::MEMBERSHIP_UPGRADE) {
+                    $user = $payment->user;
+                    $newMembership = $user ? $user->currentMembership : null;
+                    $data['upgrade'] = [
+                        'application_id' => $payable->id,
+                        'status' => $payable->status,
+                        'payment_status' => $payable->payment_status,
+                        'new_tier_id' => $payable->selected_tier_id,
+                        'membership' => $newMembership ? [
+                            'id' => $newMembership->id,
+                            'tier_id' => $newMembership->membership_tier_id,
+                            'status' => $newMembership->status,
+                            'expires_at' => $newMembership->expires_at ? $newMembership->expires_at->toIso8601String() : null,
+                        ] : null,
+                    ];
+                } else {
+                    $data['membership_application'] = [
+                        'id' => $payable->id,
+                        'status' => $payable->status,
+                        'payment_status' => $payable->payment_status,
+                    ];
+                }
+            } elseif ($payment->payable_type === \App\Models\VaultRemovalRequest::class) {
+                $data['vault_request'] = [
+                    'id' => $payable->id,
+                    'status' => $payable->status,
+                    'payment_status' => $payable->payment_status,
+                    'delivery_fee' => (float) $payable->delivery_fee,
+                    'tracking_number' => $payable->tracking_number,
+                ];
+            }
         }
 
         return $this->success($data, $message);
@@ -129,3 +163,4 @@ class RazorpayPaymentController extends Controller
         ]);
     }
 }
+
