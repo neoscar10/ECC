@@ -113,8 +113,14 @@ class Index extends Component
     // --- Render & Computed Props ---
 
     protected $listeners = [
-        'set-combo-default' => 'setComboDefault'
+        'set-combo-default'  => 'setComboDefault',
+        'shop-product:edit'  => 'editFromEvent',
     ];
+
+    public function editFromEvent($productId)
+    {
+        $this->edit($productId);
+    }
 
     public function setComboDefault($key)
     {

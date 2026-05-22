@@ -61,12 +61,12 @@
     html[data-theme="light"] {
         color-scheme: light;
 
-        --ecc-bg-page: #F8F5EC;
-        --ecc-bg-page-rgb: 248, 245, 236;
-        --ecc-bg-nav: rgba(248, 245, 236, 0.94);
-        --ecc-bg-surface: #FFFDF7;
-        --ecc-bg-surface-2: #F3EBD8;
-        --ecc-bg-elevated: #FFFFFF;
+        --ecc-bg-page: #ffffff;
+        --ecc-bg-page-rgb: 255, 255, 255;
+        --ecc-bg-nav: rgba(255, 255, 255, 0.94);
+        --ecc-bg-surface: #ffffff;
+        --ecc-bg-surface-2: #f5f5f5;
+        --ecc-bg-elevated: #ffffff;
         --ecc-bg-input: rgba(19, 15, 7, 0.055);
         --ecc-bg-hover: rgba(199, 167, 90, 0.13);
 

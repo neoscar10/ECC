@@ -67,10 +67,38 @@ class RazorpayPaymentController extends Controller
             'amount'           => $payment->amount,
         ]);
 
+        // Derive test mode from config only — never hardcoded
+        $isTestMode = config('payments.gateways.razorpay.mode', 'test') === 'test'
+                   || app()->environment(['local', 'staging', 'testing']);
+
+        // Build a safe payable summary for display (no sensitive data)
+        $payable = $payment->payable;
+        $payableSummary = [
+            'label'        => 'Order',
+            'reference'    => null,
+            'display_amount' => '₹' . number_format((float) $payment->amount, 2),
+        ];
+
+        if ($payable && method_exists($payable, 'getKey')) {
+            if ($payable instanceof \App\Models\Shop\ShopOrder) {
+                $payableSummary['label']     = 'Order';
+                $payableSummary['reference'] = $payable->order_number ?? ('#' . $payable->id);
+            } elseif ($payable instanceof \App\Models\VaultRemovalRequest) {
+                $payableSummary['label']     = 'Vault Delivery';
+                $payableSummary['reference'] = '#' . $payable->id;
+            } elseif ($payable instanceof \App\Models\MembershipApplication) {
+                $payableSummary['label']     = 'Membership';
+                $payableSummary['reference'] = '#' . $payable->id;
+            }
+        }
+
         return view('shop.payment.razorpay', [
-            'payment'      => $payment,
-            'checkoutData' => $checkoutData,
+            'payment'        => $payment,
+            'checkoutData'   => $checkoutData,
+            'isTestMode'     => $isTestMode,
+            'payableSummary' => $payableSummary,
         ]);
+
     }
 
     /**

@@ -144,6 +144,9 @@
                         <button type="button" class="btn btn-primary" wire:click="requestEdit">
                             <i class="ri-edit-2-line align-middle me-1"></i> Edit Product
                         </button>
+                        <a href="{{ route('shop.show', $product->slug) }}" target="_blank" rel="noopener" class="btn btn-soft-success">
+                            <i class="ri-eye-line align-middle me-1"></i> View on Store
+                        </a>
                         <a href="{{ route('admin.shop.inventory', ['search' => $product->title]) }}" class="btn btn-soft-info">
                             <i class="ri-history-line align-middle me-1"></i> Manage Inventory
                         </a>
