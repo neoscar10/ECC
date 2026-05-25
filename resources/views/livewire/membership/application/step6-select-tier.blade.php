@@ -196,8 +196,8 @@
 
   .ecc-tier-card{
     width:100%;
-    border:1px solid var(--ecc-text-primary);
-    background:var(--ecc-text-primary);
+    border:1px solid var(--ecc-border);
+    background:var(--ecc-surface);
     border-radius:16px;
     padding:16px;
     text-align:left;
@@ -226,7 +226,7 @@
     width:28px; height:28px;
     border-radius:9999px;
     display:flex; align-items:center; justify-content:center;
-    border:1px solid var(--ecc-text-primary);
+    border:1px solid var(--ecc-border);
     background:rgba(0,0,0,.25);
     color:transparent;
   }
