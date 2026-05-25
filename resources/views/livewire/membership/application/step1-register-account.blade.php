@@ -198,14 +198,14 @@
     margin-left: 14px;
   }
   .ecc-input{
-    background: var(--ecc-text-primary) !important;
-    border: 1px solid var(--ecc-text-primary) !important;
+    background: var(--ecc-surface) !important;
+    border: 1px solid var(--ecc-border) !important;
     border-radius: 12px !important;
     color: #fff !important;
     padding: 14px 18px !important;
     font-family: "Noto Sans", system-ui, sans-serif;
   }
-  .ecc-input::placeholder{ color: var(--ecc-text-primary) !important; }
+  .ecc-input::placeholder{ color: var(--ecc-text-subtle) !important; }
   .ecc-input:focus{ border-color: var(--ecc-primary) !important; box-shadow: 0 0 0 1px var(--ecc-primary) !important; }
 
   .ecc-hint{

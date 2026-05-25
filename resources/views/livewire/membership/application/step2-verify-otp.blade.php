@@ -146,7 +146,7 @@
     --ecc-primary:var(--ecc-primary);
     --ecc-bg:#020202;
     --ecc-surface:#181818;
-    --ecc-border: var(--ecc-text-primary);
+    --ecc-border:#333333;
   }
 
   .ecc-bg{ background: var(--ecc-bg); color: var(--ecc-text-primary); font-family: "Newsreader", serif; }
@@ -233,7 +233,7 @@
 
   .ecc-otp-input{
     width: 15%; height: 64px;
-    background: var(--ecc-text-primary) !important;
+    background: var(--ecc-surface) !important;
     border: 1px solid var(--ecc-border) !important;
     border-radius: 12px !important;
     color: #fff !important;
