@@ -537,7 +537,7 @@ document.addEventListener('click', function (e) {
         border-radius: 12px;
         background: rgba(199,167,90,.03);
         border: 1px solid rgba(199,167,90,.20);
-        color: var(--ecc-gold-300);
+        color: #ffffff;
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         transition: all 220ms ease;
@@ -552,7 +552,7 @@ document.addEventListener('click', function (e) {
         background: rgba(199,167,90,.08);
         border-color: rgba(199,167,90,.80);
         box-shadow: none;
-        color: var(--ecc-gold-300);
+        color: #ffffff;
     }
 
     .ecc-input-icon{
@@ -648,7 +648,7 @@ document.addEventListener('click', function (e) {
     input:-webkit-autofill:hover,
     input:-webkit-autofill:focus,
     input:-webkit-autofill:active{
-        -webkit-text-fill-color: var(--ecc-gold-400) !important;
+        -webkit-text-fill-color: #ffffff !important;
         -webkit-box-shadow: 0 0 0 30px #050505 inset !important;
         transition: background-color 5000s ease-in-out 0s;
     }
