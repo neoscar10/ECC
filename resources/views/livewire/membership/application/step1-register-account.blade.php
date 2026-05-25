@@ -112,8 +112,6 @@
 @push('styles')
 <style>
   :root{
-    --ecc-primary:var(--ecc-primary);
-    --ecc-primary-dark:var(--ecc-gold-600);
     --ecc-bg:#020202;
     --ecc-surface:#181818;
     --ecc-border:#333333;

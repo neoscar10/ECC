@@ -145,7 +145,6 @@
 @push('styles')
 <style>
   :root{
-    --ecc-primary:var(--ecc-primary); --ecc-primary-dark:var(--ecc-gold-600);
     --ecc-bg:#020202; --ecc-surface:#0a0a0a; --ecc-border:rgba(199, 167, 90,.30);
   }
   .ecc-bg{ background:var(--ecc-bg); color: var(--ecc-text-primary); font-family:"Work Sans","Noto Sans",system-ui,sans-serif; }
