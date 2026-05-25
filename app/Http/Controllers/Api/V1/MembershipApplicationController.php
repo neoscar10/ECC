@@ -118,6 +118,73 @@ class MembershipApplicationController extends Controller
         return $this->success($application, 'Tier selected.');
     }
 
+    public function initiatePayment(Request $request, $id, \App\Services\Payments\PaymentManager $paymentManager): JsonResponse
+    {
+        $application = $this->getApplicationOr404($id, $request->user());
+
+        $validator = Validator::make($request->all(), [
+            'payment_gateway' => ['nullable', 'string'],
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error('Validation failed', 422, $validator->errors()->toArray());
+        }
+
+        $tier = $application->membershipTier;
+        if (!$tier) {
+            return $this->error('No tier selected.', 400);
+        }
+
+        $amount = (float) $tier->price;
+
+        if ($amount <= 0) {
+            // Free tier: no gateway payment needed
+            $application->update([
+                'payment_status' => 'not_required',
+                'current_step' => 'submitted'
+            ]);
+            $this->membershipService->submitApplication($application);
+            return $this->success([
+                'application' => $application,
+                'payment' => null
+            ], 'Payment not required for this tier. Application submitted.');
+        }
+
+        $availabilityService = app(\App\Services\Payments\PaymentGatewayAvailabilityService::class);
+        $gatewayName = $availabilityService->validateGateway($request->input('payment_gateway'));
+
+        try {
+            $paymentInitiation = $paymentManager->initiatePayment(
+                payable: $application,
+                amount: $amount,
+                purpose: \App\Support\Payments\PaymentPurpose::MEMBERSHIP_RENEWAL, // Match web registration payment purpose
+                user: $request->user(),
+                gateway: $gatewayName
+            );
+
+            $payment = $paymentInitiation['payment'];
+            $checkout = $paymentInitiation['checkout'];
+
+            return $this->success([
+                'application' => $application,
+                'payment' => [
+                    'id' => $payment->id,
+                    'gateway' => $payment->gateway,
+                    'status' => $payment->status,
+                    'amount' => (float) $payment->amount,
+                    'currency' => $payment->currency,
+                    'purpose' => $payment->purpose,
+                    'verify_endpoint' => url('/api/v1/payments/' . $gatewayName . '/verify'),
+                    'gateway_order_id' => $payment->gateway_order_id,
+                    'checkout' => $checkout,
+                ]
+            ], 'Payment initiated successfully.');
+
+        } catch (Exception $e) {
+            return $this->error('Payment initiation failed: ' . $e->getMessage(), 500);
+        }
+    }
+
     public function confirmPayment(Request $request, $id, PaymentService $paymentService): JsonResponse
     {
         $application = $this->getApplicationOr404($id, $request->user());

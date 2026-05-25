@@ -77,6 +77,7 @@ Route::prefix('v1')->group(function () {
             Route::patch('/cricket-profile', [App\Http\Controllers\Api\V1\MembershipApplicationController::class, 'saveCricketProfile']);
             Route::patch('/collector-intent', [App\Http\Controllers\Api\V1\MembershipApplicationController::class, 'saveCollectorIntent']);
             Route::post('/select-tier', [App\Http\Controllers\Api\V1\MembershipApplicationController::class, 'selectTier']);
+            Route::post('/payment/initiate', [App\Http\Controllers\Api\V1\MembershipApplicationController::class, 'initiatePayment']);
             Route::post('/payment/confirm', [App\Http\Controllers\Api\V1\MembershipApplicationController::class, 'confirmPayment']);
             Route::post('/submit', [App\Http\Controllers\Api\V1\MembershipApplicationController::class, 'submitApplication']);
         });
