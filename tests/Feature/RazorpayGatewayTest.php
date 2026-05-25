@@ -24,6 +24,8 @@ class RazorpayGatewayTest extends TestCase
         // Dynamically set mock configurations for tests
         config([
             'payments.gateways.razorpay' => [
+                'driver' => \App\Services\Payments\Gateways\RazorpayGateway::class,
+                'enabled' => true,
                 'key_id' => 'rzp_test_key_123',
                 'key_secret' => 'rzp_test_secret_abc',
                 'webhook_secret' => 'rzp_webhook_secret_xyz',
@@ -321,6 +323,8 @@ class RazorpayGatewayTest extends TestCase
         // Set credentials to empty
         config([
             'payments.gateways.razorpay' => [
+                'driver' => \App\Services\Payments\Gateways\RazorpayGateway::class,
+                'enabled' => true,
                 'key_id' => '',
                 'key_secret' => '',
             ]
@@ -336,6 +340,8 @@ class RazorpayGatewayTest extends TestCase
     {
         config([
             'payments.gateways.razorpay' => [
+                'driver' => \App\Services\Payments\Gateways\RazorpayGateway::class,
+                'enabled' => true,
                 'key_id' => 'rzp_test_key_123',
                 'key_secret' => 'rzp_test_secret_abc',
             ]

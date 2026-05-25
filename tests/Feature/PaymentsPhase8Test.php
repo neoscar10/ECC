@@ -35,6 +35,8 @@ class PaymentsPhase8Test extends TestCase
         // Configure credentials for Razorpay in tests
         config([
             'payments.gateways.razorpay' => [
+                'driver' => \App\Services\Payments\Gateways\RazorpayGateway::class,
+                'enabled' => true,
                 'key_id' => 'rzp_test_key_123',
                 'key_secret' => 'rzp_test_secret_abc',
                 'webhook_secret' => $this->webhookSecret,

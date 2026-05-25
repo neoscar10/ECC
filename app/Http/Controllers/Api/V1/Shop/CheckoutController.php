@@ -41,7 +41,11 @@ class CheckoutController extends Controller
             'billing_address_id' => 'nullable|exists:user_addresses,id',
             'billing_same_as_shipping' => 'boolean',
             'notes' => 'nullable|string|max:500',
+            'payment_gateway' => ['nullable', 'string'],
         ]);
+
+        $availabilityService = app(\App\Services\Payments\PaymentGatewayAvailabilityService::class);
+        $gatewayName = $availabilityService->validateGateway($request->input('payment_gateway'));
 
         try {
             // Additional check: address must belong to user
@@ -52,14 +56,14 @@ class CheckoutController extends Controller
 
             $order = $this->checkoutService->placeOrder($request->user(), $request->all());
             
-            // Initiate Razorpay payment
+            // Initiate payment dynamically
             $paymentManager = app(\App\Services\Payments\PaymentManager::class);
             $paymentInitiation = $paymentManager->initiatePayment(
                 payable: $order,
                 amount: $order->total_amount,
                 purpose: 'shop_order',
                 user: $request->user(),
-                gateway: 'razorpay'
+                gateway: $gatewayName
             );
 
             $paymentData = [
@@ -68,6 +72,8 @@ class CheckoutController extends Controller
                 'status' => $paymentInitiation['payment']->status,
                 'amount' => (float) $paymentInitiation['payment']->amount,
                 'currency' => $paymentInitiation['payment']->currency,
+                'purpose' => $paymentInitiation['payment']->purpose,
+                'verify_endpoint' => url('/api/v1/payments/' . $gatewayName . '/verify'),
                 'checkout' => $paymentInitiation['checkout'],
             ];
 

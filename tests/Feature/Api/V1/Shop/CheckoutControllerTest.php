@@ -104,6 +104,25 @@ class CheckoutControllerTest extends TestCase
                  ->andReturn($mockOrder);
         });
 
+        $this->mock(\App\Services\Payments\PaymentManager::class, function (MockInterface $mock) use ($mockOrder) {
+            $mock->shouldReceive('initiatePayment')
+                 ->once()
+                 ->andReturn([
+                     'payment' => (object)[
+                         'id' => 999,
+                         'gateway' => 'razorpay',
+                         'status' => 'pending',
+                         'amount' => 150.00,
+                         'currency' => 'INR',
+                         'purpose' => 'shop_order',
+                     ],
+                     'checkout' => [
+                         'id' => 'pay_mock_123',
+                         'amount' => 15000,
+                     ]
+                 ]);
+        });
+
         $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
                          ->postJson('/api/v1/shop/checkout/place-order', [
                              'shipping_address_id' => $address->id,

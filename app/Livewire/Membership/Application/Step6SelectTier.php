@@ -75,6 +75,12 @@ class Step6SelectTier extends Component
             $draft = $wiz->getDraft();
             $membershipSvc->selectTier($draft, $this->selectedTierId);
 
+            $tier = MembershipTier::find($this->selectedTierId);
+            if ($tier && (float)$tier->price <= 0.0) {
+                $membershipSvc->submitApplication($draft);
+                return redirect()->route('membership.application.step8');
+            }
+
             return redirect()->route('membership.application.step7');
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;

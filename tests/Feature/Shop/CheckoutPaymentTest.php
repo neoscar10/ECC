@@ -22,6 +22,19 @@ class CheckoutPaymentTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        config([
+            'shiprocket.checkout_requires_serviceability' => false,
+            'payments.gateways.razorpay' => [
+                'driver'         => \App\Services\Payments\Gateways\RazorpayGateway::class,
+                'enabled'        => true,
+                'key_id'         => 'rzp_test_key_123',
+                'key_secret'     => 'rzp_test_secret_abc',
+                'webhook_secret' => 'rzp_webhook_secret_xyz',
+                'mode'           => 'test',
+            ]
+        ]);
+
         $this->user = User::factory()->create();
         $this->product = ShopProduct::factory()->create([
             'base_price' => 1000,
@@ -60,10 +73,20 @@ class CheckoutPaymentTest extends TestCase
     }
 
     /**
-     * Test that successful dummy payment creates a paid order, deducts stock, and clears cart.
+     * Test that successful dummy payment creates a pending order, which is finalized upon payment verification.
      */
     public function test_successful_dummy_payment_creates_or_finalizes_paid_order()
     {
+        \Illuminate\Support\Facades\Http::fake([
+            'https://api.razorpay.com/v1/orders' => \Illuminate\Support\Facades\Http::response([
+                'id' => 'order_web123',
+                'entity' => 'order',
+                'amount' => 200000,
+                'currency' => 'INR',
+                'status' => 'created',
+            ], 201)
+        ]);
+
         $this->actingAs($this->user);
         $address = UserAddress::factory()->create(['user_id' => $this->user->id]);
 
@@ -76,24 +99,48 @@ class CheckoutPaymentTest extends TestCase
             'selection_signature' => 'none',
         ]);
 
-        Livewire::actingAs($this->user)
+        $lw = Livewire::actingAs($this->user)
             ->test(CheckoutPage::class)
-            ->set('selectedAddressId', $address->id)
-            ->call('placeOrder');
+            ->set('selectedAddressId', $address->id);
+        
+        $lw->call('placeOrder');
 
-        // Verify order creation
+        // Verify order creation in pending_payment state
         $this->assertEquals(1, \App\Models\Shop\ShopOrder::count());
         $order = \App\Models\Shop\ShopOrder::first();
 
-        $this->assertEquals('paid', $order->status);
-        $this->assertEquals('paid', $order->payment_status);
-        $this->assertNotNull($order->paid_at);
+        $this->assertEquals('pending_payment', $order->status);
+        $this->assertEquals('unpaid', $order->payment_status);
 
         // Verify stock deduction
         $this->assertEquals(8, $this->product->fresh()->stock_qty);
 
         // Verify cart cleared
         $this->assertEquals(0, $cart->items()->count());
+
+        // Simulate payment verification
+        $payment = \App\Models\Payment::where('payable_id', $order->id)
+            ->where('payable_type', \App\Models\Shop\ShopOrder::class)
+            ->first();
+        $this->assertNotNull($payment);
+
+        $paymentManager = app(\App\Services\Payments\PaymentManager::class);
+        $gatewayPaymentId = 'pay_web999';
+        $signature = hash_hmac('sha256', "{$payment->gateway_order_id}|{$gatewayPaymentId}", 'rzp_test_secret_abc');
+
+        $paymentManager->verifyPayment($payment, [
+            'gateway' => 'razorpay',
+            'razorpay_order_id' => $payment->gateway_order_id,
+            'razorpay_payment_id' => $gatewayPaymentId,
+            'razorpay_signature' => $signature,
+        ]);
+
+        app(\App\Services\Payments\PaymentFinalizationService::class)->finalizePaidPayment($payment);
+
+        $order->refresh();
+        $this->assertEquals('paid', $order->status);
+        $this->assertEquals('paid', $order->payment_status);
+        $this->assertNotNull($order->paid_at);
     }
 
     /**

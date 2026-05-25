@@ -32,9 +32,15 @@ Route::middleware(['auth', 'ensure_registration_complete'])->group(function () {
     Route::get('/shop/{slug}', \App\Livewire\Shop\Show::class)->name('shop.show');
     
     // Payments
+    Route::get('/payments/{payment}/pay', [\App\Http\Controllers\Web\Payment\GenericPaymentController::class, 'pay'])->name('payments.pay');
+    Route::get('/payments/{payment}/retry', [\App\Http\Controllers\Web\Payment\GenericPaymentController::class, 'retry'])->name('payments.retry');
     Route::get('/payments/razorpay/{payment}/pay', [\App\Http\Controllers\Web\Payment\RazorpayPaymentController::class, 'pay'])->name('payments.razorpay.pay');
     Route::post('/payments/razorpay/verify', [\App\Http\Controllers\Web\Payment\RazorpayPaymentController::class, 'verify'])->name('payments.razorpay.verify');
     Route::get('/payments/razorpay/{payment}/retry', [\App\Http\Controllers\Web\Payment\RazorpayPaymentController::class, 'retry'])->name('payments.razorpay.retry');
+    // Cashfree Phase 3: developer debug page confirming session creation (no SDK yet)
+    Route::get('/payments/cashfree/{payment}/pay', [\App\Http\Controllers\Web\Payment\CashfreePaymentController::class, 'pay'])->name('payments.cashfree.pay');
+    Route::post('/payments/cashfree/verify', [\App\Http\Controllers\Web\Payment\CashfreePaymentController::class, 'verify'])->name('payments.cashfree.verify');
+    Route::get('/payments/cashfree/return/{payment}', [\App\Http\Controllers\Web\Payment\CashfreePaymentController::class, 'return'])->name('payments.cashfree.return');
     Route::get('/payments/failed', function () {
         return view('shop.payment.failed');
     })->name('payments.failed');
@@ -162,4 +168,4 @@ Route::middleware(['auth'])->group(function() {
 });
 
 Route::post('/webhooks/razorpay', [\App\Http\Controllers\Webhooks\RazorpayWebhookController::class, 'handle'])->name('webhooks.razorpay');
-
+Route::post('/webhooks/cashfree', [\App\Http\Controllers\Webhooks\CashfreeWebhookController::class, 'handle'])->name('webhooks.cashfree');

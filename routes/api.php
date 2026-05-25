@@ -51,6 +51,13 @@ Route::prefix('v1')->group(function () {
 
     // Protected Application Routes
     Route::middleware('auth:api')->group(function () {
+        // Payments Selection and Handoff
+        Route::prefix('payments')->group(function () {
+            Route::get('gateways', [\App\Http\Controllers\Api\V1\Payment\GatewayOptionsController::class, 'index']);
+            Route::post('razorpay/verify', [\App\Http\Controllers\Api\V1\Payment\RazorpayPaymentController::class, 'verify']);
+            Route::post('cashfree/verify', [\App\Http\Controllers\Api\V1\Payment\CashfreePaymentController::class, 'verify']);
+        });
+
         // Profile Routes
         Route::prefix('profile')->group(function () {
             Route::get('/', [\App\Http\Controllers\Api\V1\Profile\ProfileController::class, 'show']);
@@ -160,6 +167,7 @@ Route::prefix('v1')->group(function () {
         // Payments
         Route::prefix('payments')->group(function () {
             Route::post('razorpay/verify', [\App\Http\Controllers\Api\V1\Payment\RazorpayPaymentController::class, 'verify']);
+            Route::post('cashfree/verify', [\App\Http\Controllers\Api\V1\Payment\CashfreePaymentController::class, 'verify']);
         });
     });
 

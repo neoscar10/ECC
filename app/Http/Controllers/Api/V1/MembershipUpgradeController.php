@@ -46,11 +46,15 @@ class MembershipUpgradeController extends Controller
             'expiry'          => 'nullable|string',
             'cvv'             => 'nullable|string',
             'cardholder_name' => 'nullable|string',
+            'payment_gateway' => ['nullable', 'string'],
         ]);
 
         if ($validator->fails()) {
             return $this->error('Validation failed', 422, $validator->errors()->toArray());
         }
+
+        $availabilityService = app(\App\Services\Payments\PaymentGatewayAvailabilityService::class);
+        $gatewayName = $availabilityService->validateGateway($request->input('payment_gateway'));
 
         $user = $request->user();
 
@@ -84,7 +88,7 @@ class MembershipUpgradeController extends Controller
                 amount: $quote['payable_amount'],
                 purpose: PaymentPurpose::MEMBERSHIP_UPGRADE,
                 user: $user,
-                gateway: 'razorpay',
+                gateway: $gatewayName,
                 context: [
                     'meta' => [
                         'upgrade_context' => $quote
@@ -102,6 +106,8 @@ class MembershipUpgradeController extends Controller
                     'status' => $payment->status,
                     'amount' => (float) $payment->amount,
                     'currency' => $payment->currency,
+                    'purpose' => $payment->purpose,
+                    'verify_endpoint' => url('/api/v1/payments/' . $gatewayName . '/verify'),
                     'gateway_order_id' => $payment->gateway_order_id,
                     'checkout' => $checkout,
                 ]

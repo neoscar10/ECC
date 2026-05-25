@@ -115,6 +115,18 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
+        $exceptions->render(function (\App\Exceptions\PaymentGatewayValidationException $e, $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'data' => null,
+                    'meta' => (object)[],
+                    'errors' => $e->getErrors(),
+                ], $e->getStatusCode());
+            }
+        });
+
         $exceptions->render(function (\App\Exceptions\MembershipApplicationException $e, $request) {
             if ($request->is('api/*')) {
                 return response()->json([

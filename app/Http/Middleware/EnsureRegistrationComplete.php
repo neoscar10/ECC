@@ -28,7 +28,7 @@ class EnsureRegistrationComplete
             // Allow if nextRouteForUser returns null (complete)
             $nextRoute = $this->resumeService->nextRouteForUser($user);
             
-            if ($nextRoute && !$request->routeIs('membership.application.*')) {
+            if ($nextRoute && !$request->routeIs(['membership.application.*', 'payments.*'])) {
                 return redirect()->to($nextRoute);
             }
         }

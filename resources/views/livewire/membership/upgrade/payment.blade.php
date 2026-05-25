@@ -70,12 +70,26 @@
       {{-- Payment method --}}
       <section class="mb-4">
         <div class="ecc-pay-title mb-2">Payment Gateway</div>
+        @php
+            $availabilityService = app(\App\Services\Payments\PaymentGatewayAvailabilityService::class);
+            $gatewayOptions = array_filter($availabilityService->publicOptions(), function($opt) {
+                return $opt['enabled'];
+            });
+        @endphp
         <div class="ecc-method">
-          <div class="ecc-method__opt is-on">
-            <span class="d-inline-flex align-items-center gap-2">
-              <span class="material-symbols-outlined">payments</span> Razorpay Secure Checkout
-            </span>
-          </div>
+          @foreach($gatewayOptions as $opt)
+            <div class="ecc-method__opt {{ $method === $opt['key'] ? 'is-on' : '' }}" wire:click="$set('method', '{{ $opt['key'] }}')">
+              <span class="d-inline-flex align-items-center gap-2">
+                @if($opt['key'] === 'razorpay')
+                  <span class="material-symbols-outlined">payments</span> Razorpay
+                @elseif($opt['key'] === 'cashfree')
+                  <span class="material-symbols-outlined">account_balance_wallet</span> Cashfree
+                @else
+                  <span class="material-symbols-outlined">payment</span> {{ $opt['label'] }}
+                @endif
+              </span>
+            </div>
+          @endforeach
         </div>
       </section>
 
@@ -90,7 +104,11 @@
             <span class="material-symbols-outlined text-ecc" style="font-size: 32px;">verified_user</span>
             <div>
               <h5 class="ecc-pay-subtitle mb-1" style="color: rgba(199, 167, 90, 0.95); font-weight: 700; font-size: 16px;">Secure Payment Routing</h5>
-              <p class="mb-0 text-muted small" style="line-height: 1.5; color: rgba(255,255,255,0.6) !important;">You will be redirected to the secure Razorpay payment gateway to complete your transaction. You can pay via Credit/Debit Cards, UPI, Netbanking, or Wallets.</p>
+              @if($method === 'cashfree')
+                <p class="mb-0 text-muted small" style="line-height: 1.5; color: rgba(255,255,255,0.6) !important;">You will be redirected to the secure Cashfree payment gateway to complete your transaction. You can pay via Credit/Debit Cards, UPI, Netbanking, or Wallets.</p>
+              @else
+                <p class="mb-0 text-muted small" style="line-height: 1.5; color: rgba(255,255,255,0.6) !important;">You will be redirected to the secure Razorpay payment gateway to complete your transaction. You can pay via Credit/Debit Cards, UPI, Netbanking, or Wallets.</p>
+              @endif
             </div>
           </div>
         </div>
@@ -107,7 +125,7 @@
             </span>
 
             <span wire:loading wire:target="submit" class="ecc-btn-load-wrapper">
-              <span>Redirecting to Razorpay...</span>
+              <span>Redirecting to {{ $method === 'cashfree' ? 'Cashfree' : 'Razorpay' }}...</span>
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             </span>
           </button>

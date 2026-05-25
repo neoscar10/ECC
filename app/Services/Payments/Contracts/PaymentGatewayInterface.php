@@ -32,4 +32,12 @@ interface PaymentGatewayInterface
      * Handle incoming gateway webhook logic.
      */
     public function handleWebhook(array $payload, ?string $signature = null, ?string $rawBody = null): PaymentResult;
+
+    /**
+     * Extract normalized identifiers from the gateway's payload.
+     *
+     * @param array $payload
+     * @return array
+     */
+    public function extractIdentifiers(array $payload): array;
 }

@@ -83,8 +83,9 @@ class ApplicationResumeService
     private function isStep3Complete(MembershipApplication $app): bool
     {
         $data = $app->personal_details_json;
+        $dob = $data['date_of_birth'] ?? $data['dob'] ?? null;
         return !empty($data['full_name']) && 
-               !empty($data['dob']) && 
+               !empty($dob) && 
                !empty($data['country']) &&
                !empty($data['city']);
     }

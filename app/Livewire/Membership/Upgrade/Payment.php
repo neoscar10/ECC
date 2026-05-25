@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 #[Layout('layouts.user.blank')]
 class Payment extends Component
 {
-    public string $method = 'razorpay';
+    public string $method = '';
     public string $tierName = '';
     public int $tierId = 0;
     public float $amount = 0.0;
@@ -25,6 +25,7 @@ class Payment extends Component
 
     public function mount(ApplicationWizardService $wiz, MembershipUpgradeService $upgradeSvc): void
     {
+        $this->method = config('payments.default_gateway', 'razorpay');
         $draft = $wiz->getDraft();
         
         // We evaluate the draft solely as the secure transport payload for the target tier
@@ -63,6 +64,9 @@ class Payment extends Component
         $this->errorMessage = null;
 
         try {
+            $availabilityService = app(\App\Services\Payments\PaymentGatewayAvailabilityService::class);
+            $gatewayName = $availabilityService->validateGateway($this->method);
+
             $user = Auth::user();
             $draft = $wiz->getDraft();
             if (!$draft) {
@@ -83,7 +87,7 @@ class Payment extends Component
                 amount: $quote['payable_amount'],
                 purpose: PaymentPurpose::MEMBERSHIP_UPGRADE,
                 user: $user,
-                gateway: 'razorpay',
+                gateway: $gatewayName,
                 context: [
                     'meta' => [
                         'upgrade_context' => $quote
@@ -93,8 +97,8 @@ class Payment extends Component
 
             $payment = $paymentInitiation['payment'];
 
-            // Redirect user to the Razorpay pay route
-            return redirect()->route('payments.razorpay.pay', $payment->id);
+            // Redirect user to the generic pay route
+            return redirect()->route('payments.pay', $payment->id);
 
         } catch (\Exception $e) {
             $this->errorMessage = $e->getMessage();

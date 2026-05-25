@@ -45,7 +45,7 @@
                     <div class="d-flex justify-content-center gap-3 mt-4">
                         <a href="{{ route('shop.cart') }}" class="btn btn-outline-light">Return to Cart</a>
                         @if($canRetry)
-                            <a href="{{ route('payments.razorpay.retry', $payment->id) }}" class="btn btn-warning">Retry Payment</a>
+                            <a href="{{ route('payments.retry', $payment->id) }}" class="btn btn-warning">Retry Payment</a>
                         @else
                             <a href="{{ route('shop.checkout') }}" class="btn btn-warning">Try Again</a>
                         @endif

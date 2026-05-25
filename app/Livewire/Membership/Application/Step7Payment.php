@@ -14,15 +14,16 @@ use Illuminate\Support\Facades\Auth;
 #[Layout('layouts.user.blank')]
 class Step7Payment extends Component
 {
-    public string $method = 'razorpay';
+    public string $method = '';
     public string $tierName = '';
     public float $amount = 0.0;
     public string $amountFormatted = '';
     public string $amountFormattedPlain = '';
     public ?string $errorMessage = null;
 
-    public function mount(ApplicationWizardService $wiz): void
+    public function mount(ApplicationWizardService $wiz, \App\Services\Membership\MembershipService $membershipSvc): void
     {
+        $this->method = config('payments.default_gateway', 'razorpay');
         $draft = $wiz->getDraft();
         
         if (!$draft || !($draft instanceof MembershipApplication)) {
@@ -33,6 +34,13 @@ class Step7Payment extends Component
         $tier = $draft->membershipTier;
         if (!$tier) {
             $this->redirect(route('membership.application.step6'));
+            return;
+        }
+
+        if ((float)$tier->price <= 0.0) {
+            $draft->update(['payment_status' => 'not_required']);
+            $membershipSvc->submitApplication($draft);
+            $this->redirect(route('membership.application.step8'));
             return;
         }
 
@@ -47,6 +55,9 @@ class Step7Payment extends Component
         $this->errorMessage = null;
 
         try {
+            $availabilityService = app(\App\Services\Payments\PaymentGatewayAvailabilityService::class);
+            $gatewayName = $availabilityService->validateGateway($this->method);
+
             $draft = $wiz->getDraft();
             if (!$draft) {
                 throw new \Exception('No membership application found.');
@@ -58,13 +69,13 @@ class Step7Payment extends Component
                 amount: $this->amount,
                 purpose: PaymentPurpose::MEMBERSHIP_RENEWAL,
                 user: Auth::user(),
-                gateway: 'razorpay'
+                gateway: $gatewayName
             );
 
             $payment = $paymentInitiation['payment'];
 
-            // Redirect user to the Razorpay pay route
-            return redirect()->route('payments.razorpay.pay', $payment->id);
+            // Redirect user to the generic pay route
+            return redirect()->route('payments.pay', $payment->id);
         } catch (\Exception $e) {
             $this->errorMessage = $e->getMessage();
         }

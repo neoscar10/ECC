@@ -318,5 +318,90 @@ class RazorpayGateway implements PaymentGatewayInterface
             raw: $payload
         );
     }
+
+    /**
+     * Extract normalized identifiers from the gateway's payload.
+     *
+     * @param array $payload
+     * @return array
+     */
+    public function extractIdentifiers(array $payload): array
+    {
+        $identifiers = [
+            'internal_payment_id' => null,
+            'gateway_order_id' => null,
+            'gateway_payment_id' => null,
+            'gateway_event_id' => null,
+            'event_type' => null,
+        ];
+
+        // A. Top-level event
+        $identifiers['event_type'] = data_get($payload, 'event');
+        $identifiers['gateway_event_id'] = data_get($payload, 'id');
+
+        // B. Payment entity path
+        $paymentEntity = data_get($payload, 'payload.payment.entity');
+        if ($paymentEntity) {
+            $identifiers['gateway_payment_id'] = data_get($paymentEntity, 'id');
+            $identifiers['gateway_order_id'] = data_get($paymentEntity, 'order_id');
+
+            // Try to extract internal_payment_id from notes
+            $internalId = data_get($paymentEntity, 'notes.internal_payment_id')
+                ?? data_get($paymentEntity, 'notes.payment_id')
+                ?? data_get($paymentEntity, 'notes.ecc_payment_id');
+
+            // Try to extract from receipt
+            if (empty($internalId)) {
+                $receipt = data_get($paymentEntity, 'receipt');
+                if ($receipt && preg_match('/^ecc_payment_(\d+)$/', $receipt, $matches)) {
+                    $internalId = $matches[1];
+                }
+            }
+
+            if ($internalId) {
+                $identifiers['internal_payment_id'] = $internalId;
+            }
+        }
+
+        // C. Order entity path
+        $orderEntity = data_get($payload, 'payload.order.entity');
+        if ($orderEntity) {
+            if (empty($identifiers['gateway_order_id'])) {
+                $identifiers['gateway_order_id'] = data_get($orderEntity, 'id');
+            }
+
+            if (empty($identifiers['internal_payment_id'])) {
+                $internalId = data_get($orderEntity, 'notes.internal_payment_id');
+                if (empty($internalId)) {
+                    $receipt = data_get($orderEntity, 'receipt');
+                    if ($receipt && preg_match('/^ecc_payment_(\d+)$/', $receipt, $matches)) {
+                        $internalId = $matches[1];
+                    }
+                }
+                if ($internalId) {
+                    $identifiers['internal_payment_id'] = $internalId;
+                }
+            }
+        }
+
+        // D. Fallback (e.g. from tests or manual simulation)
+        if (empty($identifiers['internal_payment_id'])) {
+            $identifiers['internal_payment_id'] = data_get($payload, 'internal_payment_id');
+        }
+        if (empty($identifiers['gateway_order_id'])) {
+            $identifiers['gateway_order_id'] = data_get($payload, 'gateway_order_id');
+        }
+        if (empty($identifiers['gateway_payment_id'])) {
+            $identifiers['gateway_payment_id'] = data_get($payload, 'gateway_payment_id');
+        }
+        if (empty($identifiers['gateway_event_id'])) {
+            $identifiers['gateway_event_id'] = data_get($payload, 'gateway_event_id');
+        }
+        if (empty($identifiers['event_type'])) {
+            $identifiers['event_type'] = data_get($payload, 'event_type');
+        }
+
+        return $identifiers;
+    }
 }
 

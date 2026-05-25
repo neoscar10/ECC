@@ -37,6 +37,8 @@ class CheckoutPage extends Component
         'is_default' => false,
     ];
 
+    public $paymentGateway = null;
+
     // Razorpay is the sole payment method; no mock card state needed.
 
     public $summary = [];
@@ -61,6 +63,7 @@ class CheckoutPage extends Component
 
     public function mount()
     {
+        $this->paymentGateway = config('payments.default_gateway', 'razorpay');
         $this->loadData();
     }
 
@@ -243,6 +246,14 @@ class CheckoutPage extends Component
             return;
         }
 
+        try {
+            $availabilityService = app(\App\Services\Payments\PaymentGatewayAvailabilityService::class);
+            $gatewayName = $availabilityService->validateGateway($this->paymentGateway);
+        } catch (\App\Exceptions\PaymentGatewayValidationException $e) {
+            session()->flash('error', $e->getMessage());
+            return;
+        }
+
         $user = Auth::user();
 
         if ($this->isVaultDelivery) {
@@ -260,10 +271,10 @@ class CheckoutPage extends Component
                     amount: $request->delivery_fee,
                     purpose: \App\Support\Payments\PaymentPurpose::VAULT_DELIVERY,
                     user: $user,
-                    gateway: 'razorpay'
+                    gateway: $gatewayName
                 );
 
-                return redirect()->route('payments.razorpay.pay', $paymentInitiation['payment']->id);
+                return redirect()->route('payments.pay', $paymentInitiation['payment']->id);
             }
             
             session()->flash('error', 'Unable to process vault payment.');
@@ -293,13 +304,13 @@ class CheckoutPage extends Component
                 'amount' => $order->total_amount,
             ]);
 
-            // 2. Initiate Payment via PaymentManager → RazorpayGateway
+            // 2. Initiate Payment via PaymentManager
             $paymentInitiation = $paymentManager->initiatePayment(
                 payable: $order,
                 amount: $order->total_amount,
                 purpose: 'shop_order',
                 user: $user,
-                gateway: 'razorpay',
+                gateway: $gatewayName,
                 context: [
                     'description' => 'ECC Shop Order #' . $order->order_number,
                 ]
@@ -307,7 +318,7 @@ class CheckoutPage extends Component
 
             $payment = $paymentInitiation['payment'];
 
-            Log::info('Checkout: Razorpay payment initiated, redirecting to pay page.', [
+            Log::info('Checkout: Payment initiated, redirecting to pay page.', [
                 'user_id' => $user->id,
                 'order_id' => $order->id,
                 'payment_id' => $payment->id,
@@ -315,8 +326,8 @@ class CheckoutPage extends Component
                 'amount' => $payment->amount,
             ]);
 
-            // 3. Redirect to Razorpay payment page
-            return redirect()->route('payments.razorpay.pay', $payment->id);
+            // 3. Redirect to payment page
+            return redirect()->route('payments.pay', $payment->id);
 
         } catch (Exception $e) {
             Log::error('Checkout: Place order failed.', [

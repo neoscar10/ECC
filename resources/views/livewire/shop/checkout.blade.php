@@ -464,38 +464,110 @@
                         <h2 class="ecc-section-title mb-0">PAYMENT METHOD</h2>
                     </div>
 
-                    <!-- Razorpay Secure Checkout Option -->
-                    <div class="ecc-payment-card is-selected" style="cursor: default; border-color: var(--ecc-primary); background: rgba(199, 167, 90, .05);">
-                        <div class="d-flex align-items-center gap-3 flex-grow-1">
-                            <!-- Razorpay Icon area -->
-                            <div style="width:56px; height:38px; border-radius:.55rem; background:rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                <svg width="28" height="20" viewBox="0 0 38 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M18.8 0L0 14.4H8.4L12 6.4L10.8 14.4H19.6L22.4 0H18.8Z" fill="#2D81EF"/>
-                                    <path d="M20.4 9.6L17.6 24H21.2L24.4 9.6H20.4Z" fill="#A9CAFF"/>
-                                    <path d="M22 9.6L25.6 0H22L20.4 9.6H22Z" fill="#2D81EF"/>
-                                </svg>
-                            </div>
+                    @php
+                        $availabilityService = app(\App\Services\Payments\PaymentGatewayAvailabilityService::class);
+                        $gatewayOptions = array_filter($availabilityService->publicOptions(), function($opt) {
+                            return $opt['enabled'];
+                        });
+                    @endphp
 
-                            <div class="flex-grow-1">
-                                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                                    <div class="fw-bold">Razorpay Secure Checkout</div>
-                                    <span class="ecc-badge-gold subtle" style="background: rgba(45,129,239,.15); color:#7db9ff; letter-spacing:.08em;">
-                                        TEST MODE
-                                    </span>
+                    @if(count($gatewayOptions) > 1)
+                        <div class="d-flex flex-column gap-3">
+                            @foreach($gatewayOptions as $opt)
+                                <div class="ecc-payment-card {{ $paymentGateway === $opt['key'] ? 'is-selected' : '' }}" 
+                                     wire:click="$set('paymentGateway', '{{ $opt['key'] }}')"
+                                     style="cursor: pointer;">
+                                    <div class="d-flex align-items-center gap-3 flex-grow-1">
+                                        @if($opt['key'] === 'razorpay')
+                                            <!-- Razorpay Icon area -->
+                                            <div style="width:56px; height:38px; border-radius:.55rem; background:rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                                <svg width="28" height="20" viewBox="0 0 38 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M18.8 0L0 14.4H8.4L12 6.4L10.8 14.4H19.6L22.4 0H18.8Z" fill="#2D81EF"/>
+                                                    <path d="M20.4 9.6L17.6 24H21.2L24.4 9.6H20.4Z" fill="#A9CAFF"/>
+                                                    <path d="M22 9.6L25.6 0H22L20.4 9.6H22Z" fill="#2D81EF"/>
+                                                </svg>
+                                            </div>
+                                        @elseif($opt['key'] === 'cashfree')
+                                            <!-- Cashfree Icon area -->
+                                            <div style="width:56px; height:38px; border-radius:.55rem; background:rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight: bold; color: #fff; font-size: 0.8rem;">
+                                                CF
+                                            </div>
+                                        @else
+                                            <div style="width:56px; height:38px; border-radius:.55rem; background:rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight: bold; color: #fff; font-size: 0.8rem;">
+                                                {{ strtoupper(substr($opt['key'], 0, 2)) }}
+                                            </div>
+                                        @endif
+
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                                <div class="fw-bold">{{ $opt['label'] }}</div>
+                                                @if($opt['key'] === 'razorpay')
+                                                    <span class="ecc-badge-gold subtle" style="background: rgba(45,129,239,.15); color:#7db9ff; letter-spacing:.08em;">
+                                                        TEST MODE
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <div class="ecc-muted small">
+                                                {{ $opt['description'] }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center" style="flex-shrink: 0;">
+                                        <input class="form-check-input ecc-radio m-0" 
+                                               type="radio" 
+                                               name="paymentGatewaySelector" 
+                                               value="{{ $opt['key'] }}"
+                                               wire:model.live="paymentGateway"
+                                               {{ $paymentGateway === $opt['key'] ? 'checked' : '' }}>
+                                    </div>
                                 </div>
-                                <div class="ecc-muted small">
-                                    UPI · Cards · Netbanking · Wallets &amp; more
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
+                    @else
+                        <!-- Only one option enabled (usually Razorpay) -->
+                        @php
+                            $opt = reset($gatewayOptions) ?: ['key' => 'razorpay', 'label' => 'Razorpay Secure Checkout', 'description' => 'UPI · Cards · Netbanking · Wallets & more'];
+                        @endphp
+                        <div class="ecc-payment-card is-selected" style="cursor: default; border-color: var(--ecc-primary); background: rgba(199, 167, 90, .05);">
+                            <div class="d-flex align-items-center gap-3 flex-grow-1">
+                                @if($opt['key'] === 'razorpay')
+                                    <div style="width:56px; height:38px; border-radius:.55rem; background:rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                        <svg width="28" height="20" viewBox="0 0 38 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M18.8 0L0 14.4H8.4L12 6.4L10.8 14.4H19.6L22.4 0H18.8Z" fill="#2D81EF"/>
+                                            <path d="M20.4 9.6L17.6 24H21.2L24.4 9.6H20.4Z" fill="#A9CAFF"/>
+                                            <path d="M22 9.6L25.6 0H22L20.4 9.6H22Z" fill="#2D81EF"/>
+                                        </svg>
+                                    </div>
+                                @else
+                                    <div style="width:56px; height:38px; border-radius:.55rem; background:rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight: bold; color: #fff; font-size: 0.8rem;">
+                                        {{ strtoupper(substr($opt['key'], 0, 2)) }}
+                                    </div>
+                                @endif
 
-                        <span class="material-symbols-outlined ecc-selected-icon" style="flex-shrink:0;">check_circle</span>
-                    </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                        <div class="fw-bold">{{ $opt['key'] === 'razorpay' ? 'Razorpay Secure Checkout' : $opt['label'] }}</div>
+                                        @if($opt['key'] === 'razorpay')
+                                            <span class="ecc-badge-gold subtle" style="background: rgba(45,129,239,.15); color:#7db9ff; letter-spacing:.08em;">
+                                                TEST MODE
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="ecc-muted small">
+                                        {{ $opt['description'] }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <span class="material-symbols-outlined ecc-selected-icon" style="flex-shrink:0;">check_circle</span>
+                        </div>
+                    @endif
 
                     <div class="text-center pt-3">
                         <div class="d-inline-flex align-items-center gap-2 ecc-security-note">
                             <i class="mdi mdi-lock-outline"></i>
-                            <span>PAYMENTS ARE SSL ENCRYPTED AND PROCESSED BY RAZORPAY</span>
+                            <span>PAYMENTS ARE SSL ENCRYPTED AND PROCESSED SECURELY</span>
                         </div>
                     </div>
                 </section>

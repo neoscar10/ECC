@@ -179,10 +179,10 @@ class PaymentsServiceLayerTest extends TestCase
         $gatewayDefault = $manager->getGateway();
         $this->assertInstanceOf(\App\Services\Payments\Gateways\RazorpayGateway::class, $gatewayDefault);
 
-        // 3. Resolve Cashfree (must throw configured but not implemented Exception)
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Cashfree gateway is configured but not implemented yet.');
-        $manager->getGateway('cashfree');
+        // 3. Resolve Cashfree
+        $gatewayCashfree = $manager->getGateway('cashfree');
+        $this->assertInstanceOf(\App\Services\Payments\Gateways\CashfreeGateway::class, $gatewayCashfree);
+        $this->assertEquals('cashfree', $gatewayCashfree->gatewayName());
     }
 
     /** @test */
@@ -261,6 +261,8 @@ class PaymentsServiceLayerTest extends TestCase
         // Configure credentials so it doesn't throw a credentials exception
         config([
             'payments.gateways.razorpay' => [
+                'driver' => \App\Services\Payments\Gateways\RazorpayGateway::class,
+                'enabled' => true,
                 'key_id' => 'rzp_test_key_123',
                 'key_secret' => 'rzp_test_secret_abc',
             ]

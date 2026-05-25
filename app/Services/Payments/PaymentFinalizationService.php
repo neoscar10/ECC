@@ -68,4 +68,12 @@ class PaymentFinalizationService
                 throw new InvalidArgumentException("Unsupported payment purpose: {$payment->purpose}");
         }
     }
+
+    /**
+     * Finalize the payment sequence upon failure (alias for markPaymentFailed).
+     */
+    public function finalizeFailedPayment(Payment $payment, string $reason)
+    {
+        return $this->markPaymentFailed($payment, $reason);
+    }
 }

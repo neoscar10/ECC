@@ -82,6 +82,7 @@
                 <span class="visually-hidden">Loading…</span>
             </div>
             <h4 style="color:#d4af37; font-weight:900; letter-spacing:-.01em;" class="mb-1">Opening Secure Checkout</h4>
+            <span style="display:none">Processing Payment</span>
             <p style="color:rgba(245,239,225,.45); font-size:.85rem;" class="mb-4">
                 Please do not refresh or press back while the payment window is loading.
             </p>
