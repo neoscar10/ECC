@@ -62,7 +62,81 @@
 
         <div>
           <label class="ecc-label">Phone Number</label>
-          <input type="text" wire:model="phone" class="form-control ecc-input" placeholder="+1234567890">
+          <div class="input-group position-relative" x-data="{
+              open: false,
+              search: '',
+              selected: { name: 'India', code: '+91', flag: '🇮🇳' },
+              countries: [
+                  { name: 'India', code: '+91', flag: '🇮🇳' },
+                  { name: 'United Kingdom', code: '+44', flag: '🇬🇧' },
+                  { name: 'United States', code: '+1', flag: '🇺🇸' },
+                  { name: 'Canada', code: '+1', flag: '🇨🇦' },
+                  { name: 'Australia', code: '+61', flag: '🇦🇺' },
+                  { name: 'United Arab Emirates', code: '+971', flag: '🇦🇪' },
+                  { name: 'Singapore', code: '+65', flag: '🇸🇬' },
+                  { name: 'South Africa', code: '+27', flag: '🇿🇦' },
+                  { name: 'New Zealand', code: '+64', flag: '🇳🇿' }
+              ],
+              get filteredCountries() {
+                  if (!this.search) return this.countries;
+                  return this.countries.filter(c => c.name.toLowerCase().includes(this.search.toLowerCase()) || c.code.includes(this.search));
+              },
+              async init() {
+                  try {
+                      let res = await fetch('https://restcountries.com/v3.1/all?fields=name,cca2,idd');
+                      if (res.ok) {
+                          let data = await res.json();
+                          let list = data.map(c => {
+                              let dialCode = '';
+                              if (c.idd && c.idd.root) {
+                                  let suffix = (c.idd.suffixes && c.idd.suffixes.length > 0) ? c.idd.suffixes[0] : '';
+                                  dialCode = c.idd.root + (c.idd.suffixes && c.idd.suffixes.length > 1 ? '' : suffix);
+                              }
+                              let flag = '';
+                              if (c.cca2) {
+                                  const codePoints = c.cca2.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
+                                  flag = String.fromCodePoint(...codePoints);
+                              }
+                              return { name: c.name.common, code: dialCode, flag: flag };
+                          }).filter(c => c.code !== '');
+                          
+                          list.sort((a, b) => a.name.localeCompare(b.name));
+                          let india = list.find(c => c.name === 'India');
+                          let filtered = list.filter(c => c.name !== 'India');
+                          this.countries = india ? [india, ...filtered] : list;
+                      }
+                  } catch (e) {
+                      console.error(e);
+                  }
+              }
+          }" @click.outside="open = false">
+            
+            <button type="button" @click="open = !open" class="btn ecc-input d-flex align-items-center gap-2" style="border-radius: 12px 0 0 12px !important; border-right: 0 !important; max-width: 140px; background-color: var(--ecc-surface) !important; color: #fff; border: 1px solid var(--ecc-border) !important;">
+              <span x-text="selected.flag" style="font-size: 18px;"></span>
+              <span x-text="selected.code" style="font-size: 14px; font-weight: 600;"></span>
+              <span class="material-symbols-outlined" style="font-size: 16px; opacity: 0.6;">keyboard_arrow_down</span>
+            </button>
+
+            <div x-show="open" class="position-absolute z-3 mt-1 shadow-lg bg-dark border border-secondary" style="display: none; top: 100%; left: 0; width: 300px; border-radius: 12px; max-height: 280px; overflow-y: auto; background-color: #121212 !important; border-color: #333 !important;">
+              <div class="p-2 sticky-top" style="background-color: #121212;">
+                <input type="text" x-model="search" class="form-control form-control-sm text-white" placeholder="Search country..." style="background-color: #222 !important; border-color: #444 !important; color: #fff !important; font-size: 13px;">
+              </div>
+              
+              <div class="list-group list-group-flush">
+                <template x-for="c in filteredCountries" :key="c.name + c.code">
+                  <button type="button" @click="selected = c; @this.set('country_code', c.code); open = false; search = '';" class="list-group-item list-group-item-action text-white d-flex align-items-center justify-content-between py-2 px-3 border-0" style="background-color: transparent; font-size: 13px; border-bottom: 1px solid #222 !important;">
+                    <div class="d-flex align-items-center gap-2">
+                      <span x-text="c.flag" style="font-size: 16px;"></span>
+                      <span x-text="c.name" class="text-truncate" style="max-width: 160px; font-family: 'Noto Sans', sans-serif;"></span>
+                    </div>
+                    <span x-text="c.code" class="text-muted fw-bold" style="font-family: 'Noto Sans', sans-serif;"></span>
+                  </button>
+                </template>
+              </div>
+            </div>
+
+            <input type="text" wire:model="phone" class="form-control ecc-input" placeholder="98765 43210" style="border-radius: 0 12px 12px 0 !important;">
+          </div>
           <div class="ecc-hint">Standard rates may apply for OTP verification.</div>
           @error('phone') <div class="ecc-err">{{ $message }}</div> @enderror
         </div>

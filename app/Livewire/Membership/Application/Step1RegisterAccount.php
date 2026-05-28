@@ -14,6 +14,7 @@ class Step1RegisterAccount extends Component
     public string $name = '';
     public string $email = '';
     public string $phone = '';
+    public string $country_code = '+91';
     public string $password = '';
     public string $password_confirmation = '';
     public ?string $errorMessage = null;
@@ -23,16 +24,25 @@ class Step1RegisterAccount extends Component
         $this->errorMessage = null;
 
         try {
-            // Normalize phone number before validation
+            // Normalize combined phone number before validation
+            $originalPhone = $this->phone;
+            $fullPhone = str_starts_with($this->phone, '+') ? $this->phone : ($this->country_code . $this->phone);
             try {
-                $this->phone = app(\App\Services\Otp\PhoneNormalizer::class)->normalize($this->phone);
+                $fullPhoneNormalized = app(\App\Services\Otp\PhoneNormalizer::class)->normalize($fullPhone);
             } catch (\Exception $e) {
                 throw \Illuminate\Validation\ValidationException::withMessages([
                     'phone' => [$e->getMessage() ?: 'The phone number format is invalid.']
                 ]);
             }
 
-            $validated = $this->validate(MembershipRules::accountRegistration());
+            $this->phone = $fullPhoneNormalized;
+
+            try {
+                $validated = $this->validate(MembershipRules::accountRegistration());
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                $this->phone = $originalPhone; // Restore original input on validation error
+                throw $e;
+            }
             
             // Initiate registration
             $result = $registrationService->initiate($validated);

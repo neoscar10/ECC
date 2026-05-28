@@ -5,7 +5,7 @@ namespace Tests\Feature\Membership;
 use App\Models\User;
 use App\Models\PendingRegistration;
 use App\Models\MembershipApplication;
-use App\Services\Otp\MetaWhatsAppService;
+use App\Services\Otp\Delivery\OtpDeliveryInterface;
 use App\Services\Otp\OtpGenerator;
 use App\Services\Otp\OtpDeliveryResult;
 use App\Livewire\Membership\Application\Step1RegisterAccount;
@@ -25,8 +25,8 @@ class WebOtpVerificationTest extends TestCase
 
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
-        // Mock MetaWhatsAppService
-        $this->mock(MetaWhatsAppService::class, function (MockInterface $mock) {
+        // Mock OtpDeliveryInterface
+        $this->mock(OtpDeliveryInterface::class, function (MockInterface $mock) {
             $mock->shouldReceive('sendOtp')->andReturn(
                 OtpDeliveryResult::success('whatsapp', 'mock_meta_id')
             );

@@ -55,10 +55,6 @@
                         <span class="ecc-cta-text">Begin Application</span>
                         <span class="material-symbols-outlined ecc-cta-icon">arrow_forward</span>
                     </a>
-
-                    <a href="{{ $tiersUrl }}" class="ecc-tier-link">
-                        Learn About Membership Tiers
-                    </a>
                 </div>
             </div>
         </div>
@@ -78,13 +74,13 @@
 
     .ecc-dot-grid{
         opacity: .06;
-        background-image: radial-gradient(#ecc813 1px, transparent 1px);
+        background-image: radial-gradient(var(--ecc-primary) 1px, transparent 1px);
         background-size: 32px 32px;
         pointer-events: none;
     }
 
     .ecc-top-title{
-        color: rgba(242,185,13,.85);
+        color: var(--ecc-primary);
         font-weight: 800;
         letter-spacing: .25em;
         font-size: 12px;
@@ -94,7 +90,7 @@
         position: relative;
         border-radius: 14px;
         overflow: hidden;
-        border: 1px solid rgba(242,185,13,.20);
+        border: 1px solid var(--ecc-primary-border);
         box-shadow: 0 28px 90px rgba(0,0,0,.55);
         aspect-ratio: 4 / 3;
         background: var(--ecc-bg-input);
@@ -117,9 +113,9 @@
     .ecc-pill{
         padding: 8px 14px;
         border-radius: 9999px;
-        border: 1px solid rgba(242,185,13,.30);
-        background: rgba(242,185,13,.06);
-        color: rgba(242,185,13,.90);
+        border: 1px solid var(--ecc-primary-border);
+        background: var(--ecc-primary-soft);
+        color: var(--ecc-primary);
         font-size: 12px;
         letter-spacing: .14em;
         text-transform: uppercase;
@@ -140,7 +136,7 @@
         margin-right: 8px;
     }
     .ecc-gold{
-        color: #ecc813;
+        color: var(--ecc-primary);
         font-style: normal;
         font-weight: 900;
     }
@@ -163,20 +159,20 @@
     .ecc-cta{
         height: 58px;
         border-radius: 12px;
-        border: 1px solid rgba(242,185,13,.55);
-        background: #ecc813;
+        border: 1px solid var(--ecc-primary-border);
+        background: var(--ecc-primary);
         color: #050505;
         font-weight: 900;
         letter-spacing: .06em;
-        box-shadow: 0 0 22px rgba(236,200,19,.18);
+        box-shadow: 0 0 22px var(--ecc-primary-shadow);
         transition: all 220ms ease;
         max-width: 520px;
     }
     .ecc-cta:hover{
-        background: #f2b90d;
-        border-color: #f2b90d;
+        background: var(--ecc-primary-hover);
+        border-color: var(--ecc-primary-hover);
         transform: translateY(-2px);
-        box-shadow: 0 12px 40px rgba(243, 186, 13, 0.35);
+        box-shadow: 0 12px 40px rgba(199, 167, 90, 0.35);
         color: #050505;
     }
     .ecc-cta:active{ transform: scale(.99); }
@@ -186,7 +182,7 @@
     .ecc-cta:hover .ecc-cta-icon{ transform: translateX(3px); }
 
     .ecc-tier-link{
-        color: rgba(236,200,19,.65);
+        color: var(--ecc-primary);
         font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
         font-weight: 700;
         font-size: 13px;
@@ -195,10 +191,11 @@
         border-bottom: 1px solid transparent;
         padding-bottom: 2px;
         transition: all 180ms ease;
+        opacity: 0.8;
     }
     .ecc-tier-link:hover{
-        color: rgba(236,200,19,.95);
-        border-bottom-color: rgba(236,200,19,.45);
+        opacity: 1;
+        border-bottom-color: var(--ecc-primary-border);
     }
 
     @media (min-width: 992px){

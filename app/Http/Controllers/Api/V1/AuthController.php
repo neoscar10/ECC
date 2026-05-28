@@ -62,7 +62,7 @@ class AuthController extends Controller
             $payload = $factory->make();
             $token = \Tymon\JWTAuth\Facades\JWTAuth::encode($payload)->get();
 
-            return $this->success([
+            $responseData = [
                 'access_token' => $token,
                 'token_type' => 'bearer',
                 'expires_in' => 15 * 60, // 15 minutes expiry for registration session
@@ -74,7 +74,13 @@ class AuthController extends Controller
                     'phone_verified_at' => null,
                 ],
                 'application' => null,
-            ], 'Registration initiated. Please verify OTP.');
+            ];
+
+            if (isset($result['otp_result']['dev_otp'])) {
+                $responseData['dev_otp'] = $result['otp_result']['dev_otp'];
+            }
+
+            return $this->success($responseData, 'Registration initiated. Please verify OTP.');
 
         } catch (\Illuminate\Database\QueryException $e) {
             if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'users_phone_unique')) {
