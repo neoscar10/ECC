@@ -34,7 +34,7 @@ class ImageRestrictionTest extends TestCase
     /** @test */
     public function profile_avatar_upload_restricts_invalid_formats()
     {
-        $this->actingAs($this->admin);
+        $this->actingAs($this->admin, 'api');
 
         // Test valid formats
         $response = $this->postJson('/api/v1/profile/avatar', [
@@ -157,7 +157,7 @@ class ImageRestrictionTest extends TestCase
         Livewire::test(\App\Livewire\Admin\Cms\Blocks\Index::class)
             // Set required fields for store
             ->set('title', 'Block Title')
-            ->set('placement', 'home') // Required for Step 1
+            ->set('placement', 'explore') // Required for Step 1, must be valid
             ->set('type', 'banner')
             ->set('contentImage', UploadedFile::fake()->create('banner.pdf'))
             ->call('store')

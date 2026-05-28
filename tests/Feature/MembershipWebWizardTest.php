@@ -33,7 +33,7 @@ class MembershipWebWizardTest extends TestCase
         $this->user = User::factory()->create([
             'id' => 99,
             'phone_verified_at' => now(),
-            'phone' => '+447700900000',
+            'phone' => '+447911123456',
         ]);
         $this->user->assignRole('user');
 

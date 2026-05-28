@@ -22,6 +22,15 @@ class CartItem extends Model
         'shop_product_variant_id',
     ];
 
+    protected static function booted()
+    {
+        static::creating(function ($item) {
+            if (empty($item->selection_signature)) {
+                $item->selection_signature = 'default';
+            }
+        });
+    }
+
     protected $casts = [
         'quantity' => 'integer',
         'unit_price' => 'decimal:2',

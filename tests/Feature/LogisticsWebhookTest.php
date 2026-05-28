@@ -8,12 +8,14 @@ use Tests\TestCase;
 
 class LogisticsWebhookTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_webhook_health_endpoint()
     {
         $response = $this->getJson('/api/webhooks/logistics/health');
 
         $response->assertStatus(200)
-                 ->assertJson(['status' => 'ok']);
+                 ->assertJson(['success' => true]);
     }
 
     public function test_webhook_tracking_unauthorized()

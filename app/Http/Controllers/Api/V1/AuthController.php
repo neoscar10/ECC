@@ -28,8 +28,19 @@ class AuthController extends Controller
     /**
      * Register a new user
      */
-    public function register(Request $request): JsonResponse
+    public function register(Request $request, \App\Services\Auth\RegistrationService $registrationService): JsonResponse
     {
+        if ($request->has('phone') && !is_null($request->input('phone'))) {
+            try {
+                $normalized = app(\App\Services\Otp\PhoneNormalizer::class)->normalize($request->input('phone'));
+                $request->merge(['phone' => $normalized]);
+            } catch (\Exception $e) {
+                return $this->error('Validation Error', 422, [
+                    'phone' => [$e->getMessage() ?: 'The phone number format is invalid.']
+                ]);
+            }
+        }
+
         $validator = Validator::make($request->all(), AuthRules::register(), [
             'email.unique' => 'This email is already registered.',
             'phone.unique' => 'This phone number is already registered.',
@@ -40,20 +51,30 @@ class AuthController extends Controller
         }
 
         try {
-            $user = $this->authService->register($request->all());
+            $result = $registrationService->initiate($request->all());
 
-            // Generate Token
-            $token = auth('api')->login($user);
+            // Generate a guest-friendly JWT containing pending_registration_id
+            $factory = \Tymon\JWTAuth\Facades\JWTFactory::customClaims([
+                'sub' => 'pending_' . $result['pending_registration_id'],
+                'pending_registration_id' => $result['pending_registration_id'],
+                'phone' => $result['phone'],
+            ]);
+            $payload = $factory->make();
+            $token = \Tymon\JWTAuth\Facades\JWTAuth::encode($payload)->get();
 
-            // Return Success Response
             return $this->success([
                 'access_token' => $token,
                 'token_type' => 'bearer',
-                'expires_in' => auth('api')->factory()->getTTL() * 60,
-                'user' => $user,
-                'application' => $user->memberships()->where('status', 'draft')->latest()->first() ?? 
-                               MembershipApplication::where('user_id', $user->id)->latest()->first(),
-            ], 'Registration successful');
+                'expires_in' => 15 * 60, // 15 minutes expiry for registration session
+                'user' => [
+                    'id' => 0,
+                    'name' => $request->input('name'),
+                    'email' => $request->input('email'),
+                    'phone' => $result['phone'],
+                    'phone_verified_at' => null,
+                ],
+                'application' => null,
+            ], 'Registration initiated. Please verify OTP.');
 
         } catch (\Illuminate\Database\QueryException $e) {
             if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'users_phone_unique')) {

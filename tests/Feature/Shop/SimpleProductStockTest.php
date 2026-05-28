@@ -21,6 +21,9 @@ class SimpleProductStockTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config([
+            'shiprocket.checkout_requires_serviceability' => false,
+        ]);
         $this->user = User::factory()->create();
         $this->address = UserAddress::factory()->create(['user_id' => $this->user->id]);
     }
@@ -46,7 +49,7 @@ class SimpleProductStockTest extends TestCase
         ]);
 
         // 3. Place Order via API
-        $response = $this->actingAs($this->user)
+        $response = $this->actingAs($this->user, 'api')
             ->postJson('/api/v1/shop/checkout/place-order', [
                 'shipping_address_id' => $this->address->id,
                 'billing_address_id' => $this->address->id,
@@ -82,7 +85,7 @@ class SimpleProductStockTest extends TestCase
         ]);
 
         // 3. Place Order
-        $response = $this->actingAs($this->user)
+        $response = $this->actingAs($this->user, 'api')
             ->postJson('/api/v1/shop/checkout/place-order', [
                 'shipping_address_id' => $this->address->id,
                 'billing_address_id' => $this->address->id,

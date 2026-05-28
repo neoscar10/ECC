@@ -34,6 +34,7 @@ class UserLoginPage extends Component
     public ?string $otpIdentifier = null;
     public int $otpTtl = 0;
     public bool $showResetPassword = false;
+    public ?string $devOtp = null;
 
     public function mount(\App\Services\Membership\ApplicationResumeService $resumeService): void
     {
@@ -57,7 +58,7 @@ class UserLoginPage extends Component
 
     public function setMode(string $mode): void
     {
-        $this->reset(['mode', 'step', 'otp', 'newPassword', 'newPassword_confirmation', 'otpIdentifier', 'errorMessage', 'showResetPassword']);
+        $this->reset(['mode', 'step', 'otp', 'newPassword', 'newPassword_confirmation', 'otpIdentifier', 'errorMessage', 'showResetPassword', 'devOtp']);
         $this->mode = $mode;
     }
 
@@ -83,12 +84,19 @@ class UserLoginPage extends Component
             ]);
         }
 
-        $data = $otpService->requestPasswordResetOtp($user, $this->identity);
-        $this->otpTtl = $data['ttl_minutes'];
-        $this->otpIdentifier = $this->identity;
+        try {
+            $data = $otpService->requestPasswordResetOtp($user, $this->identity);
+            $this->otpTtl = $data['ttl_minutes'];
+            $this->otpIdentifier = $this->identity;
+            $this->devOtp = $data['dev_otp'] ?? null;
 
-        $this->step = 2;
-        $this->errorMessage = null;
+            $this->step = 2;
+            $this->errorMessage = null;
+        } catch (\App\Exceptions\OtpException $e) {
+            throw ValidationException::withMessages([
+                'identity' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function verifyResetOtp(\App\Services\Otp\OtpService $otpService): void
@@ -105,8 +113,13 @@ class UserLoginPage extends Component
 
         $user = $this->resolveUserByIdentity($this->otpIdentifier);
 
-        if (!$user || !$otpService->verifyPasswordResetOtp($user, $this->otpIdentifier, $this->otp)) {
-            $this->addError('otp', 'Invalid or expired OTP.');
+        try {
+            if (!$user || !$otpService->verifyPasswordResetOtp($user, $this->otpIdentifier, $this->otp)) {
+                $this->addError('otp', 'Invalid or expired OTP.');
+                return;
+            }
+        } catch (\App\Exceptions\OtpException $e) {
+            $this->addError('otp', $e->getMessage());
             return;
         }
 
@@ -127,18 +140,24 @@ class UserLoginPage extends Component
             'identity' => ['required', 'string', 'max:255'],
         ]);
 
-        $data = $authService->requestOtp($this->identity);
+        try {
+            $data = $authService->requestOtp($this->identity);
+            if (!$data) {
+                throw ValidationException::withMessages([
+                    'identity' => 'No member account was found for that identity.',
+                ]);
+            }
 
-        if (!$data) {
+            $this->otpIdentifier = $this->identity;
+            $this->otpTtl = $data['ttl_minutes'];
+            $this->devOtp = $data['dev_otp'] ?? null;
+            $this->step = 2;
+            $this->errorMessage = null;
+        } catch (\App\Exceptions\OtpException $e) {
             throw ValidationException::withMessages([
-                'identity' => 'No member account was found for that identity.',
+                'identity' => $e->getMessage(),
             ]);
         }
-
-        $this->otpIdentifier = $this->identity;
-        $this->otpTtl = $data['ttl_minutes'];
-        $this->step = 2;
-        $this->errorMessage = null;
     }
 
     public function verifyLoginOtp(AuthService $authService, \App\Services\Membership\ApplicationResumeService $resumeService): void
@@ -147,10 +166,14 @@ class UserLoginPage extends Component
             'otp' => ['required', 'string', 'size:6'],
         ]);
 
-        $user = $authService->verifyOtp($this->otpIdentifier, $this->otp);
-
-        if (!$user) {
-            $this->addError('otp', 'Invalid or expired OTP.');
+        try {
+            $user = $authService->verifyOtp($this->otpIdentifier, $this->otp);
+            if (!$user) {
+                $this->addError('otp', 'Invalid or expired OTP.');
+                return;
+            }
+        } catch (\App\Exceptions\OtpException $e) {
+            $this->addError('otp', $e->getMessage());
             return;
         }
 

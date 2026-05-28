@@ -17,25 +17,33 @@ class Step2VerifyOtp extends Component
     public bool $hasExpiry = false;
     public ?string $maskedPhone = null;
     public ?string $errorMessage = null;
+    public ?string $devOtp = null;
 
     public function mount(OtpService $otpService)
     {
-        $phone = session('ecc_pending_phone');
-        $userId = session('ecc_pending_user_id');
+        $pendingId = session('ecc_pending_registration_id');
+        $verificationToken = session('ecc_pending_verification_token');
 
-        if (!$phone || !$userId) {
+        if (!$pendingId || !$verificationToken) {
             return redirect()->route('membership.application.step1');
         }
 
-        $user = User::find($userId);
-        if ($user) {
-            $this->resendRemaining = $otpService->getExpiry($user);
-            $this->hasExpiry = true;
-        } else {
+        $pending = \App\Models\PendingRegistration::valid()->find($pendingId);
+        if (!$pending) {
             return redirect()->route('membership.application.step1');
         }
 
+        // Validate session ownership / session binding
+        if ($pending->ip_address !== request()->ip() || $pending->user_agent !== request()->userAgent()) {
+            session()->forget(['ecc_pending_registration_id', 'ecc_pending_verification_token']);
+            return redirect()->route('membership.application.step1');
+        }
+
+        $phone = $pending->phone;
+        $this->resendRemaining = $otpService->getExpiryByPhone($phone);
+        $this->hasExpiry = true;
         $this->maskedPhone = $this->maskPhone($phone);
+        $this->devOtp = session('ecc_dev_otp');
     }
 
     private function maskPhone(string $phone): string
@@ -46,7 +54,7 @@ class Step2VerifyOtp extends Component
         return substr($phone, 0, 2) . ' ****** ' . substr($phone, -4);
     }
 
-    public function verify(OtpService $otpService, ApplicationWizardService $wizardService, \App\Services\Membership\ApplicationResumeService $resumeService)
+    public function verify(\App\Services\Auth\RegistrationService $registrationService, ApplicationWizardService $wizardService, \App\Services\Membership\ApplicationResumeService $resumeService)
     {
         $this->errorMessage = null;
         $otp = implode('', $this->digits);
@@ -56,40 +64,78 @@ class Step2VerifyOtp extends Component
             return;
         }
 
-        $userId = session('ecc_pending_user_id');
-        $phone = session('ecc_pending_phone');
-        $user = User::find($userId);
+        $pendingId = session('ecc_pending_registration_id');
+        $verificationToken = session('ecc_pending_verification_token');
 
-        if (!$user) {
+        if (!$pendingId || !$verificationToken) {
             return redirect()->route('membership.application.step1');
         }
 
-        if ($otpService->verifyPhoneOtp($user, $phone, $otp)) {
+        $pending = \App\Models\PendingRegistration::valid()->find($pendingId);
+        if (!$pending) {
+            return redirect()->route('membership.application.step1');
+        }
+
+        // Validate session ownership / session binding
+        if ($pending->ip_address !== request()->ip() || $pending->user_agent !== request()->userAgent()) {
+            session()->forget(['ecc_pending_registration_id', 'ecc_pending_verification_token']);
+            return redirect()->route('membership.application.step1');
+        }
+
+        $phone = $pending->phone;
+
+        try {
+            $user = $registrationService->complete($phone, $otp);
+
+            // Mark phone verified only after successful creation
+            $user->update([
+                'phone_verified_at' => now(),
+            ]);
+
             Auth::guard('web')->login($user);
             $wizardService->attachDraftToUser($user->id);
 
-            session()->forget(['ecc_pending_phone', 'ecc_pending_user_id']);
+            session()->forget(['ecc_pending_registration_id', 'ecc_pending_verification_token']);
 
             $nextRoute = $resumeService->nextRouteForUser($user);
             
             return redirect()->to($nextRoute ?: route('home'));
+        } catch (\App\Exceptions\OtpException $e) {
+            $this->errorMessage = $e->getMessage();
         }
-
-        $this->errorMessage = 'Invalid or expired verification code.';
     }
 
     public function resend(OtpService $otpService)
     {
-        $userId = session('ecc_pending_user_id');
-        $phone = session('ecc_pending_phone');
-        $user = User::find($userId);
+        $pendingId = session('ecc_pending_registration_id');
+        $verificationToken = session('ecc_pending_verification_token');
 
-        if ($user) {
-            $otpService->requestPhoneOtp($user, $phone);
-            $this->resendRemaining = $otpService->getExpiry($user);
-            $this->errorMessage = null;
+        if (!$pendingId || !$verificationToken) {
+            return;
+        }
 
-            $this->dispatch('ecc-otp-countdown-reset', seconds: $this->resendRemaining);
+        $pending = \App\Models\PendingRegistration::valid()->find($pendingId);
+        if ($pending) {
+            // Validate session ownership / session binding
+            if ($pending->ip_address !== request()->ip() || $pending->user_agent !== request()->userAgent()) {
+                session()->forget(['ecc_pending_registration_id', 'ecc_pending_verification_token']);
+                return redirect()->route('membership.application.step1');
+            }
+
+            $phone = $pending->phone;
+            try {
+                $otpService->requestRegistrationOtp($phone);
+                $this->devOtp = session('ecc_dev_otp');
+                // Pass purpose explicitly — this is always a signup context
+                $this->resendRemaining = $otpService->getExpiryByPhone($phone, 'signup');
+                $this->errorMessage = null;
+                // Clear previously typed digits so the user starts fresh
+                $this->digits = ['', '', '', '', '', ''];
+
+                $this->dispatch('ecc-otp-countdown-reset', seconds: $this->resendRemaining);
+            } catch (\App\Exceptions\OtpException $e) {
+                $this->errorMessage = $e->getMessage();
+            }
         }
     }
 

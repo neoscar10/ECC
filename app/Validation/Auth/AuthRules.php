@@ -8,8 +8,24 @@ class AuthRules
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'phone' => 'nullable|string|max:20|unique:users,phone',
+            'email' => [
+                'required', 'string', 'email', 'max:255',
+                function ($attribute, $value, $fail) {
+                    if (\App\Models\User::where('email', $value)->exists() || \App\Models\PendingRegistration::where('email', $value)->valid()->exists()) {
+                        $fail('This email is already registered.');
+                    }
+                }
+            ],
+            'phone' => [
+                'nullable', 'string', 'max:20',
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        if (\App\Models\User::where('phone', $value)->exists() || \App\Models\PendingRegistration::where('phone', $value)->valid()->exists()) {
+                            $fail('This phone number is already registered.');
+                        }
+                    }
+                }
+            ],
             'password' => 'required|string|min:6|confirmed',
         ];
     }

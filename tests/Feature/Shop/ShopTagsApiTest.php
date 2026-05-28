@@ -13,20 +13,23 @@ class ShopTagsApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected $user;
+
     protected function setUp(): void
     {
         parent::setUp();
-        // Assuming public endpoints or simple auth. 
-        // Based on Categories test, we might need auth.
-        // Categories test used: $this->actingAs($user, 'api');
+        $this->user = User::factory()->create();
     }
 
     public function test_can_list_active_tag_groups()
     {
-        ShopTagGroup::create(['name' => 'Active Group', 'slug' => 'active-group', 'is_active' => true, 'sort_order' => 1]);
-        ShopTagGroup::create(['name' => 'Inactive Group', 'slug' => 'inactive-group', 'is_active' => false, 'sort_order' => 2]);
+        $active = ShopTagGroup::create(['name' => 'Active Group', 'slug' => 'active-group', 'is_active' => true, 'sort_order' => 1]);
+        ShopTag::create(['group_id' => $active->id, 'name' => 'Tag 1', 'slug' => 'tag-1', 'is_active' => true]);
 
-        $response = $this->getJson(route('api.v1.shop.tags.groups.index'));
+        $inactive = ShopTagGroup::create(['name' => 'Inactive Group', 'slug' => 'inactive-group', 'is_active' => false, 'sort_order' => 2]);
+        ShopTag::create(['group_id' => $inactive->id, 'name' => 'Tag 2', 'slug' => 'tag-2', 'is_active' => true]);
+
+        $response = $this->actingAs($this->user, 'api')->getJson(route('shop.tags.groups.index'));
 
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data')
@@ -43,7 +46,7 @@ class ShopTagsApiTest extends TestCase
         $group2 = ShopTagGroup::create(['name' => 'Size', 'slug' => 'size', 'is_active' => true]);
         ShopTag::create(['group_id' => $group2->id, 'name' => 'XL', 'slug' => 'xl', 'is_active' => true]);
 
-        $response = $this->getJson(route('api.v1.shop.tags.index', ['group_id' => $group->id]));
+        $response = $this->actingAs($this->user, 'api')->getJson(route('shop.tags.index', ['group_id' => $group->id]));
 
         $response->assertStatus(200)
             ->assertJsonCount(2, 'data')
@@ -55,7 +58,7 @@ class ShopTagsApiTest extends TestCase
     {
         $group = ShopTagGroup::create(['name' => 'Brand', 'slug' => 'brand', 'is_active' => true]);
 
-        $response = $this->getJson(route('api.v1.shop.tags.groups.show', $group->id));
+        $response = $this->actingAs($this->user, 'api')->getJson(route('shop.tags.groups.show', $group->id));
 
         $response->assertStatus(200)
             ->assertJsonPath('data.id', $group->id)
@@ -67,7 +70,7 @@ class ShopTagsApiTest extends TestCase
         $group = ShopTagGroup::create(['name' => 'Brand', 'slug' => 'brand', 'is_active' => true]);
         $tag = ShopTag::create(['group_id' => $group->id, 'name' => 'Nike', 'slug' => 'nike', 'is_active' => true]);
 
-        $response = $this->getJson(route('api.v1.shop.tags.show', $tag->id));
+        $response = $this->actingAs($this->user, 'api')->getJson(route('shop.tags.show', $tag->id));
 
         $response->assertStatus(200)
             ->assertJsonPath('data.id', $tag->id)
@@ -77,10 +80,10 @@ class ShopTagsApiTest extends TestCase
 
     public function test_404_for_non_existent_group_or_tag()
     {
-        $this->getJson(route('api.v1.shop.tags.groups.show', 999))
+        $this->actingAs($this->user, 'api')->getJson(route('shop.tags.groups.show', 999))
             ->assertStatus(404);
 
-        $this->getJson(route('api.v1.shop.tags.show', 999))
+        $this->actingAs($this->user, 'api')->getJson(route('shop.tags.show', 999))
             ->assertStatus(404);
     }
 }

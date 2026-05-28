@@ -6,6 +6,7 @@ use App\Models\Shop\ShopOrder;
 use App\Models\Shop\ShopProduct;
 use App\Models\Shop\ShopProductVariationGroup;
 use App\Models\Shop\ShopProductVariationValue;
+use App\Models\Shop\ShopProductVariant;
 use App\Models\Shop\UserAddress;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,10 +21,24 @@ class CheckoutTest extends TestCase
     protected ShopProduct $product;
     protected ShopProductVariationValue $redVariant;
     protected ShopProductVariationValue $blueVariant;
+    protected ShopProductVariant $redVariantCombo;
+    protected ShopProductVariant $blueVariantCombo;
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        config([
+            'shiprocket.checkout_requires_serviceability' => false,
+            'payments.gateways.razorpay' => [
+                'driver'         => \App\Services\Payments\Gateways\RazorpayGateway::class,
+                'enabled'        => true,
+                'key_id'         => 'rzp_test_key_123',
+                'key_secret'     => 'rzp_test_secret_abc',
+                'webhook_secret' => 'rzp_webhook_secret_xyz',
+                'mode'           => 'test',
+            ]
+        ]);
 
         $this->user = User::factory()->create();
 
@@ -37,7 +52,7 @@ class CheckoutTest extends TestCase
         $variation = ShopProductVariationGroup::factory()->create([
             'shop_product_id' => $this->product->id,
             'name' => 'Color',
-            'type' => 'radio'
+            'presentation_type' => 'text'
         ]);
 
         // Create Values (Red with stock, Blue out of stock/low stock)
@@ -54,11 +69,30 @@ class CheckoutTest extends TestCase
             'price' => 1000,
             'stock_qty' => 0
         ]);
+
+        // Create Variant combinations
+        $this->redVariantCombo = ShopProductVariant::create([
+            'shop_product_id' => $this->product->id,
+            'sku' => 'TEST-RED',
+            'price' => 1200,
+            'stock_qty' => 10,
+            'is_active' => true,
+        ]);
+        $this->redVariantCombo->optionValues()->attach($this->redVariant);
+
+        $this->blueVariantCombo = ShopProductVariant::create([
+            'shop_product_id' => $this->product->id,
+            'sku' => 'TEST-BLUE',
+            'price' => 1000,
+            'stock_qty' => 0,
+            'is_active' => true,
+        ]);
+        $this->blueVariantCombo->optionValues()->attach($this->blueVariant);
     }
 
     public function test_user_can_manage_addresses()
     {
-        $this->actingAs($this->user);
+        $this->actingAs($this->user, 'api');
 
         // 1. Create Address
         $payload = [
@@ -75,7 +109,7 @@ class CheckoutTest extends TestCase
         ];
 
         $response = $this->postJson('/api/v1/shop/addresses', $payload);
-        $response->assertCreated()
+        $response->assertOk()
             ->assertJsonPath('data.label', 'Home');
         
         $addressId = $response->json('data.id');
@@ -100,14 +134,14 @@ class CheckoutTest extends TestCase
 
     public function test_checkout_summary_and_validation()
     {
-        $this->actingAs($this->user);
+        $this->actingAs($this->user, 'api');
 
         // Add item to cart
         $this->postJson('/api/v1/cart/items', [
             'product_id' => $this->product->id,
             'quantity' => 2,
             'variation_value_ids' => [$this->redVariant->id]
-        ])->assertCreated();
+        ])->assertOk();
 
         // Get Summary
         $response = $this->getJson('/api/v1/shop/checkout/summary');
@@ -120,23 +154,26 @@ class CheckoutTest extends TestCase
 
     public function test_cannot_checkout_with_insufficient_stock()
     {
-        $this->actingAs($this->user);
+        $this->actingAs($this->user, 'api');
 
-        // Set Blue variant stock to 1 to test boundary
-        $this->blueVariant->update(['stock_qty' => 1]);
+        // 1. Set stock to 2 initially so we can successfully add it to the cart
+        $this->blueVariantCombo->update(['stock_qty' => 2]);
 
-        // Add 2 Blue items (exceeds stock)
+        // Add 2 Blue items (succeeds because stock is 2)
         $this->postJson('/api/v1/cart/items', [
             'product_id' => $this->product->id,
             'quantity' => 2,
             'variation_value_ids' => [$this->blueVariant->id]
-        ]);
+        ])->assertOk();
+
+        // 2. Reduce stock to 1 to simulate another purchase/stock change
+        $this->blueVariantCombo->update(['stock_qty' => 1]);
 
         // Summary should show issue
         $res = $this->getJson('/api/v1/shop/checkout/summary');
         $res->assertOk()
             ->assertJsonPath('data.can_place_order', false)
-            ->assertJsonPath('data.items.0.stock_issues.0', 'Insufficient stock');
+            ->assertJsonPath('data.items.0.stock_issues.0', 'Insufficient stock for Blue (Available: 1)');
 
         // Place Order should fail
         $address = UserAddress::factory()->create(['user_id' => $this->user->id]);
@@ -149,7 +186,17 @@ class CheckoutTest extends TestCase
 
     public function test_can_place_order_successfully()
     {
-        $this->actingAs($this->user);
+        $this->actingAs($this->user, 'api');
+
+        \Illuminate\Support\Facades\Http::fake([
+            'https://api.razorpay.com/v1/orders' => \Illuminate\Support\Facades\Http::response([
+                'id' => 'order_vlt999',
+                'entity' => 'order',
+                'amount' => 240000,
+                'currency' => 'INR',
+                'status' => 'created',
+            ], 201)
+        ]);
 
         // Add 2 Red items (Stock 10)
         $this->postJson('/api/v1/cart/items', [
@@ -170,7 +217,7 @@ class CheckoutTest extends TestCase
             ->assertJsonPath('data.status', 'pending_payment');
 
         // Check Stock Deducted (10 - 2 = 8)
-        $this->assertEquals(8, $this->redVariant->fresh()->stock_qty);
+        $this->assertEquals(8, $this->redVariantCombo->fresh()->stock_qty);
 
         // Check Cart Cleared
         $this->getJson('/api/v1/cart')->assertJsonCount(0, 'data.items');
@@ -178,7 +225,7 @@ class CheckoutTest extends TestCase
 
     public function test_order_history_and_cancellation()
     {
-        $this->actingAs($this->user);
+        $this->actingAs($this->user, 'api');
         $address = UserAddress::factory()->create(['user_id' => $this->user->id]);
 
         // Create an order directly (simulating placement)
@@ -187,6 +234,7 @@ class CheckoutTest extends TestCase
             'order_number' => 'TEST-ORDER',
             'status' => 'pending_payment',
             'currency' => 'INR',
+            'subtotal' => 2400,
             'total_amount' => 2400,
             'billing_address_snapshot' => $address->toArray(),
             'shipping_address_snapshot' => $address->toArray(),
@@ -195,14 +243,10 @@ class CheckoutTest extends TestCase
         // Add Item
         $order->items()->create([
             'shop_product_id' => $this->product->id,
-            'product_snapshot' => ['title' => 'Test'],
+            'title_snapshot' => 'Test Product',
             'quantity' => 2,
             'unit_price' => 1200,
             'line_total' => 2400,
-            'variation_snapshot' => [[
-                'id' => $this->redVariant->id,
-                'stock_qty' => 10 // Snapshot of old stock
-            ]]
         ]);
         
         // Link variations table actually

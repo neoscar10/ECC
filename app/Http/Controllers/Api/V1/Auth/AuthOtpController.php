@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
+use App\Exceptions\OtpException;
+
 class AuthOtpController extends Controller
 {
     use ApiResponse;
@@ -33,15 +35,24 @@ class AuthOtpController extends Controller
             return $this->error('Validation Error', 422, $validator->errors());
         }
 
-        $otpData = $this->authService->requestOtp($request->phone);
-
-        if (!$otpData) {
-            return $this->error('We could not find an account with that email/phone.', 404);
+        try {
+            $otpData = $this->authService->requestOtp($request->phone);
+            if (!$otpData) {
+                return $this->error('We could not find an account with that email/phone.', 404);
+            }
+        } catch (OtpException $e) {
+            return $this->error($e->getMessage(), $e->getCode() ?: 400);
         }
 
-        return $this->success([
+        $responseData = [
             'ttl_minutes' => $otpData['ttl_minutes']
-        ], $otpData['message']);
+        ];
+
+        if (isset($otpData['dev_otp'])) {
+            $responseData['dev_otp'] = $otpData['dev_otp'];
+        }
+
+        return $this->success($responseData, $otpData['message']);
     }
 
     /**
@@ -55,10 +66,13 @@ class AuthOtpController extends Controller
              return $this->error('Validation Error', 422, $validator->errors());
         }
 
-        $user = $this->authService->verifyOtp($request->phone, $request->otp);
-
-        if (!$user) {
-            return $this->error('Invalid OTP or account not found.', 404);
+        try {
+            $user = $this->authService->verifyOtp($request->phone, $request->otp);
+            if (!$user) {
+                return $this->error('Invalid OTP or account not found.', 404);
+            }
+        } catch (OtpException $e) {
+            return $this->error($e->getMessage(), $e->getCode() ?: 400);
         }
         
         // Generate Token

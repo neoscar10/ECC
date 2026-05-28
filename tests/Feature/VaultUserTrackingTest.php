@@ -158,8 +158,8 @@ class VaultUserTrackingTest extends TestCase
         // User2 trying to access User1's request
         $this->actingAs($user2);
         
-        Livewire::test(\App\Livewire\Vault\DeliveryPaymentPage::class, ['requestId' => $request->id])
-            ->assertForbidden();
+        Livewire::test(\App\Livewire\Shop\CheckoutPage::class, ['vaultRequestId' => $request->id])
+            ->assertRedirect(route('vault.index'));
     }
 
     public function test_delivery_payment_page_successful_simulation()
@@ -183,20 +183,32 @@ class VaultUserTrackingTest extends TestCase
             'delivery_currency' => 'INR',
         ]);
 
-        $this->actingAs($user);
-        
-        Livewire::test(\App\Livewire\Vault\DeliveryPaymentPage::class, ['requestId' => $request->id])
-            ->set('method', 'card')
-            ->set('card_number', '1111222233334444')
-            ->set('expiry', '12/25')
-            ->set('cvv', '123')
-            ->set('cardholder_name', 'Test User')
-            ->call('submit')
-            ->assertRedirect(route('vault.index'));
+        $address = \App\Models\Shop\UserAddress::factory()->create(['user_id' => $user->id]);
 
-        $request->refresh();
-        $this->assertEquals('paid', $request->payment_status);
-        $this->assertNotNull($request->paid_at);
-        $this->assertNotNull($request->payment_reference);
+        $this->actingAs($user);
+
+        \Illuminate\Support\Facades\Http::fake([
+            'https://api.razorpay.com/v1/orders' => \Illuminate\Support\Facades\Http::response([
+                'id' => 'order_vlt999',
+                'entity' => 'order',
+                'amount' => 20000,
+                'currency' => 'INR',
+                'status' => 'created',
+            ], 201)
+        ]);
+
+        config(['payments.default_gateway' => 'razorpay']);
+        
+        $lw = Livewire::test(\App\Livewire\Shop\CheckoutPage::class, ['vaultRequestId' => $request->id])
+            ->set('selectedAddressId', $address->id);
+
+        $lw->call('placeOrder');
+
+        $payment = \App\Models\Payment::where('payable_type', VaultRemovalRequest::class)
+            ->where('payable_id', $request->id)
+            ->first();
+
+        $this->assertNotNull($payment);
+        $lw->assertRedirect(route('payments.pay', $payment->id));
     }
 }

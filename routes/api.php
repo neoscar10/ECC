@@ -22,18 +22,15 @@ Route::prefix('v1')->group(function () {
             Route::post('password/reset', [App\Http\Controllers\Api\V1\Auth\PasswordResetController::class, 'reset']);
         });
         
+        // OTP (Publicly accessible, auth checked dynamically inside controllers)
+        Route::post('request-otp', [\App\Http\Controllers\Api\V1\PhoneVerificationController::class, 'requestOtp']);
+        Route::post('verify-otp', [\App\Http\Controllers\Api\V1\PhoneVerificationController::class, 'verifyOtp']);
+
         // Protected Auth Routes
         Route::middleware('auth:api')->group(function () {
              Route::post('refresh', [AuthController::class, 'refresh']);
              Route::post('logout', [AuthController::class, 'logout']);
              Route::get('me', [AuthController::class, 'me']);
-
-
-
-             
-             // OTP
-             Route::post('request-otp', [\App\Http\Controllers\Api\V1\PhoneVerificationController::class, 'requestOtp']);
-             Route::post('verify-otp', [\App\Http\Controllers\Api\V1\PhoneVerificationController::class, 'verifyOtp']);
 
              // Password Change
              Route::post('change-password', [AuthController::class, 'changePassword']);

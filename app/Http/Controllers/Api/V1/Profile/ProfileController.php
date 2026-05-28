@@ -42,6 +42,17 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
+        if ($request->has('phone') && !is_null($request->input('phone'))) {
+            try {
+                $normalized = app(\App\Services\Otp\PhoneNormalizer::class)->normalize($request->input('phone'));
+                $request->merge(['phone' => $normalized]);
+            } catch (\Exception $e) {
+                return $this->error('Validation Error', 422, [
+                    'phone' => [$e->getMessage() ?: 'The phone number format is invalid.']
+                ]);
+            }
+        }
+
         $validator = Validator::make($request->all(), [
             'full_name' => 'nullable|string|max:100',
             'date_of_birth' => 'nullable|date|before:today',

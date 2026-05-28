@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
+use App\Exceptions\OtpException;
+
 class PasswordResetController extends Controller
 {
     protected $otpService;
@@ -41,14 +43,28 @@ class PasswordResetController extends Controller
 
         // Security: Always return success to prevent user enumeration
         if ($user) {
-            $data = $this->otpService->requestPasswordResetOtp($user, $identifier);
-            return response()->json([
-                'success' => true,
-                'message' => $data['message'],
-                'data' => ['ttl_minutes' => $data['ttl_minutes']],
-                'meta' => null,
-                'errors' => null,
-            ]);
+            try {
+                $data = $this->otpService->requestPasswordResetOtp($user, $identifier);
+                $responseData = ['ttl_minutes' => $data['ttl_minutes']];
+                if (isset($data['dev_otp'])) {
+                    $responseData['dev_otp'] = $data['dev_otp'];
+                }
+                return response()->json([
+                    'success' => true,
+                    'message' => $data['message'],
+                    'data' => $responseData,
+                    'meta' => null,
+                    'errors' => null,
+                ]);
+            } catch (OtpException $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'data' => null,
+                    'meta' => null,
+                    'errors' => null,
+                ], $e->getCode() ?: 400);
+            }
         }
 
         // Fake response if user not found
@@ -94,17 +110,27 @@ class PasswordResetController extends Controller
             ], 400);
         }
 
-        if ($this->otpService->verifyPasswordResetOtp($user, $identifier, $otp)) {
-            $user->password = Hash::make($request->input('password'));
-            $user->save();
+        try {
+            if ($this->otpService->verifyPasswordResetOtp($user, $identifier, $otp)) {
+                $user->password = Hash::make($request->input('password'));
+                $user->save();
 
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Password reset successfully.',
+                    'data' => null,
+                    'meta' => null,
+                    'errors' => null,
+                ]);
+            }
+        } catch (OtpException $e) {
             return response()->json([
-                'success' => true,
-                'message' => 'Password reset successfully.',
+                'success' => false,
+                'message' => $e->getMessage(),
                 'data' => null,
                 'meta' => null,
                 'errors' => null,
-            ]);
+            ], $e->getCode() ?: 400);
         }
 
         return response()->json([

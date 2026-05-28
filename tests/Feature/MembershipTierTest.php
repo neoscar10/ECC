@@ -23,7 +23,7 @@ class MembershipTierTest extends TestCase
         $this->seed(\Database\Seeders\PrivilegesSeeder::class);
         $this->seed(\Database\Seeders\MembershipTiersSeeder::class);
 
-        $this->user = User::factory()->create(['phone_verified_at' => now(), 'phone' => '+447700900000']);
+        $this->user = User::factory()->create(['phone_verified_at' => now(), 'phone' => '+447911123456']);
         $this->user->assignRole('user');
         $this->token = auth('api')->login($this->user);
     }

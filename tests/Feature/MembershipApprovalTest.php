@@ -24,7 +24,7 @@ class MembershipApprovalTest extends TestCase
         $this->seed(\Database\Seeders\PrivilegesSeeder::class);
         $this->seed(\Database\Seeders\MembershipTiersSeeder::class);
 
-        $this->user = User::factory()->create(['phone_verified_at' => now(), 'phone' => '+447700900000']);
+        $this->user = User::factory()->create(['phone_verified_at' => now(), 'phone' => '+447911123456']);
         $this->user->assignRole('user');
 
         $this->admin = User::factory()->create(['email' => 'admin@ecc.com']);

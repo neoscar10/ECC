@@ -1105,7 +1105,7 @@ class Index extends Component
         $block = CmsBlock::with(['visibilityTiers', 'clearViewTiers'])->findOrFail($id);
 
         $this->title = $block->title;
-        $this->placement = 'explore';
+        $this->placement = $block->placement;
         $this->type = $block->type;
         $this->isActive = $block->is_active;
         $this->sortOrder = $block->sort_order;
@@ -1278,7 +1278,7 @@ class Index extends Component
 
             $data = [
                 'title' => $this->title,
-                'placement' => 'explore',
+                'placement' => $this->placement,
                 'type' => $this->type,
                 'content' => $contentPayload,
                 'type_config' => $typeConfigPayload,

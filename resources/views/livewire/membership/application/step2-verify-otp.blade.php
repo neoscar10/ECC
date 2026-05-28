@@ -35,6 +35,26 @@
       </div>
     </div>
 
+    @if($devOtp)
+      <div class="card border-0 mb-4 text-start shadow-sm" style="background: rgba(199,167,90,0.15); border-left: 4px solid var(--ecc-primary) !important; border-radius: 12px;">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-uppercase fw-bold small text-ecc mb-1" style="letter-spacing: 0.05em; font-family: 'Noto Sans', sans-serif;">Developer Mode OTP</div>
+              <div class="h3 mb-0 text-white font-monospace fw-bold" style="letter-spacing: 0.1em;">{{ $devOtp }}</div>
+            </div>
+            <button type="button" 
+                    class="btn btn-sm btn-outline-light border-0 px-2 py-1 d-flex align-items-center gap-1"
+                    style="background: rgba(255,255,255,0.05); color: #fff; font-size: 12px; font-family: 'Noto Sans', sans-serif; border-radius: 8px;"
+                    onclick="navigator.clipboard.writeText('{{ $devOtp }}').then(() => { this.innerHTML = '<span class=\'material-symbols-outlined\' style=\'font-size:16px;\'>check</span><span>Copied!</span>'; setTimeout(() => this.innerHTML = '<span class=\'material-symbols-outlined\' style=\'font-size:16px;\'>content_copy</span><span>Copy</span>', 2000) })">
+              <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+              <span>Copy</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    @endif
+
     <div class="ecc-shield mb-4 mx-auto">
       <span class="material-symbols-outlined">shield</span>
     </div>
@@ -278,16 +298,18 @@
 @endpush
 
 <script>
-    // Timer reset event listener
+    // Timer reset event listener — fired by Livewire after a successful resend
     window.addEventListener('ecc-otp-countdown-reset', event => {
         if (window.otpTimer) window.otpTimer.start(event.detail.seconds);
     });
 
-    // Simple global-ish timer handler for the countdown block
-    document.addEventListener('livewire:initialized', () => {
+    function eccInitOtpTimer(initialSeconds) {
         const timerDisplay = document.getElementById('timer-display');
-        const timerBlock = document.getElementById('otp-timer-block');
-        const resendBlock = document.getElementById('otp-resend-block');
+        const timerBlock   = document.getElementById('otp-timer-block');
+        const resendBlock  = document.getElementById('otp-resend-block');
+
+        if (!timerDisplay || !timerBlock || !resendBlock) return;
+
         let interval = null;
 
         window.otpTimer = {
@@ -309,24 +331,31 @@
                 }, 1000);
             },
             update(seconds) {
-                if (!timerDisplay) return;
                 const m = Math.floor(seconds / 60);
                 const s = seconds % 60;
                 timerDisplay.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
             },
             showTimer() {
-                timerBlock?.classList.remove('d-none');
-                resendBlock?.classList.add('d-none');
+                timerBlock.classList.remove('d-none');
+                resendBlock.classList.add('d-none');
             },
             showResend() {
-                timerBlock?.classList.add('d-none');
-                resendBlock?.classList.remove('d-none');
+                timerBlock.classList.add('d-none');
+                resendBlock.classList.remove('d-none');
                 @this.set('resendRemaining', 0);
             }
         };
 
-        // Initial start
-        const initialSeconds = @js($resendRemaining);
         window.otpTimer.start(initialSeconds);
+    }
+
+    // Start once the DOM is ready — handles initial page load
+    document.addEventListener('DOMContentLoaded', () => {
+        eccInitOtpTimer(@js($resendRemaining));
+    });
+
+    // Re-init after any Livewire navigation (full-page Livewire navigate)
+    document.addEventListener('livewire:navigated', () => {
+        eccInitOtpTimer(@js($resendRemaining));
     });
 </script>

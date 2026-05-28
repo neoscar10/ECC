@@ -96,6 +96,15 @@ class SettingsPage extends Component
 
     public function saveProfile(ProfileService $profileService)
     {
+        if (!empty($this->profileForm['phone'])) {
+            try {
+                $this->profileForm['phone'] = app(\App\Services\Otp\PhoneNormalizer::class)->normalize($this->profileForm['phone']);
+            } catch (\Exception $e) {
+                $this->addError('profileForm.phone', $e->getMessage() ?: 'The phone number format is invalid.');
+                return;
+            }
+        }
+
         $this->validate([
             'profileForm.name' => 'required|string|max:255',
             'profileForm.full_name' => 'nullable|string|max:100',

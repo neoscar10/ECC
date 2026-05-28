@@ -11,7 +11,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(\App\Services\Otp\Delivery\OtpDeliveryInterface::class, function ($app) {
+            $mode = config('otp.delivery_mode', 'meta_whatsapp');
+
+            if (app()->environment('production') && $mode === 'dev') {
+                throw new \RuntimeException('CRITICAL: DEV OTP mode cannot be enabled in production environments.');
+            }
+
+            return match ($mode) {
+                'dev' => $app->make(\App\Services\Otp\Delivery\DevOtpDeliveryService::class),
+                'meta_whatsapp' => $app->make(\App\Services\Otp\Delivery\MetaWhatsAppService::class),
+                default => throw new \InvalidArgumentException("Unsupported OTP delivery mode: {$mode}"),
+            };
+        });
     }
 
     /**
@@ -19,6 +31,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (app()->environment('production') && config('otp.delivery_mode') === 'dev') {
+            throw new \RuntimeException('CRITICAL: DEV OTP mode cannot be enabled in production environments.');
+        }
+
         \App\Models\Membership::observe(\App\Observers\MembershipObserver::class);
         
         // Share counts with admin sidebar

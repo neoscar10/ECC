@@ -18,23 +18,29 @@ class Step1RegisterAccount extends Component
     public string $password_confirmation = '';
     public ?string $errorMessage = null;
 
-    public function submit(AuthService $authService, OtpService $otpService)
+    public function submit(\App\Services\Auth\RegistrationService $registrationService)
     {
         $this->errorMessage = null;
 
         try {
+            // Normalize phone number before validation
+            try {
+                $this->phone = app(\App\Services\Otp\PhoneNormalizer::class)->normalize($this->phone);
+            } catch (\Exception $e) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'phone' => [$e->getMessage() ?: 'The phone number format is invalid.']
+                ]);
+            }
+
             $validated = $this->validate(MembershipRules::accountRegistration());
             
-            // Register user
-            $user = $authService->register($validated);
-
-            // Request OTP
-            $otpService->requestPhoneOtp($user, $validated['phone']);
+            // Initiate registration
+            $result = $registrationService->initiate($validated);
 
             // Store pending info in session
             session([
-                'ecc_pending_phone' => $validated['phone'],
-                'ecc_pending_user_id' => $user->id,
+                'ecc_pending_registration_id' => $result['pending_registration_id'],
+                'ecc_pending_verification_token' => \Illuminate\Support\Str::random(40),
             ]);
 
             return redirect()->route('membership.application.step2');

@@ -69,7 +69,7 @@ class UserDeviceTokenRegistrationTest extends TestCase
 
         // 3. Act
         $response = $this->actingAs($user, 'api')
-            ->postJson('/api/v1/user/device-tokens', [
+            ->postJson('/api/v1/me/device-tokens', [
                 'token' => $token,
                 'platform' => 'android'
             ]);
@@ -105,7 +105,7 @@ class UserDeviceTokenRegistrationTest extends TestCase
             ->with([$token], Mockery::pattern('/ecc_membership_/'));
 
         $this->actingAs($user, 'api')
-            ->postJson('/api/v1/user/device-tokens', [
+            ->postJson('/api/v1/me/device-tokens', [
                 'token' => $token,
                 'platform' => 'ios'
             ])

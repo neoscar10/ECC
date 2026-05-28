@@ -20,6 +20,15 @@ class Cart extends Model
         'admin_note',
     ];
 
+    protected static function booted()
+    {
+        static::creating(function ($cart) {
+            if (!$cart->last_activity_at) {
+                $cart->last_activity_at = now();
+            }
+        });
+    }
+
     protected $casts = [
         'last_activity_at' => 'datetime',
         'checked_out_at' => 'datetime',

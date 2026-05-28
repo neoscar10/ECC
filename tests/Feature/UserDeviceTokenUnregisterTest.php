@@ -75,7 +75,7 @@ class UserDeviceTokenUnregisterTest extends TestCase
             
         // 3. Act
         $response = $this->actingAs($user, 'api')
-            ->deleteJson('/api/v1/user/device-tokens', [
+            ->postJson('/api/v1/me/device-tokens/unregister', [
                 'token' => $token
             ]);
 

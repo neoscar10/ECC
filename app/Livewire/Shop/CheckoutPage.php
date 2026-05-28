@@ -64,7 +64,7 @@ class CheckoutPage extends Component
     public function mount()
     {
         $this->paymentGateway = config('payments.default_gateway', 'razorpay');
-        $this->loadData();
+        return $this->loadData();
     }
 
     public function loadData()

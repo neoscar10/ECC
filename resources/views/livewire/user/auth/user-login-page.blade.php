@@ -9,7 +9,7 @@
             <div class="text-center mb-3 mb-md-4">
                 <div class="ecc-crest mx-auto">
                     <div class="ecc-crest-sheen"></div>
-                    <div class="ecc-crest-img" aria-label="Executive Cricket Club crest"></div>
+                    <img src="{{ asset('ecc_logo_dark.png') }}" class="ecc-crest-img" alt="ECC Logo">
                 </div>
             </div>
 
@@ -109,6 +109,7 @@
                 {{-- Links outside form to prevent accidental submission --}}
                 <div class="d-flex justify-content-between align-items-center mt-4 px-1 flex-wrap gap-3">
                     <a href="javascript:void(0)" wire:click="setMode('forgot')" class="ecc-link text-uppercase">Forgot Password?</a>
+                    <a href="{{ route('membership.application.step1') }}" class="ecc-link text-uppercase" style="color: var(--ecc-gold-400);">Register / Apply</a>
                     <a href="javascript:void(0)" wire:click="setMode('otp')" class="ecc-link text-uppercase">Login with OTP</a>
                 </div>
 
@@ -152,6 +153,25 @@
                 @else
                     {{-- Step 2: Verify & Reset --}}
                     <form wire:submit.prevent="verifyResetOtp" class="ecc-form">
+                        @if($devOtp)
+                          <div class="card border-0 mb-3 text-start shadow-sm" style="background: rgba(199,167,90,0.15); border-left: 4px solid var(--ecc-gold-400) !important; border-radius: 12px;">
+                            <div class="card-body p-3">
+                              <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                  <div class="text-uppercase fw-bold small mb-1" style="letter-spacing: 0.05em; font-family: 'Noto Sans', sans-serif; color: var(--ecc-gold-400);">Developer Mode OTP</div>
+                                  <div class="h3 mb-0 text-white font-monospace fw-bold" style="letter-spacing: 0.1em;">{{ $devOtp }}</div>
+                                </div>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-light border-0 px-2 py-1 d-flex align-items-center gap-1"
+                                        style="background: rgba(255,255,255,0.05); color: #fff; font-size: 12px; font-family: 'Noto Sans', sans-serif; border-radius: 8px;"
+                                        onclick="navigator.clipboard.writeText('{{ $devOtp }}').then(() => { this.innerHTML = '<span class=\'material-symbols-outlined\' style=\'font-size:16px;\'>check</span><span>Copied!</span>'; setTimeout(() => this.innerHTML = '<span class=\'material-symbols-outlined\' style=\'font-size:16px;\'>content_copy</span><span>Copy</span>', 2000) })">
+                                  <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+                                  <span>Copy</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        @endif
                         <div class="ecc-field mb-3 mb-md-4 text-center">
                             <label class="ecc-label text-uppercase d-block mb-3">Verification Code</label>
                             <input
@@ -271,6 +291,25 @@
                 @else
                     {{-- Step 2: Verify & Login --}}
                     <form wire:submit.prevent="verifyLoginOtp" class="ecc-form">
+                        @if($devOtp)
+                          <div class="card border-0 mb-3 text-start shadow-sm" style="background: rgba(199,167,90,0.15); border-left: 4px solid var(--ecc-gold-400) !important; border-radius: 12px;">
+                            <div class="card-body p-3">
+                              <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                  <div class="text-uppercase fw-bold small mb-1" style="letter-spacing: 0.05em; font-family: 'Noto Sans', sans-serif; color: var(--ecc-gold-400);">Developer Mode OTP</div>
+                                  <div class="h3 mb-0 text-white font-monospace fw-bold" style="letter-spacing: 0.1em;">{{ $devOtp }}</div>
+                                </div>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-light border-0 px-2 py-1 d-flex align-items-center gap-1"
+                                        style="background: rgba(255,255,255,0.05); color: #fff; font-size: 12px; font-family: 'Noto Sans', sans-serif; border-radius: 8px;"
+                                        onclick="navigator.clipboard.writeText('{{ $devOtp }}').then(() => { this.innerHTML = '<span class=\'material-symbols-outlined\' style=\'font-size:16px;\'>check</span><span>Copied!</span>'; setTimeout(() => this.innerHTML = '<span class=\'material-symbols-outlined\' style=\'font-size:16px;\'>content_copy</span><span>Copy</span>', 2000) })">
+                                  <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+                                  <span>Copy</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        @endif
                         <div class="ecc-field mb-3 mb-md-4 text-center">
                             <label class="ecc-label text-uppercase d-block mb-3">Verification Code</label>
                             <input
@@ -495,11 +534,7 @@ document.addEventListener('click', function (e) {
         width: 64px; height: 64px;
         position:absolute; inset:0;
         margin:auto;
-        background-size: contain;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAhzOGy9CW7AuHZ9r5_EEGr9I-sEK3Ax0P0Hd-DdfRe-Op0DDV1XrbxKYcBaz6GtF4l_D259OWN-BuRLDP92r4laRvHvwrYUKRC7n5urXerZi0M0wVp1s165Blw-VM7TpVZP-_VpDSyZ1EmJ_XWssVjn7FvpCjMG3c1D7g4nlg1L7QqengsSioKoNUKuOsK8sbEAkk6qwK3bkCTG-bWIFzXCexcPc_1avCBMqGK6oiUOueq5ybIvCY6Oo-yGOwqQLYBXOBRaKve5oB8');
-        filter: invert(86%) sepia(23%) saturate(2329%) hue-rotate(358deg) brightness(96%) contrast(96%);
+        object-fit: contain;
     }
 
     /* Title */

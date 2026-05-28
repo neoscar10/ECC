@@ -8,8 +8,22 @@ class MembershipRules
     {
         return [
             'name' => 'required|string|min:2|max:120',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'required|string|unique:users,phone',
+            'email' => [
+                'required', 'email',
+                function ($attribute, $value, $fail) {
+                    if (\App\Models\User::where('email', $value)->exists() || \App\Models\PendingRegistration::where('email', $value)->valid()->exists()) {
+                        $fail('This email is already registered.');
+                    }
+                }
+            ],
+            'phone' => [
+                'required', 'string',
+                function ($attribute, $value, $fail) {
+                    if (\App\Models\User::where('phone', $value)->exists() || \App\Models\PendingRegistration::where('phone', $value)->valid()->exists()) {
+                        $fail('This phone number is already registered.');
+                    }
+                }
+            ],
             'password' => 'required|string|min:6|confirmed',
         ];
     }

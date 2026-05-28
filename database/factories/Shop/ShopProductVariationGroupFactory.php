@@ -15,9 +15,9 @@ class ShopProductVariationGroupFactory extends Factory
         return [
             'shop_product_id' => ShopProduct::factory(),
             'name' => $this->faker->word,
-            'type' => 'radio', // radio, select, image
-            'order' => 0,
-            'is_required' => true,
+            'presentation_type' => 'text', // text, image, color
+            'has_images' => false,
+            'sort_order' => 0,
         ];
     }
 }

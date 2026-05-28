@@ -8,6 +8,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Spatie\Permission\Models\Role;
 
+use App\Services\Otp\MetaWhatsAppService;
+use App\Services\Otp\OtpGenerator;
+use App\Services\Otp\OtpDeliveryResult;
+use Mockery\MockInterface;
+
 class MembershipApplicationTest extends TestCase
 {
     use RefreshDatabase;
@@ -17,6 +22,18 @@ class MembershipApplicationTest extends TestCase
         parent::setUp();
         $this->seed(\Database\Seeders\RoleSeeder::class);
         $this->seed(\Database\Seeders\DatabaseSeeder::class); // To ensure admin exists
+
+        // Mock MetaWhatsAppService to avoid external API calls
+        $this->mock(MetaWhatsAppService::class, function (MockInterface $mock) {
+            $mock->shouldReceive('sendOtp')->andReturn(
+                OtpDeliveryResult::success('whatsapp', 'mocked_meta_id')
+            );
+        });
+
+        // Mock OtpGenerator to return a static code
+        $this->mock(OtpGenerator::class, function (MockInterface $mock) {
+            $mock->shouldReceive('generate')->andReturn('123456');
+        });
     }
 
     public function test_registration_creates_draft_application()
@@ -24,12 +41,23 @@ class MembershipApplicationTest extends TestCase
         $response = $this->postJson('/api/v1/auth/register', [
             'name' => 'New Applicant',
             'email' => 'applicant@example.com',
-            'phone' => '+447700900000',
+            'phone' => '+447911123456',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
 
-        $response->assertStatus(200)
+        $response->assertStatus(200);
+        $tempToken = $response->json('data.access_token');
+        $this->assertNotNull($tempToken);
+
+        $verifyResponse = $this->postJson('/api/v1/auth/verify-otp', [
+            'phone' => '+447911123456',
+            'otp' => '123456',
+        ], [
+            'Authorization' => 'Bearer ' . $tempToken
+        ]);
+
+        $verifyResponse->assertStatus(200)
             ->assertJsonStructure([
                 'success',
                 'data' => [
@@ -48,7 +76,7 @@ class MembershipApplicationTest extends TestCase
     public function test_full_application_flow()
     {
         // 1. Register
-        $user = User::factory()->create(['phone_verified_at' => now(), 'phone' => '+447700900000']);
+        $user = User::factory()->create(['phone_verified_at' => now(), 'phone' => '+447911123456']);
         $user->assignRole('user');
         $token = auth('api')->login($user);
 

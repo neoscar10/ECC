@@ -10,6 +10,9 @@ use Spatie\Permission\Models\Role;
 
 class AuthService
 {
+    public function __construct(
+        protected \App\Services\Otp\PhoneNormalizer $phoneNormalizer
+    ) {}
     /**
      * Register a new user and create an initial membership application.
      */
@@ -78,7 +81,11 @@ class AuthService
         if ($isEmail) {
             $userQuery->where('email', $identifier);
         } else {
-            $userQuery->where('phone', $this->normalizePhone($identifier));
+            try {
+                $userQuery->where('phone', $this->normalizePhone($identifier));
+            } catch (\Exception $e) {
+                return null;
+            }
         }
 
         return $userQuery->first();
@@ -180,10 +187,10 @@ class AuthService
     }
 
     /**
-     * Minimal Phone Normalization.
+     * Normalize Phone using PhoneNormalizer.
      */
     private function normalizePhone(string $phone): string
     {
-        return trim(str_replace(' ', '', $phone));
+        return $this->phoneNormalizer->normalize($phone);
     }
 }

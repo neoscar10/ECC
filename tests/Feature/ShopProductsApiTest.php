@@ -38,7 +38,7 @@ class ShopProductsApiTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'title', 'slug', 'base_price', 'currency', 'thumbnail_url', 'categories'
+                        'id', 'title', 'slug', 'base_price', 'currency', 'primary_image', 'categories'
                     ]
                 ]
             ]);
@@ -79,14 +79,16 @@ class ShopProductsApiTest extends TestCase
 
         $group = $product->variationGroups()->create([
             'name' => 'Size',
-            'presentation_type' => 'text'
+            'presentation_type' => 'text',
+            'sort_order' => 1
         ]);
 
         $group->values()->create([
             'caption' => 'SH',
             'price' => 2000, // Same as base
             'stock_qty' => 10,
-            'is_default' => true
+            'is_default' => true,
+            'sort_order' => 1
         ]);
 
         $response = $this->actingAs($this->user, 'api')
@@ -95,15 +97,17 @@ class ShopProductsApiTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'id', 'title', 'variation_groups' => [
-                        '*' => [
-                            'name', 'values' => [
-                                '*' => ['caption', 'price', 'stock_qty']
+                    'id', 'title', 'variations' => [
+                        'groups' => [
+                            '*' => [
+                                'name', 'values' => [
+                                    '*' => ['label', 'price', 'stock']
+                                ]
                             ]
                         ]
                     ]
                 ]
             ])
-            ->assertJsonFragment(['name' => 'Size', 'caption' => 'SH']);
+            ->assertJsonFragment(['name' => 'Size', 'label' => 'SH']);
     }
 }

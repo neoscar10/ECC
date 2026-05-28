@@ -46,7 +46,7 @@ class InitialAutoBidTest extends TestCase
         ]);
 
         // 2. Act
-        $response = $this->actingAs($user)->postJson("/api/v1/auctions/{$lot->id}/auto-bid", [
+        $response = $this->actingAs($user, 'api')->postJson("/api/v1/auctions/{$lot->id}/auto-bid", [
             'max_bid' => 500,
             'increment_amount' => 15, // > min 10
         ]);
@@ -99,7 +99,7 @@ class InitialAutoBidTest extends TestCase
 
         // 2. Act
         // Current: 100. Next req: 100 + 10 = 110. Max: 200.
-        $response = $this->actingAs($userB)->postJson("/api/v1/auctions/{$lot->id}/auto-bid", [
+        $response = $this->actingAs($userB, 'api')->postJson("/api/v1/auctions/{$lot->id}/auto-bid", [
             'max_bid' => 200,
             'increment_amount' => 10,
         ]);
@@ -118,11 +118,7 @@ class InitialAutoBidTest extends TestCase
         ]);
 
         // Verify Job Pushed
-        Queue::assertPushed(ProcessAutoBidStepJob::class, function ($job) use ($lot) {
-            // Can inspect job properties if public property exists
-            return true;
-        });
-        
+        Queue::assertPushed(ProcessAutoBidStepJob::class);
         // Also verify cache lock is gone? 
         // Can't easily test cache forget in feature test unless we spy on Cache.
     }
@@ -150,7 +146,7 @@ class InitialAutoBidTest extends TestCase
         ]);
 
         // 2. Act
-        $response = $this->actingAs($user)->postJson("/api/v1/auctions/{$lot->id}/auto-bid", [
+        $response = $this->actingAs($user, 'api')->postJson("/api/v1/auctions/{$lot->id}/auto-bid", [
             'max_bid' => 500,
             'increment_amount' => 10,
         ]);
