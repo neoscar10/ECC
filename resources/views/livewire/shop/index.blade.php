@@ -606,7 +606,7 @@
             border-radius: 50%;
             border: 1px solid var(--ecc-primary-border);
             background: transparent;
-            color: var(--ecc-text-secondary);
+            color: var(--ecc-text-primary);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -616,9 +616,9 @@
         }
 
         .shop-pagination-page.active {
-            background: var(--ecc-primary);
-            border-color: var(--ecc-primary);
-            color: var(--ecc-text-primary);
+            background: var(--ecc-primary) !important;
+            border-color: var(--ecc-primary) !important;
+            color: #111111 !important;
         }
 
         .shop-pagination-arrow:hover,
@@ -628,7 +628,7 @@
         }
 
         .shop-pagination-page.active:hover {
-            color: var(--ecc-text-primary);
+            color: #111111 !important;
         }
 
         .shop-mobile-filter-trigger {
