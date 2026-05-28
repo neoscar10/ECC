@@ -25,8 +25,7 @@ class OtpService
      */
     public static function shouldExposeDevOtp(): bool
     {
-        return app()->environment('local')
-            && config('otp.delivery_mode') === 'dev'
+        return config('otp.delivery_mode') === 'dev'
             && config('app.debug') === true;
     }
 

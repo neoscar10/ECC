@@ -24,6 +24,7 @@ class DevOtpModeTest extends TestCase
     public function test_resolves_dev_provider_when_config_is_dev()
     {
         Config::set('otp.delivery_mode', 'dev');
+        Config::set('app.debug', true);
 
         $provider = app(OtpDeliveryInterface::class);
         $this->assertInstanceOf(DevOtpDeliveryService::class, $provider);
@@ -37,22 +38,20 @@ class DevOtpModeTest extends TestCase
         $this->assertInstanceOf(MetaWhatsAppService::class, $provider);
     }
 
-    public function test_refuses_startup_in_production_env_when_mode_is_dev()
+    public function test_refuses_startup_when_mode_is_dev_and_debug_is_false()
     {
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('CRITICAL: DEV OTP mode cannot be enabled in production environments.');
+        $this->expectExceptionMessage('CRITICAL: DEV OTP mode cannot be enabled when APP_DEBUG is disabled.');
 
-        // Set config to dev and environment to production
         Config::set('otp.delivery_mode', 'dev');
-        $this->app['env'] = 'production';
+        Config::set('app.debug', false);
 
-        // Resolving the interface triggers the register callback check
         app()->make(OtpDeliveryInterface::class);
     }
 
-    public function test_exposes_dev_otp_in_local_debug_mode()
+    public function test_exposes_dev_otp_when_mode_is_dev_and_debug_is_true()
     {
-        $this->app['env'] = 'local';
+        $this->app['env'] = 'production'; // Set to production to prove environment independence
         Config::set('app.debug', true);
         Config::set('otp.delivery_mode', 'dev');
 
@@ -67,23 +66,14 @@ class DevOtpModeTest extends TestCase
 
     public function test_does_not_expose_dev_otp_when_debug_disabled()
     {
-        $this->app['env'] = 'local';
         Config::set('app.debug', false);
-        Config::set('otp.delivery_mode', 'dev');
+        Config::set('otp.delivery_mode', 'meta_whatsapp'); // Keep as meta so we can bootstrap and check
 
-        $user = User::factory()->create(['phone' => '+919876543210']);
-        $otpService = app(OtpService::class);
-
-        $result = $otpService->requestPhoneOtp($user, $user->phone);
-
-        $this->assertArrayNotHasKey('dev_otp', $result);
-    }
-
-    public function test_does_not_expose_dev_otp_when_env_is_not_local()
-    {
-        $this->app['env'] = 'testing';
-        Config::set('app.debug', true);
-        Config::set('otp.delivery_mode', 'dev');
+        $this->mock(OtpDeliveryInterface::class, function ($mock) {
+            $mock->shouldReceive('sendOtp')->andReturn(
+                \App\Services\Otp\OtpDeliveryResult::success('whatsapp', 'mock_meta_id')
+            );
+        });
 
         $user = User::factory()->create(['phone' => '+919876543210']);
         $otpService = app(OtpService::class);

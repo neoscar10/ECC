@@ -13,9 +13,10 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(\App\Services\Otp\Delivery\OtpDeliveryInterface::class, function ($app) {
             $mode = config('otp.delivery_mode', 'meta_whatsapp');
+            $debug = config('app.debug', false);
 
-            if (app()->environment('production') && $mode === 'dev') {
-                throw new \RuntimeException('CRITICAL: DEV OTP mode cannot be enabled in production environments.');
+            if ($mode === 'dev' && !$debug) {
+                throw new \RuntimeException('CRITICAL: DEV OTP mode cannot be enabled when APP_DEBUG is disabled.');
             }
 
             return match ($mode) {
@@ -31,8 +32,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (app()->environment('production') && config('otp.delivery_mode') === 'dev') {
-            throw new \RuntimeException('CRITICAL: DEV OTP mode cannot be enabled in production environments.');
+        $mode = config('otp.delivery_mode', 'meta_whatsapp');
+        $debug = config('app.debug', false);
+
+        if ($mode === 'dev' && !$debug) {
+            throw new \RuntimeException('CRITICAL: DEV OTP mode cannot be enabled when APP_DEBUG is disabled.');
         }
 
         \App\Models\Membership::observe(\App\Observers\MembershipObserver::class);
