@@ -75,39 +75,132 @@
                   { name: 'United Arab Emirates', code: '+971', flag: '🇦🇪' },
                   { name: 'Singapore', code: '+65', flag: '🇸🇬' },
                   { name: 'South Africa', code: '+27', flag: '🇿🇦' },
-                  { name: 'New Zealand', code: '+64', flag: '🇳🇿' }
+                  { name: 'New Zealand', code: '+64', flag: '🇳🇿' },
+                  { name: 'Nigeria', code: '+234', flag: '🇳🇬' },
+                  { name: 'Pakistan', code: '+92', flag: '🇵🇰' },
+                  { name: 'Bangladesh', code: '+880', flag: '🇧🇩' },
+                  { name: 'Sri Lanka', code: '+94', flag: '🇱🇰' },
+                  { name: 'Ireland', code: '+353', flag: '🇮🇪' },
+                  { name: 'Germany', code: '+49', flag: '🇩🇪' },
+                  { name: 'France', code: '+33', flag: '🇫🇷' },
+                  { name: 'Italy', code: '+39', flag: '🇮🇹' },
+                  { name: 'Spain', code: '+34', flag: '🇪🇸' },
+                  { name: 'Netherlands', code: '+31', flag: '🇳🇱' },
+                  { name: 'Switzerland', code: '+41', flag: '🇨🇭' },
+                  { name: 'Sweden', code: '+46', flag: '🇸🇪' },
+                  { name: 'Norway', code: '+47', flag: '🇳🇴' },
+                  { name: 'Denmark', code: '+45', flag: '🇩🇰' },
+                  { name: 'Belgium', code: '+32', flag: '🇧🇪' },
+                  { name: 'Austria', code: '+43', flag: '🇦🇹' },
+                  { name: 'Portugal', code: '+351', flag: '🇵🇹' },
+                  { name: 'Greece', code: '+30', flag: '🇬🇷' },
+                  { name: 'Japan', code: '+81', flag: '🇯🇵' },
+                  { name: 'South Korea', code: '+82', flag: '🇰🇷' },
+                  { name: 'China', code: '+86', flag: '🇨🇳' },
+                  { name: 'Hong Kong', code: '+852', flag: '🇭🇰' },
+                  { name: 'Malaysia', code: '+60', flag: '🇲🇾' },
+                  { name: 'Indonesia', code: '+62', flag: '🇮🇩' },
+                  { name: 'Philippines', code: '+63', flag: '🇵🇭' },
+                  { name: 'Thailand', code: '+66', flag: '🇹🇭' },
+                  { name: 'Vietnam', code: '+84', flag: '🇻🇳' },
+                  { name: 'Kenya', code: '+254', flag: '🇰🇪' },
+                  { name: 'Ghana', code: '+233', flag: '🇬🇭' },
+                  { name: 'Saudi Arabia', code: '+966', flag: '🇸🇦' },
+                  { name: 'Qatar', code: '+974', flag: '🇶🇦' },
+                  { name: 'Kuwait', code: '+965', flag: '🇰🇼' },
+                  { name: 'Oman', code: '+968', flag: '🇴🇲' },
+                  { name: 'Bahrain', code: '+973', flag: '🇧🇭' },
+                  { name: 'Turkey', code: '+90', flag: '🇹🇷' },
+                  { name: 'Brazil', code: '+55', flag: '🇧🇷' },
+                  { name: 'Argentina', code: '+54', flag: '🇦🇷' },
+                  { name: 'Mexico', code: '+52', flag: '🇲🇽' },
+                  { name: 'Egypt', code: '+20', flag: '🇪🇬' },
+                  { name: 'Israel', code: '+972', flag: '🇮🇱' },
+                  { name: 'Zimbabwe', code: '+263', flag: '🇿🇼' },
+                  { name: 'Jamaica', code: '+1876', flag: '🇯🇲' },
+                  { name: 'Nepal', code: '+977', flag: '🇳🇵' },
+                  { name: 'Afghanistan', code: '+93', flag: '🇦🇫' },
+                  { name: 'Albania', code: '+355', flag: '🇦🇱' },
+                  { name: 'Algeria', code: '+213', flag: '🇩🇿' },
+                  { name: 'Andorra', code: '+376', flag: '🇦🇩' },
+                  { name: 'Angola', code: '+244', flag: '🇦🇴' },
+                  { name: 'Armenia', code: '+374', flag: '🇦🇲' },
+                  { name: 'Azerbaijan', code: '+994', flag: '🇦🇿' },
+                  { name: 'Bahamas', code: '+1242', flag: '🇧🇸' },
+                  { name: 'Barbados', code: '+1246', flag: '🇧🇧' },
+                  { name: 'Belarus', code: '+375', flag: '🇧🇾' },
+                  { name: 'Bolivia', code: '+591', flag: '🇧🇴' },
+                  { name: 'Bosnia and Herzegovina', code: '+387', flag: '🇧🇦' },
+                  { name: 'Botswana', code: '+267', flag: '🇧🇼' },
+                  { name: 'Bulgaria', code: '+359', flag: '🇧🇬' },
+                  { name: 'Cambodia', code: '+855', flag: '🇰🇭' },
+                  { name: 'Cameroon', code: '+237', flag: '🇨🇲' },
+                  { name: 'Chile', code: '+56', flag: '🇨🇱' },
+                  { name: 'Colombia', code: '+57', flag: '🇨🇴' },
+                  { name: 'Costa Rica', code: '+506', flag: '🇨🇷' },
+                  { name: 'Croatia', code: '+385', flag: '🇭🇷' },
+                  { name: 'Cuba', code: '+53', flag: '🇨🇺' },
+                  { name: 'Cyprus', code: '+357', flag: '🇨🇾' },
+                  { name: 'Czech Republic', code: '+420', flag: '🇨🇿' },
+                  { name: 'Ecuador', code: '+593', flag: '🇪🇨' },
+                  { name: 'El Salvador', code: '+503', flag: '🇸🇻' },
+                  { name: 'Estonia', code: '+372', flag: '🇪🇪' },
+                  { name: 'Ethiopia', code: '+251', flag: '🇪🇹' },
+                  { name: 'Fiji', code: '+679', flag: '🇫🇯' },
+                  { name: 'Finland', code: '+358', flag: '🇫🇮' },
+                  { name: 'Georgia', code: '+995', flag: '🇬🇪' },
+                  { name: 'Guatemala', code: '+502', flag: '🇬🇹' },
+                  { name: 'Honduras', code: '+504', flag: '🇭🇳' },
+                  { name: 'Hungary', code: '+36', flag: '🇭🇺' },
+                  { name: 'Iceland', code: '+354', flag: '🇮🇸' },
+                  { name: 'Iran', code: '+98', flag: '🇮🇷' },
+                  { name: 'Iraq', code: '+964', flag: '🇮🇶' },
+                  { name: 'Jordan', code: '+962', flag: '🇯🇴' },
+                  { name: 'Kazakhstan', code: '+7', flag: '🇰🇿' },
+                  { name: 'Latvia', code: '+371', flag: '🇱🇻' },
+                  { name: 'Lebanon', code: '+961', flag: '🇱🇧' },
+                  { name: 'Libya', code: '+218', flag: '🇱🇾' },
+                  { name: 'Liechtenstein', code: '+423', flag: '🇱🇮' },
+                  { name: 'Lithuania', code: '+370', flag: '🇱🇹' },
+                  { name: 'Luxembourg', code: '+352', flag: '🇱🇺' },
+                  { name: 'Macao', code: '+853', flag: '🇲🇴' },
+                  { name: 'Macedonia', code: '+389', flag: '🇲🇰' },
+                  { name: 'Madagascar', code: '+261', flag: '🇲🇬' },
+                  { name: 'Malta', code: '+356', flag: '🇲🇹' },
+                  { name: 'Mauritius', code: '+230', flag: '🇲🇺' },
+                  { name: 'Monaco', code: '+377', flag: '🇲🇨' },
+                  { name: 'Mongolia', code: '+976', flag: '🇲🇳' },
+                  { name: 'Montenegro', code: '+382', flag: '🇲🇪' },
+                  { name: 'Morocco', code: '+212', flag: '🇲🇦' },
+                  { name: 'Mozambique', code: '+258', flag: '🇲🇿' },
+                  { name: 'Myanmar', code: '+95', flag: '🇲🇲' },
+                  { name: 'Namibia', code: '+264', flag: '🇳🇦' },
+                  { name: 'Nicaragua', code: '+505', flag: '🇳🇮' },
+                  { name: 'Panama', code: '+507', flag: '🇵🇦' },
+                  { name: 'Paraguay', code: '+595', flag: '🇵🇾' },
+                  { name: 'Peru', code: '+51', flag: '🇵🇪' },
+                  { name: 'Poland', code: '+48', flag: '🇵🇱' },
+                  { name: 'Romania', code: '+40', flag: '🇷🇴' },
+                  { name: 'Russia', code: '+7', flag: '🇷🇺' },
+                  { name: 'Serbia', code: '+381', flag: '🇷🇸' },
+                  { name: 'Slovakia', code: '+421', flag: '🇸🇰' },
+                  { name: 'Slovenia', code: '+386', flag: '🇸🇮' },
+                  { name: 'Taiwan', code: '+886', flag: '🇹🇼' },
+                  { name: 'Uganda', code: '+256', flag: '🇺🇬' },
+                  { name: 'Ukraine', code: '+380', flag: '🇺🇦' },
+                  { name: 'Uruguay', code: '+598', flag: '🇺🇾' },
+                  { name: 'Uzbekistan', code: '+998', flag: '🇺🇿' },
+                  { name: 'Venezuela', code: '+58', flag: '🇻🇪' }
               ],
               get filteredCountries() {
                   if (!this.search) return this.countries;
                   return this.countries.filter(c => c.name.toLowerCase().includes(this.search.toLowerCase()) || c.code.includes(this.search));
               },
-              async init() {
-                  try {
-                      let res = await fetch('https://restcountries.com/v3.1/all?fields=name,cca2,idd');
-                      if (res.ok) {
-                          let data = await res.json();
-                          let list = data.map(c => {
-                              let dialCode = '';
-                              if (c.idd && c.idd.root) {
-                                  let suffix = (c.idd.suffixes && c.idd.suffixes.length > 0) ? c.idd.suffixes[0] : '';
-                                  dialCode = c.idd.root + (c.idd.suffixes && c.idd.suffixes.length > 1 ? '' : suffix);
-                              }
-                              let flag = '';
-                              if (c.cca2) {
-                                  const codePoints = c.cca2.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
-                                  flag = String.fromCodePoint(...codePoints);
-                              }
-                              return { name: c.name.common, code: dialCode, flag: flag };
-                          }).filter(c => c.code !== '');
-                          
-                          list.sort((a, b) => a.name.localeCompare(b.name));
-                          let india = list.find(c => c.name === 'India');
-                          let filtered = list.filter(c => c.name !== 'India');
-                          this.countries = india ? [india, ...filtered] : list;
-                      }
-                  } catch (e) {
-                      console.error(e);
-                  }
+              init() {
+                  this.countries.sort((a, b) => a.name.localeCompare(b.name));
+                  let india = this.countries.find(c => c.name === 'India');
+                  let filtered = this.countries.filter(c => c.name !== 'India');
+                  this.countries = india ? [india, ...filtered] : this.countries;
               }
           }" @click.outside="open = false">
             

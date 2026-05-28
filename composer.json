@@ -10,7 +10,6 @@
     "require": {
         "php": "^8.2",
         "dedoc/scramble": "^0.13.10",
-        "giggsey/libphonenumber-for-php": "^9.0",
         "kreait/laravel-firebase": "^5.8",
         "laravel/framework": "^11.0",
         "laravel/reverb": "^1.6",

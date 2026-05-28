@@ -2,24 +2,19 @@
 
 namespace App\Services\Otp;
 
-use libphonenumber\PhoneNumberUtil;
-use libphonenumber\PhoneNumberFormat;
-use libphonenumber\NumberParseException;
 use App\Exceptions\OtpException;
 
 class PhoneNormalizer
 {
-    protected PhoneNumberUtil $phoneUtil;
     protected string $defaultRegion;
 
     public function __construct()
     {
-        $this->phoneUtil = PhoneNumberUtil::getInstance();
         $this->defaultRegion = strtoupper((string) config('services.whatsapp.default_region', 'IN'));
     }
 
     /**
-     * Normalize a phone number to strict E.164 format.
+     * Normalize a phone number to strict E.164 format without external dependencies.
      *
      * @param string $phone Raw phone number.
      * @return string Normalized phone number (E.164).
@@ -39,69 +34,40 @@ class PhoneNormalizer
             throw new OtpException('The phone number is empty or contains no valid digits.', 422);
         }
 
-        // 3. Deduce region based on patterns/heuristics
-        $region = $this->deduceRegion($clean);
-
-        try {
-            // 4. Parse phone number
-            // For numbers starting with '+', parse uses region 'ZZ' which extracts country code from number.
-            $phoneNumberInstance = $this->phoneUtil->parse($clean, $region);
-
-            // 5. Validate
-            if ($this->phoneUtil->isValidNumber($phoneNumberInstance)) {
-                // 6. Format to E.164
-                return $this->phoneUtil->format($phoneNumberInstance, PhoneNumberFormat::E164);
+        // 3. Normalize to E.164
+        if (str_starts_with($clean, '+')) {
+            $digits = substr($clean, 1);
+            if (strlen($digits) >= 7 && strlen($digits) <= 15) {
+                return $clean;
             }
-        } catch (NumberParseException $e) {
-            // Suppress and try fallback
-        }
+        } else {
+            // Heuristic for 10-digit number without country code
+            if (strlen($clean) === 10) {
+                $prefix = ($this->defaultRegion === 'NG') ? '+234' : '+91';
+                return $prefix . $clean;
+            }
+            
+            // Heuristic for Nigeria 11-digit local format (e.g. 08012345678)
+            if (str_starts_with($clean, '0') && strlen($clean) === 11) {
+                return '+234' . substr($clean, 1);
+            }
 
-        // 7. Fallback: If it didn't start with '+' and failed local validation, try prepending '+' and parsing as international
-        if (!str_starts_with($clean, '+')) {
-            try {
-                $phoneNumberInstance = $this->phoneUtil->parse('+' . $clean, 'ZZ');
-                if ($this->phoneUtil->isValidNumber($phoneNumberInstance)) {
-                    return $this->phoneUtil->format($phoneNumberInstance, PhoneNumberFormat::E164);
-                }
-            } catch (NumberParseException $e) {
-                // Suppress and throw the main validation exception below
+            // India with 12 digits starting with 91
+            if (str_starts_with($clean, '91') && strlen($clean) === 12) {
+                return '+' . $clean;
+            }
+
+            // Nigeria with 13 digits starting with 234
+            if (str_starts_with($clean, '234') && strlen($clean) === 13) {
+                return '+' . $clean;
+            }
+
+            // Default fallback: prepend + if not present and check length
+            if (strlen($clean) >= 7 && strlen($clean) <= 15) {
+                return '+' . $clean;
             }
         }
 
         throw new OtpException('The phone number provided is not valid.', 422);
-    }
-
-    /**
-     * Deduce region code (e.g. IN, NG) based on input string patterns.
-     */
-    private function deduceRegion(string $phone): string
-    {
-        // If it starts with '+', use 'ZZ' to force libphonenumber to parse international code
-        if (str_starts_with($phone, '+')) {
-            return 'ZZ';
-        }
-
-        // Nigeria heuristic:
-        // - Starts with '0' and has exactly 11 digits (e.g., 08012345678)
-        // - Starts with '234' and has exactly 13 digits (e.g., 2348012345678)
-        if (str_starts_with($phone, '0') && strlen($phone) === 11) {
-            return 'NG';
-        }
-        if (str_starts_with($phone, '234') && strlen($phone) === 13) {
-            return 'NG';
-        }
-
-        // India heuristic:
-        // - Exactly 10 digits (e.g., 9876543210)
-        // - Starts with '91' and has exactly 12 digits (e.g., 919876543210)
-        if (strlen($phone) === 10) {
-            return $this->defaultRegion === 'NG' ? 'NG' : 'IN';
-        }
-        if (str_starts_with($phone, '91') && strlen($phone) === 12) {
-            return 'IN';
-        }
-
-        // Default region fallback
-        return $this->defaultRegion;
     }
 }
