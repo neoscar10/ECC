@@ -593,6 +593,36 @@
             margin-top: 1.25rem;
         }
 
+        /* Override Bootstrap pagination inside shop to match theme */
+        .shop-pagination-wrap .page-link {
+            background: transparent !important;
+            border-color: var(--ecc-primary-border) !important;
+            color: var(--ecc-text-primary) !important;
+        }
+        .shop-pagination-wrap .page-item.active .page-link {
+            background: var(--ecc-primary) !important;
+            border-color: var(--ecc-primary) !important;
+            color: #111111 !important;
+        }
+        .shop-pagination-wrap .page-item.disabled .page-link {
+            background: transparent !important;
+            border-color: var(--ecc-primary-border) !important;
+            color: var(--ecc-text-subtle) !important;
+        }
+        .shop-pagination-wrap .page-link:hover {
+            background: var(--ecc-primary-soft, rgba(199,167,90,.12)) !important;
+            border-color: var(--ecc-primary-border) !important;
+            color: var(--ecc-primary) !important;
+        }
+        .shop-pagination-wrap .page-item.active .page-link:hover {
+            background: var(--ecc-primary) !important;
+            color: #111111 !important;
+        }
+        /* Helper text "Showing X to Y of Z results" */
+        .shop-pagination-wrap .text-muted {
+            color: var(--ecc-text-secondary) !important;
+        }
+
         .shop-pagination {
             display: inline-flex;
             align-items: center;
