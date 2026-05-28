@@ -53,8 +53,14 @@
   }
 
   .ecc-success{
-    background: var(--ecc-black);
-    color: var(--ecc-gold);
+    --ecc-primary: #C7A75A;
+    --ecc-gold: #C7A75A;
+    --ecc-gold-pale: #E5C568;
+    --ecc-black: #0A0A0A;
+    --ecc-gray: #1C1C1C;
+
+    background: var(--ecc-black) !important;
+    color: var(--ecc-gold) !important;
     font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   }
 
@@ -101,14 +107,13 @@
     font-weight: 800;
     line-height: 1.05;
     letter-spacing: -0.02em;
-    color: var(--ecc-gold);
+    color: #ffffff !important;
   }
 
   .ecc-success__p{
     font-size: 16px;
-    color: rgba(229,197,104,.92);
+    color: rgba(229,197,104,.92) !important;
     line-height: 1.7;
-    opacity: .92;
     font-weight: 500;
   }
 
@@ -121,18 +126,17 @@
 
   .ecc-success__p2{
     font-size: 13px;
-    color: rgba(229,197,104,.85);
+    color: rgba(229,197,104,.85) !important;
     line-height: 1.6;
-    opacity: .85;
     font-weight: 600;
   }
 
   .ecc-success__btn{
     height: 56px;
     border-radius: 12px;
-    border: 1px solid rgba(199, 167, 90,.50);
-    background: transparent;
-    color: var(--ecc-gold);
+    border: 1px solid rgba(199, 167, 90,.50) !important;
+    background: transparent !important;
+    color: var(--ecc-gold) !important;
     font-weight: 800;
     letter-spacing: .02em;
     box-shadow: 0 0 15px rgba(199, 167, 90,0.10);
