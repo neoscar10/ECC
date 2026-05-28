@@ -162,7 +162,22 @@
     --ecc-primary-dark: #9C7D35;
   }
 
-  .ecc-bg{ background: var(--ecc-bg); color: var(--ecc-text-primary); font-family: "Newsreader", serif; }
+  .ecc-bg{
+    --ecc-bg:#020202;
+    --ecc-surface:#181818;
+    --ecc-border:#333333;
+    --ecc-border-soft: rgba(255, 255, 255, 0.065);
+    --ecc-text-primary: #ffffff;
+    --ecc-text-secondary: rgba(255, 255, 255, 0.78);
+    --ecc-text-muted: rgba(255, 255, 255, 0.58);
+    --ecc-text-subtle: rgba(255, 255, 255, 0.42);
+    --ecc-primary: #C7A75A;
+    --ecc-primary-dark: #9C7D35;
+
+    background: var(--ecc-bg) !important;
+    color: var(--ecc-text-primary) !important;
+    font-family: "Newsreader", serif;
+  }
   .ecc-max{ max-width: 520px; }
   @media (min-width: 992px){
     .ecc-max{ max-width: 620px; }
@@ -233,10 +248,11 @@
     font-style: italic;
     font-weight: 500;
     letter-spacing: -.02em;
+    color: var(--ecc-text-primary) !important;
   }
   .ecc-sub{
     font-family: "Noto Sans", system-ui, sans-serif;
-    color: var(--ecc-text-muted);
+    color: var(--ecc-text-muted) !important;
     font-size: 18px;
     line-height: 1.6;
     font-weight: 300;
@@ -256,16 +272,28 @@
     background: var(--ecc-surface) !important;
     border: 0 !important;
     border-bottom: 1px solid var(--ecc-border) !important;
-    color: #fff !important;
+    color: #ffffff !important;
     padding: 14px 44px 14px 16px !important;
     border-radius: 12px 12px 0 0 !important;
     font-size: 18px !important;
     font-family: "Noto Sans", system-ui, sans-serif;
     box-shadow: none !important;
   }
-  .ecc-input::placeholder{ color: var(--ecc-text-primary); }
+  .ecc-input::placeholder{ color: var(--ecc-text-subtle) !important; }
   .ecc-input:focus{
     border-bottom-color: var(--ecc-primary) !important;
+    color: #ffffff !important;
+    outline: none;
+  }
+
+  /* Autofill styling overrides */
+  .ecc-input:-webkit-autofill,
+  .ecc-input:-webkit-autofill:hover,
+  .ecc-input:-webkit-autofill:focus,
+  .ecc-input:-webkit-autofill:active {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px var(--ecc-surface) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
   }
   .ecc-select{ appearance: none; }
 

@@ -145,7 +145,22 @@
     --ecc-primary: #C7A75A;
     --ecc-primary-dark: #9C7D35;
   }
-  .ecc-bg{ background:var(--ecc-bg); color: var(--ecc-text-primary); font-family:"Work Sans","Noto Sans",system-ui,sans-serif; }
+  .ecc-bg{
+    --ecc-bg:#020202;
+    --ecc-surface:#181818;
+    --ecc-border:#333333;
+    --ecc-border-soft: rgba(255, 255, 255, 0.065);
+    --ecc-text-primary: #ffffff;
+    --ecc-text-secondary: rgba(255, 255, 255, 0.78);
+    --ecc-text-muted: rgba(255, 255, 255, 0.58);
+    --ecc-text-subtle: rgba(255, 255, 255, 0.42);
+    --ecc-primary: #C7A75A;
+    --ecc-primary-dark: #9C7D35;
+
+    background: var(--ecc-bg) !important;
+    color: var(--ecc-text-primary) !important;
+    font-family:"Work Sans","Noto Sans",system-ui,sans-serif;
+  }
   .ecc-max{ max-width:520px; }
   @media(min-width:992px){ .ecc-max{ max-width:620px; } }
 
@@ -162,7 +177,7 @@
   .ecc-bg-grad{ position:absolute; inset:0; background:linear-gradient(to bottom, transparent, rgba(2,2,2,.80), rgba(2,2,2,1)); pointer-events:none;}
   .ecc-bg-glow{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:520px; height:320px; background:rgba(199, 167, 90,.10); filter:blur(110px); border-radius:9999px; pointer-events:none;}
 
-  .ecc-topbar{ background:rgba(2,2,2,.80); backdrop-filter:blur(10px); border-bottom:1px solid var(--ecc-text-primary); }
+  .ecc-topbar{ background:rgba(2,2,2,.80); backdrop-filter:blur(10px); border-bottom:1px solid var(--ecc-border-soft); }
   .ecc-icon-btn{ width:40px; height:40px; border-radius:9999px; border:0; background:transparent; color:rgba(199, 167, 90,.85); display:flex; align-items:center; justify-content:center; }
   .ecc-icon-btn:hover{ background:var(--ecc-text-primary); }
   .text-ecc{ color:rgba(199, 167, 90,.95); }
@@ -223,7 +238,15 @@
     box-shadow:none !important;
   }
   .ecc-inp::placeholder{ color:rgba(199, 167, 90,.35); }
-  .ecc-inp:focus{ border-color:var(--ecc-primary) !important; box-shadow:0 0 0 .15rem rgba(199, 167, 90,.15) !important; }
+  .ecc-inp:focus{ border-color:var(--ecc-primary) !important; box-shadow:0 0 0 .15rem rgba(199, 167, 90,.15) !important; color:rgba(199, 167, 90,.95) !important; }
+  .ecc-inp:-webkit-autofill,
+  .ecc-inp:-webkit-autofill:hover,
+  .ecc-inp:-webkit-autofill:focus,
+  .ecc-inp:-webkit-autofill:active {
+    -webkit-text-fill-color: rgba(199, 167, 90,.95) !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(10,10,10,.90) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
   .ecc-ic{ position:absolute; left:14px; top:50%; transform:translateY(-50%); color:rgba(199, 167, 90,.95); }
   .ecc-check{ background:rgba(10,10,10,.90) !important; border-color:rgba(199, 167, 90,.55) !important; }
   .ecc-check:checked{ background:var(--ecc-primary) !important; border-color:var(--ecc-primary) !important; }
