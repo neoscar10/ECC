@@ -804,7 +804,7 @@
         ['key'=>'club',    'label'=>'Club',     'icon'=>'shield_person',    'href'=>url('/club')],
         ['key'=>'shop',    'label'=>'Shop',     'icon'=>'storefront',       'href'=>route('shop.index')],
         ['key'=>'orders',  'label'=>'Orders',   'icon'=>'receipt_long',     'href'=>route('shop.orders')],
-        ['key'=>'settings','label'=>'Settings', 'icon'=>'settings',         'href'=>route('settings')],
+        ['key'=>'settings','label'=>'Profile', 'icon'=>'settings',         'href'=>route('settings')],
       ];
 
       $isOn = fn($k) => $active === $k;

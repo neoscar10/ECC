@@ -10,7 +10,7 @@
   ];
 
   $bottomItems = [
-    ['key'=>'settings','label'=>'Settings','icon'=>'settings',   'href'=>url('/settings')],
+    ['key'=>'settings','label'=>'Profile','icon'=>'settings',   'href'=>url('/settings')],
   ];
 
   $path = trim(request()->path(), '/');

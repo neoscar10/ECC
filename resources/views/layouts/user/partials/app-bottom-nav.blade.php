@@ -7,7 +7,7 @@
     ['key'=>'auctions','label'=>'Auctions','icon'=>'gavel',       'href'=>url('/auctions')],
     ['key'=>'club',    'label'=>'Club',   'icon'=>'shield_person','href'=>url('/club')],
     ['key'=>'shop',    'label'=>'Shop',   'icon'=>'storefront',   'href'=>route('shop.index')],
-    ['key'=>'settings','label'=>'Settings','icon'=>'settings',    'href'=>url('/settings')],
+    ['key'=>'settings','label'=>'Profile','icon'=>'settings',    'href'=>url('/settings')],
   ];
 
   $path = trim(request()->path(), '/');
