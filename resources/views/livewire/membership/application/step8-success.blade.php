@@ -45,7 +45,8 @@
 @push('styles')
 <style>
   :root{
-    --ecc-gold:var(--ecc-primary);
+    --ecc-primary: #C7A75A;
+    --ecc-gold: var(--ecc-primary);
     --ecc-gold-pale:#E5C568;
     --ecc-black:#0A0A0A;
     --ecc-gray:#1C1C1C;

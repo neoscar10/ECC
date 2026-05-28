@@ -165,6 +165,13 @@
     --ecc-bg:#020202;
     --ecc-surface:#181818;
     --ecc-border:#333333;
+    --ecc-border-soft: rgba(255, 255, 255, 0.065);
+    --ecc-text-primary: #ffffff;
+    --ecc-text-secondary: rgba(255, 255, 255, 0.78);
+    --ecc-text-muted: rgba(255, 255, 255, 0.58);
+    --ecc-text-subtle: rgba(255, 255, 255, 0.42);
+    --ecc-primary: #C7A75A;
+    --ecc-primary-dark: #9C7D35;
   }
 
   .ecc-bg{ background: var(--ecc-bg); color: var(--ecc-text-primary); font-family:"Newsreader", serif; }
