@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Amazing Bat | Live Auction</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;family=Manrope:wght@200..800&amp;family=Work+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#261900",
+                        "secondary": "#775a19",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#785a1a",
+                        "tertiary": "#000000",
+                        "secondary-fixed-dim": "#e9c176",
+                        "on-background": "#1c1b1b",
+                        "background": "#fcf9f8",
+                        "primary-fixed-dim": "#bfc5e4",
+                        "on-primary-container": "#7c839f",
+                        "on-surface-variant": "#46464d",
+                        "tertiary-fixed-dim": "#c9c6bd",
+                        "tertiary-fixed": "#e5e2d9",
+                        "inverse-on-surface": "#f3f0ef",
+                        "outline": "#76767e",
+                        "surface-container": "#f0eded",
+                        "tertiary-container": "#1c1c16",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#dcd9d9",
+                        "primary": "#000000",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#5d4201",
+                        "on-tertiary-container": "#85847c",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#e5e2e1",
+                        "on-primary-fixed-variant": "#3f465f",
+                        "surface-tint": "#575d78",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#fcf9f8",
+                        "primary-container": "#141a32",
+                        "surface": "#fcf9f8",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#ffdea5",
+                        "outline-variant": "#c6c6ce",
+                        "secondary-container": "#fed488",
+                        "primary-fixed": "#dce1ff",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#313030",
+                        "surface-variant": "#e5e2e1",
+                        "surface-container-high": "#eae7e7",
+                        "on-surface": "#1c1b1b",
+                        "surface-container-low": "#f6f3f2",
+                        "on-tertiary-fixed-variant": "#484740",
+                        "on-tertiary-fixed": "#1c1c16",
+                        "on-primary-fixed": "#141a32",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#bfc5e4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "margin-mobile": "20px",
+                        "gutter": "24px",
+                        "unit": "8px",
+                        "margin-desktop": "80px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Playfair Display"],
+                        "headline-sm": ["Playfair Display"],
+                        "display-lg-mobile": ["Playfair Display"],
+                        "body-lg": ["Manrope"],
+                        "label-caps": ["Work Sans"],
+                        "headline-md": ["Playfair Display"],
+                        "body-md": ["Manrope"],
+                        "nav-link": ["Work Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["84px", { "lineHeight": "92px", "letterSpacing": "-0.02em", "fontWeight": "400" }],
+                        "headline-sm": ["28px", { "lineHeight": "36px", "fontWeight": "400" }],
+                        "display-lg-mobile": ["48px", { "lineHeight": "54px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.15em", "fontWeight": "500" }],
+                        "headline-md": ["42px", { "lineHeight": "52px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "nav-link": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .museum-shadow {
+            box-shadow: 0 40px 80px -20px rgba(10, 17, 40, 0.08);
+        }
+        .grain-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.03;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+        .gold-divider {
+            height: 1px;
+            background-color: #C5A059;
+            width: 200px;
+            margin: 0 auto;
+        }
+        input:focus {
+            outline: none !important;
+            border-color: #775a19 !important;
+            box-shadow: none !important;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md overflow-x-hidden">
+<div class="grain-overlay"></div>
+<!-- TopNavBar -->
+<nav class="flex justify-between items-center px-margin-desktop py-4 w-full sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-secondary/20">
+<div class="font-headline-sm text-headline-sm tracking-tighter text-primary">IMPERIAL ARCHIVE</div>
+<div class="hidden md:flex gap-8 items-center">
+<a class="font-nav-link text-nav-link uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors" href="#">Collections</a>
+<a class="font-nav-link text-nav-link uppercase tracking-widest text-primary border-b border-secondary pb-1" href="#">Live Auctions</a>
+<a class="font-nav-link text-nav-link uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors" href="#">Private Sales</a>
+<a class="font-nav-link text-nav-link uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors" href="#">Provenance</a>
+</div>
+<div class="flex items-center gap-6">
+<button class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity" data-icon="history">history</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity" data-icon="account_circle">account_circle</button>
+</div>
+</nav>
+<main class="max-w-[1440px] mx-auto px-margin-desktop py-12">
+<!-- Breadcrumbs -->
+<nav class="flex items-center gap-2 mb-8 font-label-caps text-label-caps text-on-surface-variant/60">
+<a class="hover:text-primary transition-colors" href="#">Home</a>
+<span class="material-symbols-outlined text-[12px]" data-icon="chevron_right">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Auctions</a>
+<span class="material-symbols-outlined text-[12px]" data-icon="chevron_right">chevron_right</span>
+<span class="text-primary">Amazing Bat</span>
+</nav>
+<!-- Title Area -->
+<header class="mb-12">
+<div class="flex items-center gap-4 mb-2">
+<span class="px-3 py-1 bg-secondary/10 text-secondary font-label-caps text-[10px] tracking-widest rounded-full border border-secondary/20 uppercase">Lot #LOT-00022</span>
+<span class="flex items-center gap-1.5 text-error font-label-caps text-[10px] tracking-widest">
+<span class="w-2 h-2 bg-error rounded-full animate-pulse"></span>
+                    LIVE AUCTION
+                </span>
+</div>
+<h1 class="font-headline-md text-headline-md text-primary mb-2">Amazing Bat</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Signed memorabilia from the 1992 World Cup Final, a relic of unparalleled sporting history.</p>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+<!-- Left Column: Visuals & Info -->
+<div class="lg:col-span-8 space-y-16">
+<!-- Main Image Container -->
+<div class="relative bg-white p-6 rounded-[16px] museum-shadow border border-secondary/5 group overflow-hidden">
+<img alt="Historic signed cricket bat" class="w-full aspect-[4/3] object-cover rounded-lg group-hover:scale-105 transition-transform duration-700 ease-out" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCck5hWPBiTAgHTZN3zZ-OT7F4e4R542RuFvMiJJwgLnPlblidzXgDTguvp0_iU5ngO7lyQqqgLIOVLEee4-lL975UbZVfN6319LHaHhyBX-s6yxwF0m6ImT9zsHftxZR5Hzk2-I9vBdAJqo5-XP0-PPtKC7kBWvLtZudwQ4KBvQEs2BataObM_AdRDrxPfR50jn4tFVQd65JQpi1Pus2h07QkgzVpkBfH0lLSt-7lx0UkwmGMFjxVdiVr773C1bHTnxfi5ZSMAbrg"/>
+<button class="absolute bottom-10 right-10 bg-white/90 backdrop-blur-md p-3 rounded-full museum-shadow hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary" data-icon="zoom_in">zoom_in</span>
+</button>
+</div>
+<!-- Tabs/Accordions for Details -->
+<div class="space-y-12">
+<section>
+<h3 class="font-label-caps text-label-caps text-secondary mb-4 uppercase tracking-widest">Description</h3>
+<div class="gold-divider mb-8 ml-0"></div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed mb-6">
+                            This extraordinary piece of cricket history features the original willow used during the climactic overs of the 1992 World Cup. Personally signed by the winning captain, the bat carries the weight of a nation's triumph. The wood has aged to a deep, resonant ochre, and the signatures remain vivid and crisp.
+                        </p>
+</section>
+<section>
+<h3 class="font-label-caps text-label-caps text-secondary mb-4 uppercase tracking-widest">Specifications</h3>
+<div class="gold-divider mb-8 ml-0"></div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+<div>
+<p class="font-label-caps text-[10px] text-on-surface-variant/60 uppercase">Material</p>
+<p class="font-body-md text-primary font-medium">English Willow (Grade A)</p>
+</div>
+<div>
+<p class="font-label-caps text-[10px] text-on-surface-variant/60 uppercase">Weight</p>
+<p class="font-body-md text-primary font-medium">2lb 9oz</p>
+</div>
+<div>
+<p class="font-label-caps text-[10px] text-on-surface-variant/60 uppercase">Origin</p>
+<p class="font-body-md text-primary font-medium">London, UK (1991)</p>
+</div>
+</div>
+</section>
+<section>
+<h3 class="font-label-caps text-label-caps text-secondary mb-4 uppercase tracking-widest">Provenance</h3>
+<div class="gold-divider mb-8 ml-0"></div>
+<div class="border-l border-secondary/30 pl-8 space-y-6">
+<div class="relative">
+<span class="absolute -left-[37px] top-1 w-4 h-4 rounded-full bg-secondary border-4 border-background"></span>
+<p class="font-label-caps text-secondary text-[10px]">MAY 2024</p>
+<p class="font-body-md text-primary">Certified by the International Cricket Memorabilia Board.</p>
+</div>
+<div class="relative">
+<span class="absolute -left-[37px] top-1 w-4 h-4 rounded-full bg-surface-container-highest border-4 border-background"></span>
+<p class="font-label-caps text-on-surface-variant/60 text-[10px]">JAN 2012</p>
+<p class="font-body-md text-primary">Acquired by a private collector at a charity auction in Mumbai.</p>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Right Column: Bidding Sidebar -->
+<div class="lg:col-span-4 lg:sticky lg:top-32 space-y-6">
+<!-- Main Bid Card -->
+<div class="bg-white p-8 rounded-[16px] museum-shadow border border-secondary/10">
+<div class="flex justify-between items-start mb-6">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant/60 uppercase">Current Bid</p>
+<h2 class="font-display-lg text-[42px] leading-tight text-primary">₹12,500</h2>
+</div>
+<div class="text-right">
+<p class="font-label-caps text-label-caps text-on-surface-variant/60 uppercase">Time Left</p>
+<p class="font-body-md text-secondary font-bold">1d 12h 45m</p>
+</div>
+</div>
+<div class="space-y-6">
+<!-- Auto Bid Toggle -->
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-secondary/5">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="smart_toy">smart_toy</span>
+<span class="font-label-caps text-[11px] uppercase tracking-wider">Auto-Bid System</span>
+</div>
+<button class="w-10 h-5 bg-surface-container-highest rounded-full relative transition-colors" id="autoBidToggle">
+<span class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform"></span>
+</button>
+</div>
+<!-- Quick Bids -->
+<div class="grid grid-cols-3 gap-2">
+<button class="py-3 border border-secondary/20 rounded-xl font-label-caps text-[10px] text-on-surface-variant hover:bg-secondary/5 transition-colors">+₹10k</button>
+<button class="py-3 border border-secondary/20 rounded-xl font-label-caps text-[10px] text-on-surface-variant hover:bg-secondary/5 transition-colors">+₹25k</button>
+<button class="py-3 border border-secondary/20 rounded-xl font-label-caps text-[10px] text-on-surface-variant hover:bg-secondary/5 transition-colors">+₹50k</button>
+</div>
+<!-- Custom Input -->
+<div class="relative">
+<span class="absolute left-0 bottom-3 text-secondary">₹</span>
+<input class="w-full bg-transparent border-0 border-b border-on-surface-variant/20 py-3 pl-4 font-body-md placeholder:text-on-surface-variant/30" placeholder="Custom Amount" type="text"/>
+</div>
+<!-- Action Button -->
+<button class="w-full bg-primary text-white py-5 rounded-[16px] font-label-caps text-label-caps tracking-widest uppercase hover:opacity-90 transition-opacity active:scale-[0.98] shadow-lg shadow-primary/20">
+                            Place Final Bid
+                        </button>
+<p class="text-[10px] text-center text-on-surface-variant/50 font-label-caps uppercase leading-relaxed">
+                            Bidding constitutes a legally binding contract. <br/>
+<a class="underline hover:text-secondary" href="#">View Auction Terms</a>
+</p>
+</div>
+</div>
+<!-- Bid History Card -->
+<div class="bg-surface-container-low/50 p-6 rounded-[16px] border border-secondary/5">
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-label-caps text-[11px] tracking-widest text-secondary uppercase">Bid History</h4>
+<span class="font-label-caps text-[10px] text-on-surface-variant/60">12 TOTAL BIDS</span>
+</div>
+<ul class="space-y-4">
+<li class="flex justify-between items-center text-primary">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center font-label-caps text-[10px]">H.K.</div>
+<div>
+<p class="font-body-md text-[13px] font-semibold">Harsh Kapoor</p>
+<p class="text-[10px] font-label-caps text-on-surface-variant/60 uppercase">2 mins ago</p>
+</div>
+</div>
+<p class="font-body-md font-bold text-secondary">₹12,500</p>
+</li>
+<li class="flex justify-between items-center text-on-surface-variant/80">
+<div class="flex items-center gap-3 opacity-60">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center font-label-caps text-[10px]">A.R.</div>
+<div>
+<p class="font-body-md text-[13px]">Anonymous Collector</p>
+<p class="text-[10px] font-label-caps text-on-surface-variant/60 uppercase">1 hour ago</p>
+</div>
+</div>
+<p class="font-body-md opacity-60">₹11,000</p>
+</li>
+<li class="flex justify-between items-center text-on-surface-variant/80">
+<div class="flex items-center gap-3 opacity-60">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center font-label-caps text-[10px]">J.D.</div>
+<div>
+<p class="font-body-md text-[13px]">Julian Drane</p>
+<p class="text-[10px] font-label-caps text-on-surface-variant/60 uppercase">5 hours ago</p>
+</div>
+</div>
+<p class="font-body-md opacity-60">₹10,500</p>
+</li>
+</ul>
+<button class="w-full mt-6 py-3 font-label-caps text-[10px] text-on-surface-variant hover:text-secondary transition-colors uppercase tracking-widest">
+                        View All Activity
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Concierge Badge -->
+<div class="fixed bottom-8 right-8 z-[100]">
+<button class="w-[56px] h-[56px] bg-primary text-secondary rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-transform active:scale-95 group">
+<span class="material-symbols-outlined transition-transform group-hover:rotate-12" data-icon="support_agent">support_agent</span>
+</button>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-highest flex flex-col items-center justify-center py-20 px-margin-desktop gap-unit border-t border-secondary/50">
+<div class="font-display-lg text-display-lg text-primary mb-12">IMPERIAL ARCHIVE</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 w-full max-w-5xl mb-16">
+<div>
+<h5 class="font-label-caps text-label-caps text-secondary mb-6 uppercase">Collections</h5>
+<ul class="space-y-3 font-label-caps text-[11px] text-on-surface-variant">
+<li><a class="hover:text-secondary transition-colors" href="#">Rare Bats</a></li>
+<li><a class="hover:text-secondary transition-colors" href="#">Match Apparel</a></li>
+<li><a class="hover:text-secondary transition-colors" href="#">Historical Logs</a></li>
+<li><a class="hover:text-secondary transition-colors" href="#">Photography</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-label-caps text-label-caps text-secondary mb-6 uppercase">Legal</h5>
+<ul class="space-y-3 font-label-caps text-[11px] text-on-surface-variant">
+<li><a class="hover:text-secondary transition-colors" href="#">Terms of Sale</a></li>
+<li><a class="hover:text-secondary transition-colors" href="#">Privacy Policy</a></li>
+<li><a class="hover:text-secondary transition-colors" href="#">Auction Regulations</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-label-caps text-label-caps text-secondary mb-6 uppercase">Support</h5>
+<ul class="space-y-3 font-label-caps text-[11px] text-on-surface-variant">
+<li><a class="hover:text-secondary transition-colors" href="#">Contact Curator</a></li>
+<li><a class="hover:text-secondary transition-colors" href="#">Shipping &amp; Vaulting</a></li>
+<li><a class="hover:text-secondary transition-colors" href="#">Insurance</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-label-caps text-label-caps text-secondary mb-6 uppercase">Newsletter</h5>
+<p class="font-body-md text-[13px] text-on-surface-variant mb-4">Register for private collection releases.</p>
+<div class="relative">
+<input class="w-full bg-white/50 border-b border-secondary/30 py-2 font-label-caps text-[11px]" placeholder="Your Ledger Email" type="email"/>
+<button class="absolute right-0 bottom-2 text-secondary hover:opacity-70 transition-opacity">
+<span class="material-symbols-outlined text-[20px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="gold-divider mb-8"></div>
+<p class="font-label-caps text-[10px] text-on-surface-variant/40 tracking-[0.2em]">© 2024 Imperial Archive Cricket Memorabilia. All Rights Reserved.</p>
+</footer>
+<script>
+        // Micro-interactions
+        const toggle = document.getElementById('autoBidToggle');
+        const toggleDot = toggle.querySelector('span');
+        let autoBidActive = false;
+
+        toggle.addEventListener('click', () => {
+            autoBidActive = !autoBidActive;
+            if (autoBidActive) {
+                toggle.classList.replace('bg-surface-container-highest', 'bg-secondary');
+                toggleDot.style.transform = 'translateX(20px)';
+            } else {
+                toggle.classList.replace('bg-secondary', 'bg-surface-container-highest');
+                toggleDot.style.transform = 'translateX(0)';
+            }
+        });
+
+        // Simple Parallax Effect on Scroll
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const heroImage = document.querySelector('img');
+            if (heroImage) {
+                heroImage.style.transform = `translateY(${scrolled * 0.05}px)`;
+            }
+        });
+    </script>
+</body></html>

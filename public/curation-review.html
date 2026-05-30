@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Curation Review | Executive Club Cricket</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Work+Sans:wght@300;400;500;600&amp;family=Manrope:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-container": "#1c1c16",
+                    "surface-container-highest": "#e5e2e1",
+                    "primary-fixed": "#dce1ff",
+                    "background": "#fcf9f8",
+                    "primary": "#000000",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface": "#1c1b1b",
+                    "tertiary-fixed-dim": "#c9c6bd",
+                    "outline-variant": "#c6c6ce",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#fed488",
+                    "on-tertiary-fixed": "#1c1c16",
+                    "surface-container-high": "#eae7e7",
+                    "tertiary": "#000000",
+                    "inverse-surface": "#313030",
+                    "surface-variant": "#e5e2e1",
+                    "primary-fixed-dim": "#bfc5e4",
+                    "surface-tint": "#575d78",
+                    "on-tertiary-container": "#85847c",
+                    "primary-container": "#141a32",
+                    "on-secondary-container": "#785a1a",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "inverse-primary": "#bfc5e4",
+                    "on-secondary-fixed-variant": "#5d4201",
+                    "surface-dim": "#dcd9d9",
+                    "on-secondary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-background": "#1c1b1b",
+                    "on-secondary-fixed": "#261900",
+                    "tertiary-fixed": "#e5e2d9",
+                    "secondary": "#775a19",
+                    "secondary-fixed": "#ffdea5",
+                    "on-primary-fixed": "#141a32",
+                    "on-surface-variant": "#46464d",
+                    "on-primary-container": "#7c839f",
+                    "on-primary-fixed-variant": "#3f465f",
+                    "outline": "#76767e",
+                    "surface": "#fcf9f8",
+                    "surface-container-low": "#f6f3f2",
+                    "on-tertiary-fixed-variant": "#484740",
+                    "surface-container": "#f0eded",
+                    "secondary-fixed-dim": "#e9c176",
+                    "surface-bright": "#fcf9f8",
+                    "on-tertiary": "#ffffff",
+                    "inverse-on-surface": "#f3f0ef"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+          },
+          "spacing": {
+                    "unit": "8px",
+                    "margin-mobile": "20px",
+                    "container-max": "1440px",
+                    "margin-desktop": "80px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Manrope"],
+                    "label-caps": ["Work Sans"],
+                    "body-md": ["Manrope"],
+                    "headline-sm": ["Playfair Display"],
+                    "headline-md": ["Playfair Display"],
+                    "nav-link": ["Work Sans"],
+                    "display-lg-mobile": ["Playfair Display"],
+                    "display-lg": ["Playfair Display"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.15em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-sm": ["28px", {"lineHeight": "36px", "fontWeight": "400"}],
+                    "headline-md": ["42px", {"lineHeight": "52px", "fontWeight": "400"}],
+                    "nav-link": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "400"}],
+                    "display-lg-mobile": ["48px", {"lineHeight": "54px", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+                    "display-lg": ["84px", {"lineHeight": "92px", "letterSpacing": "-0.02em", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .grain-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.03;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+        .gold-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #C5A059, transparent);
+            width: 200px;
+            margin: 0 auto;
+        }
+        ::selection {
+            background: #775a19;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-secondary/30 selection:text-primary">
+<div class="grain-overlay"></div>
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full z-50 bg-background dark:bg-surface-container-low border-b border-secondary/20 dark:border-secondary-fixed/20 shadow-[0_40px_40px_rgba(10,17,40,0.04)] h-20">
+<div class="flex justify-between items-center px-margin-desktop h-full max-w-container-max mx-auto">
+<div class="font-headline-sm text-headline-sm tracking-tighter text-primary dark:text-primary-fixed">ECC</div>
+<div class="hidden md:flex gap-12 items-center">
+<a class="font-nav-link text-nav-link uppercase tracking-widest text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-300" href="#">Explore</a>
+<a class="font-nav-link text-nav-link uppercase tracking-widest text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-300" href="#">Auctions</a>
+<a class="font-nav-link text-nav-link uppercase tracking-widest text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-300" href="#">Archive</a>
+<a class="font-nav-link text-nav-link uppercase tracking-widest text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-300" href="#">Boutique</a>
+<a class="font-nav-link text-nav-link uppercase tracking-widest text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-300" href="#">The Club</a>
+</div>
+<div class="flex items-center gap-6">
+<button class="material-symbols-outlined text-primary hover:text-secondary transition-colors">shopping_bag</button>
+<button class="material-symbols-outlined text-primary hover:text-secondary transition-colors">person</button>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="pt-32 pb-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto min-h-screen">
+<!-- Header Section -->
+<header class="text-center mb-16">
+<h1 class="font-headline-md text-headline-md text-primary mb-4">My Curation</h1>
+<div class="gold-divider mb-4"></div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Imperial Archive Collection • Session 2024</p>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+<!-- Left Side: Curated Items (Bento Style Card) -->
+<div class="lg:col-span-8 space-y-8">
+<div class="bg-surface-container-lowest rounded-xl p-8 shadow-[0_40px_40px_rgba(10,17,40,0.04)] border border-outline-variant/30 group">
+<div class="flex flex-col md:flex-row gap-8">
+<!-- Artifact Image -->
+<div class="w-full md:w-56 h-72 bg-surface-container rounded-lg overflow-hidden relative">
+<img alt="Indian Team Hoodie" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" src="/ecc_logo_dark_1.jpeg"/>
+<div class="absolute top-4 left-4 bg-primary-container/80 backdrop-blur-md px-3 py-1 rounded-full">
+<span class="font-label-caps text-[10px] text-on-primary-fixed uppercase tracking-widest">Authenticated</span>
+</div>
+</div>
+<!-- Artifact Details -->
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-2">
+<h2 class="font-headline-sm text-headline-sm text-primary">Indian Team Hoodie</h2>
+<p class="font-body-lg text-body-lg text-secondary font-medium">₹5,999.00</p>
+</div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-6">2023 World Cup Edition • Official Memorabilia</p>
+<div class="space-y-3">
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant/60">Specification</span>
+<span class="font-body-md text-body-md text-primary">Size: Small (S)</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant/60">Condition</span>
+<span class="font-body-md text-body-md text-primary">Archival Mint Condition</span>
+</div>
+</div>
+</div>
+<div class="mt-8 flex items-center justify-between border-t border-outline-variant/20 pt-6">
+<div class="flex items-center gap-6">
+<div class="flex items-center border border-outline-variant rounded-full px-4 py-1 gap-4">
+<button class="material-symbols-outlined text-[18px] hover:text-secondary">remove</button>
+<span class="font-body-md text-primary w-4 text-center">1</span>
+<button class="material-symbols-outlined text-[18px] hover:text-secondary">add</button>
+</div>
+</div>
+<button class="font-label-caps text-label-caps text-error hover:underline transition-all uppercase flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">close</span>
+                                    Remove
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Information / Museum Note -->
+<div class="bg-surface-container-low p-8 rounded-xl border border-secondary/10 italic text-on-surface-variant font-body-md leading-relaxed">
+                    "Each piece within the Imperial Archive is vetted by our lead archivists to ensure its provenance and heritage value. This curation represents a moment in cricketing history, preserved for the discerning collector."
+                </div>
+</div>
+<!-- Right Side: Acquisition Summary -->
+<aside class="lg:col-span-4 sticky top-28">
+<div class="bg-white rounded-xl p-8 shadow-[0_40px_40px_rgba(10,17,40,0.04)] border border-secondary/10">
+<h3 class="font-headline-sm text-[22px] text-primary mb-8 border-b border-secondary/10 pb-4">Acquisition Summary</h3>
+<div class="space-y-6 mb-10">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Curation Value</span>
+<span class="font-body-md text-body-md text-primary">₹5,999.00</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Archive Fee &amp; Tax</span>
+<span class="font-body-md text-body-md text-primary">₹1,079.82</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Concierge Shipping</span>
+<span class="font-body-md text-body-md text-secondary">Complimentary</span>
+</div>
+<div class="pt-6 border-t border-outline-variant/30 flex justify-between items-center">
+<span class="font-headline-sm text-headline-sm text-primary">Total</span>
+<span class="font-headline-sm text-headline-sm text-primary">₹7,078.82</span>
+</div>
+</div>
+<div class="space-y-4">
+<button class="w-full bg-primary-container text-white font-label-caps py-4 rounded-xl hover:bg-primary transition-all duration-300 shadow-lg shadow-primary-container/20 flex items-center justify-center gap-3">
+                            Secure Acquisition
+                            <span class="material-symbols-outlined text-[18px]">lock</span>
+</button>
+<button class="w-full border border-secondary text-secondary font-label-caps py-4 rounded-xl hover:bg-secondary/5 transition-all duration-300">
+                            Apply Member Code
+                        </button>
+</div>
+<!-- Secure Badge -->
+<div class="mt-8 flex items-center justify-center gap-4 px-4 py-3 bg-surface-container rounded-lg">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<div class="text-left">
+<p class="font-label-caps text-[10px] text-primary leading-tight">Secure Archive Checkout</p>
+<p class="font-body-md text-[11px] text-on-surface-variant">Encrypted Museum-Grade Security</p>
+</div>
+</div>
+</div>
+<div class="mt-8 px-4 text-center">
+<p class="font-label-caps text-[10px] text-on-surface-variant/60 uppercase tracking-[0.2em]">Questions? Contact Your Private Concierge</p>
+</div>
+</aside>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 bg-background dark:bg-surface-container-low border-t border-secondary/20 dark:border-secondary-fixed/20 mt-20">
+<div class="flex flex-col items-center gap-8 px-margin-desktop max-w-container-max mx-auto">
+<div class="font-headline-sm text-headline-sm text-primary dark:text-primary-fixed">ECC</div>
+<div class="flex flex-wrap justify-center gap-12">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors" href="#">Provenance</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors" href="#">Terms of Sale</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors" href="#">Private Concierge</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors" href="#">Heritage</a>
+</div>
+<p class="font-label-caps text-label-caps text-on-surface-variant opacity-80 mt-4 text-center">
+                © 2024 Executive Club Cricket. An Imperial Archive Collection.
+            </p>
+</div>
+</footer>
+<!-- Concierge Floating Badge -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-transform z-40 group overflow-hidden">
+<div class="absolute inset-0 bg-secondary opacity-0 group-hover:opacity-20 transition-opacity"></div>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">support_agent</span>
+</button>
+<script>
+        // Subtle interaction for acquisition button
+        document.querySelector('button.bg-primary-container').addEventListener('mouseenter', function() {
+            this.style.letterSpacing = '0.2em';
+        });
+        document.querySelector('button.bg-primary-container').addEventListener('mouseleave', function() {
+            this.style.letterSpacing = '0.15em';
+        });
+    </script>
+</body></html>

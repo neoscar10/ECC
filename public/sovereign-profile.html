@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sovereign Profile | ECC VAULT</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Work+Sans:wght@300;400;500;600&amp;family=Manrope:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#eae7e7",
+                        "tertiary-fixed": "#e5e2d9",
+                        "surface-container": "#f0eded",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#141a32",
+                        "on-secondary-container": "#785a1a",
+                        "primary": "#000000",
+                        "surface-bright": "#fcf9f8",
+                        "secondary": "#775a19",
+                        "on-surface": "#1c1b1b",
+                        "surface-container-highest": "#e5e2e1",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#000000",
+                        "surface-tint": "#575d78",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f6f3f2",
+                        "outline-variant": "#c6c6ce",
+                        "secondary-container": "#fed488",
+                        "on-surface-variant": "#46464d",
+                        "inverse-primary": "#bfc5e4",
+                        "on-primary-fixed-variant": "#3f465f",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#261900",
+                        "on-tertiary-fixed": "#1c1c16",
+                        "tertiary-container": "#1c1c16",
+                        "background": "#fcf9f8",
+                        "secondary-fixed-dim": "#e9c176",
+                        "surface": "#fcf9f8",
+                        "surface-variant": "#e5e2e1",
+                        "secondary-fixed": "#ffdea5",
+                        "on-secondary-fixed-variant": "#5d4201",
+                        "on-primary-fixed": "#141a32",
+                        "inverse-surface": "#313030",
+                        "tertiary-fixed-dim": "#c9c6bd",
+                        "inverse-on-surface": "#f3f0ef",
+                        "on-tertiary-container": "#85847c",
+                        "surface-dim": "#dcd9d9",
+                        "on-tertiary-fixed-variant": "#484740",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#7c839f",
+                        "on-background": "#1c1b1b",
+                        "outline": "#76767e",
+                        "primary-fixed": "#dce1ff",
+                        "on-secondary": "#ffffff",
+                        "accent-gold": "#C5A059",
+                        "deep-navy": "#0a1128"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Playfair Display"],
+                        "headline-sm": ["Playfair Display"],
+                        "headline-md": ["Playfair Display"],
+                        "nav-link": ["Work Sans"],
+                        "label-caps": ["Work Sans"],
+                        "body-lg": ["Manrope"],
+                        "body-md": ["Manrope"]
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "margin-desktop": "80px",
+                        "gutter": "24px",
+                        "container-max": "1440px",
+                        "margin-mobile": "20px"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #fcf9f8;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            background-repeat: repeat;
+            -webkit-font-smoothing: antialiased;
+        }
+        .grain-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.03;
+            background-image: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .vault-card-shadow {
+            box-shadow: 0 40px 40px -20px rgba(10, 17, 40, 0.04);
+        }
+        .accent-divider {
+            width: 200px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #C5A059, transparent);
+            margin: 48px auto;
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<div class="grain-overlay"></div>
+<!-- TopNavBar -->
+<nav class="fixed top-0 left-0 w-full z-50 bg-surface border-b border-secondary/20 h-20">
+<div class="max-w-container-max mx-auto px-margin-desktop h-full flex justify-between items-center">
+<div class="font-display-lg text-headline-sm font-normal text-primary tracking-tighter">
+                ECC VAULT
+            </div>
+<div class="hidden md:flex items-center gap-10">
+<a class="font-nav-link text-nav-link uppercase tracking-widest text-on-surface-variant hover:text-secondary transition-colors duration-300" href="#">ARCHIVE</a>
+<a class="font-nav-link text-nav-link uppercase tracking-widest text-on-surface-variant hover:text-secondary transition-colors duration-300" href="#">CURATIONS</a>
+<a class="font-nav-link text-nav-link uppercase tracking-widest text-on-surface-variant hover:text-secondary transition-colors duration-300" href="#">THE CLUB</a>
+<a class="font-nav-link text-nav-link uppercase tracking-widest text-on-surface-variant hover:text-secondary transition-colors duration-300" href="#">LEDGER</a>
+</div>
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:text-secondary transition-colors">notifications</span>
+<div class="w-10 h-10 rounded-full border border-secondary/30 flex items-center justify-center bg-primary-container text-on-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+</div>
+</div>
+</nav>
+<main class="pt-32 pb-24 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<!-- Sovereign Member Identity -->
+<section class="mb-16">
+<div class="bg-surface-container-lowest vault-card-shadow rounded-xl p-8 md:p-12 border border-secondary/10 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-[120px]">verified_user</span>
+</div>
+<div class="relative">
+<div class="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-secondary/20 p-1">
+<img alt="Profile Photo" class="w-full h-full object-cover rounded-full" data-alt="A dignified and professional portrait of a distinguished man in a bespoke navy blue tailored suit. The lighting is dramatic yet soft, characteristic of high-end editorial photography in a private club setting. The background is a blurred, warm-toned wood-paneled office. The overall mood is one of quiet power, heritage, and refined luxury, maintaining a palette of deep blues and warm ambers." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKcL-OhnUyrv1aRFkLdEpDcU3PGppD41wsDxFMrlyevlY-pzgBWbW0RvcQmHtFs5-3Du6PKZsVK8t_APn9hPBU8uSjKqQFk4zM5NnO-UWCamxmgPpXygaASP5bjTql_BJw8UKtLraM4819EMhN_YKzlR_q0T9J7pBcZaFCZKE0YPl6Nr-HiEhieUsJ3naDJIR2TMaFLi7RLQfv5Hkzwk_LtAw8HzTNwZy9MPMpu4qtPewATMLHIUV2M1ERCTUSlvId6wfGdR5PnT4"/>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-secondary text-white w-10 h-10 rounded-full flex items-center justify-center border-4 border-surface-container-lowest">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">shield</span>
+</div>
+</div>
+<div class="text-center md:text-left">
+<div class="flex items-center justify-center md:justify-start gap-3 mb-2">
+<span class="font-label-caps text-label-caps text-secondary uppercase tracking-[0.2em]">Sovereign Status</span>
+</div>
+<h1 class="font-headline-md text-primary mb-1">Adamu Haladu</h1>
+<p class="font-body-md text-on-surface-variant opacity-70">Member ID: ECC-8842-ARCHIVE</p>
+<div class="mt-6 flex flex-wrap justify-center md:justify-start gap-4">
+<span class="px-4 py-1.5 border border-secondary/20 rounded-full font-label-caps text-[10px] text-secondary">EST. 2018</span>
+<span class="px-4 py-1.5 border border-secondary/20 rounded-full font-label-caps text-[10px] text-secondary">IMPERIAL TIER</span>
+</div>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<!-- Member Navigation Sidebar -->
+<aside class="lg:col-span-3 space-y-8">
+<div>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-6 pb-2 border-b border-secondary/10">PREFERENCES</h3>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-4 py-3 px-4 rounded-lg bg-primary-container text-on-primary-container font-medium transition-all" href="#">
+<span class="material-symbols-outlined text-xl">account_circle</span>
+<span class="font-body-md">Account</span>
+</a>
+<a class="flex items-center gap-4 py-3 px-4 rounded-lg hover:bg-surface-container transition-all group" href="#">
+<span class="material-symbols-outlined text-xl text-on-surface-variant group-hover:text-primary">settings_applications</span>
+<span class="font-body-md text-on-surface-variant group-hover:text-primary">App Information</span>
+</a>
+<a class="flex items-center gap-4 py-3 px-4 rounded-lg hover:bg-surface-container transition-all group" href="#">
+<span class="material-symbols-outlined text-xl text-on-surface-variant group-hover:text-primary">notifications_active</span>
+<span class="font-body-md text-on-surface-variant group-hover:text-primary">Correspondence</span>
+</a>
+</nav>
+</div>
+<div class="pt-8">
+<button class="w-full flex items-center justify-center gap-3 py-4 px-6 border border-error/30 text-error font-label-caps tracking-widest hover:bg-error/5 transition-colors rounded-xl uppercase">
+<span class="material-symbols-outlined">logout</span>
+                        Log Out
+                    </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="lg:col-span-9 space-y-12">
+<!-- Profile Actions Grid -->
+<section>
+<h2 class="font-headline-sm text-primary mb-8">Vault Management</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Action Card 1 -->
+<div class="group bg-surface-container-lowest p-8 border border-secondary/10 rounded-xl vault-card-shadow cursor-pointer hover:border-secondary/40 transition-all duration-300">
+<div class="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-primary group-hover:text-on-primary-container">edit_note</span>
+</div>
+<h3 class="font-headline-sm text-xl mb-2">Edit Profile</h3>
+<p class="font-body-md text-on-surface-variant opacity-70">Modify your sovereign identity and contact information.</p>
+</div>
+<!-- Action Card 2 -->
+<div class="group bg-surface-container-lowest p-8 border border-secondary/10 rounded-xl vault-card-shadow cursor-pointer hover:border-secondary/40 transition-all duration-300">
+<div class="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-primary group-hover:text-on-primary-container">lock_reset</span>
+</div>
+<h3 class="font-headline-sm text-xl mb-2">Change Password</h3>
+<p class="font-body-md text-on-surface-variant opacity-70">Update the cryptographic credentials of your access portal.</p>
+</div>
+<!-- Action Card 3 -->
+<div class="group bg-surface-container-lowest p-8 border border-secondary/10 rounded-xl vault-card-shadow cursor-pointer hover:border-secondary/40 transition-all duration-300">
+<div class="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-primary group-hover:text-on-primary-container">card_membership</span>
+</div>
+<h3 class="font-headline-sm text-xl mb-2">Membership Details</h3>
+<p class="font-body-md text-on-surface-variant opacity-70">Review the rights, privileges, and ledger of your membership.</p>
+</div>
+<!-- Action Card 4 -->
+<div class="group bg-surface-container-lowest p-8 border border-secondary/10 rounded-xl vault-card-shadow cursor-pointer hover:border-secondary/40 transition-all duration-300">
+<div class="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-primary group-hover:text-on-primary-container">account_balance_wallet</span>
+</div>
+<h3 class="font-headline-sm text-xl mb-2">Digital Vault</h3>
+<p class="font-body-md text-on-surface-variant opacity-70">Access your private archival assets and secure documentation.</p>
+</div>
+</div>
+</section>
+<div class="accent-divider"></div>
+<!-- The Gilded Archive -->
+<section>
+<div class="flex flex-col gap-2 mb-8">
+<span class="font-label-caps text-label-caps text-secondary uppercase tracking-[0.2em]">The Gilded Archive</span>
+<h2 class="font-headline-sm text-primary">Governance &amp; Documentation</h2>
+<p class="font-body-md text-on-surface-variant italic">System information and legal governance documentation for the sovereign elite.</p>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-6 bg-surface-container-low rounded-xl border border-secondary/5 hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-secondary opacity-60">info</span>
+<div>
+<h4 class="font-body-lg font-semibold text-primary">About Us</h4>
+<p class="font-body-md text-on-surface-variant text-sm">The history and ethos of the Executive Club Cricket.</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-6 bg-surface-container-low rounded-xl border border-secondary/5 hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-secondary opacity-60">gavel</span>
+<div>
+<h4 class="font-body-lg font-semibold text-primary">Privacy Governance</h4>
+<p class="font-body-md text-on-surface-variant text-sm">How we protect your sovereign data within the archive.</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-6 bg-surface-container-low rounded-xl border border-secondary/5 hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-secondary opacity-60">verified</span>
+<div>
+<h4 class="font-body-lg font-semibold text-primary">Terms of Honor</h4>
+<p class="font-body-md text-on-surface-variant text-sm">The code of conduct for Vault access and ledger entries.</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low border-t border-secondary/10 py-12">
+<div class="max-w-container-max mx-auto px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-gutter">
+<div class="font-display-lg text-body-md text-primary tracking-widest uppercase">
+                ECC VAULT
+            </div>
+<div class="flex flex-wrap justify-center gap-8">
+<a class="font-label-caps text-label-caps text-on-surface-variant uppercase hover:text-primary transition-colors duration-200" href="#">PRIVACY</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant uppercase hover:text-primary transition-colors duration-200" href="#">TERMS</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant uppercase hover:text-primary transition-colors duration-200" href="#">CONCIERGE</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant uppercase hover:text-primary transition-colors duration-200" href="#">AUTHENTICITY</a>
+</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase text-center md:text-right">
+                © 2024 EXECUTIVE CLUB CRICKET. AN IMPERIAL ARCHIVE PRODUCTION.
+            </div>
+</div>
+</footer>
+<!-- Floating Concierge Badge -->
+<div class="fixed bottom-8 right-8 z-40">
+<button class="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center shadow-2xl border border-accent-gold/30 hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-3xl text-secondary" style="font-variation-settings: 'FILL' 1;">support_agent</span>
+</button>
+</div>
+<script>
+        // Micro-interactions for hovering over action cards
+        document.querySelectorAll('.vault-card-shadow').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Subtle parallax or scroll effects can be added here
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            // Add subtle sticky effects or header transitions if needed
+        });
+    </script>
+</body></html>

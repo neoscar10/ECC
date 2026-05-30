@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Boutique | Executive Club Cricket</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Manrope:wght@400;500;600&amp;family=Work+Sans:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "on-background": "#1c1b1b",
+                  "secondary-container": "#fed488",
+                  "error-container": "#ffdad6",
+                  "secondary-fixed": "#ffdea5",
+                  "on-surface-variant": "#46464d",
+                  "inverse-surface": "#313030",
+                  "on-secondary-fixed-variant": "#5d4201",
+                  "secondary": "#775a19",
+                  "tertiary": "#000000",
+                  "primary": "#000000",
+                  "primary-fixed": "#dce1ff",
+                  "primary-container": "#141a32",
+                  "outline-variant": "#c6c6ce",
+                  "inverse-on-surface": "#f3f0ef",
+                  "surface-container-low": "#f6f3f2",
+                  "on-secondary-container": "#785a1a",
+                  "on-tertiary-container": "#85847c",
+                  "surface-container-lowest": "#ffffff",
+                  "error": "#ba1a1a",
+                  "on-primary-container": "#7c839f",
+                  "on-tertiary": "#ffffff",
+                  "on-secondary-fixed": "#261900",
+                  "surface-dim": "#dcd9d9",
+                  "surface-container-highest": "#e5e2e1",
+                  "tertiary-container": "#1c1c16",
+                  "surface-variant": "#e5e2e1",
+                  "secondary-fixed-dim": "#e9c176",
+                  "tertiary-fixed-dim": "#c9c6bd",
+                  "surface-container-high": "#eae7e7",
+                  "surface-bright": "#fcf9f8",
+                  "outline": "#76767e",
+                  "on-primary-fixed": "#141a32",
+                  "on-primary": "#ffffff",
+                  "surface-tint": "#575d78",
+                  "on-error-container": "#93000a",
+                  "on-tertiary-fixed-variant": "#484740",
+                  "on-surface": "#1c1b1b",
+                  "surface-container": "#f0eded",
+                  "surface": "#fcf9f8",
+                  "primary-fixed-dim": "#bfc5e4",
+                  "on-primary-fixed-variant": "#3f465f",
+                  "on-secondary": "#ffffff",
+                  "inverse-primary": "#bfc5e4",
+                  "tertiary-fixed": "#e5e2d9",
+                  "on-error": "#ffffff",
+                  "on-tertiary-fixed": "#1c1c16",
+                  "background": "#fcf9f8"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "margin-desktop": "80px",
+                  "gutter": "24px",
+                  "margin-mobile": "20px",
+                  "container-max": "1440px",
+                  "unit": "8px"
+          },
+          "fontFamily": {
+                  "headline-md": ["Playfair Display"],
+                  "headline-sm": ["Playfair Display"],
+                  "display-lg-mobile": ["Playfair Display"],
+                  "display-lg": ["Playfair Display"],
+                  "body-md": ["Manrope"],
+                  "body-lg": ["Manrope"],
+                  "nav-link": ["Work Sans"],
+                  "label-caps": ["Work Sans"]
+          },
+          "fontSize": {
+                  "headline-md": ["42px", {"lineHeight": "52px", "fontWeight": "400"}],
+                  "headline-sm": ["28px", {"lineHeight": "36px", "fontWeight": "400"}],
+                  "display-lg-mobile": ["48px", {"lineHeight": "54px", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+                  "display-lg": ["84px", {"lineHeight": "92px", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+                  "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                  "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                  "nav-link": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "400"}],
+                  "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.15em", "fontWeight": "500"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      font-size: 20px;
+    }
+    .grain-overlay {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: url('https://grainy-gradients.vercel.app/noise.svg');
+      opacity: 0.03;
+      z-index: 9999;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #C5A059;
+      border-radius: 10px;
+    }
+    .hover-gold-underline {
+      position: relative;
+    }
+    .hover-gold-underline::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 1px;
+      bottom: -2px;
+      left: 0;
+      background-color: #775a19;
+      transition: width 0.3s ease;
+    }
+    .hover-gold-underline:hover::after {
+      width: 100%;
+    }
+    .museum-shadow {
+      box-shadow: 0 40px 40px -20px rgba(10, 17, 40, 0.04);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-secondary-container selection:text-on-secondary-container">
+<div class="grain-overlay"></div>
+<!-- TopNavBar Implementation from JSON -->
+<nav class="bg-surface sticky top-0 z-50 border-b border-outline-variant/30 shadow-sm opacity-[0.98] w-full">
+<div class="flex justify-between items-center h-20 px-margin-desktop max-w-container-max mx-auto">
+<div class="flex items-center gap-12">
+<a class="text-headline-sm font-headline-sm tracking-tighter text-primary" href="#">ECC</a>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant font-nav-link text-nav-link hover:text-secondary transition-colors duration-300" href="#">Explore</a>
+<a class="text-on-surface-variant font-nav-link text-nav-link hover:text-secondary transition-colors duration-300" href="#">Auctions</a>
+<a class="text-on-surface-variant font-nav-link text-nav-link hover:text-secondary transition-colors duration-300" href="#">Archive</a>
+<a class="text-primary font-bold border-b border-secondary font-nav-link text-nav-link hover:text-secondary transition-colors duration-300" href="#">Boutique</a>
+<a class="text-on-surface-variant font-nav-link text-nav-link hover:text-secondary transition-colors duration-300" href="#">The Club</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="cursor-pointer active:opacity-70 transition-opacity flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div class="relative cursor-pointer active:opacity-70 transition-opacity">
+<span class="material-symbols-outlined">shopping_bag</span>
+<span class="absolute -top-2 -right-2 bg-secondary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">3</span>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-container-max mx-auto px-margin-desktop py-16 min-h-screen">
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Sidebar (Left) -->
+<aside class="col-span-3">
+<div class="sticky top-32 space-y-12">
+<!-- Categories -->
+<section>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-6 tracking-widest border-b border-outline-variant/20 pb-2">CATEGORIES</h3>
+<ul class="space-y-4">
+<li><a class="font-nav-link text-nav-link text-secondary font-semibold flex justify-between items-center group" href="#">All Collections <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span></a></li>
+<li><a class="font-nav-link text-nav-link text-on-surface-variant hover:text-secondary transition-colors flex justify-between items-center group" href="#">Backpack <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span></a></li>
+<li><a class="font-nav-link text-nav-link text-on-surface-variant hover:text-secondary transition-colors flex justify-between items-center group" href="#">Indian Cricket Team <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span></a></li>
+<li><a class="font-nav-link text-nav-link text-on-surface-variant hover:text-secondary transition-colors flex justify-between items-center group" href="#">IPL <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span></a></li>
+<li><a class="font-nav-link text-nav-link text-on-surface-variant hover:text-secondary transition-colors flex justify-between items-center group" href="#">Kit Bags <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span></a></li>
+<li><a class="font-nav-link text-nav-link text-on-surface-variant hover:text-secondary transition-colors flex justify-between items-center group" href="#">Shoes <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span></a></li>
+</ul>
+</section>
+<!-- Price Range -->
+<section>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-6 tracking-widest border-b border-outline-variant/20 pb-2">PRICE RANGE</h3>
+<div class="relative h-1 bg-outline-variant/30 rounded-full mt-8">
+<div class="absolute left-0 right-1/4 h-full bg-secondary rounded-full"></div>
+<div class="absolute left-0 -top-2 w-4 h-4 bg-white border-2 border-secondary rounded-full shadow-sm cursor-pointer"></div>
+<div class="absolute right-1/4 -top-2 w-4 h-4 bg-white border-2 border-secondary rounded-full shadow-sm cursor-pointer"></div>
+</div>
+<div class="flex justify-between mt-4 font-label-caps text-label-caps text-on-surface-variant">
+<span>₹1,799</span>
+<span>₹25,999+</span>
+</div>
+</section>
+<!-- Brands -->
+<section>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-6 tracking-widest border-b border-outline-variant/20 pb-2">BRANDS</h3>
+<div class="space-y-3">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 border-outline rounded-none text-secondary focus:ring-0" type="checkbox"/>
+<span class="font-nav-link text-nav-link text-on-surface-variant group-hover:text-primary transition-colors">Adidas</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 border-outline rounded-none text-secondary focus:ring-0" type="checkbox"/>
+<span class="font-nav-link text-nav-link text-on-surface-variant group-hover:text-primary transition-colors">Nike</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 border-outline rounded-none text-secondary focus:ring-0" type="checkbox"/>
+<span class="font-nav-link text-nav-link text-on-surface-variant group-hover:text-primary transition-colors">Masuri</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 border-outline rounded-none text-secondary focus:ring-0" type="checkbox"/>
+<span class="font-nav-link text-nav-link text-on-surface-variant group-hover:text-primary transition-colors">Shrey</span>
+</label>
+</div>
+</section>
+</div>
+</aside>
+<!-- Main Content (Right) -->
+<section class="col-span-9">
+<!-- Boutique Header -->
+<div class="mb-16">
+<h1 class="font-headline-md text-headline-md text-primary mb-4">The Boutique</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl leading-relaxed">
+            A curated repository of limited archival drops, featuring iconic equipment from cricket’s most legendary eras.
+          </p>
+</div>
+<!-- Search Bar -->
+<div class="mb-12 relative">
+<span class="absolute left-6 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline">search</span>
+<input class="w-full bg-white border-b-2 border-outline-variant/50 focus:border-secondary py-6 pl-16 pr-6 outline-none transition-all font-body-md text-body-md placeholder:text-outline-variant rounded-t-xl museum-shadow border-x border-t" placeholder="Search premium cricket gear, apparel, and accessories..." type="text"/>
+</div>
+<!-- Filter / Sort Bar -->
+<div class="flex justify-between items-center mb-10 pb-4 border-b border-outline-variant/10">
+<div class="flex gap-4">
+<span class="font-label-caps text-label-caps text-secondary underline underline-offset-4 cursor-pointer">NEW ARRIVALS</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary cursor-pointer transition-colors">ARCHIVAL RELEASES</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Sort By:</span>
+<select class="bg-transparent font-nav-link text-nav-link border-none focus:ring-0 cursor-pointer text-primary pr-8">
+<option>Newest First</option>
+<option>Price: High to Low</option>
+<option>Price: Low to High</option>
+<option>Heritage Status</option>
+</select>
+</div>
+</div>
+<!-- Product Grid -->
+<div class="grid grid-cols-2 gap-12">
+<!-- Product Card 1 -->
+<div class="group">
+<div class="relative aspect-[4/5] bg-white rounded-2xl overflow-hidden museum-shadow mb-6">
+<div class="absolute top-6 left-6 z-10">
+<span class="bg-secondary text-white font-label-caps text-[10px] px-3 py-1 tracking-widest rounded-full uppercase">Archival</span>
+</div>
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A pair of high-end vintage cricket shoes displayed on a minimal white pedestal in a museum setting. The lighting is dramatic and warm, highlighting the fine leather texture and golden stitching details. The aesthetic is clean and luxurious, emphasizing the heritage and prestige of the footwear." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAepYTCpeevXwHvds07Ol8F_bp2f9LLudU9Od5UaEJd-p8GD3sn8k0Uk9yJlDDu1UD8DVmVqNlPGhWB0ScoX9z3g33y6DXMc0p4RKp_4YVACM3QV0nNO8e1H7jCm_8EwWWcenCOZe93j76yOwfOjL4kUQ9ZQ62nJwhLs-Sr2Xr0BJkCC9XQqTLa87Sw9l4koDQ2ozbpidWthjEAn1J-QPSoD5HPh1QxLIxXcAeGGdz6-0nUR1aICA5FzkM6niBBiT8y38m73XsXYAU"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+<button class="bg-white text-primary px-8 py-4 rounded-full font-label-caps text-label-caps tracking-widest museum-shadow transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">Inquire for Acquisition</button>
+</div>
+</div>
+<div class="space-y-2">
+<p class="font-label-caps text-[10px] text-secondary tracking-widest uppercase">Shoes • Master Collection</p>
+<h2 class="font-headline-sm text-[22px] text-primary group-hover:text-secondary transition-colors">Sachin Tendulkar - Desert Storm Shoes TenxU</h2>
+<p class="font-body-md text-body-md text-on-surface-variant font-medium">₹5,000.00</p>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="group">
+<div class="relative aspect-[4/5] bg-white rounded-2xl overflow-hidden museum-shadow mb-6">
+<div class="absolute top-6 left-6 z-10">
+<span class="bg-on-background text-white font-label-caps text-[10px] px-3 py-1 tracking-widest rounded-full uppercase">New Drop</span>
+</div>
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A premium sky blue cricket training hoodie folded neatly on a textured beige surface. The fabric weave is visible under soft morning light. The mood is serene and exclusive, echoing a private vault atmosphere with muted tones and elegant presentation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQ3ynwmT1LsxhE6M5Jrcg9g3cPzk3y_Wb7BW3l8pck6FFRD8jue1qmVJVOzD7T9iKp_QbnUZiv9rGRHSWNrojiqVLZVJLYtFTOs5Xr9tXhGx0rdydobkR8T2vRjAh4IJAw8Hw0D2fiGVFRzrJNBcYbHkUvkH_b41_sHNrTKB8GhjESUtKijgv1xP-Wpu4FuDqkv2WCNyASC1Eu5VAOG4k9j7grsQnB60qnnMPplz-NzgUQ_lLGeJjFfZtuQ4UIh0LX9vzy3dqqMeY"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+<button class="bg-white text-primary px-8 py-4 rounded-full font-label-caps text-label-caps tracking-widest museum-shadow transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">Add to Collection</button>
+</div>
+</div>
+<div class="space-y-2">
+<p class="font-label-caps text-[10px] text-secondary tracking-widest uppercase">Apparel • Indian Cricket Team</p>
+<h2 class="font-headline-sm text-[22px] text-primary group-hover:text-secondary transition-colors">Indian Team Training Hoodie - Blue</h2>
+<p class="font-body-md text-body-md text-on-surface-variant font-medium">₹5,999.00</p>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="group">
+<div class="relative aspect-[4/5] bg-white rounded-2xl overflow-hidden museum-shadow mb-6">
+<div class="absolute top-6 left-6 z-10">
+<span class="bg-outline text-white font-label-caps text-[10px] px-3 py-1 tracking-widest rounded-full uppercase">Sold Out</span>
+</div>
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 grayscale-[0.5]" data-alt="A sleek black professional cricket backpack with minimalist branding, shot against a dark charcoal background. The materials look high-end, featuring matte finishes and luxury zippers. The lighting creates a focused, vault-like aesthetic, emphasizing the product's premium build quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7Dd_OKSAKL87B7HgXb2zFXCh-rRxXvYFWOvVzHJf_KAowQXcW75WUWflXeeCvuhf-Xx_ap25YEGVZbFffeLc_N2G3YOl2VYrMd_mumpE0ULjgx9cDZyXEfqry-VRJ3TBZgWViK4m_z6lxlKv2wBGN6RQQeMITgbQWMKJ1gB9cH7IC7xy4s7DodiGlT4WiLCbEI4sWDxUFqh4vJmkC_mJaeR0ELrOO-Mg63rm3TtC7ByhLuAta0E1a8hCNyEE9HGn6g4BidCQ6kEM"/>
+<div class="absolute inset-0 bg-primary/10 flex items-center justify-center">
+<span class="text-white font-headline-sm italic">Allocated</span>
+</div>
+</div>
+<div class="space-y-2">
+<p class="font-label-caps text-[10px] text-secondary tracking-widest uppercase">Accessories • Backpack</p>
+<h2 class="font-headline-sm text-[22px] text-primary group-hover:text-secondary transition-colors">Indian Team Backpack - Black</h2>
+<p class="font-body-md text-body-md text-on-surface-variant font-medium opacity-50">₹8,999.00</p>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="group">
+<div class="relative aspect-[4/5] bg-white rounded-2xl overflow-hidden museum-shadow mb-6">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A high-performance Masuri cricket helmet with a gleaming steel visor, presented on a dark wooden display stand. The background is a soft-focus library or trophy room, bathed in warm, prestigious lighting that highlights the metallic and protective textures." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-MjPGlsS0piEbtSgKnbhlAg7cXO0SIk7WFTLsU3aXH07KUER8gJuqGZPln5wjwRaIcsFhyT5M7LTGy4eWsEIFTWeHhsCaAYQ2H9hX166RSsgc3V3pJFUqk5lCPWT1Mut_WssrwvLsOARKHsxpPP0RZ-DFL3JeF2Lc2Y3N0WbIKsWeLGaj5ACqhM_ovbEIdDtt0LJ6yfQUs6OdpKZCb4JE5D_ANYNq_ag-kWPwZXHUcUq6j9zL0ymgjjBfBzuMuwYQ8W_shFxcf8I"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+<button class="bg-white text-primary px-8 py-4 rounded-full font-label-caps text-label-caps tracking-widest museum-shadow transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">Inquire for Acquisition</button>
+</div>
+</div>
+<div class="space-y-2">
+<p class="font-label-caps text-[10px] text-secondary tracking-widest uppercase">Protection • Performance Gear</p>
+<h2 class="font-headline-sm text-[22px] text-primary group-hover:text-secondary transition-colors">Masuri E-Line Steel Visor Helmet</h2>
+<p class="font-body-md text-body-md text-on-surface-variant font-medium">₹12,450.00</p>
+</div>
+</div>
+</div>
+<!-- Pagination / Load More -->
+<div class="mt-24 flex flex-col items-center gap-6">
+<div class="h-[1px] w-48 bg-secondary"></div>
+<button class="group flex flex-col items-center gap-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant tracking-[0.3em] group-hover:text-primary transition-colors">EXPLORE MORE REPOSITORIES</span>
+<span class="material-symbols-outlined animate-bounce">expand_more</span>
+</button>
+</div>
+</section>
+</div>
+</main>
+<!-- Footer Implementation from JSON -->
+<footer class="bg-surface border-t border-outline-variant/20 pt-16 pb-8 w-full">
+<div class="flex flex-col items-center gap-8 px-margin-desktop max-w-container-max mx-auto">
+<div class="font-headline-sm text-headline-sm text-primary">ECC</div>
+<div class="flex gap-12">
+<a class="text-on-surface-variant font-label-caps text-label-caps hover:text-secondary transition-all" href="#">Provenance</a>
+<a class="text-on-surface-variant font-label-caps text-label-caps hover:text-secondary transition-all" href="#">Legal</a>
+<a class="text-on-surface-variant font-label-caps text-label-caps hover:text-secondary transition-all" href="#">Heritage</a>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant/60 text-center">
+        © 2024 Executive Club Cricket. All Rights Reserved.
+      </p>
+</div>
+</footer>
+<!-- Concierge FAB -->
+<div class="fixed bottom-8 right-8 z-[100]">
+<button class="w-16 h-16 bg-primary text-secondary rounded-full flex items-center justify-center museum-shadow hover:scale-105 active:scale-95 transition-all group">
+<span class="material-symbols-outlined text-[28px] group-hover:hidden">concierge</span>
+<span class="hidden group-hover:block font-label-caps text-[10px] tracking-tighter">ASSIST</span>
+</button>
+</div>
+<script>
+    // Micro-interactions for the boutique
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', function() {
+        if(this.checked) {
+          console.log('Filter applied: ' + this.nextElementSibling.innerText);
+          // Potential logic for dynamic filtering
+        }
+      });
+    });
+
+    // Simple smooth parallax for image hover handled via CSS
+  </script>
+</body></html>

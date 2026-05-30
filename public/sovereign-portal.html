@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sovereign Portal | Executive Club Cricket</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Work+Sans:wght@300;400;500;600&amp;family=Manrope:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-image: radial-gradient(#C5A059 0.5px, transparent 0.5px);
+            background-size: 40px 40px;
+            background-attachment: fixed;
+            background-color: #fcf9f8; /* Base background */
+        }
+        .grain-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.03;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .gold-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #C5A059, transparent);
+            width: 200px;
+            margin: 2rem auto;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#bfc5e4",
+                        "primary-fixed": "#dce1ff",
+                        "on-error": "#ffffff",
+                        "surface": "#fcf9f8",
+                        "tertiary-fixed": "#e5e2d9",
+                        "surface-container-low": "#f6f3f2",
+                        "primary-container": "#141a32",
+                        "outline": "#76767e",
+                        "secondary-fixed-dim": "#e9c176",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#1c1b1b",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed": "#141a32",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#eae7e7",
+                        "outline-variant": "#c6c6ce",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#46464d",
+                        "secondary-container": "#fed488",
+                        "secondary": "#775a19",
+                        "tertiary-container": "#1c1c16",
+                        "on-tertiary-container": "#85847c",
+                        "secondary-fixed": "#ffdea5",
+                        "inverse-on-surface": "#f3f0ef",
+                        "surface-dim": "#dcd9d9",
+                        "on-secondary-fixed": "#261900",
+                        "surface-container-highest": "#e5e2e1",
+                        "inverse-surface": "#313030",
+                        "on-secondary-container": "#785a1a",
+                        "primary": "#000000",
+                        "on-background": "#1c1b1b",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#f0eded",
+                        "tertiary": "#000000",
+                        "on-tertiary-fixed-variant": "#484740",
+                        "background": "#fcf9f8",
+                        "tertiary-fixed-dim": "#c9c6bd",
+                        "on-tertiary-fixed": "#1c1c16",
+                        "inverse-primary": "#bfc5e4",
+                        "on-primary-fixed-variant": "#3f465f",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#7c839f",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#e5e2e1",
+                        "on-secondary-fixed-variant": "#5d4201",
+                        "surface-bright": "#fcf9f8",
+                        "surface-tint": "#575d78"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "container-max": "1440px",
+                        "margin-mobile": "20px",
+                        "gutter": "24px",
+                        "margin-desktop": "80px"
+                    },
+                    "fontFamily": {
+                        "nav-link": ["Work Sans"],
+                        "display-lg": ["Playfair Display"],
+                        "label-caps": ["Work Sans"],
+                        "headline-sm": ["Playfair Display"],
+                        "headline-md": ["Playfair Display"],
+                        "body-md": ["Manrope"],
+                        "body-lg": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "nav-link": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "400"}],
+                        "display-lg": ["84px", {"lineHeight": "92px", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.15em", "fontWeight": "500"}],
+                        "headline-sm": ["28px", {"lineHeight": "36px", "fontWeight": "400"}],
+                        "headline-md": ["42px", {"lineHeight": "52px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md overflow-x-hidden">
+<div class="grain-overlay"></div>
+<!-- TopNavBar -->
+<nav class="bg-surface border-b border-[#C5A059] shadow-sm sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-margin-desktop py-4 max-w-container-max mx-auto">
+<div class="font-headline-sm text-headline-sm text-primary tracking-tight">ECC</div>
+<div class="hidden md:flex gap-8 items-center">
+<a class="font-nav-link text-nav-link text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">The Archive</a>
+<a class="font-nav-link text-nav-link text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Curated Lots</a>
+<a class="font-nav-link text-nav-link text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Vault Access</a>
+<a class="font-nav-link text-nav-link text-primary font-bold border-b-2 border-primary pb-1" href="#">Member Services</a>
+</div>
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">account_balance_wallet</span>
+<div class="w-10 h-10 rounded-full border border-[#C5A059] p-0.5">
+<img alt="Member Profile Avatar" class="w-full h-full object-cover rounded-full" data-alt="A professional, high-end close-up portrait of a gentleman with a warm smile, set against a soft, out-of-focus archival background. The lighting is museum-grade, emphasizing texture and quality, fitting for a prestigious private club member. The overall tone is sophisticated and clean, aligning with the quiet luxury aesthetic of white and cream tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsj1bU-JcxTaBGYH3YeCWYN0dp_wDNq18dx_hR5bnD7nDqUb1mDhkXW-O7Fnue-0KoeMN70TjYeBnnZwHzwRNkmAwxiF-9dkCGSEjMdfwA2e_rQigIH4tZ8vApFMuuQ3YV9ct5IB3L39ecfEcTBTCyhSmXDsQ4AbON1dNsw5_xa9I6ByT9ulNtfwQTmYemVuAZpIJtcPYX6JzrmecowtxOVNVnmSnUDxydEjvMh3zr7kqGidbKuTOI36aDIAd7OjQXtWAySIZKGa0"/>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-container-max mx-auto px-margin-desktop py-12 md:py-20">
+<!-- Sovereign Profile Hero -->
+<header class="bg-surface-container-lowest rounded-2xl p-10 shadow-[0_40px_40px_rgba(10,17,40,0.04)] border border-[#C5A059]/10 relative overflow-hidden mb-16">
+<div class="flex flex-col md:flex-row items-center gap-10">
+<div class="relative">
+<div class="w-40 h-40 rounded-full border-2 border-[#C5A059] p-1.5 shadow-xl">
+<img alt="Adamu Haladu" class="w-full h-full object-cover rounded-full" data-alt="A detailed portrait of a handsome man in professional attire, showcasing a look of confidence and belonging. He is positioned in a modern, brightly lit environment that exudes wealth and exclusivity. The lighting is soft and flattering, highlighting the refined details of his appearance against a minimalist background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8_Tl2ALPO7WUd8lx1EJGN7Qe6eqfQ3pMS15_-mqOm2-7_jvqMBX1JfsjZFpJn96X2aNoCso0nknIPJetEB9EgO5dWxgf3uiNuDMTyPJCuRmzwBXKVrqie9tX_GlyOcYlo6oThReCQcsXMDYhxBdS6Cwn9axypQwSRRVpYphdCtj6yqfISxLDhL2oUkPzn5GqJOMu5H6guKPsJtx8Jw9X_or73uJ0xPmRz_dO9_9o-PKxP6S8VfIuVUUE5evG_vk_dP3exqv1FaR4"/>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-primary text-[#C5A059] w-12 h-12 rounded-full flex items-center justify-center border-2 border-surface">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="flex-grow text-center md:text-left">
+<div class="flex flex-col gap-1">
+<h1 class="font-headline-md text-headline-md text-primary mb-2">Adamu Haladu</h1>
+<div class="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2 text-on-surface-variant font-label-caps tracking-widest uppercase">
+<span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#C5A059]"></span> SOVEREIGN MEMBER</span>
+<span class="text-outline">ID: ECC-ARCH-2026-001</span>
+<span class="text-outline">SINCE: MAY 2026</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<button class="bg-primary text-white font-body-md px-8 py-4 rounded-xl hover:opacity-90 transition-all duration-300 flex items-center gap-3">
+<span class="material-symbols-outlined">concierge</span>
+                        Contact Concierge
+                    </button>
+<button class="border border-[#C5A059] text-[#775a19] font-body-md px-8 py-4 rounded-xl hover:bg-surface-container transition-all duration-300">
+                        View Dossier
+                    </button>
+</div>
+</div>
+</header>
+<div class="gold-divider"></div>
+<!-- Your Privileges Grid -->
+<section class="mb-20">
+<div class="flex items-center justify-between mb-10">
+<h2 class="font-headline-sm text-headline-sm flex items-center gap-3">
+<span class="material-symbols-outlined text-[#C5A059]">stars</span>
+                    Sovereign Privileges
+                </h2>
+<a class="text-on-surface-variant font-label-caps underline underline-offset-8 decoration-[#C5A059] hover:text-primary transition-colors" href="#">Expand Benefits</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Privilege Card 1 -->
+<div class="bg-white p-8 rounded-2xl shadow-[0_40px_40px_rgba(10,17,40,0.04)] border border-transparent hover:border-[#C5A059]/30 transition-all duration-500 group">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-6 text-[#C5A059] group-hover:bg-[#C5A059] group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+</div>
+<h3 class="font-headline-sm text-xl mb-2">Private Viewing</h3>
+<p class="text-on-surface-variant text-body-md">Unlimited museum entry with exclusive after-hours access to the Imperial vaults.</p>
+</div>
+<!-- Privilege Card 2 -->
+<div class="bg-white p-8 rounded-2xl shadow-[0_40px_40px_rgba(10,17,40,0.04)] border border-transparent hover:border-[#C5A059]/30 transition-all duration-500 group">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-6 text-[#C5A059] group-hover:bg-[#C5A059] group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">gavel</span>
+</div>
+<h3 class="font-headline-sm text-xl mb-2">Priority Bidding</h3>
+<p class="text-on-surface-variant text-body-md">Early access to high-value lots and zero-commission fees on archive acquisitions.</p>
+</div>
+<!-- Privilege Card 3 -->
+<div class="bg-white p-8 rounded-2xl shadow-[0_40px_40px_rgba(10,17,40,0.04)] border border-transparent hover:border-[#C5A059]/30 transition-all duration-500 group">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-6 text-[#C5A059] group-hover:bg-[#C5A059] group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">meeting_room</span>
+</div>
+<h3 class="font-headline-sm text-xl mb-2">Lounge Entry</h3>
+<p class="text-on-surface-variant text-body-md">Seamless global access to Executive Club Cricket lounges and private networking hubs.</p>
+</div>
+<!-- Privilege Card 4 -->
+<div class="bg-white p-8 rounded-2xl shadow-[0_40px_40px_rgba(10,17,40,0.04)] border border-transparent hover:border-[#C5A059]/30 transition-all duration-500 group">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-6 text-[#C5A059] group-hover:bg-[#C5A059] group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">shield</span>
+</div>
+<h3 class="font-headline-sm text-xl mb-2">Vault Access</h3>
+<p class="text-on-surface-variant text-body-md">Premium climate-controlled storage for your most valuable cricketing assets and artifacts.</p>
+</div>
+</div>
+</section>
+<!-- Main Dashboard Content -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+<!-- Concierge Ledger -->
+<section class="lg:col-span-2">
+<div class="flex items-center gap-3 mb-8">
+<span class="material-symbols-outlined text-primary">book</span>
+<h2 class="font-headline-sm text-headline-sm">Concierge Ledger</h2>
+</div>
+<div class="bg-white rounded-2xl shadow-[0_40px_40px_rgba(10,17,40,0.04)] border border-[#C5A059]/10 overflow-hidden">
+<div class="p-4 bg-surface-container-low border-b border-[#C5A059]/10 grid grid-cols-4 px-8 font-label-caps text-on-surface-variant tracking-wider">
+<div class="col-span-3">REQUEST DETAILS</div>
+<div class="text-right">STATUS</div>
+</div>
+<div class="divide-y divide-[#C5A059]/10">
+<!-- Ledger Item 1 -->
+<div class="px-8 py-6 flex items-center justify-between group hover:bg-surface-container-lowest transition-colors">
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">apparel</span>
+</div>
+<div>
+<p class="font-body-lg font-medium text-primary">Surya Kumar Yadav Signed Jersey</p>
+<p class="text-on-surface-variant text-sm mt-1">Request #21 • May 19, 2026</p>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full text-[10px] font-bold tracking-widest bg-surface-variant text-outline-variant border border-outline-variant uppercase">Not Interested</span>
+</div>
+<!-- Ledger Item 2 -->
+<div class="px-8 py-6 flex items-center justify-between group hover:bg-surface-container-lowest transition-colors">
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">sports_baseball</span>
+</div>
+<div>
+<p class="font-body-lg font-medium text-primary">Indian Team training Cap - Lavender</p>
+<p class="text-on-surface-variant text-sm mt-1">Request #20 • May 19, 2026</p>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full text-[10px] font-bold tracking-widest bg-surface-container-high text-on-surface-variant border border-[#C5A059]/20 uppercase">Closed</span>
+</div>
+<!-- Ledger Item 3 -->
+<div class="px-8 py-6 flex items-center justify-between group hover:bg-surface-container-lowest transition-colors">
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">sports_cricket</span>
+</div>
+<div>
+<p class="font-body-lg font-medium text-primary">Virat Kohli Hand Signed Bat</p>
+<p class="text-on-surface-variant text-sm mt-1">Request #19 • May 12, 2026</p>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full text-[10px] font-bold tracking-widest bg-surface-container-high text-on-surface-variant border border-[#C5A059]/20 uppercase">Closed</span>
+</div>
+<!-- Ledger Item 4 -->
+<div class="px-8 py-6 flex items-center justify-between group hover:bg-surface-container-lowest transition-colors">
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">laundry</span>
+</div>
+<div>
+<p class="font-body-lg font-medium text-primary">MS Dhoni Autographed CSK Polo</p>
+<p class="text-on-surface-variant text-sm mt-1">Request #17 • May 11, 2026</p>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full text-[10px] font-bold tracking-widest bg-surface-container-high text-on-surface-variant border border-[#C5A059]/20 uppercase">Closed</span>
+</div>
+</div>
+<div class="p-6 bg-surface-container-lowest text-center">
+<button class="text-[#C5A059] font-label-caps hover:underline underline-offset-4 tracking-widest">REQUEST NEW CONCIERGE SERVICE</button>
+</div>
+</div>
+</section>
+<!-- Auction Dossier -->
+<aside>
+<div class="flex items-center gap-3 mb-8">
+<span class="material-symbols-outlined text-primary">folder_managed</span>
+<h2 class="font-headline-sm text-headline-sm">Auction Dossier</h2>
+</div>
+<div class="bg-white rounded-2xl shadow-[0_40px_40px_rgba(10,17,40,0.04)] border border-[#C5A059]/10 p-8 flex flex-col items-center">
+<div class="w-full aspect-square rounded-xl overflow-hidden mb-8 border border-[#C5A059]/20 shadow-inner group">
+<img alt="The Amazing Bat" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="A pristine, historical cricket bat displayed on a velvet stand within a glass case. The lighting is focused and warm, highlighting the intricate wood grain and hand-carved details. The bat is an artifact of great significance, presented with reverence in a minimalist, modern museum setting that utilizes the brand's primary black and cream color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAu328rv5yrFMHK8tXkorMau4bFwSP6m4ttdDkcEYZhPUzn9hrgDSbPI9oedbAoEaRc9-de2mvQSJq8-e49247o2Cc2tcxYUsBkVvji5zzZKx4ShgENWXUx0uWIg1bER2SczEHcv9njVzZl067YNWENixy8a37KoVUsT0kB_gI3nYHk6B2IKxFn_p1_ySg24z3jz-Wv861qjrKbjUIGkoynPEPFDMv-lkuNC752yHOLdsHeBtCrqPQRVKmTmrWwdF6m3oN_wZDOM6s"/>
+</div>
+<div class="w-full">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-headline-sm text-2xl">The Amazing Bat</h3>
+<p class="text-on-surface-variant text-sm mt-1">Lot ID: ARCH-VINT-202</p>
+</div>
+<span class="bg-[#fed488] text-secondary font-bold text-[10px] px-3 py-1 rounded-full tracking-tighter uppercase">Leading</span>
+</div>
+<div class="flex items-baseline gap-2 mb-8">
+<span class="font-headline-md text-primary">₹12,500</span>
+<span class="text-on-surface-variant text-sm">Current Bid</span>
+</div>
+<div class="flex flex-col gap-4">
+<button class="w-full py-4 border-2 border-primary text-primary rounded-xl font-bold font-body-md hover:bg-primary hover:text-white transition-all duration-300">Raise Bid</button>
+<button class="w-full py-4 text-on-surface-variant font-label-caps hover:text-primary transition-colors">View Full Auction History</button>
+</div>
+</div>
+</div>
+<!-- Floating Concierge Trigger -->
+<div class="mt-8 flex justify-end">
+<div class="w-16 h-16 bg-primary rounded-full shadow-2xl flex items-center justify-center text-[#fed488] cursor-pointer hover:scale-110 active:scale-95 transition-all duration-300 group">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">support_agent</span>
+<div class="absolute right-20 bg-primary text-[#fed488] px-4 py-2 rounded-lg text-xs opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap">Concierge Live</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-[#C5A059] mt-24">
+<div class="flex flex-col md:flex-row justify-between items-center gap-gutter max-w-container-max mx-auto w-full py-16 px-margin-desktop">
+<div class="flex flex-col items-center md:items-start gap-4">
+<div class="font-headline-md text-headline-md text-primary">ECC</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs text-center md:text-left">© 2024 Executive Club Cricket. All Rights Reserved. Private Membership Only.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-8">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary transition-colors duration-200" href="#">Terms of Archive</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary transition-colors duration-200" href="#">Provenance Policy</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary transition-colors duration-200" href="#">Contact Concierge</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary transition-colors duration-200" href="#">Privacy</a>
+</div>
+<div class="flex gap-4">
+<div class="w-10 h-10 border border-[#C5A059]/30 rounded-full flex items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary cursor-pointer transition-all">
+<span class="material-symbols-outlined">public</span>
+</div>
+<div class="w-10 h-10 border border-[#C5A059]/30 rounded-full flex items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary cursor-pointer transition-all">
+<span class="material-symbols-outlined">mail</span>
+</div>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction: Header parallax effect
+        document.addEventListener('mousemove', (e) => {
+            const amount = 5;
+            const x = (e.clientX / window.innerWidth - 0.5) * amount;
+            const y = (e.clientY / window.innerHeight - 0.5) * amount;
+            
+            const cards = document.querySelectorAll('.rounded-2xl');
+            cards.forEach(card => {
+                card.style.transform = `perspective(1000px) rotateY(${x}deg) rotateX(${-y}deg)`;
+            });
+        });
+
+        // Soft interaction for buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => btn.classList.add('scale-95', 'opacity-80'));
+            btn.addEventListener('mouseup', () => btn.classList.remove('scale-95', 'opacity-80'));
+            btn.addEventListener('mouseleave', () => btn.classList.remove('scale-95', 'opacity-80'));
+        });
+    </script>
+</body></html>

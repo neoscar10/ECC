@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Auctions | The Sovereign Archive</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Work+Sans:wght@300;400;500;600&amp;family=Manrope:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "on-secondary-fixed-variant": "#5d4201",
+                  "primary-fixed-dim": "#bfc5e4",
+                  "outline": "#76767e",
+                  "on-background": "#1c1b1b",
+                  "tertiary": "#000000",
+                  "on-primary-fixed-variant": "#3f465f",
+                  "surface-variant": "#e5e2e1",
+                  "primary-fixed": "#dce1ff",
+                  "outline-variant": "#c6c6ce",
+                  "tertiary-fixed-dim": "#c9c6bd",
+                  "inverse-primary": "#bfc5e4",
+                  "surface-tint": "#575d78",
+                  "primary-container": "#141a32",
+                  "on-tertiary-fixed-variant": "#484740",
+                  "error": "#ba1a1a",
+                  "tertiary-container": "#1c1c16",
+                  "on-primary-fixed": "#141a32",
+                  "surface-bright": "#fcf9f8",
+                  "on-secondary-fixed": "#261900",
+                  "on-error": "#ffffff",
+                  "inverse-on-surface": "#f3f0ef",
+                  "on-tertiary-container": "#85847c",
+                  "on-primary": "#ffffff",
+                  "secondary-fixed": "#ffdea5",
+                  "on-primary-container": "#7c839f",
+                  "on-secondary": "#ffffff",
+                  "surface-container": "#f0eded",
+                  "on-error-container": "#93000a",
+                  "on-surface-variant": "#46464d",
+                  "primary": "#000000",
+                  "on-tertiary-fixed": "#1c1c16",
+                  "on-surface": "#1c1b1b",
+                  "surface-container-low": "#f6f3f2",
+                  "secondary-container": "#fed488",
+                  "on-secondary-container": "#785a1a",
+                  "surface-container-lowest": "#ffffff",
+                  "on-tertiary": "#ffffff",
+                  "inverse-surface": "#313030",
+                  "secondary": "#775a19",
+                  "background": "#fcf9f8",
+                  "error-container": "#ffdad6",
+                  "surface-container-highest": "#e5e2e1",
+                  "surface-dim": "#dcd9d9",
+                  "surface-container-high": "#eae7e7",
+                  "surface": "#fcf9f8",
+                  "tertiary-fixed": "#e5e2d9",
+                  "secondary-fixed-dim": "#e9c176"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "margin-mobile": "20px",
+                  "margin-desktop": "80px",
+                  "container-max": "1440px",
+                  "gutter": "24px",
+                  "unit": "8px"
+          },
+          "fontFamily": {
+                  "display-lg": ["Playfair Display"],
+                  "label-caps": ["Work Sans"],
+                  "headline-md": ["Playfair Display"],
+                  "nav-link": ["Work Sans"],
+                  "headline-sm": ["Playfair Display"],
+                  "body-md": ["Manrope"],
+                  "body-lg": ["Manrope"]
+          },
+          "fontSize": {
+                  "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.15em", "fontWeight": "500"}],
+                  "headline-md": ["42px", {"lineHeight": "52px", "fontWeight": "400"}],
+                  "nav-link": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "400"}],
+                  "headline-sm": ["28px", {"lineHeight": "36px", "fontWeight": "400"}],
+                  "display-lg": ["84px", {"lineHeight": "92px", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+                  "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                  "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .grain-overlay {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background-image: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
+      opacity: 0.03;
+    }
+    .artifact-card-shadow {
+      shadow: 0 40px 40px rgba(10, 17, 40, 0.04);
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md selection:bg-secondary-container selection:text-on-secondary-container">
+<div class="grain-overlay"></div>
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 z-50 w-full bg-surface/90 backdrop-blur-md border-b border-secondary-container shadow-[0_40px_40px_rgba(10,17,40,0.04)]">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop flex justify-between items-center h-20">
+<div class="font-headline-sm text-headline-sm text-primary tracking-widest uppercase">
+        The Sovereign Archive
+      </div>
+<nav class="hidden md:flex items-center gap-10">
+<a class="text-on-surface-variant font-nav-link text-nav-link hover:text-secondary transition-colors duration-500" href="#">Explore</a>
+<a class="text-primary border-b-2 border-secondary pb-1 font-bold font-nav-link text-nav-link hover:text-secondary transition-colors duration-500" href="#">Auctions</a>
+<a class="text-on-surface-variant font-nav-link text-nav-link hover:text-secondary transition-colors duration-500" href="#">Archive</a>
+<a class="text-on-surface-variant font-nav-link text-nav-link hover:text-secondary transition-colors duration-500" href="#">Boutique</a>
+<a class="text-on-surface-variant font-nav-link text-nav-link hover:text-secondary transition-colors duration-500" href="#">The Club</a>
+</nav>
+<div class="flex items-center gap-6">
+<button class="hidden md:block font-label-caps text-label-caps uppercase text-secondary hover:opacity-80 transition-opacity">Vault</button>
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-label-caps text-label-caps uppercase tracking-wider hover:opacity-90 active:scale-[0.98] transition-all">
+          Private Access
+        </button>
+</div>
+</div>
+</header>
+<main class="pt-32 pb-24">
+<!-- Hero Section -->
+<section class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mb-16">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+<div class="max-w-2xl">
+<span class="font-label-caps text-label-caps text-secondary uppercase block mb-4">Established 1892</span>
+<h1 class="font-display-lg text-display-lg leading-none mb-6">The Auction House</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+            Curated heritage lots available for live bidding and private acquisition. Each piece vetted by our council of archival experts.
+          </p>
+</div>
+<div class="flex flex-col items-start md:items-end gap-4">
+<div class="flex gap-2 p-1 bg-surface-container rounded-2xl">
+<button class="px-6 py-2 rounded-xl font-label-caps text-label-caps bg-surface text-primary border border-secondary shadow-sm transition-all">Live Bidding</button>
+<button class="px-6 py-2 rounded-xl font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors">Upcoming</button>
+<button class="px-6 py-2 rounded-xl font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors">Past Results</button>
+</div>
+</div>
+</div>
+<div class="w-full h-px bg-[#C5A059] opacity-20 mt-12"></div>
+</section>
+<!-- Catalog Controls -->
+<section class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mb-12">
+<div class="flex items-center gap-4 mb-10">
+<div class="w-1 h-8 bg-[#C5A059]"></div>
+<h2 class="font-headline-sm text-headline-sm">Explore Catalog</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+<!-- Artifact Card 1: Main Highlight -->
+<div class="group relative bg-surface-container-lowest rounded-[16px] overflow-hidden shadow-[0_40px_40px_rgba(10,17,40,0.04)] transition-all duration-700 hover:-translate-y-2">
+<div class="relative aspect-[1.25] overflow-hidden">
+<img alt="The Master's Willow Heritage Artifact" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhjO4YyRAQmnZ4bG13RPZm8IaA-ng4MYcU6K4wlZ7jba__FND6j7sL-HtPCEjnIBcrt2p17wKs0x0jZ8Y6oPJ5nytnvyCxDC23MetafXGHJWIfzPqXykuciQiiT2yYH_71vu6EU5sz6-F7rd58wOjMQIkZuF9PCrITPeOHlSmUUbtKx4CbSlNyJjeXz1odL-5B5RF-8h6d-coorh12dZBkgTdCz4PKhNUOi-BGvR6LAoQ_LHHEamVVSwjKJ-0om8EcVGxNP1NzZag"/>
+<div class="absolute top-4 left-4">
+<span class="bg-primary/90 backdrop-blur-md text-on-primary font-label-caps text-[10px] px-3 py-1 rounded-full uppercase tracking-widest">Live Now</span>
+</div>
+<button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-[20px]">bookmark</span>
+</button>
+</div>
+<div class="p-8">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-secondary uppercase">Lot #LOT-00022</span>
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span class="font-label-caps text-[11px] uppercase tracking-wider">1d 13h Left</span>
+</div>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-6 group-hover:text-secondary transition-colors">The Master's Willow - Hand-Signed</h3>
+<div class="flex items-end justify-between mb-8">
+<div>
+<p class="font-label-caps text-[10px] text-on-surface-variant uppercase mb-1">Current Bid</p>
+<p class="font-headline-sm text-[24px] text-primary">₹12,500</p>
+</div>
+<button class="bg-primary text-on-primary px-8 py-3 rounded-xl font-label-caps text-label-caps uppercase tracking-widest hover:bg-secondary transition-all active:scale-95">
+                Place Bid
+              </button>
+</div>
+<div class="w-full h-px bg-secondary-container"></div>
+<div class="mt-4 flex items-center justify-between font-label-caps text-[10px] text-outline uppercase">
+<span>8 Bids</span>
+<span>Reserve Met</span>
+</div>
+</div>
+</div>
+<!-- Artifact Card 2 -->
+<div class="group relative bg-surface-container-lowest rounded-[16px] overflow-hidden shadow-[0_40px_40px_rgba(10,17,40,0.04)] transition-all duration-700 hover:-translate-y-2">
+<div class="relative aspect-[1.25] overflow-hidden bg-surface-container-high">
+<img class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" data-alt="A macro photograph of an ornate, antique pocket watch resting on a dark velvet cushion. The lighting is dramatic and chiaroscuro, highlighting the intricate gold engravings and delicate gears visible through the glass back. The color palette is rich with deep navies, golds, and polished silver. The overall mood is prestigious and archival, echoing a high-end luxury auction aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnVXY45k5BYfvJ0gTVixpPrwk3NAL-b3CG0WgBI1-FhoWceL3s7Z3qqTKiBBNlZa4pnHeBbwqWLSOcoIRnn2R_eWSAw6A64HE2IVDRhlVWXqC4_Pjm3v_nPmfiC-amXTQENvlvAkQ2kVwdPEVjOQ9kTNefO5nhc6IDp2zJPGmsjDS6H-wIRPbLGKOMfpNRiMnFKr8kFOnRcTi75my8t9Css3bz-ghf8LEsbZi5RbnRlAnx7eTKBewHYAFktpy9y28NrTnOcUzTKgA"/>
+<div class="absolute top-4 left-4">
+<span class="bg-primary/90 backdrop-blur-md text-on-primary font-label-caps text-[10px] px-3 py-1 rounded-full uppercase tracking-widest">Live Now</span>
+</div>
+<button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-[20px]">bookmark</span>
+</button>
+</div>
+<div class="p-8">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-secondary uppercase">Lot #LOT-00023</span>
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span class="font-label-caps text-[11px] uppercase tracking-wider">4h 12m Left</span>
+</div>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-6 group-hover:text-secondary transition-colors">Imperial Chronograph Circa 1895</h3>
+<div class="flex items-end justify-between mb-8">
+<div>
+<p class="font-label-caps text-[10px] text-on-surface-variant uppercase mb-1">Current Bid</p>
+<p class="font-headline-sm text-[24px] text-primary">₹45,200</p>
+</div>
+<button class="bg-primary text-on-primary px-8 py-3 rounded-xl font-label-caps text-label-caps uppercase tracking-widest hover:bg-secondary transition-all active:scale-95">
+                Place Bid
+              </button>
+</div>
+<div class="w-full h-px bg-secondary-container"></div>
+<div class="mt-4 flex items-center justify-between font-label-caps text-[10px] text-outline uppercase">
+<span>15 Bids</span>
+<span>Reserve Met</span>
+</div>
+</div>
+</div>
+<!-- Artifact Card 3 -->
+<div class="group relative bg-surface-container-lowest rounded-[16px] overflow-hidden shadow-[0_40px_40px_rgba(10,17,40,0.04)] transition-all duration-700 hover:-translate-y-2">
+<div class="relative aspect-[1.25] overflow-hidden bg-surface-container-high">
+<img class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" data-alt="A minimalist architectural study of a marble pedestal supporting a rare First Edition manuscript. The setting is a clean, modern museum gallery with soft, warm overhead lighting. The color palette is dominated by off-whites, cream, and subtle gold accents from the book's embossed cover. The mood is quiet luxury, emphasizing the historical significance and rarity of the archival object." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9kgiamEoam-Ud1uCWs9SY24QYrLDZ4-uC-UYcuZhZkZXlPX7Tg6szw3wcT8giFy8AerxDa_P0aLKjYbtGtG_tX2jL0PSDHNy_ITDlShmrb7vUfzBUBCFaKwtablr4w2eGiBHp92DX9XnmesYf0UwxXKTw13PwjJOrqK_jQ0ttRjcGSd6svPW7FJP0xGDXUK-xsZXPAzQ6JEEFDmZx4Fq9Twxt-x6EIsMXNAwldM966nA54nD9dU3ruGc2cuoFV_nGSXahISEdnvI"/>
+<div class="absolute top-4 left-4">
+<span class="bg-primary/90 backdrop-blur-md text-on-primary font-label-caps text-[10px] px-3 py-1 rounded-full uppercase tracking-widest">Live Now</span>
+</div>
+<button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+</button>
+</div>
+<div class="p-8">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-secondary uppercase">Lot #LOT-00024</span>
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span class="font-label-caps text-[11px] uppercase tracking-wider">2d 08h Left</span>
+</div>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-6 group-hover:text-secondary transition-colors">Founder's Ledger: First Edition</h3>
+<div class="flex items-end justify-between mb-8">
+<div>
+<p class="font-label-caps text-[10px] text-on-surface-variant uppercase mb-1">Current Bid</p>
+<p class="font-headline-sm text-[24px] text-primary">₹8,900</p>
+</div>
+<button class="bg-primary text-on-primary px-8 py-3 rounded-xl font-label-caps text-label-caps uppercase tracking-widest hover:bg-secondary transition-all active:scale-95">
+                Place Bid
+              </button>
+</div>
+<div class="w-full h-px bg-secondary-container"></div>
+<div class="mt-4 flex items-center justify-between font-label-caps text-[10px] text-outline uppercase">
+<span>3 Bids</span>
+<span>Reserve Pending</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-20 pt-10 border-t border-secondary-container flex flex-col md:flex-row justify-between items-center gap-6">
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase">Showing 1-12 of 48 lots</p>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 rounded-full flex items-center justify-center border border-secondary-container text-on-surface-variant hover:border-secondary hover:text-secondary transition-all">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<div class="flex items-center gap-2">
+<button class="w-10 h-10 rounded-full flex items-center justify-center bg-primary text-on-primary font-label-caps text-[12px]">1</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant font-label-caps text-[12px] hover:bg-surface-container transition-colors">2</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant font-label-caps text-[12px] hover:bg-surface-container transition-colors">3</button>
+<span class="text-on-surface-variant">...</span>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant font-label-caps text-[12px] hover:bg-surface-container transition-colors">4</button>
+</div>
+<button class="w-10 h-10 rounded-full flex items-center justify-center border border-secondary-container text-on-surface-variant hover:border-secondary hover:text-secondary transition-all">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Shell -->
+<footer class="bg-surface-container w-full py-16">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-gutter">
+<div class="font-headline-sm text-headline-sm text-primary">The Sovereign Archive</div>
+<div class="flex flex-wrap justify-center gap-8">
+<a class="text-on-surface-variant font-nav-link text-nav-link hover:text-secondary underline decoration-1 underline-offset-4 transition-all duration-300" href="#">Provenance Guarantee</a>
+<a class="text-on-surface-variant font-nav-link text-nav-link hover:text-secondary underline decoration-1 underline-offset-4 transition-all duration-300" href="#">Membership Inquiries</a>
+<a class="text-on-surface-variant font-nav-link text-nav-link hover:text-secondary underline decoration-1 underline-offset-4 transition-all duration-300" href="#">Imperial Terms</a>
+<a class="text-on-surface-variant font-nav-link text-nav-link hover:text-secondary underline decoration-1 underline-offset-4 transition-all duration-300" href="#">Privacy Vault</a>
+</div>
+<div class="text-center md:text-right">
+<p class="font-body-md text-body-md text-on-surface-variant">© 2024 The Sovereign Archive. All Rights Reserved. Private Membership applies.</p>
+</div>
+</div>
+<div class="max-w-xs mx-auto border-t border-secondary-container mt-10"></div>
+</footer>
+<!-- Concierge Floating Badge -->
+<div class="fixed bottom-8 right-8 z-[60]">
+<button class="w-16 h-16 rounded-full bg-primary text-secondary shadow-[0_20px_40px_rgba(0,0,0,0.3)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'wght' 200;">concierge</span>
+</button>
+</div>
+<script>
+    // Smooth interaction for auction grid cards
+    document.querySelectorAll('.artifact-card-shadow').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        card.style.transform = 'translateY(-8px)';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'translateY(0)';
+      });
+    });
+  </script>
+</body></html>
