@@ -86,14 +86,7 @@ class CashfreePaymentController extends Controller
                     'success' => false,
                     'message' => 'Payment is still pending.',
                     'data'    => [
-                        'payment' => [
-                            'id'               => $payment->id,
-                            'gateway'          => $payment->gateway,
-                            'status'           => $payment->status,
-                            'amount'           => (float) $payment->amount,
-                            'currency'         => $payment->currency,
-                            'gateway_order_id' => $payment->gateway_order_id,
-                        ]
+                        'payment' => (new \App\Http\Resources\Payment\PaymentResource($result['payment']))->resolve(request())
                     ],
                     'meta'    => null,
                     'errors'  => null,
@@ -122,16 +115,7 @@ class CashfreePaymentController extends Controller
         $payable = $payment->payable;
 
         $data = [
-            'payment' => [
-                'id'                 => $payment->id,
-                'gateway'            => $payment->gateway,
-                'status'             => $payment->status,
-                'amount'             => (float) $payment->amount,
-                'currency'             => $payment->currency,
-                'gateway_order_id'   => $payment->gateway_order_id,
-                'gateway_payment_id' => $payment->gateway_payment_id,
-                'paid_at'            => $payment->paid_at ? $payment->paid_at->toIso8601String() : null,
-            ]
+            'payment' => (new \App\Http\Resources\Payment\PaymentResource($payment))->resolve(request())
         ];
 
         if ($payable) {

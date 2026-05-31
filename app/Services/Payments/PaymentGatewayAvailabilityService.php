@@ -3,15 +3,23 @@
 namespace App\Services\Payments;
 
 use App\Exceptions\PaymentGatewayValidationException;
+use App\Models\PaymentGateway;
 
 class PaymentGatewayAvailabilityService
 {
+    protected PaymentSettingsService $settingsService;
+
+    public function __construct(?PaymentSettingsService $settingsService = null)
+    {
+        $this->settingsService = $settingsService ?: app(PaymentSettingsService::class);
+    }
+
     /**
-     * Get the default gateway from config.
+     * Get the default gateway from settings.
      */
     public function defaultGateway(): string
     {
-        return config('payments.default_gateway', 'razorpay');
+        return $this->settingsService->getDefaultGateway();
     }
 
     /**
@@ -19,14 +27,7 @@ class PaymentGatewayAvailabilityService
      */
     public function enabledGateways(): array
     {
-        $gateways = [];
-        $supported = config('payments.supported_gateways', []);
-        foreach ($supported as $gateway) {
-            if ($this->isEnabled($gateway)) {
-                $gateways[] = $gateway;
-            }
-        }
-        return $gateways;
+        return $this->settingsService->getEnabledGateways();
     }
 
     /**
@@ -34,7 +35,7 @@ class PaymentGatewayAvailabilityService
      */
     public function isEnabled(string $gateway): bool
     {
-        return (bool) config("payments.gateways.{$gateway}.enabled", false);
+        return $this->settingsService->isGatewayEnabled($gateway);
     }
 
     /**
@@ -43,71 +44,58 @@ class PaymentGatewayAvailabilityService
      *
      * @throws PaymentGatewayValidationException
      */
-    public function validateGateway(?string $gateway): string
+    public function validateGateway(?string $gateway, ?string $purpose = null): string
     {
-        if (is_null($gateway) || $gateway === '') {
-            $gateway = $this->defaultGateway();
-        }
-
-        $gateway = strtolower($gateway);
-        $supported = config('payments.supported_gateways', []);
-
-        if (!in_array($gateway, $supported)) {
-            throw new PaymentGatewayValidationException(
-                'Invalid payment gateway selected.',
-                [
-                    'payment_gateway' => ['Invalid payment gateway selected.']
-                ],
-                422
-            );
-        }
-
-        if (!$this->isEnabled($gateway)) {
-            $label = $gateway === 'cashfree' ? 'Cashfree' : ucfirst($gateway);
-            throw new PaymentGatewayValidationException(
-                'Selected payment gateway is not available.',
-                [
-                    'payment_gateway' => ["{$label} is not available for checkout yet."]
-                ],
-                422
-            );
-        }
-
-        // Verify driver class exists and implements PaymentGatewayInterface
-        $driverClass = config("payments.gateways.{$gateway}.driver");
-        if (empty($driverClass) || !class_exists($driverClass)) {
-            throw new PaymentGatewayValidationException(
-                'Selected payment gateway is not available.',
-                [
-                    'payment_gateway' => ["Payment gateway driver for {$gateway} is missing/unimplemented."]
-                ],
-                422
-            );
-        }
-
-        return $gateway;
+        return $this->settingsService->validateGatewaySelection($gateway, $purpose);
     }
 
     /**
      * Get public gateway options with labels, descriptions, and availability.
      */
-    public function publicOptions(): array
+    public function publicOptions(?string $purpose = null): array
     {
         $options = [];
-        $supported = config('payments.supported_gateways', []);
-        foreach ($supported as $gateway) {
-            $config = config("payments.gateways.{$gateway}", []);
-            $enabled = (bool) ($config['enabled'] ?? false);
+        
+        // Load display order dynamically from database if possible
+        $gatewayCodes = $this->settingsService->getGatewayDisplayOrder();
 
-            if ($gateway === 'razorpay') {
-                $label = 'Razorpay';
-                $description = 'Pay using UPI, cards, netbanking and wallets.';
-            } elseif ($gateway === 'cashfree') {
-                $label = 'Cashfree';
-                $description = 'Pay using Cashfree supported methods.';
+        foreach ($gatewayCodes as $gateway) {
+            // Find gateway settings in DB
+            $dbGateway = PaymentGateway::where('code', $gateway)->first();
+            
+            if ($dbGateway) {
+                $enabled = $dbGateway->is_enabled;
+                
+                // If a purpose is supplied, we only include the gateway if it's authorized for that purpose.
+                // If the gateway is not allowed for the purpose, we treat it as disabled/hidden.
+                if ($purpose && !$this->settingsService->isGatewayAllowedForPurpose($gateway, $purpose)) {
+                    $enabled = false;
+                }
+
+                $visible = $enabled;
+                $label = $dbGateway->name;
+                $description = $dbGateway->description;
             } else {
-                $label = ucfirst($gateway);
-                $description = 'Pay using ' . $label . ' supported methods.';
+                // Fallback to static config mapping
+                $config = config("payments.gateways.{$gateway}", []);
+                $enabled = (bool) ($config['enabled'] ?? false);
+                $visible = true;
+
+                if ($gateway === 'razorpay') {
+                    $label = 'Razorpay';
+                    $description = 'Pay using UPI, cards, netbanking and wallets.';
+                } elseif ($gateway === 'cashfree') {
+                    $label = 'Cashfree';
+                    $description = 'Pay using Cashfree supported methods.';
+                } else {
+                    $label = ucfirst($gateway);
+                    $description = 'Pay using ' . $label . ' supported methods.';
+                }
+            }
+
+            // Skip if not visible to users
+            if (!$visible) {
+                continue;
             }
 
             $options[] = [

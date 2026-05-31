@@ -151,7 +151,7 @@ class MembershipApplicationController extends Controller
         }
 
         $availabilityService = app(\App\Services\Payments\PaymentGatewayAvailabilityService::class);
-        $gatewayName = $availabilityService->validateGateway($request->input('payment_gateway'));
+        $gatewayName = $availabilityService->validateGateway($request->input('payment_gateway'), \App\Support\Payments\PaymentPurpose::MEMBERSHIP_RENEWAL);
 
         try {
             $paymentInitiation = $paymentManager->initiatePayment(
@@ -163,21 +163,13 @@ class MembershipApplicationController extends Controller
             );
 
             $payment = $paymentInitiation['payment'];
-            $checkout = $paymentInitiation['checkout'];
+            if (is_object($payment)) {
+                $payment->checkout = $paymentInitiation['checkout'] ?? null;
+            }
 
             return $this->success([
                 'application' => $application,
-                'payment' => [
-                    'id' => $payment->id,
-                    'gateway' => $payment->gateway,
-                    'status' => $payment->status,
-                    'amount' => (float) $payment->amount,
-                    'currency' => $payment->currency,
-                    'purpose' => $payment->purpose,
-                    'verify_endpoint' => url('/api/v1/payments/' . $gatewayName . '/verify'),
-                    'gateway_order_id' => $payment->gateway_order_id,
-                    'checkout' => $checkout,
-                ]
+                'payment' => new \App\Http\Resources\Payment\PaymentResource($payment)
             ], 'Payment initiated successfully.');
 
         } catch (Exception $e) {

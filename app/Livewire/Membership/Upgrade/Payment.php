@@ -65,7 +65,7 @@ class Payment extends Component
 
         try {
             $availabilityService = app(\App\Services\Payments\PaymentGatewayAvailabilityService::class);
-            $gatewayName = $availabilityService->validateGateway($this->method);
+            $gatewayName = $availabilityService->validateGateway($this->method, \App\Support\Payments\PaymentPurpose::MEMBERSHIP_UPGRADE);
 
             $user = Auth::user();
             $draft = $wiz->getDraft();

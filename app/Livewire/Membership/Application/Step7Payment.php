@@ -56,7 +56,7 @@ class Step7Payment extends Component
 
         try {
             $availabilityService = app(\App\Services\Payments\PaymentGatewayAvailabilityService::class);
-            $gatewayName = $availabilityService->validateGateway($this->method);
+            $gatewayName = $availabilityService->validateGateway($this->method, \App\Support\Payments\PaymentPurpose::MEMBERSHIP_RENEWAL);
 
             $draft = $wiz->getDraft();
             if (!$draft) {

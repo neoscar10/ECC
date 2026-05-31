@@ -248,7 +248,8 @@ class CheckoutPage extends Component
 
         try {
             $availabilityService = app(\App\Services\Payments\PaymentGatewayAvailabilityService::class);
-            $gatewayName = $availabilityService->validateGateway($this->paymentGateway);
+            $purpose = $this->isVaultDelivery ? \App\Support\Payments\PaymentPurpose::VAULT_DELIVERY : 'shop_order';
+            $gatewayName = $availabilityService->validateGateway($this->paymentGateway, $purpose);
         } catch (\App\Exceptions\PaymentGatewayValidationException $e) {
             session()->flash('error', $e->getMessage());
             return;

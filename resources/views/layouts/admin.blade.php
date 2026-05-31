@@ -443,6 +443,41 @@
                                 </ul>
                             </div>
                         </li>
+
+                        @php
+                            $isPaymentsActive = request()->routeIs('admin.payments.*');
+                        @endphp
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ $isPaymentsActive ? 'active' : '' }}" href="#sidebarPayments" data-bs-toggle="collapse" role="button" aria-expanded="{{ $isPaymentsActive ? 'true' : 'false' }}" aria-controls="sidebarPayments">
+                                <i class="ri-bank-card-line"></i> <span data-key="t-payments">Payment Operations</span>
+                            </a>
+                            <div class="collapse menu-dropdown {{ $isPaymentsActive ? 'show' : '' }}" id="sidebarPayments">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.payments.dashboard') }}" class="nav-link {{ request()->routeIs('admin.payments.dashboard') ? 'active' : '' }}">Dashboard</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.payments.gateways') }}" class="nav-link {{ request()->routeIs('admin.payments.gateways') ? 'active' : '' }}">Gateways</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.payments.availability') }}" class="nav-link {{ request()->routeIs('admin.payments.availability') ? 'active' : '' }}">Availability</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.payments.methods') }}" class="nav-link {{ request()->routeIs('admin.payments.methods') ? 'active' : '' }}">Gateway Methods</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.payments.transactions') }}" class="nav-link {{ request()->routeIs('admin.payments.transactions') ? 'active' : '' }}">Transactions</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.payments.failed') }}" class="nav-link {{ request()->routeIs('admin.payments.failed') ? 'active' : '' }}">Failed Payments</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.payments.audits') }}" class="nav-link {{ request()->routeIs('admin.payments.audits') ? 'active' : '' }}">Audit Logs</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}">
                                 <i class="ri-pie-chart-line"></i> <span data-key="t-reports">Reports</span>

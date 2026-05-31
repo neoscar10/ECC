@@ -184,6 +184,11 @@ class Index extends Component
             return;
         }
 
+        // Ensure all values are integers to prevent type mismatch during strict comparisons
+        $this->selectedVariationValues = collect($this->selectedVariationValues)
+            ->map(fn($val) => is_numeric($val) ? (int)$val : $val)
+            ->toArray();
+
         $allVariants = $this->quickViewProduct->variants->where('is_active', true);
         $inStockVariants = $allVariants->where('stock_qty', '>', 0);
         

@@ -45,7 +45,7 @@ class CheckoutController extends Controller
         ]);
 
         $availabilityService = app(\App\Services\Payments\PaymentGatewayAvailabilityService::class);
-        $gatewayName = $availabilityService->validateGateway($request->input('payment_gateway'));
+        $gatewayName = $availabilityService->validateGateway($request->input('payment_gateway'), 'shop_order');
 
         try {
             // Additional check: address must belong to user
@@ -66,19 +66,13 @@ class CheckoutController extends Controller
                 gateway: $gatewayName
             );
 
-            $paymentData = [
-                'id' => $paymentInitiation['payment']->id,
-                'gateway' => $paymentInitiation['payment']->gateway,
-                'status' => $paymentInitiation['payment']->status,
-                'amount' => (float) $paymentInitiation['payment']->amount,
-                'currency' => $paymentInitiation['payment']->currency,
-                'purpose' => $paymentInitiation['payment']->purpose,
-                'verify_endpoint' => url('/api/v1/payments/' . $gatewayName . '/verify'),
-                'checkout' => $paymentInitiation['checkout'],
-            ];
+            $payment = $paymentInitiation['payment'];
+            if (is_object($payment)) {
+                $payment->checkout = $paymentInitiation['checkout'] ?? null;
+            }
 
             $responseData = (new ShopOrderResource($order))->resolve($request);
-            $responseData['payment'] = $paymentData;
+            $responseData['payment'] = (new \App\Http\Resources\Payment\PaymentResource($payment))->resolve($request);
 
             return $this->success(
                 $responseData,

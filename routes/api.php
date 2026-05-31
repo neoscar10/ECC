@@ -53,7 +53,11 @@ Route::prefix('v1')->group(function () {
             Route::get('gateways', [\App\Http\Controllers\Api\V1\Payment\GatewayOptionsController::class, 'index']);
             Route::post('razorpay/verify', [\App\Http\Controllers\Api\V1\Payment\RazorpayPaymentController::class, 'verify']);
             Route::post('cashfree/verify', [\App\Http\Controllers\Api\V1\Payment\CashfreePaymentController::class, 'verify']);
+            Route::get('{payment}', [\App\Http\Controllers\Api\V1\Payment\PaymentStatusController::class, 'show']);
+            Route::post('{payment}/retry', [\App\Http\Controllers\Api\V1\Payment\PaymentRetryController::class, 'retry']);
         });
+        Route::get('payment-options', [\App\Http\Controllers\Api\V1\Payment\GatewayOptionsController::class, 'paymentOptions']);
+        Route::post('vault/removal-requests/{id}/payment/initiate', [\App\Http\Controllers\Api\V1\Vault\VaultPaymentController::class, 'initiatePayment']);
 
         // Profile Routes
         Route::prefix('profile')->group(function () {

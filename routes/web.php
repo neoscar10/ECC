@@ -140,6 +140,17 @@ Route::middleware(['auth:web', EnsureAdminRole::class])->prefix('admin')->name('
         Route::get('/auctions', \App\Livewire\Admin\Reports\AuctionReport::class)->name('auctions');
         Route::get('/vault', \App\Livewire\Admin\Reports\VaultLedgerReport::class)->name('vault');
     });
+
+    // Payments Management
+    Route::prefix('payments')->name('payments.')->group(function () {
+        Route::get('/dashboard', \App\Livewire\Admin\Payments\Dashboard::class)->name('dashboard');
+        Route::get('/gateways', \App\Livewire\Admin\Payments\Gateways::class)->name('gateways');
+        Route::get('/availability', \App\Livewire\Admin\Payments\PaymentAvailability::class)->name('availability');
+        Route::get('/methods', \App\Livewire\Admin\Payments\GatewayMethods::class)->name('methods');
+        Route::get('/transactions', \App\Livewire\Admin\Payments\Transactions::class)->name('transactions');
+        Route::get('/failed', \App\Livewire\Admin\Payments\FailedPayments::class)->name('failed');
+        Route::get('/audits', \App\Livewire\Admin\Payments\AuditLogs::class)->name('audits');
+    });
 });
 
 // Membership Application Flow (Guest)
