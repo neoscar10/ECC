@@ -90,6 +90,11 @@ class ArchiveProduct extends Model
         return $this->belongsTo(MembershipTier::class, 'restricted_private_tier_id');
     }
 
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
     public function scopeVisibleTo($query, ?\App\Models\User $user, ?MembershipTier $userTier = null)
     {
         return $query->where(function ($q) use ($user, $userTier) {

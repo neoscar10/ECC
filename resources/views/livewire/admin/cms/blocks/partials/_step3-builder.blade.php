@@ -491,7 +491,7 @@
                   </div>
                 @endif
 
-                @if($hasDetailPage || $hasTarget)
+                @if($hasDetailPage)
                     <div class="row g-3 mt-1 mb-3">
                          <div class="col-12">
                               <label class="form-label">Button Text <span class="text-danger">*</span></label>

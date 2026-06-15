@@ -5,10 +5,40 @@
     $textPos = $content['text_position'] ?? 'below'; 
     $hasDetail = $content['has_detail_page'] ?? false;
     $id = $content['id'] ?? uniqid();
+
+    $targetUrl = null;
+    if (($content['has_target'] ?? false) && !empty($content['target'])) {
+        $target = $content['target'];
+        $kind = $target['kind'] ?? '';
+        $source = $target['source'] ?? '';
+        $targetId = $target['id'] ?? null;
+        
+        if ($kind === 'item' && $targetId) {
+            if ($source === 'shop') {
+                $slug = \App\Models\Shop\ShopProduct::where('id', $targetId)->value('slug');
+                if ($slug) {
+                    $targetUrl = route('shop.show', ['slug' => $slug]);
+                }
+            } elseif ($source === 'archive') {
+                $targetUrl = route('archive.products.show', ['id' => $targetId]);
+            } elseif ($source === 'auctions') {
+                $targetUrl = route('auctions.show', ['lot' => $targetId]);
+            }
+        } elseif ($kind === 'category' && $targetId) {
+            if ($source === 'shop') {
+                $targetUrl = route('shop.index', ['activeCategoryId' => $targetId]);
+            } elseif ($source === 'archive') {
+                $targetUrl = route('archive.index') . '?activeTab=' . $targetId;
+            }
+        }
+    }
 @endphp
 
 <div class="cms-fade-in">
     <x-cms.partials.access-gate :access="$access">
+        @if($targetUrl)
+            <a href="{{ $targetUrl }}" class="text-decoration-none text-white d-block">
+        @endif
         <section class="ecc-hero-block position-relative overflow-hidden mb-5">
             <div class="ecc-hero-bg">
                 <img src="{{ $media['image_url'] ?? asset('images/placeholder.jpg') }}"
@@ -62,6 +92,9 @@
                 </div>
             </div>
         </section>
+        @if($targetUrl)
+            </a>
+        @endif
     </x-cms.partials.access-gate>
 </div>
 

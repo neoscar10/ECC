@@ -2,11 +2,42 @@
     $content = $block;
     $access = $content['access'] ?? [];
     $hasDetail = $content['has_detail_page'] ?? false;
+    $id = $content['id'] ?? uniqid();
+
+    $targetUrl = null;
+    if (($content['has_target'] ?? false) && !empty($content['target'])) {
+        $target = $content['target'];
+        $kind = $target['kind'] ?? '';
+        $source = $target['source'] ?? '';
+        $targetId = $target['id'] ?? null;
+        
+        if ($kind === 'item' && $targetId) {
+            if ($source === 'shop') {
+                $slug = \App\Models\Shop\ShopProduct::where('id', $targetId)->value('slug');
+                if ($slug) {
+                    $targetUrl = route('shop.show', ['slug' => $slug]);
+                }
+            } elseif ($source === 'archive') {
+                $targetUrl = route('archive.products.show', ['id' => $targetId]);
+            } elseif ($source === 'auctions') {
+                $targetUrl = route('auctions.show', ['lot' => $targetId]);
+            }
+        } elseif ($kind === 'category' && $targetId) {
+            if ($source === 'shop') {
+                $targetUrl = route('shop.index', ['activeCategoryId' => $targetId]);
+            } elseif ($source === 'archive') {
+                $targetUrl = route('archive.index') . '?activeTab=' . $targetId;
+            }
+        }
+    }
 @endphp
 
 <div class="cms-fade-in">
     <x-cms.partials.access-gate :access="$access">
-        <div class="card border-0 rounded-4 overflow-hidden mb-4" style="background: var(--ecc-bg-page); border: 1px solid rgba(199, 167, 90,0.1) !important; border-radius: 20px !important;">
+        @if($targetUrl)
+            <a href="{{ $targetUrl }}" class="text-decoration-none text-dark d-block">
+        @endif
+        <div class="card border-0 rounded-4 overflow-hidden mb-4" style="background: var(--ecc-bg-page); border: 1px solid rgba(199, 167, 90,0.1) !important; border-radius: 20px !important; @if($targetUrl) cursor: pointer; @endif">
             <div class="card-body p-4 p-md-5">
                 <x-cms.partials.section-heading 
                     :title="$content['title']" 
@@ -27,6 +58,9 @@
                 @endif
             </div>
         </div>
+        @if($targetUrl)
+            </a>
+        @endif
     </x-cms.partials.access-gate>
 </div>
 

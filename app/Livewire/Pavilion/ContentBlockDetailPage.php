@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.user.app')]
+#[Layout('layouts.web-app')]
 class ContentBlockDetailPage extends Component
 {
     public array $block = [];
@@ -45,7 +45,7 @@ class ContentBlockDetailPage extends Component
     {
         return view('livewire.pavilion.content-block-detail', [
             'activeNav' => 'explore',
-        ])->layout('layouts.user.app', [
+        ])->layout('layouts.web-app', [
             'title' => $this->block['title'] ?? 'Content Detail',
         ]);
     }
