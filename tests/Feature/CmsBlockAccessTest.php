@@ -48,6 +48,7 @@ class CmsBlockAccessTest extends TestCase
     {
         $block = CmsBlock::create([
             'title' => 'Public Block',
+            'placement' => 'explore',
             'type' => 'card',
             'restriction_mode' => 'public',
             'is_active' => true,
@@ -68,6 +69,7 @@ class CmsBlockAccessTest extends TestCase
     {
         $block = CmsBlock::create([
             'title' => 'Silver Only',
+            'placement' => 'explore',
             'type' => 'card',
             'restriction_mode' => 'restricted',
             'restriction_type' => 'hierarchical',
@@ -102,6 +104,7 @@ class CmsBlockAccessTest extends TestCase
         
         $block = CmsBlock::create([
             'title' => 'Blurred Block',
+            'placement' => 'explore',
             'type' => 'card',
             'restriction_mode' => 'restricted',
             'restriction_type' => 'hierarchical',

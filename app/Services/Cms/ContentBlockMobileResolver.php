@@ -225,6 +225,7 @@ class ContentBlockMobileResolver
             return [
                 'kind' => 'shop_product',
                 'id' => $product->id,
+                'slug' => $product->slug,
                 'title' => $product->title,
                 'image_url' => $this->resolveImageUrl($product->images->first()?->image_path), // Shop uses image_path
                 'price_label' => 'INR ' . number_format($product->base_price),

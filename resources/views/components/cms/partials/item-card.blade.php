@@ -30,7 +30,8 @@
     // Determine Target Link
     $link = '#';
     if ($source === 'shop') {
-        $link = url("/shop/products/{$id}");
+        $slug = $item['slug'] ?? $id;
+        $link = url("/shop/{$slug}");
     } elseif ($source === 'archive') {
         $link = url("/archive/products/{$id}");
     } elseif ($source === 'auctions') {

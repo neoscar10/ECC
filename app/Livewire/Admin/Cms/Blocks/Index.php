@@ -1044,12 +1044,12 @@ class Index extends Component
                 'restrictionMode' => 'required|in:public,restricted',
                 'selectedVisibilityTiers' => ['exclude_unless:restrictionMode,restricted', 'required', 'array', 'min:1'],
                 'restrictionType' => ['exclude_unless:restrictionMode,restricted', 'exclude_if:blurEnabled,false', 'exclude_unless:blurEnabled,true', 'required_if:blurEnabled,true', 'in:hierarchical,random,private'],
-                'restrictedMinTierId' => ['exclude_unless:restrictionType,hierarchical', 'required', 'exists:membership_tiers,id'],
-                'restrictedPrivateTierId' => ['exclude_unless:restrictionType,private', 'required', 'exists:membership_tiers,id'],
-                'selectedRandomTiers' => ['exclude_unless:restrictionType,random', 'required', 'array', 'min:1'],
+                'restrictedMinTierId' => ['exclude_unless:restrictionMode,restricted', 'exclude_if:blurEnabled,false', 'exclude_unless:restrictionType,hierarchical', 'required', 'exists:membership_tiers,id'],
+                'restrictedPrivateTierId' => ['exclude_unless:restrictionMode,restricted', 'exclude_if:blurEnabled,false', 'exclude_unless:restrictionType,private', 'required', 'exists:membership_tiers,id'],
+                'selectedRandomTiers' => ['exclude_unless:restrictionMode,restricted', 'exclude_if:blurEnabled,false', 'exclude_unless:restrictionType,random', 'required', 'array', 'min:1'],
                 'selectedRandomTiers.*' => ['exists:membership_tiers,id'],
                 'blurEnabled' => 'boolean',
-            ]);
+             ]);
         }
     }
 
@@ -1286,10 +1286,10 @@ class Index extends Component
                 'sort_order' => $this->sortOrder,
                 'restriction_mode' => $this->restrictionMode,
                 'restriction_type' => $this->restrictionMode === 'public' ? 'hierarchical' : ($this->restrictionType ?: 'hierarchical'),
-                'restricted_min_tier_id' => $this->restrictionMode === 'public' ? null : $this->restrictedMinTierId,
-                'restricted_private_tier_id' => $this->restrictionMode === 'public' ? null : $this->restrictedPrivateTierId,
+                'restricted_min_tier_id' => ($this->restrictionMode === 'public' || !$this->blurEnabled) ? null : $this->restrictedMinTierId,
+                'restricted_private_tier_id' => ($this->restrictionMode === 'public' || !$this->blurEnabled) ? null : $this->restrictedPrivateTierId,
                 'blur_enabled' => $this->blurEnabled,
-                'blur_strategy' => $this->restrictionMode === 'public' ? 'hierarchical' : ($this->restrictionType ?? 'hierarchical'),
+                'blur_strategy' => $this->restrictionMode === 'public' ? 'hierarchical' : ($this->restrictionType ?: 'hierarchical'),
             ];
 
             if ($this->blurEnabled && $data['restriction_type'] === 'hierarchical') {
@@ -1340,7 +1340,7 @@ class Index extends Component
         $this->resetForm();
         session()->flash('success', $this->isEditMode ? 'Block updated successfully.' : 'Block created successfully.');
 
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         DB::rollBack();
         session()->flash('error', 'Error saving block: ' . $e->getMessage());
     }
