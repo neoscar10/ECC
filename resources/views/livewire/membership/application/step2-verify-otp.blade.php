@@ -84,9 +84,10 @@
            target="_blank" 
            rel="noopener noreferrer" 
            wire:click="openWhatsApp"
-           class="btn ecc-verify-btn w-100 d-flex align-items-center justify-content-center gap-2 mb-3">
-          <span class="material-symbols-outlined">chat</span>
-          <span>Open WhatsApp to Request OTP</span>
+           class="btn ecc-verify-btn w-100 d-flex align-items-center justify-content-center gap-2 mb-3"
+           style="color: #000000 !important; text-decoration: none;">
+          <span class="material-symbols-outlined" style="color: #000000 !important;">chat</span>
+          <span style="color: #000000 !important;">Open WhatsApp to Request OTP</span>
         </a>
         <p class="small text-muted mb-0">After sending the message, you will receive the OTP in WhatsApp. Copy and paste it here.</p>
       </div>
