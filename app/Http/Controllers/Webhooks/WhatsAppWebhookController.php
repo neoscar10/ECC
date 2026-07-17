@@ -103,7 +103,8 @@ class WhatsAppWebhookController extends Controller
 
         if (!$otpPlaintext) {
             Log::info('WhatsApp Webhook: No pending OTP found in cache.', ['phone_last4' => substr($phone, -4)]);
-            $whatsappService->sendRawMessage($phone, "No pending OTP request found for this number. Please initiate a request from the website.");
+            $websiteUrl = config('app.url');
+            $whatsappService->sendRawMessage($phone, "No pending OTP request found for this number. Please initiate a request from the website ({$websiteUrl}) or the mobile app.");
             return;
         }
 
