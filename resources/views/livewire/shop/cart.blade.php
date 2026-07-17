@@ -205,11 +205,12 @@
 
             .ecc-summary-total .amount {
                 color: var(--ecc-primary);
-                font-size: clamp(2rem, 8vw, 3rem);
+                font-size: clamp(1.4rem, 6vw, 3rem);
                 line-height: 1;
                 font-weight: 900;
                 letter-spacing: -0.04em;
-                word-break: break-word;
+                word-break: break-all;
+                overflow-wrap: break-word;
             }
 
             .ecc-checkout-btn {
