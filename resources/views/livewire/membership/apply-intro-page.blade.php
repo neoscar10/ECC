@@ -55,6 +55,11 @@
                         <span class="ecc-cta-text">Begin Application</span>
                         <span class="material-symbols-outlined ecc-cta-icon">arrow_forward</span>
                     </a>
+                    
+                    <a href="{{ route('login') }}" class="ecc-tier-link d-inline-flex align-items-center gap-1 mt-2">
+                        <span class="material-symbols-outlined" style="font-size: 16px;">arrow_back</span>
+                        <span>Return to Login</span>
+                    </a>
                 </div>
             </div>
         </div>
