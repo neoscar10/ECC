@@ -160,11 +160,11 @@ Route::middleware('guest')->group(function () {
     
     // Application Wizard (Guest Steps)
     Route::get('/membership/application/step-1', \App\Livewire\Membership\Application\Step1RegisterAccount::class)->name('membership.application.step1');
-    Route::get('/membership/application/step-2', \App\Livewire\Membership\Application\Step2VerifyOtp::class)->name('membership.application.step2');
 });
 
 // Application Wizard (Member Steps - Requires Auth)
 Route::middleware(['auth'])->group(function() {
+    Route::get('/membership/application/step-2', \App\Livewire\Membership\Application\Step2VerifyOtp::class)->name('membership.application.step2');
     Route::get('/membership/application/step-3', \App\Livewire\Membership\Application\Step3PersonalDetails::class)->name('membership.application.step3');
     Route::get('/membership/application/step-4', \App\Livewire\Membership\Application\Step4CricketProfile::class)->name('membership.application.step4');
     Route::get('/membership/application/step-5', \App\Livewire\Membership\Application\Step5CollectorIntent::class)->name('membership.application.step5');

@@ -19,7 +19,7 @@ class Step1RegisterAccount extends Component
     public string $password_confirmation = '';
     public ?string $errorMessage = null;
 
-    public function submit(\App\Services\Auth\RegistrationService $registrationService)
+    public function submit(\App\Services\Auth\AuthService $authService, \App\Services\Otp\OtpService $otpService)
     {
         $this->errorMessage = null;
 
@@ -44,14 +44,15 @@ class Step1RegisterAccount extends Component
                 throw $e;
             }
             
-            // Initiate registration
-            $result = $registrationService->initiate($validated);
+            // Create the user and application
+            $user = $authService->register($validated);
 
-            // Store pending info in session
-            session([
-                'ecc_pending_registration_id' => $result['pending_registration_id'],
-                'ecc_pending_verification_token' => \Illuminate\Support\Str::random(40),
-            ]);
+            // Log the user in
+            \Illuminate\Support\Facades\Auth::guard('web')->login($user, false);
+            request()->session()->regenerate();
+
+            // Request OTP
+            $otpService->requestPhoneOtp($user, $user->phone);
 
             return redirect()->route('membership.application.step2');
         } catch (\Illuminate\Validation\ValidationException $e) {

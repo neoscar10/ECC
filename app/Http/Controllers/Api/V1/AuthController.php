@@ -28,7 +28,7 @@ class AuthController extends Controller
     /**
      * Register a new user
      */
-    public function register(Request $request, \App\Services\Auth\RegistrationService $registrationService): JsonResponse
+    public function register(Request $request): JsonResponse
     {
         if ($request->has('phone') && !is_null($request->input('phone'))) {
             try {
@@ -51,36 +51,35 @@ class AuthController extends Controller
         }
 
         try {
-            $result = $registrationService->initiate($request->all());
+            // 1. Create User and MembershipApplication instantly
+            $user = $this->authService->register($request->all());
 
-            // Generate a guest-friendly JWT containing pending_registration_id
-            $factory = \Tymon\JWTAuth\Facades\JWTFactory::customClaims([
-                'sub' => 'pending_' . $result['pending_registration_id'],
-                'pending_registration_id' => $result['pending_registration_id'],
-                'phone' => $result['phone'],
-            ]);
-            $payload = $factory->make();
-            $token = \Tymon\JWTAuth\Facades\JWTAuth::encode($payload)->get();
+            // 2. Request OTP using the real user
+            $otpResult = app(\App\Services\Otp\OtpService::class)->requestPhoneOtp($user, $user->phone);
 
+            // 3. Generate fully-fledged JWT for the user
+            $token = auth('api')->login($user);
+
+            // 4. Return standard response exactly as expected by mobile
             $responseData = [
                 'access_token' => $token,
                 'token_type' => 'bearer',
-                'expires_in' => 15 * 60, // 15 minutes expiry for registration session
-                'user' => [
-                    'id' => 0,
-                    'name' => $request->input('name'),
-                    'email' => $request->input('email'),
-                    'phone' => $result['phone'],
-                    'phone_verified_at' => null,
-                ],
-                'application' => null,
+                'expires_in' => JWTAuth::factory()->getTTL() * 60,
+                'user' => $user,
+                'application' => $this->authService->getPendingApplication($user),
+                'active_subscriptions' => $this->getActiveSubscriptions($user),
+                
+                // Extra OTP flow data
+                'ttl_minutes' => $otpResult['ttl_minutes'] ?? 5,
+                'otp_method' => $otpResult['otp_method'] ?? config('services.whatsapp.otp_method', 'template'),
+                'whatsapp_number' => $otpResult['whatsapp_number'] ?? config('services.whatsapp.phone_number', ''),
             ];
 
-            if (isset($result['otp_result']['dev_otp'])) {
-                $responseData['dev_otp'] = $result['otp_result']['dev_otp'];
+            if (isset($otpResult['dev_otp'])) {
+                $responseData['dev_otp'] = $otpResult['dev_otp'];
             }
 
-            return $this->success($responseData, 'Registration initiated. Please verify OTP.');
+            return $this->success($responseData, 'Registration successful. Please verify OTP.');
 
         } catch (\Illuminate\Database\QueryException $e) {
             if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'users_phone_unique')) {

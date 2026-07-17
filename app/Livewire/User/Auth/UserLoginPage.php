@@ -155,7 +155,7 @@ class UserLoginPage extends Component
             $this->otpTtl = $data['ttl_minutes'];
             $this->devOtp = $data['dev_otp'] ?? null;
             $this->otpMethod = $data['otp_method'] ?? config('services.whatsapp.otp_method', 'template');
-            $this->whatsappNumber = $data['whatsapp_number'] ?? config('services.whatsapp.phone_number', '');
+            $this->whatsappNumber = (string) ($data['whatsapp_number'] ?? config('services.whatsapp.phone_number', ''));
             
             if ($this->otpMethod === 'direct_message') {
                 $this->showOtpInput = false;

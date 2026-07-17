@@ -24,26 +24,18 @@ class Step2VerifyOtp extends Component
 
     public function mount(OtpService $otpService)
     {
-        $pendingId = session('ecc_pending_registration_id');
-        $verificationToken = session('ecc_pending_verification_token');
-
-        if (!$pendingId || !$verificationToken) {
+        $user = Auth::user();
+        if (!$user) {
             return redirect()->route('membership.application.step1');
         }
 
-        $pending = \App\Models\PendingRegistration::valid()->find($pendingId);
-        if (!$pending) {
-            return redirect()->route('membership.application.step1');
+        // If phone is already verified, send them to the next step
+        if ($user->phone_verified_at) {
+            return redirect()->to(app(\App\Services\Membership\ApplicationResumeService::class)->nextRouteForUser($user) ?: route('home'));
         }
 
-        // Validate session ownership / session binding
-        if ($pending->ip_address !== request()->ip() || $pending->user_agent !== request()->userAgent()) {
-            session()->forget(['ecc_pending_registration_id', 'ecc_pending_verification_token']);
-            return redirect()->route('membership.application.step1');
-        }
-
-        $phone = $pending->phone;
-        $this->resendRemaining = $otpService->getExpiryByPhone($phone);
+        $phone = $user->phone;
+        $this->resendRemaining = $otpService->getExpiry($user);
         $this->hasExpiry = true;
         $this->maskedPhone = $this->maskPhone($phone);
         $this->devOtp = session('ecc_dev_otp');
@@ -68,7 +60,7 @@ class Step2VerifyOtp extends Component
         return substr($phone, 0, 2) . ' ****** ' . substr($phone, -4);
     }
 
-    public function verify(\App\Services\Auth\RegistrationService $registrationService, ApplicationWizardService $wizardService, \App\Services\Membership\ApplicationResumeService $resumeService)
+    public function verify(OtpService $otpService, ApplicationWizardService $wizardService, \App\Services\Membership\ApplicationResumeService $resumeService)
     {
         $this->errorMessage = null;
         $otp = implode('', $this->digits);
@@ -78,38 +70,28 @@ class Step2VerifyOtp extends Component
             return;
         }
 
-        $pendingId = session('ecc_pending_registration_id');
-        $verificationToken = session('ecc_pending_verification_token');
-
-        if (!$pendingId || !$verificationToken) {
+        $user = Auth::user();
+        if (!$user) {
             return redirect()->route('membership.application.step1');
         }
 
-        $pending = \App\Models\PendingRegistration::valid()->find($pendingId);
-        if (!$pending) {
-            return redirect()->route('membership.application.step1');
-        }
-
-        // Validate session ownership / session binding
-        if ($pending->ip_address !== request()->ip() || $pending->user_agent !== request()->userAgent()) {
-            session()->forget(['ecc_pending_registration_id', 'ecc_pending_verification_token']);
-            return redirect()->route('membership.application.step1');
-        }
-
-        $phone = $pending->phone;
+        $phone = $user->phone;
 
         try {
-            $user = $registrationService->complete($phone, $otp);
+            $isValid = $otpService->verifyPhoneOtp($user, $phone, $otp);
+            if (!$isValid) {
+                $this->errorMessage = 'Invalid or expired OTP.';
+                return;
+            }
 
-            // Mark phone verified only after successful creation
+            // Mark phone verified only after successful verification
             $user->update([
                 'phone_verified_at' => now(),
             ]);
 
-            Auth::guard('web')->login($user);
+            // Ensure membership application is attached (it should be drafted in step 1 already)
+            // But just in case, this is fine
             $wizardService->attachDraftToUser($user->id);
-
-            session()->forget(['ecc_pending_registration_id', 'ecc_pending_verification_token']);
 
             $nextRoute = $resumeService->nextRouteForUser($user);
             
@@ -121,40 +103,38 @@ class Step2VerifyOtp extends Component
 
     public function resend(OtpService $otpService)
     {
-        $pendingId = session('ecc_pending_registration_id');
-        $verificationToken = session('ecc_pending_verification_token');
-
-        if (!$pendingId || !$verificationToken) {
-            return;
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('membership.application.step1');
         }
 
-        $pending = \App\Models\PendingRegistration::valid()->find($pendingId);
-        if ($pending) {
-            // Validate session ownership / session binding
-            if ($pending->ip_address !== request()->ip() || $pending->user_agent !== request()->userAgent()) {
-                session()->forget(['ecc_pending_registration_id', 'ecc_pending_verification_token']);
-                return redirect()->route('membership.application.step1');
+        $phone = $user->phone;
+        
+        try {
+            $otpService->requestPhoneOtp($user, $phone);
+            $this->devOtp = session('ecc_dev_otp');
+            $this->resendRemaining = $otpService->getExpiry($user);
+            $this->errorMessage = null;
+            // Clear previously typed digits so the user starts fresh
+            $this->digits = ['', '', '', '', '', ''];
+            
+            if ($this->otpMethod === 'direct_message') {
+                $this->showOtpInput = false;
             }
 
-            $phone = $pending->phone;
-            try {
-                $otpService->requestRegistrationOtp($phone);
-                $this->devOtp = session('ecc_dev_otp');
-                // Pass purpose explicitly — this is always a signup context
-                $this->resendRemaining = $otpService->getExpiryByPhone($phone, 'signup');
-                $this->errorMessage = null;
-                // Clear previously typed digits so the user starts fresh
-                $this->digits = ['', '', '', '', '', ''];
-                
-                if ($this->otpMethod === 'direct_message') {
-                    $this->showOtpInput = false;
-                }
-
-                $this->dispatch('ecc-otp-countdown-reset', seconds: $this->resendRemaining);
-            } catch (\App\Exceptions\OtpException $e) {
-                $this->errorMessage = $e->getMessage();
-            }
+            $this->dispatch('ecc-otp-countdown-reset', seconds: $this->resendRemaining);
+        } catch (\App\Exceptions\OtpException $e) {
+            $this->errorMessage = $e->getMessage();
         }
+    }
+
+    public function logout()
+    {
+        Auth::guard('web')->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        
+        return redirect()->route('login');
     }
 
     public function render()
@@ -162,3 +142,4 @@ class Step2VerifyOtp extends Component
         return view('livewire.membership.application.step2-verify-otp');
     }
 }
+

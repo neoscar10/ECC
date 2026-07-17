@@ -181,8 +181,13 @@
     @endif
 
     <div class="pt-2">
-      <p class="ecc-sub-small">
+      <p class="ecc-sub-small mb-1">
         Having trouble logging in? <a href="#" class="text-ecc text-decoration-none">Contact Support</a>
+      </p>
+      <p class="ecc-sub-small mt-3">
+        <a href="#" wire:click.prevent="logout" class="text-ecc text-decoration-none" style="opacity: 0.8; font-size: 0.9em;">
+          Log out / Use different account
+        </a>
       </p>
     </div>
 

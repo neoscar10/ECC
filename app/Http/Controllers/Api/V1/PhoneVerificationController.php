@@ -34,31 +34,7 @@ class PhoneVerificationController extends Controller
         $user = $request->user('api');
 
         if (!$user) {
-            // Check for temporary registration JWT
-            try {
-                $token = \Tymon\JWTAuth\Facades\JWTAuth::parseToken();
-                $payload = $token->getPayload();
-                $pendingRegistrationId = $payload->get('pending_registration_id');
-            } catch (\Exception $e) {
-                return $this->error('Unauthorized. Please log in or register.', 401);
-            }
-
-            if (!$pendingRegistrationId) {
-                return $this->error('Unauthorized. Please log in or register.', 401);
-            }
-
-            $pending = \App\Models\PendingRegistration::valid()->find($pendingRegistrationId);
-            if (!$pending) {
-                return $this->error('Registration session expired. Please register again.', 400);
-            }
-
-            try {
-                $result = $this->otpService->requestRegistrationOtp($request->phone);
-            } catch (OtpException $e) {
-                return $this->error($e->getMessage(), $e->getCode() ?: 400);
-            }
-
-            return $this->success($result, 'OTP sent successfully.');
+            return $this->error('Unauthorized. Please log in first.', 401);
         }
 
         if ($user->phone_verified_at) {
@@ -88,38 +64,7 @@ class PhoneVerificationController extends Controller
         $user = $request->user('api');
 
         if (!$user) {
-            // Check for temporary registration JWT
-            try {
-                $token = \Tymon\JWTAuth\Facades\JWTAuth::parseToken();
-                $payload = $token->getPayload();
-                $pendingRegistrationId = $payload->get('pending_registration_id');
-            } catch (\Exception $e) {
-                return $this->error('Unauthorized. Invalid verification session.', 401);
-            }
-
-            if (!$pendingRegistrationId) {
-                return $this->error('Unauthorized. Invalid verification session.', 401);
-            }
-
-            try {
-                // Complete registration: verify OTP and finalize user
-                $finalizer = app(\App\Services\Auth\RegistrationFinalizer::class);
-                $createdUser = $finalizer->finalize($request->phone, $request->otp);
-
-                // Generate real user JWT token
-                $newToken = auth('api')->login($createdUser);
-
-                return $this->success([
-                    'access_token' => $newToken,
-                    'token_type' => 'bearer',
-                    'expires_in' => auth('api')->factory()->getTTL() * 60,
-                    'user' => $createdUser,
-                    'application' => $createdUser->memberships()->where('status', 'draft')->latest()->first() ?? 
-                                   \App\Models\MembershipApplication::where('user_id', $createdUser->id)->latest()->first(),
-                ], 'Phone verified and registration completed successfully.');
-            } catch (OtpException $e) {
-                return $this->error($e->getMessage(), $e->getCode() ?: 400);
-            }
+            return $this->error('Unauthorized. Please log in first.', 401);
         }
 
         try {

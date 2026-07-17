@@ -265,7 +265,7 @@
                                     type="text"
                                     wire:model="identity"
                                     class="form-control ecc-input ps-5"
-                                    placeholder="Email or Registered Mobile"
+                                    placeholder="Registered Mobile Number"
                                 >
                             </div>
                             @error('identity') <div class="ecc-error mt-2">{{ $message }}</div> @enderror

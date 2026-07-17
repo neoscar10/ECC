@@ -20,6 +20,11 @@ class ApplicationResumeService
             return null;
         }
 
+        // 1.5. Phone Verification Check (OTP Step 2)
+        if (!$user->phone_verified_at) {
+            return route('membership.application.step2');
+        }
+
         // 2. Auth Query: Prefer non-draft if exists, else pick latest updated
         $application = MembershipApplication::where('user_id', $user->id)
             ->orderByRaw("CASE WHEN status != 'draft' THEN 1 ELSE 0 END DESC")
