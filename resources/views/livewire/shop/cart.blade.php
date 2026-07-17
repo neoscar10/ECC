@@ -68,7 +68,7 @@
             }
 
             .ecc-cart-item-title {
-                font-size: 1.65rem;
+                font-size: clamp(1.25rem, 4vw, 1.65rem);
                 font-weight: 800;
                 letter-spacing: -0.03em;
                 color: var(--ecc-text-primary);
@@ -83,7 +83,7 @@
 
             .ecc-cart-price {
                 color: var(--ecc-primary);
-                font-size: 1.85rem;
+                font-size: clamp(1.4rem, 4.5vw, 1.85rem);
                 font-weight: 900;
                 letter-spacing: -0.03em;
                 white-space: nowrap;
@@ -190,7 +190,8 @@
                 display: flex;
                 align-items: flex-end;
                 justify-content: space-between;
-                gap: 1rem;
+                flex-wrap: wrap;
+                gap: 0.5rem;
                 padding-top: 1.25rem;
                 margin-top: 1.25rem;
                 border-top: 1px solid var(--ecc-text-primary);
@@ -198,16 +199,17 @@
 
             .ecc-summary-total .label {
                 color: var(--ecc-text-primary);
-                font-size: 1.7rem;
+                font-size: clamp(1.4rem, 4vw, 1.7rem);
                 font-weight: 800;
             }
 
             .ecc-summary-total .amount {
                 color: var(--ecc-primary);
-                font-size: 3rem;
+                font-size: clamp(2rem, 8vw, 3rem);
                 line-height: 1;
                 font-weight: 900;
                 letter-spacing: -0.04em;
+                word-break: break-word;
             }
 
             .ecc-checkout-btn {
