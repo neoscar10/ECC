@@ -45,7 +45,11 @@ class PasswordResetController extends Controller
         if ($user) {
             try {
                 $data = $this->otpService->requestPasswordResetOtp($user, $identifier);
-                $responseData = ['ttl_minutes' => $data['ttl_minutes']];
+                $responseData = [
+                    'ttl_minutes' => $data['ttl_minutes'],
+                    'otp_method' => $data['otp_method'] ?? config('services.whatsapp.otp_method', 'template'),
+                    'whatsapp_number' => $data['whatsapp_number'] ?? config('services.whatsapp.phone_number', '')
+                ];
                 if (isset($data['dev_otp'])) {
                     $responseData['dev_otp'] = $data['dev_otp'];
                 }
@@ -71,7 +75,11 @@ class PasswordResetController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'OTP sent (if account exists).',
-            'data' => ['ttl_minutes' => 10], // Default mock TTL
+            'data' => [
+                'ttl_minutes' => 10,
+                'otp_method' => config('services.whatsapp.otp_method', 'template'),
+                'whatsapp_number' => config('services.whatsapp.phone_number', '')
+            ], // Default mock TTL
             'meta' => null,
             'errors' => null,
         ]);

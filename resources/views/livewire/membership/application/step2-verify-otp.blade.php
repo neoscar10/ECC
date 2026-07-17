@@ -59,11 +59,18 @@
       <span class="material-symbols-outlined">shield</span>
     </div>
 
-    <h1 class="ecc-h1 mb-2">Verification Code</h1>
-    <p class="ecc-sub mb-4">
-      We sent a 6-digit code to<br>
-      <span class="ecc-text-primary fw-bold">{{ $maskedPhone }}</span>
-    </p>
+    @if(!$showOtpInput && $otpMethod === 'direct_message')
+      <h1 class="ecc-h1 mb-2">Request Verification Code</h1>
+      <p class="ecc-sub mb-4">
+        To receive your OTP, please send us a message on WhatsApp.
+      </p>
+    @else
+      <h1 class="ecc-h1 mb-2">Verification Code</h1>
+      <p class="ecc-sub mb-4">
+        We sent a 6-digit code to<br>
+        <span class="ecc-text-primary fw-bold">{{ $maskedPhone }}</span>
+      </p>
+    @endif
 
     @if($errorMessage)
       <div class="alert alert-danger py-2 small mb-4 border-0" style="background: rgba(255,107,107,0.1); color: #ff6b6b;">
@@ -71,85 +78,107 @@
       </div>
     @endif
 
-    <form wire:submit.prevent="verify" class="mb-4">
-      <div class="d-flex justify-content-between gap-2 mb-4" 
-           id="otp-inputs" 
-           x-data="{ 
-              init() {
-                  this.$nextTick(() => {
-                      this.$refs.input0.focus();
-                  });
-              },
-              handleInput(e, index) {
-                  const val = e.target.value;
-                  if (!/^\d$/.test(val)) {
-                      e.target.value = '';
-                      return;
-                  }
-                  if (val && index < 5) {
-                      this.$refs['input' + (index + 1)].focus();
-                  }
-              },
-              handleKeydown(e, index) {
-                  if (e.key === 'Backspace' && !e.target.value && index > 0) {
-                      this.$refs['input' + (index - 1)].focus();
-                  }
-              },
-              handlePaste(e) {
-                  const data = e.clipboardData.getData('text').trim();
-                  if (/^\d{6}$/.test(data)) {
-                      data.split('').forEach((digit, i) => {
-                          if (this.$refs['input' + i]) {
-                              this.$refs['input' + i].value = digit;
-                              @this.set('digits.' + i, digit);
-                          }
-                      });
-                      this.$refs.input5.focus();
-                      e.preventDefault();
-                  }
-              }
-           }">
-        @foreach($digits as $index => $digit)
-          <input type="text" 
-                 maxlength="1" 
-                 class="form-control ecc-otp-input" 
-                 wire:model.defer="digits.{{ $index }}"
-                 x-ref="input{{ $index }}"
-                 x-on:input="handleInput($event, {{ $index }})"
-                 x-on:keydown="handleKeydown($event, {{ $index }})"
-                 x-on:paste="if({{ $index }} === 0) handlePaste($event)"
-                 inputmode="numeric"
-                 pattern="[0-9]*"
-                 autocomplete="one-time-code">
-        @endforeach
+    @if(!$showOtpInput && $otpMethod === 'direct_message')
+      <div class="mb-4">
+        <a href="https://wa.me/{{ ltrim($whatsappNumber, '+') }}?text={{ urlencode('Request OTP') }}" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           wire:click="openWhatsApp"
+           class="btn ecc-verify-btn w-100 d-flex align-items-center justify-content-center gap-2 mb-3">
+          <span class="material-symbols-outlined">chat</span>
+          <span>Open WhatsApp to Request OTP</span>
+        </a>
+        <p class="small text-muted mb-0">After sending the message, you will receive the OTP in WhatsApp. Copy and paste it here.</p>
       </div>
-
+      
       <div class="ecc-timer-container mb-4">
         @if($hasExpiry)
           <div id="otp-timer-block" class="{{ $resendRemaining > 0 ? '' : 'd-none' }}">
             <span class="ecc-timer-text">Resend code in <span id="timer-display">00:00</span></span>
           </div>
-          <div id="otp-resend-block" class="{{ $resendRemaining > 0 ? 'd-none' : '' }}">
-            <button type="button" class="btn btn-link text-ecc p-0 text-decoration-none fw-bold" wire:click="resend">Resend Code</button>
-          </div>
-        @else
-          <button type="button" class="btn btn-link text-ecc p-0 text-decoration-none fw-bold" wire:click="resend">Resend Code</button>
         @endif
       </div>
+    @else
+      <form wire:submit.prevent="verify" class="mb-4">
+        <div class="d-flex justify-content-between gap-2 mb-4" 
+             id="otp-inputs" 
+             x-data="{ 
+                init() {
+                    this.$nextTick(() => {
+                        this.$refs.input0.focus();
+                    });
+                },
+                handleInput(e, index) {
+                    const val = e.target.value;
+                    if (!/^\d$/.test(val)) {
+                        e.target.value = '';
+                        return;
+                    }
+                    if (val && index < 5) {
+                        this.$refs['input' + (index + 1)].focus();
+                    }
+                },
+                handleKeydown(e, index) {
+                    if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                        this.$refs['input' + (index - 1)].focus();
+                    }
+                },
+                handlePaste(e) {
+                    const data = e.clipboardData.getData('text').trim();
+                    if (/^\d{6}$/.test(data)) {
+                        data.split('').forEach((digit, i) => {
+                            if (this.$refs['input' + i]) {
+                                this.$refs['input' + i].value = digit;
+                                @this.set('digits.' + i, digit);
+                            }
+                        });
+                        this.$refs.input5.focus();
+                        e.preventDefault();
+                    }
+                }
+             }">
+          @foreach($digits as $index => $digit)
+            <input type="text" 
+                   maxlength="1" 
+                   class="form-control ecc-otp-input" 
+                   wire:model.defer="digits.{{ $index }}"
+                   x-ref="input{{ $index }}"
+                   x-on:input="handleInput($event, {{ $index }})"
+                   x-on:keydown="handleKeydown($event, {{ $index }})"
+                   x-on:paste="if({{ $index }} === 0) handlePaste($event)"
+                   inputmode="numeric"
+                   pattern="[0-9]*"
+                   autocomplete="one-time-code">
+          @endforeach
+        </div>
 
-      <button type="submit" 
-              class="btn ecc-verify-btn w-100 d-flex align-items-center justify-content-center gap-2"
-              wire:loading.attr="disabled"
-              wire:target="verify">
-        <span wire:loading.remove wire:target="verify">Verify & Enter Lounge</span>
-        <span class="material-symbols-outlined" wire:loading.remove wire:target="verify">arrow_forward</span>
-        
-        <span wire:loading wire:target="verify" class="align-items-center gap-2" style="display: none;">
-          Verifying...
-          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        </span>
-      </button>
-    </form>
+        <div class="ecc-timer-container mb-4">
+          @if($hasExpiry)
+            <div id="otp-timer-block" class="{{ $resendRemaining > 0 ? '' : 'd-none' }}">
+              <span class="ecc-timer-text">Resend code in <span id="timer-display">00:00</span></span>
+            </div>
+            <div id="otp-resend-block" class="{{ $resendRemaining > 0 ? 'd-none' : '' }}">
+              <button type="button" class="btn btn-link text-ecc p-0 text-decoration-none fw-bold" wire:click="resend">Resend Code</button>
+            </div>
+          @else
+            <button type="button" class="btn btn-link text-ecc p-0 text-decoration-none fw-bold" wire:click="resend">Resend Code</button>
+          @endif
+        </div>
+
+        <button type="submit" 
+                class="btn ecc-verify-btn w-100 d-flex align-items-center justify-content-center gap-2"
+                wire:loading.attr="disabled"
+                wire:target="verify">
+          <span wire:loading.remove wire:target="verify">Verify & Enter Lounge</span>
+          <span class="material-symbols-outlined" wire:loading.remove wire:target="verify">arrow_forward</span>
+          
+          <span wire:loading wire:target="verify" class="align-items-center gap-2" style="display: none;">
+            Verifying...
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          </span>
+        </button>
+      </form>
+    @endif
 
     <div class="pt-2">
       <p class="ecc-sub-small">

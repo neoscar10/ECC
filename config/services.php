@@ -33,8 +33,12 @@ return [
 
     'whatsapp' => [
         'enabled'             => env('WHATSAPP_ENABLED', false),
+        'otp_method'          => env('WHATSAPP_OTP_METHOD', 'template'),
+        'waba_id'             => env('WHATSAPP_WABA_ID'),
         'access_token'        => env('WHATSAPP_ACCESS_TOKEN'),
         'phone_number_id'     => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'phone_number'        => env('WHATSAPP_PHONE_NUMBER'),
+        'webhook_verify_token'=> env('WHATSAPP_WEBHOOK_VERIFY_TOKEN'),
         'api_version'         => env('WHATSAPP_API_VERSION', 'v22.0'),
         'template_name'       => env('WHATSAPP_TEMPLATE_NAME', 'authentication'),
         'template_language'   => env('WHATSAPP_TEMPLATE_LANGUAGE', 'en_US'),

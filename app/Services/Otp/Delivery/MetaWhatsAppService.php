@@ -60,6 +60,13 @@ class MetaWhatsAppService implements OtpDeliveryInterface
             return OtpDeliveryResult::skipped('whatsapp', 'WhatsApp service is disabled.');
         }
 
+        if (config('services.whatsapp.otp_method') === 'direct_message') {
+            Log::info('MetaWhatsApp: OTP method is direct_message. Skipping template delivery, waiting for user message.', [
+                'phone_last4' => substr($phone, -4),
+            ]);
+            return OtpDeliveryResult::skipped('whatsapp', 'Waiting for user direct message.');
+        }
+
         if (empty($this->accessToken) || empty($this->phoneNumberId)) {
             Log::warning('MetaWhatsApp: Missing credentials. OTP delivery skipped.', [
                 'phone_last4' => substr($phone, -4),
@@ -154,6 +161,54 @@ class MetaWhatsAppService implements OtpDeliveryInterface
         ]);
 
         return OtpDeliveryResult::success('whatsapp', $messageId ?? 'unknown');
+    }
+
+    /**
+     * Send a raw text message via WhatsApp Cloud API.
+     * Used primarily for webhook responses to user-initiated conversations.
+     *
+     * @param string $phone E.164 formatted phone number.
+     * @param string $message The text message to send.
+     * @return OtpDeliveryResult
+     */
+    public function sendRawMessage(string $phone, string $message): OtpDeliveryResult
+    {
+        if (!$this->enabled) {
+            return OtpDeliveryResult::skipped('whatsapp', 'WhatsApp service is disabled.');
+        }
+
+        $recipient = ltrim($phone, '+');
+
+        $payload = [
+            'messaging_product' => 'whatsapp',
+            'recipient_type'    => 'individual',
+            'to'                => $recipient,
+            'type'              => 'text',
+            'text'              => [
+                'preview_url' => false,
+                'body'        => $message,
+            ],
+        ];
+
+        try {
+            $response = Http::withToken($this->accessToken)
+                ->timeout($this->timeout)
+                ->post("{$this->baseUrl}/{$this->phoneNumberId}/messages", $payload);
+
+            if ($response->failed()) {
+                return $this->handleFailedResponse($response, $phone);
+            }
+
+            $messageId = $response->json('messages.0.id');
+            return OtpDeliveryResult::success('whatsapp', $messageId ?? 'unknown');
+
+        } catch (\Exception $e) {
+            Log::error('MetaWhatsApp: Raw message send failed.', [
+                'phone_last4' => substr($phone, -4),
+                'error' => $e->getMessage(),
+            ]);
+            throw new OtpException('Failed to send raw message via WhatsApp', 500, $e);
+        }
     }
 
     /**

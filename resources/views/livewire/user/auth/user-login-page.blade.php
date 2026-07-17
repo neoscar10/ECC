@@ -291,57 +291,73 @@
                 @else
                     {{-- Step 2: Verify & Login --}}
                     <form wire:submit.prevent="verifyLoginOtp" class="ecc-form">
-                        @if($devOtp)
-                          <div class="card border-0 mb-3 text-start shadow-sm" style="background: rgba(199,167,90,0.15); border-left: 4px solid var(--ecc-gold-400) !important; border-radius: 12px;">
-                            <div class="card-body p-3">
-                              <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                  <div class="text-uppercase fw-bold small mb-1" style="letter-spacing: 0.05em; font-family: 'Noto Sans', sans-serif; color: var(--ecc-gold-400);">Developer Mode OTP</div>
-                                  <div class="h3 mb-0 text-white font-monospace fw-bold" style="letter-spacing: 0.1em;">{{ $devOtp }}</div>
-                                </div>
-                                <button type="button" 
-                                        class="btn btn-sm btn-outline-light border-0 px-2 py-1 d-flex align-items-center gap-1"
-                                        style="background: rgba(255,255,255,0.05); color: #fff; font-size: 12px; font-family: 'Noto Sans', sans-serif; border-radius: 8px;"
-                                        onclick="navigator.clipboard.writeText('{{ $devOtp }}').then(() => { this.innerHTML = '<span class=\'material-symbols-outlined\' style=\'font-size:16px;\'>check</span><span>Copied!</span>'; setTimeout(() => this.innerHTML = '<span class=\'material-symbols-outlined\' style=\'font-size:16px;\'>content_copy</span><span>Copy</span>', 2000) })">
-                                  <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
-                                  <span>Copy</span>
-                                </button>
-                              </div>
+                        @if(!$showOtpInput && $otpMethod === 'direct_message')
+                            <h5 class="text-center mb-3" style="color: var(--ecc-gold-400);">Request Verification Code</h5>
+                            <p class="text-center mb-4 ecc-subtext mx-auto" style="color: rgba(199,167,90,.60);">To receive your OTP, please send us a message on WhatsApp.</p>
+                            <div class="mb-4 text-center">
+                                <a href="https://wa.me/{{ ltrim($whatsappNumber, '+') }}?text={{ urlencode('Request OTP') }}" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer" 
+                                   wire:click="openWhatsApp"
+                                   class="btn ecc-submit-btn w-100 d-flex align-items-center justify-content-center gap-2 mb-3">
+                                  <span class="material-symbols-outlined">chat</span>
+                                  <span>Open WhatsApp to Request OTP</span>
+                                </a>
+                                <p class="small mb-0" style="color: rgba(199,167,90,.60);">After sending the message, you will receive the OTP in WhatsApp. Copy and paste it here.</p>
                             </div>
-                          </div>
+                        @else
+                            @if($devOtp)
+                              <div class="card border-0 mb-3 text-start shadow-sm" style="background: rgba(199,167,90,0.15); border-left: 4px solid var(--ecc-gold-400) !important; border-radius: 12px;">
+                                <div class="card-body p-3">
+                                  <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                      <div class="text-uppercase fw-bold small mb-1" style="letter-spacing: 0.05em; font-family: 'Noto Sans', sans-serif; color: var(--ecc-gold-400);">Developer Mode OTP</div>
+                                      <div class="h3 mb-0 text-white font-monospace fw-bold" style="letter-spacing: 0.1em;">{{ $devOtp }}</div>
+                                    </div>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-light border-0 px-2 py-1 d-flex align-items-center gap-1"
+                                            style="background: rgba(255,255,255,0.05); color: #fff; font-size: 12px; font-family: 'Noto Sans', sans-serif; border-radius: 8px;"
+                                            onclick="navigator.clipboard.writeText('{{ $devOtp }}').then(() => { this.innerHTML = '<span class=\'material-symbols-outlined\' style=\'font-size:16px;\'>check</span><span>Copied!</span>'; setTimeout(() => this.innerHTML = '<span class=\'material-symbols-outlined\' style=\'font-size:16px;\'>content_copy</span><span>Copy</span>', 2000) })">
+                                      <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+                                      <span>Copy</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            @endif
+                            <div class="ecc-field mb-3 mb-md-4 text-center">
+                                <label class="ecc-label text-uppercase d-block mb-3">Verification Code</label>
+                                <input
+                                    type="text"
+                                    wire:model="otp"
+                                    class="form-control ecc-input text-center fs-2 fw-bold"
+                                    placeholder="- - - - - -"
+                                    maxlength="6"
+                                    style="letter-spacing: 0.6em; padding-left: 0.6em; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 28px !important; height: 64px; border-color: rgba(242,185,13,.4);"
+                                >
+                                @error('otp') <div class="ecc-error mt-2 text-center">{{ $message }}</div> @enderror
+                                <div class="mt-3 fs-11" style="color: rgba(242,185,13,.5);">Code expires in {{ $otpTtl }} minutes.</div>
+                            </div>
+
+                            <div class="pt-2">
+                                <button type="submit" class="ecc-submit-btn w-100" wire:loading.attr="disabled" wire:target="verifyLoginOtp">
+                                    <span class="ecc-btn-default d-inline-flex align-items-center justify-content-center gap-2" wire:loading.class="d-none" wire:target="verifyLoginOtp">
+                                        Verify & Access Club
+                                        <span class="material-symbols-outlined ecc-arrow">check_circle</span>
+                                    </span>
+                                    <span class="ecc-btn-loading d-none align-items-center justify-content-center gap-2" wire:loading.delay.class.remove="d-none" wire:target="verifyLoginOtp">
+                                        Verifying...
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    </span>
+                                </button>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <a href="#" wire:click.prevent="requestLoginOtp" class="ecc-link text-uppercase">Resend Code</a>
+                                <span class="mx-2 opacity-25">|</span>
+                                <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase">Back to Login</a>
+                            </div>
                         @endif
-                        <div class="ecc-field mb-3 mb-md-4 text-center">
-                            <label class="ecc-label text-uppercase d-block mb-3">Verification Code</label>
-                            <input
-                                type="text"
-                                wire:model="otp"
-                                class="form-control ecc-input text-center fs-2 fw-bold"
-                                placeholder="- - - - - -"
-                                maxlength="6"
-                                style="letter-spacing: 0.6em; padding-left: 0.6em; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 28px !important; height: 64px; border-color: rgba(242,185,13,.4);"
-                            >
-                            @error('otp') <div class="ecc-error mt-2 text-center">{{ $message }}</div> @enderror
-                            <div class="mt-3 fs-11" style="color: rgba(242,185,13,.5);">Code expires in {{ $otpTtl }} minutes.</div>
-                        </div>
-
-                        <div class="pt-2">
-                            <button type="submit" class="ecc-submit-btn w-100" wire:loading.attr="disabled" wire:target="verifyLoginOtp">
-                                <span class="ecc-btn-default d-inline-flex align-items-center justify-content-center gap-2" wire:loading.class="d-none" wire:target="verifyLoginOtp">
-                                    Verify & Access Club
-                                    <span class="material-symbols-outlined ecc-arrow">check_circle</span>
-                                </span>
-                                <span class="ecc-btn-loading d-none align-items-center justify-content-center gap-2" wire:loading.delay.class.remove="d-none" wire:target="verifyLoginOtp">
-                                    Verifying...
-                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                </span>
-                            </button>
-                        </div>
-
-                        <div class="text-center mt-4">
-                            <a href="#" wire:click.prevent="requestLoginOtp" class="ecc-link text-uppercase">Resend Code</a>
-                            <span class="mx-2 opacity-25">|</span>
-                            <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase">Back to Login</a>
-                        </div>
                     </form>
                 @endif
             @endif

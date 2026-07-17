@@ -35,6 +35,9 @@ class UserLoginPage extends Component
     public int $otpTtl = 0;
     public bool $showResetPassword = false;
     public ?string $devOtp = null;
+    public string $otpMethod = 'template';
+    public string $whatsappNumber = '';
+    public bool $showOtpInput = true;
 
     public function mount(\App\Services\Membership\ApplicationResumeService $resumeService): void
     {
@@ -151,6 +154,15 @@ class UserLoginPage extends Component
             $this->otpIdentifier = $this->identity;
             $this->otpTtl = $data['ttl_minutes'];
             $this->devOtp = $data['dev_otp'] ?? null;
+            $this->otpMethod = $data['otp_method'] ?? config('services.whatsapp.otp_method', 'template');
+            $this->whatsappNumber = $data['whatsapp_number'] ?? config('services.whatsapp.phone_number', '');
+            
+            if ($this->otpMethod === 'direct_message') {
+                $this->showOtpInput = false;
+            } else {
+                $this->showOtpInput = true;
+            }
+
             $this->step = 2;
             $this->errorMessage = null;
         } catch (\App\Exceptions\OtpException $e) {
@@ -158,6 +170,11 @@ class UserLoginPage extends Component
                 'identity' => $e->getMessage(),
             ]);
         }
+    }
+
+    public function openWhatsApp()
+    {
+        $this->showOtpInput = true;
     }
 
     public function verifyLoginOtp(AuthService $authService, \App\Services\Membership\ApplicationResumeService $resumeService): void

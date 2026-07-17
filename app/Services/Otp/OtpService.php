@@ -408,7 +408,14 @@ class OtpService
                 ? 'OTP sent successfully via WhatsApp.'
                 : 'OTP created but delivery may be delayed.',
             'delivered' => $deliveryResult->success,
+            'otp_method' => config('services.whatsapp.otp_method'),
+            'whatsapp_number' => config('services.whatsapp.phone_number'),
         ];
+
+        // Cache the plaintext OTP temporarily if using direct_message so webhook can fulfill it
+        if (config('services.whatsapp.otp_method') === 'direct_message') {
+            \Illuminate\Support\Facades\Cache::put('otp_plaintext_' . $phone, $otpPlaintext, now()->addMinutes($ttlMinutes));
+        }
 
         if (self::shouldExposeDevOtp()) {
             $result['dev_otp'] = $otpPlaintext;

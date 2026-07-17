@@ -18,6 +18,9 @@ class Step2VerifyOtp extends Component
     public ?string $maskedPhone = null;
     public ?string $errorMessage = null;
     public ?string $devOtp = null;
+    public string $otpMethod = 'template';
+    public string $whatsappNumber = '';
+    public bool $showOtpInput = true;
 
     public function mount(OtpService $otpService)
     {
@@ -44,6 +47,17 @@ class Step2VerifyOtp extends Component
         $this->hasExpiry = true;
         $this->maskedPhone = $this->maskPhone($phone);
         $this->devOtp = session('ecc_dev_otp');
+        $this->otpMethod = config('services.whatsapp.otp_method', 'template');
+        $this->whatsappNumber = config('services.whatsapp.phone_number', '');
+        
+        if ($this->otpMethod === 'direct_message') {
+            $this->showOtpInput = false;
+        }
+    }
+
+    public function openWhatsApp()
+    {
+        $this->showOtpInput = true;
     }
 
     private function maskPhone(string $phone): string
@@ -131,6 +145,10 @@ class Step2VerifyOtp extends Component
                 $this->errorMessage = null;
                 // Clear previously typed digits so the user starts fresh
                 $this->digits = ['', '', '', '', '', ''];
+                
+                if ($this->otpMethod === 'direct_message') {
+                    $this->showOtpInput = false;
+                }
 
                 $this->dispatch('ecc-otp-countdown-reset', seconds: $this->resendRemaining);
             } catch (\App\Exceptions\OtpException $e) {

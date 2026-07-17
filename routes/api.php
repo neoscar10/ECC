@@ -246,3 +246,9 @@ Route::prefix('webhooks/logistics')->group(function () {
     Route::get('/health', [\App\Http\Controllers\Webhooks\LogisticsWebhookController::class, 'health'])->name('api.webhooks.logistics.health');
     Route::post('/tracking', [\App\Http\Controllers\Webhooks\LogisticsWebhookController::class, 'tracking'])->name('api.webhooks.logistics.tracking');
 });
+
+// WhatsApp Webhook Routes
+Route::prefix('webhooks/whatsapp')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Webhooks\WhatsAppWebhookController::class, 'verify']);
+    Route::post('/', [\App\Http\Controllers\Webhooks\WhatsAppWebhookController::class, 'handle']);
+});

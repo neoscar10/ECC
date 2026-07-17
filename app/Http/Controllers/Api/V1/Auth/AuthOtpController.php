@@ -45,7 +45,9 @@ class AuthOtpController extends Controller
         }
 
         $responseData = [
-            'ttl_minutes' => $otpData['ttl_minutes']
+            'ttl_minutes' => $otpData['ttl_minutes'],
+            'otp_method' => $otpData['otp_method'] ?? config('services.whatsapp.otp_method', 'template'),
+            'whatsapp_number' => $otpData['whatsapp_number'] ?? config('services.whatsapp.phone_number', '')
         ];
 
         if (isset($otpData['dev_otp'])) {
