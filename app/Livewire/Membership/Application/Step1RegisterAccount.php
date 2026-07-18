@@ -19,6 +19,30 @@ class Step1RegisterAccount extends Component
     public string $password_confirmation = '';
     public ?string $errorMessage = null;
 
+    public function mount()
+    {
+        if (auth()->check()) {
+            $user = auth()->user();
+            
+            // If phone is already verified, send them forward
+            if ($user->phone_verified_at) {
+                return redirect()->to(app(\App\Services\Membership\ApplicationResumeService::class)->nextRouteForUser($user) ?: route('home'));
+            }
+            
+            // Pre-fill existing unverified details
+            $this->name = $user->name;
+            $this->email = $user->email;
+            
+            // Extract country code if starts with +91
+            if ($user->phone && str_starts_with($user->phone, '+91')) {
+                $this->country_code = '+91';
+                $this->phone = substr($user->phone, 3);
+            } else {
+                $this->phone = $user->phone ?? '';
+            }
+        }
+    }
+
     public function submit(\App\Services\Auth\AuthService $authService, \App\Services\Otp\OtpService $otpService)
     {
         $this->errorMessage = null;
@@ -37,19 +61,35 @@ class Step1RegisterAccount extends Component
 
             $this->phone = $fullPhoneNormalized;
 
+            $userId = auth()->check() ? auth()->id() : null;
+
             try {
-                $validated = $this->validate(MembershipRules::accountRegistration());
+                $validated = $this->validate(MembershipRules::accountRegistration($userId));
             } catch (\Illuminate\Validation\ValidationException $e) {
                 $this->phone = $originalPhone; // Restore original input on validation error
                 throw $e;
             }
             
-            // Create the user and application
-            $user = $authService->register($validated);
+            if (auth()->check()) {
+                // Update existing user
+                $user = auth()->user();
+                $updateData = [
+                    'name' => $validated['name'],
+                    'email' => $validated['email'],
+                    'phone' => $validated['phone'],
+                ];
+                if (!empty($validated['password'])) {
+                    $updateData['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
+                }
+                $user->update($updateData);
+            } else {
+                // Create the user and application
+                $user = $authService->register($validated);
 
-            // Log the user in
-            \Illuminate\Support\Facades\Auth::guard('web')->login($user, false);
-            request()->session()->regenerate();
+                // Log the user in
+                \Illuminate\Support\Facades\Auth::guard('web')->login($user, false);
+                request()->session()->regenerate();
+            }
 
             // Request OTP
             $otpService->requestPhoneOtp($user, $user->phone);

@@ -39,8 +39,13 @@
       </div>
 
       <div class="mb-4">
-        <h1 class="ecc-h1-lite mb-2">Create Account</h1>
-        <p class="ecc-sub mb-0">Join the exclusive circle of cricket heritage enthusiasts.</p>
+        @if(auth()->check())
+            <h1 class="ecc-h1-lite mb-2">Update Account</h1>
+            <p class="ecc-sub mb-0">Update your details to continue the application.</p>
+        @else
+            <h1 class="ecc-h1-lite mb-2">Create Account</h1>
+            <p class="ecc-sub mb-0">Join the exclusive circle of cricket heritage enthusiasts.</p>
+        @endif
       </div>
 
       @if($errorMessage)
@@ -236,7 +241,7 @@
 
         <div class="row g-3">
           <div class="col-6" x-data="{ show: false }">
-            <label class="ecc-label">Password</label>
+            <label class="ecc-label">Password @if(auth()->check()) <span class="text-muted fw-normal" style="font-size:11px;">(Optional)</span> @endif</label>
             <div class="position-relative">
               <input :type="show ? 'text' : 'password'" wire:model="password" class="form-control ecc-input pe-5">
               <button type="button" @click="show = !show" class="ecc-pass-toggle" style="color: #222;">
@@ -261,11 +266,13 @@
                   class="btn ecc-continue w-100 d-flex align-items-center justify-content-center gap-2"
                   wire:loading.attr="disabled"
                   wire:target="submit">
-            <span wire:loading.remove wire:target="submit">Continue</span>
+            <span wire:loading.remove wire:target="submit">
+              @if(auth()->check()) Update & Continue @else Continue @endif
+            </span>
             <span class="material-symbols-outlined" wire:loading.remove wire:target="submit">arrow_forward</span>
 
             <span wire:loading wire:target="submit" class="align-items-center gap-2" style="display: none;">
-              Creating Account...
+              @if(auth()->check()) Updating... @else Creating Account... @endif
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             </span>
           </button>

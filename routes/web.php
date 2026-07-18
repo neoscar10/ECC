@@ -153,14 +153,12 @@ Route::middleware(['auth:web', EnsureAdminRole::class])->prefix('admin')->name('
     });
 });
 
-// Membership Application Flow (Guest)
-Route::middleware('guest')->group(function () {
-    Route::get('/membership/apply-intro', \App\Livewire\Membership\ApplyIntroPage::class)->name('membership.apply-intro');
-    Route::get('/membership/apply', \App\Livewire\Membership\ApplyPage::class)->name('membership.apply');
-    
-    // Application Wizard (Guest Steps)
-    Route::get('/membership/application/step-1', \App\Livewire\Membership\Application\Step1RegisterAccount::class)->name('membership.application.step1');
-});
+// Membership Application Flow (Public/Mixed)
+Route::get('/membership/apply-intro', \App\Livewire\Membership\ApplyIntroPage::class)->name('membership.apply-intro');
+Route::get('/membership/apply', \App\Livewire\Membership\ApplyPage::class)->name('membership.apply');
+
+// Application Wizard (Mixed - Guest or Unverified Member)
+Route::get('/membership/application/step-1', \App\Livewire\Membership\Application\Step1RegisterAccount::class)->name('membership.application.step1');
 
 // Application Wizard (Member Steps - Requires Auth)
 Route::middleware(['auth'])->group(function() {

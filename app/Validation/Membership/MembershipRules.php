@@ -4,13 +4,16 @@ namespace App\Validation\Membership;
 
 class MembershipRules
 {
-    public static function accountRegistration(): array
+    public static function accountRegistration(?int $userId = null): array
     {
+        $emailRule = $userId ? "required|email|unique:users,email,{$userId}" : 'required|email|unique:users,email';
+        $phoneRule = $userId ? "required|string|unique:users,phone,{$userId}" : 'required|string|unique:users,phone';
+        
         return [
             'name' => 'required|string|min:2|max:120',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'required|string|unique:users,phone',
-            'password' => 'required|string|min:6|confirmed',
+            'email' => $emailRule,
+            'phone' => $phoneRule,
+            'password' => $userId ? 'nullable|string|min:6|confirmed' : 'required|string|min:6|confirmed',
         ];
     }
 
