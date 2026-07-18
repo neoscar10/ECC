@@ -109,7 +109,7 @@ class WhatsAppWebhookController extends Controller
         }
 
         // Send the OTP and clear it from the cache
-        $whatsappService->sendRawMessage($phone, "Your Executive Cricket Club verification OTP is: {$otpPlaintext}. Valid for 5 minutes.");
+        $whatsappService->sendRawMessage($phone, "*Executive Club Cricket*\n\nYour verification code is:\n*{$otpPlaintext}*\n\nValid for 5 minutes.");
         \Illuminate\Support\Facades\Cache::forget('otp_plaintext_' . $phone);
         
         Log::info('WhatsApp Webhook: OTP sent via direct message.', ['phone_last4' => substr($phone, -4)]);

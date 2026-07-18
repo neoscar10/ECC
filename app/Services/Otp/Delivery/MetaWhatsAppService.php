@@ -227,7 +227,7 @@ class MetaWhatsAppService implements OtpDeliveryInterface
                 'type'              => 'text',
                 'text'              => [
                     'preview_url' => false,
-                    'body'        => "Your Executive Cricket Club verification OTP is: {$otp}. Valid for 5 minutes.",
+                    'body'        => "*Executive Club Cricket*\n\nYour verification code is:\n*{$otp}*\n\nValid for 5 minutes.",
                 ],
             ];
         }

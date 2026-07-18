@@ -259,7 +259,43 @@
                             </button>
                         </div>
 
-                        <div class="ecc-timer-container text-center mt-4" x-data="otpCountdown({{ $resendRemaining }})">
+                        <div class="ecc-timer-container text-center mt-4" 
+                             x-data="{
+                                seconds: {{ $resendRemaining }},
+                                running: false,
+                                display: '00:00',
+                                interval: null,
+                                init() {
+                                    this.startTimer(this.seconds);
+                                    window.addEventListener('ecc-otp-countdown-reset', (e) => {
+                                        this.startTimer(e.detail.seconds);
+                                    });
+                                },
+                                startTimer(secs) {
+                                    if (this.interval) clearInterval(this.interval);
+                                    this.seconds = secs;
+                                    if (this.seconds <= 0) {
+                                        this.running = false;
+                                        return;
+                                    }
+                                    this.running = true;
+                                    this.updateDisplay();
+                                    this.interval = setInterval(() => {
+                                        this.seconds--;
+                                        this.updateDisplay();
+                                        if (this.seconds <= 0) {
+                                            clearInterval(this.interval);
+                                            this.running = false;
+                                            @this.set('resendRemaining', 0);
+                                        }
+                                    }, 1000);
+                                },
+                                updateDisplay() {
+                                    const m = Math.floor(this.seconds / 60);
+                                    const s = this.seconds % 60;
+                                    this.display = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                                }
+                             }">
                             <div x-show="running" style="display: none;">
                                 <span class="ecc-timer-text" style="color: var(--ecc-text-muted);">Resend code in <span x-text="display" style="color: var(--ecc-gold-400); font-weight: bold;">00:00</span></span>
                                 <div class="mt-2">
@@ -376,7 +412,43 @@
                                 </button>
                             </div>
 
-                            <div class="ecc-timer-container text-center mt-4" x-data="otpCountdown({{ $resendRemaining }})">
+                            <div class="ecc-timer-container text-center mt-4" 
+                                 x-data="{
+                                    seconds: {{ $resendRemaining }},
+                                    running: false,
+                                    display: '00:00',
+                                    interval: null,
+                                    init() {
+                                        this.startTimer(this.seconds);
+                                        window.addEventListener('ecc-otp-countdown-reset', (e) => {
+                                            this.startTimer(e.detail.seconds);
+                                        });
+                                    },
+                                    startTimer(secs) {
+                                        if (this.interval) clearInterval(this.interval);
+                                        this.seconds = secs;
+                                        if (this.seconds <= 0) {
+                                            this.running = false;
+                                            return;
+                                        }
+                                        this.running = true;
+                                        this.updateDisplay();
+                                        this.interval = setInterval(() => {
+                                            this.seconds--;
+                                            this.updateDisplay();
+                                            if (this.seconds <= 0) {
+                                                clearInterval(this.interval);
+                                                this.running = false;
+                                                @this.set('resendRemaining', 0);
+                                            }
+                                        }, 1000);
+                                    },
+                                    updateDisplay() {
+                                        const m = Math.floor(this.seconds / 60);
+                                        const s = this.seconds % 60;
+                                        this.display = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                                    }
+                                 }">
                                 <div x-show="running" style="display: none;">
                                     <span class="ecc-timer-text" style="color: var(--ecc-text-muted);">Resend code in <span x-text="display" style="color: var(--ecc-gold-400); font-weight: bold;">00:00</span></span>
                                     <div class="mt-2">
@@ -842,54 +914,3 @@ document.addEventListener('click', function (e) {
 </style>
 @endpush
 
-@push('scripts')
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('otpCountdown', (initialSeconds) => ({
-            seconds: initialSeconds,
-            running: false,
-            display: '00:00',
-            interval: null,
-
-            init() {
-                this.startTimer(this.seconds);
-
-                // Listen for Livewire event to reset timer
-                window.addEventListener('ecc-otp-countdown-reset', (e) => {
-                    this.startTimer(e.detail.seconds);
-                });
-            },
-
-            startTimer(secs) {
-                if (this.interval) clearInterval(this.interval);
-                this.seconds = secs;
-
-                if (this.seconds <= 0) {
-                    this.running = false;
-                    return;
-                }
-
-                this.running = true;
-                this.updateDisplay();
-
-                this.interval = setInterval(() => {
-                    this.seconds--;
-                    this.updateDisplay();
-
-                    if (this.seconds <= 0) {
-                        clearInterval(this.interval);
-                        this.running = false;
-                        @this.set('resendRemaining', 0);
-                    }
-                }, 1000);
-            },
-
-            updateDisplay() {
-                const m = Math.floor(this.seconds / 60);
-                const s = this.seconds % 60;
-                this.display = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-            }
-        }));
-    });
-</script>
-@endpush
