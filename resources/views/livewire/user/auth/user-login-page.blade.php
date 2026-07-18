@@ -259,14 +259,14 @@
                             </button>
                         </div>
 
-                        <div class="ecc-timer-container text-center mt-4">
-                            <div id="otp-timer-block-forgot" class="{{ $resendRemaining > 0 ? '' : 'd-none' }}">
-                                <span class="ecc-timer-text" style="color: var(--ecc-text-muted);">Resend code in <span id="timer-display-forgot" style="color: var(--ecc-gold-400); font-weight: bold;">00:00</span></span>
+                        <div class="ecc-timer-container text-center mt-4" x-data="otpCountdown({{ $resendRemaining }})">
+                            <div x-show="running" style="display: none;">
+                                <span class="ecc-timer-text" style="color: var(--ecc-text-muted);">Resend code in <span x-text="display" style="color: var(--ecc-gold-400); font-weight: bold;">00:00</span></span>
                                 <div class="mt-2">
                                     <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase" style="font-size: 11px;">Back to Login</a>
                                 </div>
                             </div>
-                            <div id="otp-resend-block-forgot" class="{{ $resendRemaining > 0 ? 'd-none' : '' }}">
+                            <div x-show="!running" style="display: none;">
                                 <a href="#" wire:click.prevent="requestResetOtp" class="ecc-link text-uppercase">Resend Code</a>
                                 <span class="mx-2 opacity-25">|</span>
                                 <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase">Back to Login</a>
@@ -376,14 +376,14 @@
                                 </button>
                             </div>
 
-                            <div class="ecc-timer-container text-center mt-4">
-                                <div id="otp-timer-block-login" class="{{ $resendRemaining > 0 ? '' : 'd-none' }}">
-                                    <span class="ecc-timer-text" style="color: var(--ecc-text-muted);">Resend code in <span id="timer-display-login" style="color: var(--ecc-gold-400); font-weight: bold;">00:00</span></span>
+                            <div class="ecc-timer-container text-center mt-4" x-data="otpCountdown({{ $resendRemaining }})">
+                                <div x-show="running" style="display: none;">
+                                    <span class="ecc-timer-text" style="color: var(--ecc-text-muted);">Resend code in <span x-text="display" style="color: var(--ecc-gold-400); font-weight: bold;">00:00</span></span>
                                     <div class="mt-2">
                                         <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase" style="font-size: 11px;">Back to Login</a>
                                     </div>
                                 </div>
-                                <div id="otp-resend-block-login" class="{{ $resendRemaining > 0 ? 'd-none' : '' }}">
+                                <div x-show="!running" style="display: none;">
                                     <a href="#" wire:click.prevent="requestLoginOtp" class="ecc-link text-uppercase">Resend Code</a>
                                     <span class="mx-2 opacity-25">|</span>
                                     <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase">Back to Login</a>
@@ -844,72 +844,52 @@ document.addEventListener('click', function (e) {
 
 @push('scripts')
 <script>
-    window.addEventListener('ecc-otp-countdown-reset', event => {
-        eccInitOtpTimers(event.detail.seconds);
-    });
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('otpCountdown', (initialSeconds) => ({
+            seconds: initialSeconds,
+            running: false,
+            display: '00:00',
+            interval: null,
 
-    function eccInitOtpTimers(seconds) {
-        // Target both possible timer blocks depending on active mode
-        const timers = [
-            { display: document.getElementById('timer-display-forgot'), block: document.getElementById('otp-timer-block-forgot'), resend: document.getElementById('otp-resend-block-forgot') },
-            { display: document.getElementById('timer-display-login'), block: document.getElementById('otp-timer-block-login'), resend: document.getElementById('otp-resend-block-login') }
-        ];
+            init() {
+                this.startTimer(this.seconds);
 
-        if (window.otpTimerInterval) {
-            clearInterval(window.otpTimerInterval);
-        }
+                // Listen for Livewire event to reset timer
+                window.addEventListener('ecc-otp-countdown-reset', (e) => {
+                    this.startTimer(e.detail.seconds);
+                });
+            },
 
-        let currentSeconds = seconds;
+            startTimer(secs) {
+                if (this.interval) clearInterval(this.interval);
+                this.seconds = secs;
 
-        const updateDisplay = (s) => {
-            const m = Math.floor(s / 60);
-            const rem = s % 60;
-            const text = `${m.toString().padStart(2, '0')}:${rem.toString().padStart(2, '0')}`;
-            timers.forEach(t => {
-                if (t.display) t.display.textContent = text;
-            });
-        };
-
-        const toggleBlocks = (showTimer) => {
-            timers.forEach(t => {
-                if (t.block && t.resend) {
-                    if (showTimer) {
-                        t.block.classList.remove('d-none');
-                        t.resend.classList.add('d-none');
-                    } else {
-                        t.block.classList.add('d-none');
-                        t.resend.classList.remove('d-none');
-                    }
+                if (this.seconds <= 0) {
+                    this.running = false;
+                    return;
                 }
-            });
-        };
 
-        if (currentSeconds <= 0) {
-            toggleBlocks(false);
-            return;
-        }
+                this.running = true;
+                this.updateDisplay();
 
-        toggleBlocks(true);
-        updateDisplay(currentSeconds);
+                this.interval = setInterval(() => {
+                    this.seconds--;
+                    this.updateDisplay();
 
-        window.otpTimerInterval = setInterval(() => {
-            currentSeconds--;
-            updateDisplay(currentSeconds);
-            
-            if (currentSeconds <= 0) {
-                clearInterval(window.otpTimerInterval);
-                toggleBlocks(false);
-                @this.set('resendRemaining', 0);
+                    if (this.seconds <= 0) {
+                        clearInterval(this.interval);
+                        this.running = false;
+                        @this.set('resendRemaining', 0);
+                    }
+                }, 1000);
+            },
+
+            updateDisplay() {
+                const m = Math.floor(this.seconds / 60);
+                const s = this.seconds % 60;
+                this.display = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
             }
-        }, 1000);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        eccInitOtpTimers(@js($resendRemaining));
-    });
-
-    document.addEventListener('livewire:navigated', () => {
-        eccInitOtpTimers(@js($resendRemaining));
+        }));
     });
 </script>
 @endpush
