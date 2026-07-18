@@ -158,6 +158,30 @@ class OtpService
     }
 
     /**
+     * Get remaining seconds for the resend cooldown by phone.
+     */
+    public function getCooldownRemainingByPhone(string $phone, string $purpose = 'signup'): int
+    {
+        $normalized = $this->normalizer->normalize($phone);
+        $purposeVal = $this->resolvePurpose($purpose);
+
+        $latest = OtpVerification::where('phone', $normalized)
+            ->where('purpose', $purposeVal)
+            ->latest()
+            ->first();
+
+        if (!$latest) {
+            return 0;
+        }
+
+        $config = config("otp.purposes.{$purposeVal}");
+        $resendCooldown = $config['resend_cooldown'] ?? 60;
+
+        $remaining = $resendCooldown - $latest->last_sent_at->diffInSeconds(now());
+        return (int) max(0, $remaining);
+    }
+
+    /**
      * Verify the provided OTP.
      */
     public function verifyPhoneOtp(User $user, string $phone, string $otp): bool
@@ -186,6 +210,18 @@ class OtpService
 
         $remaining = now()->diffInSeconds($verification->expires_at, false);
         return (int) max(0, $remaining);
+    }
+
+    /**
+     * Get remaining seconds for the resend cooldown for the user.
+     */
+    public function getCooldownRemaining(User $user, string $purpose = 'signup'): int
+    {
+        if (!$user->phone) {
+            return 0;
+        }
+        
+        return $this->getCooldownRemainingByPhone($user->phone, $purpose);
     }
 
     /**
@@ -403,6 +439,7 @@ class OtpService
 
         $result = [
             'ttl_minutes' => $ttlMinutes,
+            'resend_cooldown' => $resendCooldown,
             'reference_id' => (string) $verification->id,
             'message' => $deliveryResult->success
                 ? 'OTP sent successfully via WhatsApp.'

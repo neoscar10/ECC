@@ -33,6 +33,7 @@ class UserLoginPage extends Component
     public string $newPassword_confirmation = '';
     public ?string $otpIdentifier = null;
     public int $otpTtl = 0;
+    public int $resendRemaining = 0;
     public bool $showResetPassword = false;
     public ?string $devOtp = null;
     public string $otpMethod = 'template';
@@ -61,7 +62,7 @@ class UserLoginPage extends Component
 
     public function setMode(string $mode): void
     {
-        $this->reset(['mode', 'step', 'otp', 'newPassword', 'newPassword_confirmation', 'otpIdentifier', 'errorMessage', 'showResetPassword', 'devOtp']);
+        $this->reset(['mode', 'step', 'otp', 'newPassword', 'newPassword_confirmation', 'otpIdentifier', 'errorMessage', 'showResetPassword', 'devOtp', 'resendRemaining']);
         $this->mode = $mode;
     }
 
@@ -92,13 +93,38 @@ class UserLoginPage extends Component
             $this->otpTtl = $data['ttl_minutes'];
             $this->otpIdentifier = $this->identity;
             $this->devOtp = $data['dev_otp'] ?? null;
+            
+            $this->otpMethod = $data['otp_method'] ?? config('services.whatsapp.otp_method', 'template');
+            $this->whatsappNumber = (string) ($data['whatsapp_number'] ?? config('services.whatsapp.phone_number', ''));
+            $this->resendRemaining = $data['resend_cooldown'] ?? app(\App\Services\Otp\OtpService::class)->getCooldownRemainingByPhone($user->phone ?? $this->identity, 'password_reset');
+            
+            if ($this->otpMethod === 'direct_message') {
+                $this->showOtpInput = false;
+            } else {
+                $this->showOtpInput = true;
+            }
 
             $this->step = 2;
             $this->errorMessage = null;
+            $this->dispatch('ecc-otp-countdown-reset', seconds: $this->resendRemaining);
         } catch (\App\Exceptions\OtpException $e) {
-            throw ValidationException::withMessages([
-                'identity' => $e->getMessage(),
-            ]);
+            $user = $this->resolveUserByIdentity($this->identity);
+            $cooldown = $user ? app(\App\Services\Otp\OtpService::class)->getCooldownRemainingByPhone($user->phone ?? $this->identity, 'password_reset') : 0;
+            
+            if ($cooldown > 0) {
+                $this->resendRemaining = $cooldown;
+                $this->step = 2;
+                $this->errorMessage = $e->getMessage();
+                $this->dispatch('ecc-otp-countdown-reset', seconds: $this->resendRemaining);
+            } else {
+                if ($this->step === 2) {
+                    $this->errorMessage = $e->getMessage();
+                } else {
+                    throw ValidationException::withMessages([
+                        'identity' => $e->getMessage(),
+                    ]);
+                }
+            }
         }
     }
 
@@ -156,6 +182,7 @@ class UserLoginPage extends Component
             $this->devOtp = $data['dev_otp'] ?? null;
             $this->otpMethod = $data['otp_method'] ?? config('services.whatsapp.otp_method', 'template');
             $this->whatsappNumber = (string) ($data['whatsapp_number'] ?? config('services.whatsapp.phone_number', ''));
+            $this->resendRemaining = $data['resend_cooldown'] ?? app(\App\Services\Otp\OtpService::class)->getCooldownRemainingByPhone($this->identity, 'login');
             
             if ($this->otpMethod === 'direct_message') {
                 $this->showOtpInput = false;
@@ -165,13 +192,26 @@ class UserLoginPage extends Component
 
             $this->step = 2;
             $this->errorMessage = null;
+            $this->dispatch('ecc-otp-countdown-reset', seconds: $this->resendRemaining);
         } catch (\App\Exceptions\OtpException $e) {
-            throw ValidationException::withMessages([
-                'identity' => $e->getMessage(),
-            ]);
+            $cooldown = app(\App\Services\Otp\OtpService::class)->getCooldownRemainingByPhone($this->identity, 'login');
+            
+            if ($cooldown > 0) {
+                $this->resendRemaining = $cooldown;
+                $this->step = 2;
+                $this->errorMessage = $e->getMessage();
+                $this->dispatch('ecc-otp-countdown-reset', seconds: $this->resendRemaining);
+            } else {
+                if ($this->step === 2) {
+                    $this->errorMessage = $e->getMessage();
+                } else {
+                    throw ValidationException::withMessages([
+                        'identity' => $e->getMessage(),
+                    ]);
+                }
+            }
         }
     }
-
     public function openWhatsApp()
     {
         $this->showOtpInput = true;

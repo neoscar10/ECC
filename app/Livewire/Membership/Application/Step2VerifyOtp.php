@@ -35,7 +35,7 @@ class Step2VerifyOtp extends Component
         }
 
         $phone = $user->phone;
-        $this->resendRemaining = $otpService->getExpiry($user);
+        $this->resendRemaining = $otpService->getCooldownRemaining($user, 'signup');
         $this->hasExpiry = true;
         $this->maskedPhone = $this->maskPhone($phone);
         $this->devOtp = session('ecc_dev_otp');
@@ -111,9 +111,9 @@ class Step2VerifyOtp extends Component
         $phone = $user->phone;
         
         try {
-            $otpService->requestPhoneOtp($user, $phone);
+            $data = $otpService->requestPhoneOtp($user, $phone);
             $this->devOtp = session('ecc_dev_otp');
-            $this->resendRemaining = $otpService->getExpiry($user);
+            $this->resendRemaining = $data['resend_cooldown'] ?? $otpService->getCooldownRemaining($user, 'signup');
             $this->errorMessage = null;
             // Clear previously typed digits so the user starts fresh
             $this->digits = ['', '', '', '', '', ''];
