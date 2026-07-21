@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100" data-theme="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,10 +8,10 @@
         (function () {
             try {
                 var storedTheme = localStorage.getItem('ecc_user_theme');
-                var theme = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'dark';
+                var theme = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'light';
                 document.documentElement.setAttribute('data-theme', theme);
             } catch (error) {
-                document.documentElement.setAttribute('data-theme', 'dark');
+                document.documentElement.setAttribute('data-theme', 'light');
             }
         })();
     </script>
@@ -1040,7 +1040,7 @@
                     toggle.dataset.themeToggleReady = '1';
 
                     toggle.addEventListener('click', function () {
-                        var currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+                        var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
                         var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
                         setTheme(newTheme);
                     });
@@ -1060,7 +1060,7 @@
                     });
                 }
 
-                setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+                setTheme(document.documentElement.getAttribute('data-theme') || 'light');
             }
 
             document.addEventListener('DOMContentLoaded', initThemeToggle);
