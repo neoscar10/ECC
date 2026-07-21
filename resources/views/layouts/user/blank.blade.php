@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100" data-theme="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,10 +9,10 @@
         (function () {
             try {
                 var storedTheme = localStorage.getItem('ecc_user_theme');
-                var theme = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'dark';
+                var theme = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'light';
                 document.documentElement.setAttribute('data-theme', theme);
             } catch (error) {
-                document.documentElement.setAttribute('data-theme', 'dark');
+                document.documentElement.setAttribute('data-theme', 'light');
             }
         })();
     </script>
