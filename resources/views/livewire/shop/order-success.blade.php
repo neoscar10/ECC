@@ -89,7 +89,7 @@
             border-radius: 1rem;
             overflow: hidden;
             background: var(--ecc-bg-input);
-            border: 1px solid rgba(245,239,225,.08);
+            border: 1px solid var(--ecc-border-soft);
         }
 
         .ecc-mini-label {
@@ -113,11 +113,11 @@
 
         .ecc-summary-divider {
             height: 1px;
-            background: rgba(245,239,225,.08);
+            background: var(--ecc-border-soft);
         }
 
         .ecc-muted {
-            color: rgba(245,239,225,.66);
+            color: var(--ecc-text-muted);
         }
 
         .ecc-total-line {

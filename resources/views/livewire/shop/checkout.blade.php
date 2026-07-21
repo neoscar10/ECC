@@ -145,7 +145,7 @@
         .ecc-summary-title {
             padding-bottom: 1rem;
             margin-bottom: 1.25rem;
-            border-bottom: 1px solid rgba(245,239,225,.08);
+            border-bottom: 1px solid var(--ecc-border-soft);
             font-size: 1.25rem;
             font-weight: 900;
             letter-spacing: -.03em;
@@ -164,11 +164,11 @@
             font-size: .72rem;
             letter-spacing: .12em;
             text-transform: uppercase;
-            color: rgba(245,239,225,.55);
+            color: var(--ecc-text-muted);
             font-weight: 800;
         }
         .ecc-summary-breakdown {
-            border-top: 1px solid rgba(245,239,225,.08);
+            border-top: 1px solid var(--ecc-border-soft);
             padding-top: 1rem;
             margin-top: 1rem;
             display: flex;

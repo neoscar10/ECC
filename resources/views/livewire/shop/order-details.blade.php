@@ -38,7 +38,7 @@
             padding: .7rem 1rem;
             border-radius: .8rem;
             background: var(--ecc-bg-input);
-            border: 1px solid rgba(245,239,225,.08);
+            border: 1px solid var(--ecc-border-soft);
             color: var(--ecc-text-primary);
             font-size: .92rem;
         }
@@ -95,7 +95,7 @@
 
         .ecc-panel-header {
             padding: 1.5rem 1.75rem;
-            border-bottom: 1px solid rgba(245,239,225,.08);
+            border-bottom: 1px solid var(--ecc-border-soft);
         }
 
         .ecc-panel-title {
@@ -118,7 +118,7 @@
             display: flex;
             gap: 1.25rem;
             padding: 1.5rem 1.75rem;
-            border-bottom: 1px solid rgba(245,239,225,.06);
+            border-bottom: 1px solid var(--ecc-border-soft);
         }
 
         .ecc-item-row:last-child {
@@ -132,7 +132,7 @@
             border-radius: .9rem;
             overflow: hidden;
             background: var(--ecc-bg-input);
-            border: 1px solid rgba(245,239,225,.06);
+            border: 1px solid var(--ecc-border-soft);
         }
 
         .ecc-item-label {
@@ -164,7 +164,7 @@
         }
 
         .ecc-item-meta {
-            color: rgba(245,239,225,.55);
+            color: var(--ecc-text-muted);
             font-size: .78rem;
             font-weight: 600;
         }
@@ -186,7 +186,7 @@
         }
 
         .ecc-muted {
-            color: rgba(245,239,225,.66);
+            color: var(--ecc-text-muted);
         }
 
         .ecc-payment-card-row {
@@ -196,7 +196,7 @@
             padding: 1rem;
             border-radius: .9rem;
             background: var(--ecc-bg-input);
-            border: 1px solid rgba(245,239,225,.08);
+            border: 1px solid var(--ecc-border-soft);
         }
 
         .ecc-payment-brand-box {
@@ -236,7 +236,7 @@
             align-items: baseline;
             gap: 1rem;
             padding-top: 1.25rem;
-            border-top: 1px solid rgba(245,239,225,.10);
+            border-top: 1px solid var(--ecc-border-soft);
         }
 
         .ecc-total-label {
@@ -254,7 +254,7 @@
         }
 
         .ecc-currency-note {
-            color: rgba(245,239,225,.50);
+            color: var(--ecc-text-muted);
             font-size: .62rem;
             font-weight: 800;
             letter-spacing: .18em;
@@ -284,7 +284,7 @@
 
         .ecc-btn-outline-light {
             background: transparent;
-            border: 1px solid rgba(245,239,225,.14);
+            border: 1px solid var(--ecc-border);
             color: var(--ecc-text-primary);
             font-weight: 800;
             border-radius: .95rem;
@@ -509,7 +509,7 @@
                                     </div>
 
                                     @if(count($trackingData['events']) > 0)
-                                        <div class="mt-4 pt-4 border-top" style="border-color: rgba(245,239,225,.08) !important;">
+                                        <div class="mt-4 pt-4 border-top" style="border-color: var(--ecc-border-soft) !important;">
                                             <h4 class="fs-6 ecc-text-primary mb-4">Tracking History</h4>
                                             <ul class="list-unstyled mb-0">
                                                 @foreach($trackingData['events'] as $event)

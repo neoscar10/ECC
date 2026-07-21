@@ -215,9 +215,9 @@
 
         .ecc-status-pill.status-paid,
         .ecc-status-pill.status-default {
-            background: rgba(245,239,225,.08);
+            background: var(--ecc-border-soft);
             color: var(--ecc-text-primary);
-            border-color: rgba(245,239,225,.12);
+            border-color: var(--ecc-text-muted);
         }
 
         .ecc-order-card-footer {
@@ -227,7 +227,7 @@
             gap: 1rem;
             padding-top: 1.25rem;
             margin-top: 1.25rem;
-            border-top: 1px solid rgba(245,239,225,.08);
+            border-top: 1px solid var(--ecc-border-soft);
             flex-wrap: wrap;
         }
 
@@ -327,7 +327,7 @@
         }
 
         .ecc-pagination-note {
-            color: rgba(245,239,225,.34);
+            color: var(--ecc-text-muted);
             font-size: .62rem;
             font-weight: 900;
             letter-spacing: .18em;
