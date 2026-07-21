@@ -59,7 +59,7 @@
     --ecc-black: #0A0A0A;
     --ecc-gray: #1C1C1C;
 
-    background: var(--ecc-black) !important;
+    background: var(--ecc-bg-page) !important;
     color: var(--ecc-gold) !important;
     font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   }
@@ -88,7 +88,7 @@
     width: 112px; height: 112px;
     border-radius: 9999px;
     border: 1px solid rgba(199, 167, 90,.40);
-    background: rgba(28,28,28,.80);
+    background: var(--ecc-bg-surface);
     box-shadow: 0 30px 80px rgba(0,0,0,.60);
     display:flex; align-items:center; justify-content:center;
     backdrop-filter: blur(8px);

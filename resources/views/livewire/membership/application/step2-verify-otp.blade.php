@@ -198,27 +198,27 @@
 @push('styles')
 <style>
   :root{
-    --ecc-bg:#020202;
-    --ecc-surface:#181818;
-    --ecc-border:#333333;
+    --ecc-bg: var(--ecc-bg-page);
+    --ecc-surface: var(--ecc-bg-surface);
+    --ecc-border: var(--ecc-border);
     --ecc-border-soft: rgba(255, 255, 255, 0.065);
-    --ecc-text-primary: #ffffff;
-    --ecc-text-secondary: rgba(255, 255, 255, 0.78);
-    --ecc-text-muted: rgba(255, 255, 255, 0.58);
-    --ecc-text-subtle: rgba(255, 255, 255, 0.42);
+    --ecc-text-primary: var(--ecc-text-primary);
+    --ecc-text-secondary: var(--ecc-text-secondary);
+    --ecc-text-muted: var(--ecc-text-muted);
+    --ecc-text-subtle: var(--ecc-text-subtle);
     --ecc-primary: #C7A75A;
     --ecc-primary-dark: #9C7D35;
   }
 
   .ecc-bg{
-    --ecc-bg:#020202;
-    --ecc-surface:#181818;
-    --ecc-border:#333333;
+    --ecc-bg: var(--ecc-bg-page);
+    --ecc-surface: var(--ecc-bg-surface);
+    --ecc-border: var(--ecc-border);
     --ecc-border-soft: rgba(255, 255, 255, 0.065);
-    --ecc-text-primary: #ffffff;
-    --ecc-text-secondary: rgba(255, 255, 255, 0.78);
-    --ecc-text-muted: rgba(255, 255, 255, 0.58);
-    --ecc-text-subtle: rgba(255, 255, 255, 0.42);
+    --ecc-text-primary: var(--ecc-text-primary);
+    --ecc-text-secondary: var(--ecc-text-secondary);
+    --ecc-text-muted: var(--ecc-text-muted);
+    --ecc-text-subtle: var(--ecc-text-subtle);
     --ecc-primary: #C7A75A;
     --ecc-primary-dark: #9C7D35;
 

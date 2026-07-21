@@ -592,8 +592,8 @@ document.addEventListener('click', function (e) {
 <style>
     .ecc-user-login{
         min-height: 100dvh;
-        background: #020202;
-        color: var(--ecc-gold-400);
+        background: var(--ecc-bg-page);
+        color: var(--ecc-text-primary);
         font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
         isolation: isolate;
     }
@@ -632,11 +632,11 @@ document.addEventListener('click', function (e) {
         width: 112px;
         height: 112px;
         border-radius: 9999px;
-        background: linear-gradient(to bottom, #0a0a0a, #000);
-        border: 1px solid rgba(199,167,90,.30);
+        background: var(--ecc-bg-surface);
+        border: 1px solid var(--ecc-border-strong);
         position: relative;
         overflow: hidden;
-        box-shadow: 0 30px 80px rgba(0,0,0,.60);
+        box-shadow: var(--ecc-shadow-soft);
     }
     @media (min-width: 992px){
         .ecc-crest{ width: 104px; height: 104px; }
@@ -690,9 +690,9 @@ document.addEventListener('click', function (e) {
     .ecc-input{
         height: 56px;
         border-radius: 12px;
-        background: rgba(199,167,90,.03);
-        border: 1px solid rgba(199,167,90,.20);
-        color: #ffffff;
+        background: var(--ecc-bg-input);
+        border: 1px solid var(--ecc-border);
+        color: var(--ecc-text-primary);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         transition: all 220ms ease;
@@ -702,12 +702,12 @@ document.addEventListener('click', function (e) {
         cursor: text;
         caret-color: var(--ecc-gold-400);
     }
-    .ecc-input::placeholder{ color: rgba(199,167,90,.30); }
+    .ecc-input::placeholder{ color: var(--ecc-text-muted); }
     .ecc-input:focus{
-        background: rgba(199,167,90,.08);
-        border-color: rgba(199,167,90,.80);
+        background: var(--ecc-bg-input);
+        border-color: var(--ecc-primary-border);
         box-shadow: none;
-        color: #ffffff;
+        color: var(--ecc-text-primary);
     }
 
     .ecc-input-icon{
