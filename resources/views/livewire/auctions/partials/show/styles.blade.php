@@ -339,8 +339,8 @@
     }
 
     .auction-place-bid-btn:disabled {
-        background: var(--ecc-text-primary);
-        color: var(--ecc-text-primary);
+        background: var(--ecc-bg-input);
+        color: var(--ecc-text-muted);
         box-shadow: none;
         cursor: not-allowed;
         transform: none;
