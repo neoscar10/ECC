@@ -70,26 +70,13 @@
 
 @push('styles')
 <style>
-    /* Page — always dark regardless of global theme */
+    /* Page */
     .ecc-gate{
         min-height: max(884px, 100dvh);
-        background: #0b0b08;
-        color: #ffffff;
+        background: var(--ecc-bg-page);
+        color: var(--ecc-text-primary);
         font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
         isolation: isolate;
-
-        /* Force dark-mode tokens within this component */
-        --ecc-bg-page: #0b0b08;
-        --ecc-bg-surface: #11110c;
-        --ecc-bg-input: rgba(255, 255, 255, 0.055);
-        --ecc-bg-hover: rgba(199, 167, 90, 0.10);
-        --ecc-text-primary: #ffffff;
-        --ecc-text-secondary: rgba(255, 255, 255, 0.78);
-        --ecc-text-muted: rgba(255, 255, 255, 0.58);
-        --ecc-text-subtle: rgba(255, 255, 255, 0.42);
-        --ecc-border: rgba(255, 255, 255, 0.10);
-        --ecc-border-soft: rgba(255, 255, 255, 0.065);
-        --ecc-primary-soft: rgba(199, 167, 90, 0.12);
     }
 
     /* Shell (keeps mobile look centered on desktop) */
@@ -99,9 +86,9 @@
         height: min(92vh, 940px);
         border-radius: 18px;
         overflow: hidden;
-        box-shadow: 0 35px 110px rgba(0,0,0,.65);
+        box-shadow: var(--ecc-shadow-card);
         border: 1px solid var(--ecc-border-soft);
-        background: rgba(5,5,5,.55);
+        background: var(--ecc-bg-surface);
         position: relative;
     }
     .ecc-gate-inner{
@@ -123,7 +110,7 @@
     }
     .ecc-gate-overlay{
         z-index: 1;
-        background: linear-gradient(to bottom, rgba(5,5,5,.78), rgba(5,5,5,.90), rgba(5,5,5,1));
+        background: linear-gradient(to bottom, rgba(var(--ecc-bg-page-rgb),.78), rgba(var(--ecc-bg-page-rgb),.90), var(--ecc-bg-page));
     }
     .ecc-gate-noise{
         z-index: 2;
