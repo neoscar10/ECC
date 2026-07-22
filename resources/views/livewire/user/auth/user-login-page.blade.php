@@ -154,8 +154,8 @@
                     {{-- Step 2: Verify & Reset --}}
                     <form wire:submit.prevent="verifyResetOtp" class="ecc-form">
                         @if(!$showOtpInput && $otpMethod === 'direct_message')
-                            <h5 class="text-center mb-3" style="color: var(--ecc-gold-400);">Request Verification Code</h5>
-                            <p class="text-center mb-4 ecc-subtext mx-auto" style="color: rgba(199,167,90,.60);">To receive your OTP, please send us a message on WhatsApp.</p>
+                            <h5 class="text-center mb-3" style="color: var(--ecc-primary-dark);">Request Verification Code</h5>
+                            <p class="text-center mb-4 ecc-subtext mx-auto" style="color: var(--ecc-primary-dark);">To receive your OTP, please send us a message on WhatsApp.</p>
                             <div class="mb-4 text-center">
                                 <a href="https://wa.me/{{ ltrim($whatsappNumber, '+') }}?text={{ urlencode('Request OTP') }}" 
                                    target="_blank" 
@@ -165,7 +165,7 @@
                                   <span class="material-symbols-outlined">chat</span>
                                   <span>Open WhatsApp to Request OTP</span>
                                 </a>
-                                <p class="small mb-0" style="color: rgba(199,167,90,.60);">After sending the message, you will receive the OTP in WhatsApp. Copy and paste it here.</p>
+                                <p class="small mb-0" style="color: var(--ecc-primary-dark);">After sending the message, you will receive the OTP in WhatsApp. Copy and paste it here.</p>
                             </div>
                         @else
                             @if($devOtp)
@@ -173,7 +173,7 @@
                                 <div class="card-body p-3">
                                   <div class="d-flex align-items-center justify-content-between">
                                     <div>
-                                      <div class="text-uppercase fw-bold small mb-1" style="letter-spacing: 0.05em; font-family: 'Noto Sans', sans-serif; color: var(--ecc-gold-400);">Developer Mode OTP</div>
+                                      <div class="text-uppercase fw-bold small mb-1" style="letter-spacing: 0.05em; font-family: 'Noto Sans', sans-serif; color: var(--ecc-primary-dark);">Developer Mode OTP</div>
                                       <div class="h3 mb-0 text-white font-monospace fw-bold" style="letter-spacing: 0.1em;">{{ $devOtp }}</div>
                                     </div>
                                     <button type="button" 
@@ -297,7 +297,7 @@
                                 }
                              }">
                             <div x-show="running" style="display: none;">
-                                <span class="ecc-timer-text" style="color: var(--ecc-text-muted);">Resend code in <span x-text="display" style="color: var(--ecc-gold-400); font-weight: bold;">00:00</span></span>
+                                <span class="ecc-timer-text" style="color: var(--ecc-primary-dark);">Resend code in <span x-text="display" style="color: var(--ecc-primary-dark); font-weight: bold;">00:00</span></span>
                                 <div class="mt-2">
                                     <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase" style="font-size: 11px;">Back to Login</a>
                                 </div>
@@ -352,8 +352,8 @@
                     {{-- Step 2: Verify & Login --}}
                     <form wire:submit.prevent="verifyLoginOtp" class="ecc-form">
                         @if(!$showOtpInput && $otpMethod === 'direct_message')
-                            <h5 class="text-center mb-3" style="color: var(--ecc-gold-400);">Request Verification Code</h5>
-                            <p class="text-center mb-4 ecc-subtext mx-auto" style="color: rgba(199,167,90,.60);">To receive your OTP, please send us a message on WhatsApp.</p>
+                            <h5 class="text-center mb-3" style="color: var(--ecc-primary-dark);">Request Verification Code</h5>
+                            <p class="text-center mb-4 ecc-subtext mx-auto" style="color: var(--ecc-primary-dark);">To receive your OTP, please send us a message on WhatsApp.</p>
                             <div class="mb-4 text-center">
                                 <a href="https://wa.me/{{ ltrim($whatsappNumber, '+') }}?text={{ urlencode('Request OTP') }}" 
                                    target="_blank" 
@@ -363,7 +363,7 @@
                                   <span class="material-symbols-outlined">chat</span>
                                   <span>Open WhatsApp to Request OTP</span>
                                 </a>
-                                <p class="small mb-0" style="color: rgba(199,167,90,.60);">After sending the message, you will receive the OTP in WhatsApp. Copy and paste it here.</p>
+                                <p class="small mb-0" style="color: var(--ecc-primary-dark);">After sending the message, you will receive the OTP in WhatsApp. Copy and paste it here.</p>
                             </div>
                         @else
                             @if($devOtp)
@@ -371,7 +371,7 @@
                                 <div class="card-body p-3">
                                   <div class="d-flex align-items-center justify-content-between">
                                     <div>
-                                      <div class="text-uppercase fw-bold small mb-1" style="letter-spacing: 0.05em; font-family: 'Noto Sans', sans-serif; color: var(--ecc-gold-400);">Developer Mode OTP</div>
+                                      <div class="text-uppercase fw-bold small mb-1" style="letter-spacing: 0.05em; font-family: 'Noto Sans', sans-serif; color: var(--ecc-primary-dark);">Developer Mode OTP</div>
                                       <div class="h3 mb-0 text-white font-monospace fw-bold" style="letter-spacing: 0.1em;">{{ $devOtp }}</div>
                                     </div>
                                     <button type="button" 
@@ -396,7 +396,7 @@
                                     style="letter-spacing: 0.6em; padding-left: 0.6em; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 28px !important; height: 64px; border-color: rgba(242,185,13,.4);"
                                 >
                                 @error('otp') <div class="ecc-error mt-2 text-center">{{ $message }}</div> @enderror
-                                <div class="mt-3 fs-11" style="color: rgba(242,185,13,.5);">Code expires in {{ $otpTtl }} minutes.</div>
+                                <div class="mt-3 fs-11" style="color: var(--ecc-primary-dark);">Code expires in {{ $otpTtl }} minutes.</div>
                             </div>
 
                             <div class="pt-2">
@@ -803,8 +803,8 @@ document.addEventListener('click', function (e) {
     input:-webkit-autofill:hover,
     input:-webkit-autofill:focus,
     input:-webkit-autofill:active{
-        -webkit-text-fill-color: #ffffff !important;
-        -webkit-box-shadow: 0 0 0 30px #050505 inset !important;
+        -webkit-text-fill-color: var(--ecc-text-primary) !important;
+        -webkit-box-shadow: 0 0 0 30px var(--ecc-bg-input) inset !important;
         transition: background-color 5000s ease-in-out 0s;
     }
 

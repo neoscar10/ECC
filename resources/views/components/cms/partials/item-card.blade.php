@@ -161,7 +161,7 @@
     }
 
     .cms-item-card:hover .card {
-        background: #181818 !important;
+        background: var(--ecc-bg-surface) !important;
         transform: translateY(-4px);
         box-shadow: 0 10px 30px rgba(199, 167, 90,0.2) !important;
         border-color: rgba(199, 167, 90,0.4) !important;
@@ -176,26 +176,27 @@
         justify-content: center;
         text-align: center;
         padding: 15px;
-        background: rgba(0,0,0,0.4);
+        background: var(--ecc-bg-surface);
+        opacity: 0.9;
     }
     .ecc-cms-lock-icon {
         width: 32px; height: 32px;
         border-radius: 50%;
-        background: rgba(0, 0, 0, 0.8);
+        background: var(--ecc-bg-input);
         border: 1px solid rgba(199, 167, 90, 0.3);
         display: flex; align-items: center; justify-content: center;
         margin-bottom: 8px;
         color: var(--ecc-primary);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .ecc-cms-lock-title {
-        color: #fceec5;
+        color: var(--ecc-text-primary);
         font-weight: 800;
         font-size: 9px;
         letter-spacing: 0.05em;
     }
     .ecc-cms-lock-hint {
-        color: #cbbc90;
+        color: var(--ecc-text-secondary);
         margin-top: 3px;
         font-size: 8px;
         font-weight: 600;
@@ -211,8 +212,8 @@
         border-radius: 1rem;
         overflow: hidden;
         border: 1px solid var(--ecc-primary-soft);
-        background: #1a140b;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        background: var(--ecc-bg-input);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
 
     .ecc-card-badge {
@@ -222,7 +223,7 @@
         z-index: 10;
         padding: .25rem .5rem;
         border-radius: .4rem;
-        background: rgba(17,13,7,.85);
+        background: var(--ecc-bg-surface);
         backdrop-filter: blur(8px);
         color: var(--ecc-primary);
         font-size: .55rem;
@@ -235,7 +236,7 @@
     .ecc-card-media-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(to top, rgba(17,13,7,0.9) 0%, rgba(17,13,7,0) 45%);
+        background: linear-gradient(to top, var(--ecc-bg-surface) 0%, transparent 45%);
         z-index: 1;
     }
 
@@ -257,7 +258,7 @@
         display: inline-flex;
         align-items: center;
         gap: .3rem;
-        background: rgba(0,0,0,0.3);
+        background: var(--ecc-bg-surface);
         padding: .2rem .4rem;
         border-radius: .35rem;
     }
@@ -270,7 +271,7 @@
         align-items: center;
         justify-content: center;
         background: var(--ecc-primary);
-        color: #17120a;
+        color: var(--ecc-bg-page);
         font-size: 1rem;
         box-shadow: 0 6px 20px rgba(199, 167, 90,.25);
         transition: .2s ease;
@@ -284,7 +285,7 @@
     }
 
     .ecc-card-meta-label {
-        color: rgba(245,239,225,.4);
+        color: var(--ecc-text-secondary);
         font-size: .75rem;
         font-weight: 600;
     }
@@ -299,14 +300,14 @@
         aspect-ratio: {{ $isPreview ? '16/9' : '1/1' }};
         border-radius: 1.15rem;
         border: 1px solid rgba(199, 167, 90,.1);
-        background: #1a140b;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        background: var(--ecc-bg-input);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
 
     .ecc-editorial-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(to top, rgba(13,9,5,0.95) 0%, rgba(13,9,5,0.7) 35%, rgba(13,9,5,0.2) 100%);
+        background: linear-gradient(to top, var(--ecc-bg-surface) 0%, transparent 100%);
         z-index: 1;
     }
 

@@ -564,8 +564,14 @@
 @push('styles')
 <style>
     .ecc-vault-page {
-        color: #fff;
+        color: var(--ecc-text-primary);
     }
+    
+    .ecc-vault-page .text-white { color: var(--ecc-text-primary) !important; }
+    .ecc-vault-page .text-white-50 { color: var(--ecc-text-secondary) !important; }
+    .ecc-vault-page .bg-white-5 { background: var(--ecc-bg-surface-2) !important; }
+    .ecc-vault-page .border-white-5 { border-color: var(--ecc-border) !important; }
+    .ecc-vault-page .border-white-10 { border-color: var(--ecc-border-soft) !important; }
 
     .ecc-vault-header {
         padding-top: 1rem;
@@ -601,13 +607,13 @@
         line-height: .92;
         font-weight: 900;
         letter-spacing: -.06em;
-        color: #fff;
+        color: var(--ecc-text-primary);
         text-transform: uppercase;
         margin: 0;
     }
 
     .ecc-vault-subtitle {
-        color: rgba(245,239,225,.70);
+        color: var(--ecc-text-secondary);
         max-width: 620px;
         font-size: 1.05rem;
         line-height: 1.8;
@@ -617,11 +623,11 @@
     .ecc-vault-sidebar-card,
     .ecc-vault-artifact-card,
     .ecc-vault-appraisal-card {
-        background: linear-gradient(180deg, rgba(24,19,10,.94), rgba(17,13,7,.98));
-        border: 1px solid rgba(199, 167, 90,.14);
+        background: var(--ecc-bg-input);
+        border: 1px solid var(--ecc-border);
         border-radius: 1.25rem;
-        box-shadow: 0 12px 30px rgba(0,0,0,.14);
-        color: #fff;
+        box-shadow: 0 12px 30px var(--ecc-shadow);
+        color: var(--ecc-text-primary);
     }
 
     .ecc-vault-standing-card {
@@ -630,7 +636,7 @@
 
     .ecc-vault-standing-label,
     .ecc-vault-grid-title {
-        color: rgba(245,239,225,.56);
+        color: var(--ecc-text-secondary);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .20em;
@@ -660,7 +666,7 @@
     }
 
     .ecc-vault-standing-note {
-        color: rgba(245,239,225,.42);
+        color: var(--ecc-text-muted);
         font-size: .62rem;
         font-weight: 800;
         letter-spacing: .16em;
@@ -696,14 +702,14 @@
     }
 
     .ecc-vault-sidebar-item-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: .98rem;
         font-weight: 800;
         margin-bottom: .15rem;
     }
 
     .ecc-vault-sidebar-item-text {
-        color: rgba(245,239,225,.56);
+        color: var(--ecc-text-secondary);
         font-size: .84rem;
         line-height: 1.7;
     }

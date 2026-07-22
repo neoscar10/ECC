@@ -14,33 +14,33 @@
                 <span style="font-size:.7rem; letter-spacing:.2em; font-weight:800; color:rgba(245,239,225,.45); text-transform:uppercase;">Razorpay Secure Checkout</span>
             </div>
 
-            <div class="p-4 mb-0" style="background: linear-gradient(180deg, #1a1509, #110e04); border: 1px solid rgba(199,167,90,.2); border-radius: 1rem;">
+            <div class="p-4 mb-0" style="background: var(--ecc-bg-input); border: 1px solid var(--ecc-border); border-radius: 1rem;">
                 <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
                     <div class="text-start">
-                        <div style="font-size:.7rem; letter-spacing:.15em; font-weight:800; color:rgba(245,239,225,.4); text-transform:uppercase; margin-bottom:.3rem;">
+                        <div style="font-size:.7rem; letter-spacing:.15em; font-weight:800; color: var(--ecc-text-secondary); text-transform:uppercase; margin-bottom:.3rem;">
                             {{ strtoupper($payableSummary['label']) }}
                         </div>
-                        <div style="font-weight:800; color:rgba(245,239,225,.9); font-size:1rem;">
+                        <div style="font-weight:800; color: var(--ecc-text-primary); font-size:1rem;">
                             {{ $payableSummary['reference'] ?? ('Payment #' . $payment->id) }}
                         </div>
                     </div>
                     <div class="text-end">
-                        <div style="font-size:.7rem; letter-spacing:.15em; font-weight:800; color:rgba(245,239,225,.4); text-transform:uppercase; margin-bottom:.3rem;">Amount</div>
-                        <div style="font-size:1.6rem; font-weight:900; color:#d4af37; letter-spacing:-.02em;">
+                        <div style="font-size:.7rem; letter-spacing:.15em; font-weight:800; color: var(--ecc-text-secondary); text-transform:uppercase; margin-bottom:.3rem;">Amount</div>
+                        <div style="font-size:1.6rem; font-weight:900; color: var(--ecc-primary); letter-spacing:-.02em;">
                             {{ $payableSummary['display_amount'] }}
                         </div>
                     </div>
                 </div>
 
-                <hr style="border-color: rgba(199,167,90,.12); margin: 1rem 0 .75rem;">
+                <hr style="border-color: var(--ecc-border); margin: 1rem 0 .75rem;">
 
                 <div class="d-flex justify-content-between gap-3" style="font-size:.78rem;">
-                    <span style="color:rgba(245,239,225,.4); font-weight:700; letter-spacing:.08em; text-transform:uppercase;">Gateway</span>
-                    <span style="color:rgba(245,239,225,.65); font-weight:600;">Razorpay</span>
+                    <span style="color: var(--ecc-text-secondary); font-weight:700; letter-spacing:.08em; text-transform:uppercase;">Gateway</span>
+                    <span style="color: var(--ecc-text-primary); font-weight:600;">Razorpay</span>
                 </div>
                 <div class="d-flex justify-content-between gap-3 mt-1" style="font-size:.78rem;">
-                    <span style="color:rgba(245,239,225,.4); font-weight:700; letter-spacing:.08em; text-transform:uppercase;">Payment Status</span>
-                    <span style="color: #f0c040; font-weight:700; letter-spacing:.06em; text-transform:uppercase;">
+                    <span style="color: var(--ecc-text-secondary); font-weight:700; letter-spacing:.08em; text-transform:uppercase;">Payment Status</span>
+                    <span style="color: var(--ecc-primary); font-weight:700; letter-spacing:.06em; text-transform:uppercase;">
                         {{ ucfirst($payment->status) }}
                     </span>
                 </div>
@@ -77,13 +77,13 @@
         {{-- ═══════════════════════════════════════════════
              LOADING / AUTO-OPEN PANEL
         ═══════════════════════════════════════════════ --}}
-        <div id="rzp-loading-panel" class="text-center p-4" style="background: linear-gradient(180deg, #1a1509, #110e04); border: 1px solid rgba(199,167,90,.2); border-radius: 1rem;">
+        <div id="rzp-loading-panel" class="text-center p-4" style="background: var(--ecc-bg-input); border: 1px solid var(--ecc-border); border-radius: 1rem;">
             <div class="spinner-border text-warning mb-3" role="status" id="loading-spinner" style="width:2.5rem;height:2.5rem;">
                 <span class="visually-hidden">Loading…</span>
             </div>
-            <h4 style="color:#d4af37; font-weight:900; letter-spacing:-.01em;" class="mb-1">Opening Secure Checkout</h4>
+            <h4 style="color: var(--ecc-primary); font-weight:900; letter-spacing:-.01em;" class="mb-1">Opening Secure Checkout</h4>
             <span style="display:none">Processing Payment</span>
-            <p style="color:rgba(245,239,225,.45); font-size:.85rem;" class="mb-4">
+            <p style="color: var(--ecc-text-secondary); font-size:.85rem;" class="mb-4">
                 Please do not refresh or press back while the payment window is loading.
             </p>
             <button id="rzp-button" class="btn btn-warning w-100 fw-bold py-3" style="display:none; border-radius:.75rem; letter-spacing:.12em; font-size:.85rem;">
@@ -104,11 +104,11 @@
              DISMISSED — PAYMENT NOT COMPLETED PANEL
         ═══════════════════════════════════════════════ --}}
         <div id="rzp-dismissed-panel" style="display:none;">
-            <div class="text-center p-5" style="background: linear-gradient(180deg, #1a1509, #110e04); border: 1px solid rgba(199,167,90,.2); border-radius: 1rem;">
-                <i class="mdi mdi-alert-circle-outline mb-3" style="font-size:52px; color:#d4af37; display:block;"></i>
-                <h3 style="color:#d4af37; font-weight:900;" class="mb-2">Payment Not Completed</h3>
-                <p style="color:rgba(245,239,225,.5); font-size:.9rem;" class="mb-4">
-                    You closed the payment window. Your order is reserved — <strong style="color:rgba(245,239,225,.7);">no payment was taken</strong>.
+            <div class="text-center p-5" style="background: var(--ecc-bg-input); border: 1px solid var(--ecc-border); border-radius: 1rem;">
+                <i class="mdi mdi-alert-circle-outline mb-3" style="font-size:52px; color: var(--ecc-primary); display:block;"></i>
+                <h3 style="color: var(--ecc-primary); font-weight:900;" class="mb-2">Payment Not Completed</h3>
+                <p style="color: var(--ecc-text-secondary); font-size:.9rem;" class="mb-4">
+                    You closed the payment window. Your order is reserved — <strong style="color: var(--ecc-text-primary);">no payment was taken</strong>.
                     You can retry or return to your cart.
                 </p>
                 <div class="d-flex flex-column gap-3">
@@ -126,10 +126,10 @@
              VERIFYING PANEL (after Razorpay success callback)
         ═══════════════════════════════════════════════ --}}
         <div id="rzp-verifying-panel" style="display:none;">
-            <div class="text-center p-5" style="background: linear-gradient(180deg, #1a1509, #110e04); border: 1px solid rgba(199,167,90,.2); border-radius: 1rem;">
+            <div class="text-center p-5" style="background: var(--ecc-bg-input); border: 1px solid var(--ecc-border); border-radius: 1rem;">
                 <div class="spinner-border text-warning mb-3" role="status" style="width:2.5rem;height:2.5rem;"></div>
-                <h4 style="color:#d4af37; font-weight:900;" class="mb-2">Verifying Payment…</h4>
-                <p style="color:rgba(245,239,225,.45); font-size:.85rem;" class="mb-0">
+                <h4 style="color: var(--ecc-primary); font-weight:900;" class="mb-2">Verifying Payment…</h4>
+                <p style="color: var(--ecc-text-secondary); font-size:.85rem;" class="mb-0">
                     Confirming your payment with Razorpay. Please wait.
                 </p>
             </div>

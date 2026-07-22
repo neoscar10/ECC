@@ -1,17 +1,17 @@
 <div>
-    <div class="position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--ecc-surface), var(--ecc-bg-page)); padding: 4rem 0 2rem;">
-        <div class="luxe-container position-relative z-1">
+    <div class="position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--ecc-surface), var(--ecc-bg-page)); padding: 3rem 0 1rem;">
+        <div class="container-xxl position-relative z-1">
             <div class="row">
                 <div class="col-lg-8">
-                    <h1 class="display-4 fw-bold mb-3" style="color: var(--ecc-primary);">Privacy Policy</h1>
-                    <p class="lead" style="color: var(--ecc-text-secondary);">Your privacy and the security of your data are paramount to the Executive Club Cricket.</p>
+                    <h1 class="display-5 fw-bold mb-2" style="color: var(--ecc-primary);">Privacy Policy</h1>
+                    <p class="lead mb-0" style="color: var(--ecc-text-secondary);">Your privacy and the security of your data are paramount to the Executive Club Cricket.</p>
                 </div>
             </div>
         </div>
-        <div class="position-absolute top-0 start-0" style="width: 600px; height: 600px; background: radial-gradient(circle, rgba(199,167,90,0.15) 0%, rgba(0,0,0,0) 70%); border-radius: 50%; z-index: 0; pointer-events: none; transform: translate(-30%, -30%);"></div>
+        <div class="position-absolute top-0 start-0" style="width: 400px; height: 400px; background: radial-gradient(circle, rgba(199,167,90,0.1) 0%, rgba(0,0,0,0) 70%); border-radius: 50%; z-index: 0; pointer-events: none; transform: translate(-30%, -30%);"></div>
     </div>
 
-    <div class="luxe-container" style="padding: 2rem 0 5rem;">
+    <div class="container-xxl" style="padding: 1.5rem 0 5rem;">
         <div class="row">
             <div class="col-lg-10 col-xl-8">
                 <div style="color: var(--ecc-text-secondary); line-height: 1.8; font-size: 1.05rem;">

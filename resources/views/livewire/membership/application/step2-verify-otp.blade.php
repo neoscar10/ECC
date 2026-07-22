@@ -232,7 +232,7 @@
   }
   .ecc-bg-grad{
     position:absolute; inset:0;
-    background: radial-gradient(circle at center, rgba(199, 167, 90,0.05) 0%, rgba(2,2,2,1) 70%);
+    background: radial-gradient(circle at center, rgba(199, 167, 90,0.05) 0%, var(--ecc-bg-page) 70%);
     pointer-events:none;
   }
   .ecc-bg-glow{

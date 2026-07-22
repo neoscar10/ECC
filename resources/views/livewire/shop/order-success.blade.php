@@ -56,7 +56,7 @@
 
         .ecc-confirmation-subtitle {
             max-width: 620px;
-            color: rgba(245, 239, 225, .70);
+            color: var(--ecc-text-secondary);
             font-size: 1.05rem;
             line-height: 1.8;
             position: relative;
@@ -101,7 +101,7 @@
         }
 
         .ecc-ecc-text-muted-gold {
-            color: rgba(245, 239, 225, .55);
+            color: var(--ecc-text-secondary);
         }
 
         .ecc-transaction-id {

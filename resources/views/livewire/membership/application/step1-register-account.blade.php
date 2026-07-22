@@ -209,25 +209,25 @@
               }
           }" @click.outside="open = false">
             
-            <button type="button" @click="open = !open" class="btn ecc-input d-flex align-items-center gap-2" style="border-radius: 12px 0 0 12px !important; border-right: 0 !important; max-width: 140px; background-color: var(--ecc-surface) !important; color: #fff; border: 1px solid var(--ecc-border) !important;">
+            <button type="button" @click="open = !open" class="btn ecc-input d-flex align-items-center gap-2" style="border-radius: 12px 0 0 12px !important; border-right: 0 !important; max-width: 140px; background-color: var(--ecc-surface) !important; color: var(--ecc-text-primary); border: 1px solid var(--ecc-border) !important;">
               <span x-text="selected.flag" style="font-size: 18px;"></span>
               <span x-text="selected.code" style="font-size: 14px; font-weight: 600;"></span>
               <span class="material-symbols-outlined" style="font-size: 16px; opacity: 0.6;">keyboard_arrow_down</span>
             </button>
 
-            <div x-show="open" class="position-absolute z-3 mt-1 shadow-lg bg-dark border border-secondary" style="display: none; top: 100%; left: 0; width: 300px; border-radius: 12px; max-height: 280px; overflow-y: auto; background-color: #121212 !important; border-color: #333 !important;">
-              <div class="p-2 sticky-top" style="background-color: #121212;">
-                <input type="text" x-model="search" class="form-control form-control-sm ecc-text-primary" placeholder="Search country..." style="background-color: #222 !important; border-color: #444 !important; color: #fff !important; font-size: 13px;">
+            <div x-show="open" class="position-absolute z-3 mt-1 shadow-lg" style="display: none; top: 100%; left: 0; width: 300px; border-radius: 12px; max-height: 280px; overflow-y: auto; background-color: var(--ecc-bg-surface) !important; border: 1px solid var(--ecc-border) !important;">
+              <div class="p-2 sticky-top" style="background-color: var(--ecc-bg-surface);">
+                <input type="text" x-model="search" class="form-control form-control-sm" placeholder="Search country..." style="background-color: var(--ecc-surface) !important; border: 1px solid var(--ecc-border) !important; color: var(--ecc-text-primary) !important; font-size: 13px;">
               </div>
               
               <div class="list-group list-group-flush">
                 <template x-for="c in filteredCountries" :key="c.name + c.code">
-                  <button type="button" @click="selected = c; @this.set('country_code', c.code); open = false; search = '';" class="list-group-item list-group-item-action ecc-text-primary d-flex align-items-center justify-content-between py-2 px-3 border-0" style="background-color: transparent; font-size: 13px; border-bottom: 1px solid #222 !important;">
+                  <button type="button" @click="selected = c; @this.set('country_code', c.code); open = false; search = '';" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-2 px-3 border-0" style="background-color: transparent; color: var(--ecc-text-primary); font-size: 13px; border-bottom: 1px solid var(--ecc-border) !important;">
                     <div class="d-flex align-items-center gap-2">
                       <span x-text="c.flag" style="font-size: 16px;"></span>
                       <span x-text="c.name" class="text-truncate" style="max-width: 160px; font-family: 'Noto Sans', sans-serif;"></span>
                     </div>
-                    <span x-text="c.code" class="text-muted fw-bold" style="font-family: 'Noto Sans', sans-serif;"></span>
+                    <span x-text="c.code" style="color: var(--ecc-text-subtle); font-family: 'Noto Sans', sans-serif; font-weight: 600;"></span>
                   </button>
                 </template>
               </div>

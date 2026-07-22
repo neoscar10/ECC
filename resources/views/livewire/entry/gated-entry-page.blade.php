@@ -158,10 +158,7 @@
         text-shadow: 0 14px 40px rgba(0,0,0,.55);
     }
     .ecc-gate-title-soft{
-        background: linear-gradient(90deg, rgba(255,255,255,1), var(--ecc-text-primary));
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
+        color: var(--ecc-text-primary);
     }
     .ecc-gate-kicker{
         font-size: 12px;
