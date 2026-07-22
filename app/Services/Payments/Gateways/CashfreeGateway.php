@@ -265,7 +265,7 @@ class CashfreeGateway implements PaymentGatewayInterface
             'environment'         => $this->isLiveMode() ? 'production' : 'sandbox',
             'return_url'          => $returnUrl,
             'notify_url'          => $notifyUrl,
-            'name'                => 'Executive Cricket Club',
+            'name'                => 'Executive Club Cricket',
             'description'         => $context['description'] ?? $this->buildDefaultDescription($payment),
             'customer'            => [
                 'id'    => $customerDetails['customer_id'],
@@ -1001,7 +1001,7 @@ class CashfreeGateway implements PaymentGatewayInterface
     protected function buildDefaultDescription(Payment $payment): string
     {
         $purpose = $payment->purpose ? str_replace('_', ' ', $payment->purpose) : 'payment';
-        return 'Executive Cricket Club - ' . ucwords($purpose);
+        return 'Executive Club Cricket - ' . ucwords($purpose);
     }
 
     /**

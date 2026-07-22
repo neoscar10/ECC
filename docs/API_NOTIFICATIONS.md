@@ -1,7 +1,7 @@
 # ECC Mobile Notifications & Auction API Guide
 
 ## 1. Overview
-The Executive Cricket Club (ECC) mobile app uses **Firebase Cloud Messaging (FCM)** for real-time auction updates. This system relies on a "Topic-based" architecture where the backend broadcasts events to specific auction topics, and the mobile app listens to them.
+The Executive Club Cricket (ECC) mobile app uses **Firebase Cloud Messaging (FCM)** for real-time auction updates. This system relies on a "Topic-based" architecture where the backend broadcasts events to specific auction topics, and the mobile app listens to them.
 
 ### Key Concepts
 *   **Topics**: The app does **NOT** subscribe to topics directly via client-side code. Instead, the backend manages subscriptions based on user actions (toggling the bell icon).

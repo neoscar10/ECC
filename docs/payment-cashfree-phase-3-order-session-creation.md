@@ -59,7 +59,7 @@ CASHFREE_NOTIFY_URL=            # Optional: webhook notification URL
     "customer_email": "john@example.com",
     "customer_phone": "9876543210"
   },
-  "order_note": "Executive Cricket Club - Shop Order",
+  "order_note": "Executive Club Cricket - Shop Order",
   "order_tags": {
     "internal_payment_id": "123",
     "purpose": "shop_order",
@@ -120,8 +120,8 @@ CASHFREE_NOTIFY_URL=            # Optional: webhook notification URL
   "environment": "sandbox",
   "return_url": null,
   "notify_url": null,
-  "name": "Executive Cricket Club",
-  "description": "Executive Cricket Club - Shop Order",
+  "name": "Executive Club Cricket",
+  "description": "Executive Club Cricket - Shop Order",
   "customer": {
     "id": "user_42",
     "name": "John Doe",

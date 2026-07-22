@@ -1,6 +1,6 @@
 # Mobile Payment Integration Flow & API Reference
 
-This document provides a comprehensive step-by-step reference for mobile client developers implementing payment flows in the Executive Cricket Club (ECC) application.
+This document provides a comprehensive step-by-step reference for mobile client developers implementing payment flows in the Executive Club Cricket (ECC) application.
 
 ---
 
@@ -258,7 +258,7 @@ graph TD
         "order_id": "order_Hj23nsD89s2",
         "amount": 50000,
         "currency": "INR",
-        "name": "Executive Cricket Club",
+        "name": "Executive Club Cricket",
         "description": "Shop Order #ORD-2026-00912",
         "prefill": {
           "name": "Jane Doe",
@@ -441,7 +441,7 @@ Upon receiving a successful callback from the mobile SDK, immediately call the v
         "order_id": "order_RegPay982",
         "amount": 1000000,
         "currency": "INR",
-        "name": "Executive Cricket Club",
+        "name": "Executive Club Cricket",
         "description": "Membership Registration",
         "prefill": {
           "name": "John Doe",

@@ -29,7 +29,7 @@ class WelcomePage extends Component
     {
         return view('livewire.welcome.welcome-page')
             ->layout('layouts.user.blank', [
-                'title' => 'Executive Cricket Club',
+                'title' => 'Executive Club Cricket',
             ]);
     }
 }

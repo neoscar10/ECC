@@ -92,7 +92,7 @@ class ClubPageService
             'concierge' => $concierge,
             'auction_dossier' => $dossier,
             'tier_headline' => $tier ? strtoupper($tier->name) . ' PRIVILEGES' : 'ECC PRIVILEGES',
-            'tier_quote' => ($tier->description ?? null) ?: 'Experience the pinnacle of luxury and exclusivity with Executive Cricket Club.',
+            'tier_quote' => ($tier->description ?? null) ?: 'Experience the pinnacle of luxury and exclusivity with Executive Club Cricket.',
             'club_stats' => $stats,
             'urls' => [
                 'settings' => route('settings'),

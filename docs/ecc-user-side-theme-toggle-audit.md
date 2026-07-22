@@ -1,7 +1,7 @@
 # ECC User-Side Theme Toggle Audit
 
 ## A. Executive Summary
-The current Executive Cricket Club (ECC) user-side design utilizes a premium, high-fidelity dark visual language. However, the styling architecture is currently **highly scattered**. While a central palette exists in `styles.blade.php`, the majority of layout-specific and component-specific styles (backgrounds, card surfaces, borders, and gradients) are hardcoded using HEX and RGBA values within `@push('styles')` blocks in almost every major Livewire view.
+The current Executive Club Cricket (ECC) user-side design utilizes a premium, high-fidelity dark visual language. However, the styling architecture is currently **highly scattered**. While a central palette exists in `styles.blade.php`, the majority of layout-specific and component-specific styles (backgrounds, card surfaces, borders, and gradients) are hardcoded using HEX and RGBA values within `@push('styles')` blocks in almost every major Livewire view.
 
 Transitioning to a theme system is highly feasible but requires a systematic refactoring of these hardcoded values into a unified CSS variable map.
 

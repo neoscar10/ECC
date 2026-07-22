@@ -1,4 +1,4 @@
-# Executive Cricket Club (ECC) Mobile Payment Gateway Handoff Guide
+# Executive Club Cricket (ECC) Mobile Payment Gateway Handoff Guide
 ## Integration Details for Razorpay and Cashfree (Phase 6)
 
 This document provides technical instructions, payload specifications, and flows for mobile developers (specifically Flutter/iOS/Android) integrating the dynamic payment gateway selection system.
@@ -126,8 +126,8 @@ For Razorpay, the amount is converted to **paise** (integer value). The mobile a
       "currency": "INR",
       "order_id": "order_PJk193kdksa",
       "internal_payment_id": 182,
-      "name": "Executive Cricket Club",
-      "description": "Executive Cricket Club - Shop Order",
+      "name": "Executive Club Cricket",
+      "description": "Executive Club Cricket - Shop Order",
       "prefill": {
         "name": "Rohan Sharma",
         "email": "rohan@example.com",

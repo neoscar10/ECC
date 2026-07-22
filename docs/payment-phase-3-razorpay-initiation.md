@@ -1,6 +1,6 @@
 # ECC Payment Phase 3: Razorpay Payment Initiation
 
-This document describes the design, implementation, and verification of **Phase 3: Razorpay Payment Initiation** for the Executive Cricket Club (ECC) Laravel 11 project.
+This document describes the design, implementation, and verification of **Phase 3: Razorpay Payment Initiation** for the Executive Club Cricket (ECC) Laravel 11 project.
 
 ---
 
@@ -82,8 +82,8 @@ The checkout payload returned from `RazorpayGateway::createOrder()` is standardi
   "currency": "INR",
   "order_id": "order_ABC123xyz",
   "internal_payment_id": 42,
-  "name": "Executive Cricket Club",
-  "description": "Executive Cricket Club - Shop Order",
+  "name": "Executive Club Cricket",
+  "description": "Executive Club Cricket - Shop Order",
   "prefill": {
     "name": "Jane Doe",
     "email": "jane@example.com",
@@ -136,7 +136,7 @@ php artisan payments:test-razorpay-initiation {amount=100}
 | Status               | pending                      |
 | Checkout Key ID      | rzp_test_key_123             |
 | Checkout Amount      | 15000 paise                  |
-| Checkout Description | Executive Cricket Club - Test|
+| Checkout Description | Executive Club Cricket - Test|
 +----------------------+------------------------------+
 ==================================================================
 🎉 Razorpay checkout payload is fully verified and stable!

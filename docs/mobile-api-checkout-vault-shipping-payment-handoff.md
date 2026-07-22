@@ -1,4 +1,4 @@
-# Executive Cricket Club (ECC) Checkout + Vault Delivery API Handoff Details
+# Executive Club Cricket (ECC) Checkout + Vault Delivery API Handoff Details
 ## Technical Reference for Mobile (Flutter) and Frontend/Web Developers
 
 This document serves as the complete technical handoff for implementing the shop checkout and vault physical delivery flows on mobile and web clients. It details the routes, data models, payment gateway integration (Razorpay), shipment management (Shiprocket), testing guidelines, and recommendations to bridge the gap between the mobile API and web client flows.
@@ -223,8 +223,8 @@ sequenceDiagram
         "currency": "INR",
         "order_id": "order_PJk193kdksa",
         "internal_payment_id": 182,
-        "name": "Executive Cricket Club",
-        "description": "Executive Cricket Club - Shop Order",
+        "name": "Executive Club Cricket",
+        "description": "Executive Club Cricket - Shop Order",
         "prefill": {
           "name": "Rohan Sharma",
           "email": "rohan@example.com",

@@ -1,6 +1,6 @@
 # Payment Gateway Integration Final Testing Checklist
 
-This document provides environment requirements, sandbox credentials, webhook routing configurations, and manual testing procedures to validate the Executive Cricket Club's gateway-neutral payment system for production readiness.
+This document provides environment requirements, sandbox credentials, webhook routing configurations, and manual testing procedures to validate the Executive Club Cricket's gateway-neutral payment system for production readiness.
 
 ---
 

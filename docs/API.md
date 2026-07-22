@@ -1,4 +1,4 @@
-# Executive Cricket Club (ECC) API Documentation
+# Executive Club Cricket (ECC) API Documentation
 
 **Version:** v1
 **Base URL:** `{{base_url}}/api/v1` (e.g., `http://localhost:8000/api/v1`)

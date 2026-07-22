@@ -1,7 +1,7 @@
 # Mobile Realtime Handoff
 
 **Generated on:** 2026-01-25  
-**Project:** Executive Cricket Club (Laravel)
+**Project:** Executive Club Cricket (Laravel)
 
 This document provides definitive technical details for connecting the mobile application to the realtime broadcasting layer.
 

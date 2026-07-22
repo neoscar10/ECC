@@ -1,6 +1,6 @@
 # Phase 1: ECC Payment Flow & Generic Architecture Audit
 
-This document audits the existing mock/dummy payment pathways in the Executive Cricket Club (ECC) Laravel 11 project. It establishes structural readiness to support multiple gateways—starting with Razorpay, followed by Cashfree—without breaking existing systems, Livewire templates, mobile/API consumers, or dashboard metrics.
+This document audits the existing mock/dummy payment pathways in the Executive Club Cricket (ECC) Laravel 11 project. It establishes structural readiness to support multiple gateways—starting with Razorpay, followed by Cashfree—without breaking existing systems, Livewire templates, mobile/API consumers, or dashboard metrics.
 
 ---
 

@@ -136,7 +136,7 @@ echo $signature;
     "key":              "<RAZORPAY_KEY_ID>",   // public key only — secret never in JS
     "amount":           <paise>,               // server-side, from Payment.amount × 100
     "currency":         "INR",                 // from Payment.currency
-    "name":             "Executive Cricket Club",
+    "name":             "Executive Club Cricket",
     "description":      "<order description>",
     "order_id":         "<gateway_order_id>",  // created server-side via Razorpay API
     "prefill":          { name, email, contact },

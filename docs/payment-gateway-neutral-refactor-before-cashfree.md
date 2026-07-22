@@ -1,6 +1,6 @@
 # ECC Payment Gateway-Neutral Refactor Summary (Pre-Cashfree)
 
-This document provides a summary of the Phase 1 refactoring of the Executive Cricket Club (ECC) payment system. The goal was to establish a gateway-neutral architecture that preserves full support for the active **Razorpay** integration while preparing the system to support a second gateway (**Cashfree**).
+This document provides a summary of the Phase 1 refactoring of the Executive Club Cricket (ECC) payment system. The goal was to establish a gateway-neutral architecture that preserves full support for the active **Razorpay** integration while preparing the system to support a second gateway (**Cashfree**).
 
 ---
 

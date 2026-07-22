@@ -24,8 +24,8 @@
                 <div class="ecc-subtext mx-auto">
                     @if($mode === 'password')
                         Access reserved for approved members
-                        <span class="d-none d-md-inline"> of Executive Cricket Club.</span>
-                        <span class="d-md-none"><br>of Executive Cricket Club.</span>
+                        <span class="d-none d-md-inline"> of Executive Club Cricket.</span>
+                        <span class="d-md-none"><br>of Executive Club Cricket.</span>
                     @elseif($mode === 'forgot')
                         @if($step === 1) Enter your identity to receive a reset code.
                         @else Verification code sent to {{ $otpIdentifier }}.

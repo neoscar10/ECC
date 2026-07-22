@@ -1013,7 +1013,7 @@
                 </div>
 
                 <div class="luxe-legal d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
-                    <div>© {{ now()->year }} Executive club cricket. All Rights Reserved.</div>
+                    <div>© {{ now()->year }} Executive Club Cricket. All Rights Reserved.</div>
                     <div class="d-flex flex-wrap gap-3">
                         <a href="{{ route('privacy') }}" class="luxe-footer-link">Privacy Policy</a>
                         <a href="javascript:void(0)" class="luxe-footer-link">Accessibility</a>

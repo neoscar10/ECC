@@ -4,7 +4,7 @@
             <div class="row">
                 <div class="col-lg-8">
                     <h1 class="display-4 fw-bold mb-3" style="color: var(--ecc-primary);">Privacy Policy</h1>
-                    <p class="lead" style="color: var(--ecc-text-secondary);">Your privacy and the security of your data are paramount to the Executive Cricket Club.</p>
+                    <p class="lead" style="color: var(--ecc-text-secondary);">Your privacy and the security of your data are paramount to the Executive Club Cricket.</p>
                 </div>
             </div>
         </div>
@@ -18,7 +18,7 @@
                         <p class="mb-4">Last Updated: {{ date('F j, Y') }}</p>
 
                         <h4 class="fw-bold mt-5 mb-3" style="color: var(--ecc-primary);">1. Introduction</h4>
-                        <p>Welcome to the Executive Cricket Club (ECC). We are committed to protecting your privacy and providing a secure, premium experience for our members and guests. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website, apply for membership, or engage with our services, including our archive and vault.</p>
+                        <p>Welcome to the Executive Club Cricket (ECC). We are committed to protecting your privacy and providing a secure, premium experience for our members and guests. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website, apply for membership, or engage with our services, including our archive and vault.</p>
 
                         <h4 class="fw-bold mt-5 mb-3" style="color: var(--ecc-primary);">2. Information We Collect</h4>
                         <p>We may collect information about you in a variety of ways. The information we may collect includes:</p>
@@ -45,7 +45,7 @@
 
                         <h4 class="fw-bold mt-5 mb-3" style="color: var(--ecc-primary);">6. Contact Us</h4>
                         <p>If you have questions or comments about this Privacy Policy, please contact us at:</p>
-                        <p class="mb-0"><strong>Executive Cricket Club</strong></p>
+                        <p class="mb-0"><strong>Executive Club Cricket</strong></p>
                         <p class="mb-0">123 Heritage Lane, Cricket Avenue</p>
                         <p class="mb-0">London, UK SW1A 1AA</p>
                         <p>Email: <a href="mailto:concierge@executivecricketclub.com" style="color: var(--ecc-primary);">concierge@executivecricketclub.com</a></p>

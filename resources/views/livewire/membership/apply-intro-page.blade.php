@@ -6,7 +6,7 @@
     <div class="container-fluid px-4 pt-3 pb-2 position-relative z-2">
         <div class="d-flex align-items-center justify-content-center">
             <div class="ecc-top-title text-uppercase text-center">
-                Executive Cricket Club
+                Executive Club Cricket
             </div>
         </div>
     </div>
@@ -41,7 +41,7 @@
                 {{-- copy --}}
                 <div class="text-center text-lg-start ecc-copy mx-auto mx-lg-0 mb-4">
                     <p class="ecc-p mb-3">
-                        Executive Cricket Club is a private members-only platform. Applications are reviewed to preserve exclusivity.
+                        Executive Club Cricket is a private members-only platform. Applications are reviewed to preserve exclusivity.
                     </p>
                     <p class="ecc-p2 mb-0">
                         <em>Please allow 10-15 minutes to complete your dossier.</em>

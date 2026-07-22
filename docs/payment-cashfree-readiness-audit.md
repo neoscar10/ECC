@@ -1,6 +1,6 @@
 # ECC Cashfree Payment Gateway Readiness Audit
 
-This document presents a comprehensive readiness audit of the Executive Cricket Club (ECC) Laravel 11 payment architecture. The objective is to evaluate whether the current codebase is ready to integrate **Cashfree** as a second payment gateway alongside the existing **Razorpay** integration.
+This document presents a comprehensive readiness audit of the Executive Club Cricket (ECC) Laravel 11 payment architecture. The objective is to evaluate whether the current codebase is ready to integrate **Cashfree** as a second payment gateway alongside the existing **Razorpay** integration.
 
 ---
 

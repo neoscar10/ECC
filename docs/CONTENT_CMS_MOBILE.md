@@ -1,6 +1,6 @@
 # Mobile CMS Integration Guide
 
-This guide details how to consume the dynamic CMS Content Blocks API for the Executive Cricket Club mobile app.
+This guide details how to consume the dynamic CMS Content Blocks API for the Executive Club Cricket mobile app.
 
 ## Overview
 

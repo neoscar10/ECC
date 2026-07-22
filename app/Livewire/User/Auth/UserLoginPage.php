@@ -283,7 +283,7 @@ class UserLoginPage extends Component
                 }
             } catch (\Throwable $e) {
                 throw ValidationException::withMessages([
-                    'identity' => $e->getMessage() ?: 'Access reserved for approved members of Executive Cricket Club.',
+                    'identity' => $e->getMessage() ?: 'Access reserved for approved members of Executive Club Cricket.',
                 ]);
             }
         }
@@ -447,6 +447,6 @@ class UserLoginPage extends Component
     public function render()
     {
         return view('livewire.user.auth.user-login-page')
-            ->layout('layouts.user.blank', ['title' => 'Member Login - Executive Cricket Club']);
+            ->layout('layouts.user.blank', ['title' => 'Member Login - Executive Club Cricket']);
     }
 }

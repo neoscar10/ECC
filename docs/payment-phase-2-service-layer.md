@@ -1,6 +1,6 @@
 # ECC Core Payment Service Layer (Phase 2 Architecture)
 
-This document describes the design, class responsibilities, and future integration paths for the **Executive Cricket Club (ECC) Generic Payment Architecture**.
+This document describes the design, class responsibilities, and future integration paths for the **Executive Club Cricket (ECC) Generic Payment Architecture**.
 
 ---
 
