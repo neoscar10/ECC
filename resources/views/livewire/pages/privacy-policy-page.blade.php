@@ -1,21 +1,20 @@
 <div>
-    <div class="position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--ecc-surface), var(--ecc-bg-page)); padding: 6rem 0 4rem;">
+    <div class="position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--ecc-surface), var(--ecc-bg-page)); padding: 4rem 0 2rem;">
         <div class="luxe-container position-relative z-1">
-            <div class="row justify-content-center text-center">
+            <div class="row">
                 <div class="col-lg-8">
                     <h1 class="display-4 fw-bold mb-3" style="color: var(--ecc-primary);">Privacy Policy</h1>
                     <p class="lead" style="color: var(--ecc-text-secondary);">Your privacy and the security of your data are paramount to the Executive Cricket Club.</p>
                 </div>
             </div>
         </div>
-        <div class="position-absolute top-0 start-50 translate-middle" style="width: 600px; height: 600px; background: radial-gradient(circle, rgba(199,167,90,0.15) 0%, rgba(0,0,0,0) 70%); border-radius: 50%; z-index: 0; pointer-events: none;"></div>
+        <div class="position-absolute top-0 start-0" style="width: 600px; height: 600px; background: radial-gradient(circle, rgba(199,167,90,0.15) 0%, rgba(0,0,0,0) 70%); border-radius: 50%; z-index: 0; pointer-events: none; transform: translate(-30%, -30%);"></div>
     </div>
 
-    <div class="luxe-container" style="padding: 5rem 0;">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm" style="background: var(--ecc-surface); border-radius: 16px;">
-                    <div class="card-body p-4 p-md-5" style="color: var(--ecc-text-secondary); line-height: 1.8;">
+    <div class="luxe-container" style="padding: 2rem 0 5rem;">
+        <div class="row">
+            <div class="col-lg-10 col-xl-8">
+                <div style="color: var(--ecc-text-secondary); line-height: 1.8; font-size: 1.05rem;">
                         <p class="mb-4">Last Updated: {{ date('F j, Y') }}</p>
 
                         <h4 class="fw-bold mt-5 mb-3" style="color: var(--ecc-primary);">1. Introduction</h4>
@@ -54,5 +53,4 @@
                 </div>
             </div>
         </div>
-    </div>
 </div>
