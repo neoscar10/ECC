@@ -73,9 +73,6 @@ class VaultController extends Controller
         ]);
     }
 
-    /**
-     * Request removal of a vault item.
-     */
     public function requestRemoval(Request $request, $id, \App\Services\VaultService $service)
     {
         $user = $request->user();
@@ -110,12 +107,50 @@ class VaultController extends Controller
         ]);
 
         try {
+            // Calculate Delivery Quote for API flow
+            $quoteData = null;
+            $quoteService = app(\App\Services\Shipping\VaultDeliveryQuoteService::class);
+            $quoteResult = null;
+            
+            if ($request->input('address_id')) {
+                $addressForQuote = $user->addresses()->find($request->input('address_id'));
+                if ($addressForQuote) {
+                    $quoteResult = $quoteService->quoteForVaultItem($item, $addressForQuote, $user);
+                }
+            } elseif ($request->input('address') && isset($request->input('address')['postal_code'])) {
+                $postalCodeForQuote = $request->input('address')['postal_code'];
+                $quoteResult = $quoteService->quoteForVaultItemAndPincode($item, $postalCodeForQuote, $user);
+            }
+
+            if ($quoteResult && ($quoteResult['success'] ?? false)) {
+                $fee = (float) $quoteResult['delivery_fee'];
+                $quoteData = [
+                    'delivery_fee' => $fee,
+                    'delivery_currency' => $quoteResult['currency'] ?? 'INR',
+                    'shipping_rate_quote_id' => $quoteResult['rate_quote_id'] ?? null,
+                    'selected_courier_company_id' => $quoteResult['selected_courier']['courier_company_id'] ?? null,
+                    'selected_courier_name' => $quoteResult['selected_courier']['courier_name'] ?? null,
+                    'package_weight_kg' => $quoteResult['measurement']['weight_kg'] ?? null,
+                    'package_length_cm' => $quoteResult['measurement']['length_cm'] ?? null,
+                    'package_breadth_cm' => $quoteResult['measurement']['breadth_cm'] ?? null,
+                    'package_height_cm' => $quoteResult['measurement']['height_cm'] ?? null,
+                    'payment_status' => $fee > 0 ? \App\Models\VaultRemovalRequest::PAYMENT_PENDING : \App\Models\VaultRemovalRequest::PAYMENT_NONE,
+                ];
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => $quoteResult['message'] ?? 'Delivery is not available for this address.',
+                    'errors' => ['shipping' => [$quoteResult['message'] ?? 'Delivery is not available for this address.']]
+                ], 422);
+            }
+
             $removalRequest = $service->requestRemoval(
                 $item, 
                 $user, 
                 $request->input('message'),
                 $request->input('address_id'),
-                $request->input('address')
+                $request->input('address'),
+                $quoteData
             );
 
             return response()->json([
@@ -124,6 +159,9 @@ class VaultController extends Controller
                 'data' => [
                     'request_id' => $removalRequest->id,
                     'status' => $removalRequest->status,
+                    'payment_status' => $removalRequest->payment_status,
+                    'delivery_fee' => $removalRequest->delivery_fee ? (float) $removalRequest->delivery_fee : null,
+                    'delivery_currency' => $removalRequest->delivery_currency ?? 'INR',
                     'delivery_address' => [
                         'name' => $removalRequest->delivery_name,
                         'phone' => $removalRequest->delivery_phone,
