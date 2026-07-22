@@ -164,8 +164,7 @@
   :root{
     --ecc-bg: var(--ecc-bg-page);
     --ecc-surface: var(--ecc-bg-surface);
-    --ecc-border: var(--ecc-border);
-    --ecc-border-soft: rgba(255, 255, 255, 0.065);
+
     --ecc-text-primary: var(--ecc-text-primary);
     --ecc-text-secondary: var(--ecc-text-secondary);
     --ecc-text-muted: var(--ecc-text-muted);
@@ -177,8 +176,7 @@
   .ecc-bg{
     --ecc-bg: var(--ecc-bg-page);
     --ecc-surface: var(--ecc-bg-surface);
-    --ecc-border: var(--ecc-border);
-    --ecc-border-soft: rgba(255, 255, 255, 0.065);
+
     --ecc-text-primary: var(--ecc-text-primary);
     --ecc-text-secondary: var(--ecc-text-secondary);
     --ecc-text-muted: var(--ecc-text-muted);

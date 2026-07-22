@@ -222,6 +222,14 @@ class UsersIndex extends Component
 
     protected function validateStep1()
     {
+        if (!empty($this->create_phone)) {
+            try {
+                $this->create_phone = app(\App\Services\Otp\PhoneNormalizer::class)->normalize($this->create_phone);
+            } catch (\Exception $e) {
+                // Let the required/unique rules handle it, or add error explicitly
+            }
+        }
+
         $rules = [
             'create_name' => 'required|string|min:2|max:120',
             'create_email' => 'required|email|unique:users,email',

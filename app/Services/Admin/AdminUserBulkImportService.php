@@ -170,8 +170,16 @@ class AdminUserBulkImportService
         $errors = [];
         $normalizedData = $data;
 
+        if (!empty($normalizedData['phone'])) {
+            try {
+                $normalizedData['phone'] = app(\App\Services\Otp\PhoneNormalizer::class)->normalize($normalizedData['phone']);
+            } catch (\Exception $e) {
+                // validation rule will fail or catch it
+            }
+        }
+
         // 1. Laravel Validation Rules
-        $validator = Validator::make($data, [
+        $validator = Validator::make($normalizedData, [
             'full_name' => 'required|string|min:2|max:120',
             'email' => 'required|email',
             'phone' => 'required|string',
