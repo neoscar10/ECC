@@ -191,7 +191,7 @@
   }
   .ecc-bg-grad{
     position:absolute; inset:0;
-    background: linear-gradient(to bottom, transparent, rgba(2,2,2,.80), rgba(2,2,2,1));
+    background: var(--ecc-bg-grad, linear-gradient(to bottom, transparent, rgba(2,2,2,.80), rgba(2,2,2,1)));
     pointer-events:none;
   }
   .ecc-bg-glow{
@@ -206,7 +206,7 @@
   }
 
   .ecc-topbar{
-    background: rgba(2,2,2,.80);
+    background: var(--ecc-bg-nav-transparent, rgba(2,2,2,.80));
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--ecc-border-soft);
   }
@@ -272,7 +272,7 @@
     background: var(--ecc-surface) !important;
     border: 0 !important;
     border-bottom: 1px solid var(--ecc-border) !important;
-    color: #ffffff !important;
+    color: var(--ecc-text-primary) !important;
     padding: 14px 44px 14px 16px !important;
     border-radius: 12px 12px 0 0 !important;
     font-size: 18px !important;
@@ -282,7 +282,7 @@
   .ecc-input::placeholder{ color: var(--ecc-text-subtle) !important; }
   .ecc-input:focus{
     border-bottom-color: var(--ecc-primary) !important;
-    color: #ffffff !important;
+    color: var(--ecc-text-primary) !important;
     outline: none;
   }
 
@@ -291,7 +291,7 @@
   .ecc-input:-webkit-autofill:hover,
   .ecc-input:-webkit-autofill:focus,
   .ecc-input:-webkit-autofill:active {
-    -webkit-text-fill-color: #ffffff !important;
+    -webkit-text-fill-color: var(--ecc-text-primary) !important;
     -webkit-box-shadow: 0 0 0px 1000px var(--ecc-surface) inset !important;
     transition: background-color 5000s ease-in-out 0s;
   }

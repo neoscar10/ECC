@@ -41,7 +41,7 @@
           <div class="d-flex align-items-center justify-content-between">
             <div>
               <div class="text-uppercase fw-bold small text-ecc mb-1" style="letter-spacing: 0.05em; font-family: 'Noto Sans', sans-serif;">Developer Mode OTP</div>
-              <div class="h3 mb-0 text-white font-monospace fw-bold" style="letter-spacing: 0.1em;">{{ $devOtp }}</div>
+              <div class="h3 mb-0 ecc-text-primary font-monospace fw-bold" style="letter-spacing: 0.1em;">{{ $devOtp }}</div>
             </div>
             <button type="button" 
                     class="btn btn-sm btn-outline-light border-0 px-2 py-1 d-flex align-items-center gap-1"
@@ -313,7 +313,7 @@
     background: var(--ecc-surface) !important;
     border: 1px solid var(--ecc-border) !important;
     border-radius: 12px !important;
-    color: #ffffff !important;
+    color: var(--ecc-text-primary) !important;
     font-size: 24px !important;
     font-weight: 700 !important;
     text-align: center !important;
@@ -324,7 +324,7 @@
     border-color: var(--ecc-primary) !important;
     background: rgba(199, 167, 90,0.05) !important;
     box-shadow: 0 0 15px rgba(199, 167, 90,0.1) !important;
-    color: #ffffff !important;
+    color: var(--ecc-text-primary) !important;
     outline: none !important;
   }
 
@@ -333,7 +333,7 @@
   .ecc-otp-input:-webkit-autofill:hover,
   .ecc-otp-input:-webkit-autofill:focus,
   .ecc-otp-input:-webkit-autofill:active {
-    -webkit-text-fill-color: #ffffff !important;
+    -webkit-text-fill-color: var(--ecc-text-primary) !important;
     -webkit-box-shadow: 0 0 0px 1000px var(--ecc-surface) inset !important;
     transition: background-color 5000s ease-in-out 0s;
   }

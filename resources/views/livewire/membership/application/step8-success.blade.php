@@ -107,7 +107,7 @@
     font-weight: 800;
     line-height: 1.05;
     letter-spacing: -0.02em;
-    color: #ffffff !important;
+    color: var(--ecc-text-primary) !important;
   }
 
   .ecc-success__p{

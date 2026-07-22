@@ -217,12 +217,12 @@
 
             <div x-show="open" class="position-absolute z-3 mt-1 shadow-lg bg-dark border border-secondary" style="display: none; top: 100%; left: 0; width: 300px; border-radius: 12px; max-height: 280px; overflow-y: auto; background-color: #121212 !important; border-color: #333 !important;">
               <div class="p-2 sticky-top" style="background-color: #121212;">
-                <input type="text" x-model="search" class="form-control form-control-sm text-white" placeholder="Search country..." style="background-color: #222 !important; border-color: #444 !important; color: #fff !important; font-size: 13px;">
+                <input type="text" x-model="search" class="form-control form-control-sm ecc-text-primary" placeholder="Search country..." style="background-color: #222 !important; border-color: #444 !important; color: #fff !important; font-size: 13px;">
               </div>
               
               <div class="list-group list-group-flush">
                 <template x-for="c in filteredCountries" :key="c.name + c.code">
-                  <button type="button" @click="selected = c; @this.set('country_code', c.code); open = false; search = '';" class="list-group-item list-group-item-action text-white d-flex align-items-center justify-content-between py-2 px-3 border-0" style="background-color: transparent; font-size: 13px; border-bottom: 1px solid #222 !important;">
+                  <button type="button" @click="selected = c; @this.set('country_code', c.code); open = false; search = '';" class="list-group-item list-group-item-action ecc-text-primary d-flex align-items-center justify-content-between py-2 px-3 border-0" style="background-color: transparent; font-size: 13px; border-bottom: 1px solid #222 !important;">
                     <div class="d-flex align-items-center gap-2">
                       <span x-text="c.flag" style="font-size: 16px;"></span>
                       <span x-text="c.name" class="text-truncate" style="max-width: 160px; font-family: 'Noto Sans', sans-serif;"></span>
@@ -324,7 +324,7 @@
   }
   .ecc-bg-grad{
     position:absolute; inset:0;
-    background: linear-gradient(to bottom, transparent, rgba(2,2,2,.80), rgba(2,2,2,1));
+    background: var(--ecc-bg-grad, linear-gradient(to bottom, transparent, rgba(2,2,2,.80), rgba(2,2,2,1)));
     pointer-events:none;
   }
   .ecc-bg-glow{
@@ -338,7 +338,7 @@
   }
 
   .ecc-topbar{
-    background: rgba(2,2,2,.80);
+    background: var(--ecc-bg-nav-transparent, rgba(2,2,2,.80));
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--ecc-border-soft);
   }
@@ -396,7 +396,7 @@
     background: var(--ecc-surface) !important;
     border: 1px solid var(--ecc-border) !important;
     border-radius: 12px !important;
-    color: #ffffff !important;
+    color: var(--ecc-text-primary) !important;
     padding: 14px 18px !important;
     font-family: "Noto Sans", system-ui, sans-serif;
   }
@@ -406,7 +406,7 @@
     background: var(--ecc-surface) !important;
     border-color: var(--ecc-primary) !important;
     box-shadow: 0 0 0 1px var(--ecc-primary) !important;
-    color: #ffffff !important;
+    color: var(--ecc-text-primary) !important;
   }
 
   /* Autofill styling overrides */
@@ -414,7 +414,7 @@
   .ecc-input:-webkit-autofill:hover,
   .ecc-input:-webkit-autofill:focus,
   .ecc-input:-webkit-autofill:active {
-    -webkit-text-fill-color: #ffffff !important;
+    -webkit-text-fill-color: var(--ecc-text-primary) !important;
     -webkit-box-shadow: 0 0 0px 1000px var(--ecc-surface) inset !important;
     transition: background-color 5000s ease-in-out 0s;
   }

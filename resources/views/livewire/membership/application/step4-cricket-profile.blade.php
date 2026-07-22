@@ -175,7 +175,7 @@
   }
   .ecc-bg-grad{
     position:absolute; inset:0;
-    background: linear-gradient(to bottom, transparent, rgba(2,2,2,.80), rgba(2,2,2,1));
+    background: var(--ecc-bg-grad, linear-gradient(to bottom, transparent, rgba(2,2,2,.80), rgba(2,2,2,1)));
     pointer-events:none;
   }
   .ecc-bg-glow{
@@ -190,7 +190,7 @@
   }
 
   .ecc-topbar{
-    background: rgba(2,2,2,.80);
+    background: var(--ecc-bg-nav-transparent, rgba(2,2,2,.80));
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--ecc-border-soft);
   }

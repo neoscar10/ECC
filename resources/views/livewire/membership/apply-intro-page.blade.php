@@ -71,7 +71,7 @@
 @push('styles')
 <style>
     .ecc-apply-intro{
-        background: #050505;
+        background: var(--ecc-bg-page);
         color: var(--ecc-text-primary);
         font-family: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
     }
@@ -110,7 +110,7 @@
     }
     .ecc-hero-overlay{
         position:absolute; inset:0;
-        background: linear-gradient(to top, rgba(5,5,5,.92), rgba(5,5,5,0) 60%);
+        background: var(--ecc-bg-hero-overlay, linear-gradient(to top, rgba(5,5,5,.92), rgba(5,5,5,0) 60%));
         opacity: .85;
         pointer-events:none;
     }
@@ -166,7 +166,7 @@
         border-radius: 12px;
         border: 1px solid var(--ecc-primary-border);
         background: var(--ecc-primary);
-        color: #050505;
+        color: var(--ecc-bg-page);
         font-weight: 900;
         letter-spacing: .06em;
         box-shadow: 0 0 22px var(--ecc-primary-shadow);
@@ -178,7 +178,7 @@
         border-color: var(--ecc-primary-hover);
         transform: translateY(-2px);
         box-shadow: 0 12px 40px rgba(199, 167, 90, 0.35);
-        color: #050505;
+        color: var(--ecc-bg-page);
     }
     .ecc-cta:active{ transform: scale(.99); }
 

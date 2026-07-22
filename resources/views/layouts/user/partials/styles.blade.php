@@ -56,6 +56,10 @@
         --ecc-danger: #ff6b6b;
         --ecc-warning: #f4c95d;
         --ecc-info: #74c0fc;
+
+        --ecc-bg-grad: linear-gradient(to bottom, transparent, rgba(2,2,2,.80), rgba(2,2,2,1));
+        --ecc-bg-nav-transparent: rgba(2,2,2,.80);
+        --ecc-bg-hero-overlay: linear-gradient(to top, rgba(5,5,5,.92), rgba(5,5,5,0) 60%);
     }
 
     html[data-theme="light"] {
@@ -90,6 +94,10 @@
         --ecc-danger: #c92a2a;
         --ecc-warning: #9C7D35;
         --ecc-info: #1864ab;
+
+        --ecc-bg-grad: none;
+        --ecc-bg-nav-transparent: rgba(255,255,255,.80);
+        --ecc-bg-hero-overlay: linear-gradient(to top, rgba(255,255,255,.92), rgba(255,255,255,0) 60%);
     }
 
     html[data-theme="dark"],
