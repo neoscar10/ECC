@@ -398,10 +398,15 @@
                         
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ request()->routeIs('admin.enquiries.index') ? 'active' : '' }}" href="{{ route('admin.enquiries.index') }}">
-                                <i class="ri-chat-voice-line"></i> <span data-key="t-contact-enquiries">Enquiries</span>
+                                <i class="ri-chat-voice-line"></i> <span data-key="t-contact-enquiries">Archive Enquiries</span>
                                 @if($newContactEnquiriesCount > 0)
                                     <span class="badge bg-danger ms-auto">{{ $newContactEnquiriesCount }}</span>
                                 @endif
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ request()->routeIs('admin.contact-messages') ? 'active' : '' }}" href="{{ route('admin.contact-messages') }}">
+                                <i class="ri-mail-send-line"></i> <span data-key="t-contact-messages">Contact Messages</span>
                             </a>
                         </li>
                         <li class="nav-item">

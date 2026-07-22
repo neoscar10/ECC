@@ -994,7 +994,7 @@
                     <div class="col-lg-3 col-md-6">
                         <div class="luxe-footer-title">Support</div>
                         <div class="d-flex flex-column">
-                            <a href="javascript:void(0)" class="luxe-footer-link">Contact Support</a>
+                            <a href="{{ route('contact') }}" class="luxe-footer-link">Contact Support</a>
                             <a href="javascript:void(0)" class="luxe-footer-link">FAQ</a>
                             <a href="javascript:void(0)" class="luxe-footer-link">Buyer Protection</a>
                         </div>
@@ -1015,7 +1015,7 @@
                 <div class="luxe-legal d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
                     <div>© {{ now()->year }} Executive club cricket. All Rights Reserved.</div>
                     <div class="d-flex flex-wrap gap-3">
-                        <a href="javascript:void(0)" class="luxe-footer-link">Privacy Policy</a>
+                        <a href="{{ route('privacy') }}" class="luxe-footer-link">Privacy Policy</a>
                         <a href="javascript:void(0)" class="luxe-footer-link">Accessibility</a>
                         <a href="javascript:void(0)" class="luxe-footer-link">Cookies</a>
                     </div>

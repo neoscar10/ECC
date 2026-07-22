@@ -60,6 +60,9 @@ Route::get('/login', UserLoginPage::class)
 Route::get('/', SplashScreen::class)->name('root');
 Route::get('/splash', SplashScreen::class)->name('splash');
 
+Route::get('/contact', \App\Livewire\Pages\ContactUsPage::class)->name('contact');
+Route::get('/privacy', \App\Livewire\Pages\PrivacyPolicyPage::class)->name('privacy');
+
 Route::middleware('guest')->group(function () {
     Route::get('/admin/login', [AuthController::class, 'index'])->name('admin.login');
     Route::post('/admin/login', [AuthController::class, 'login'])->name('admin.login.submit');
@@ -124,8 +127,9 @@ Route::middleware(['auth:web', EnsureAdminRole::class])->prefix('admin')->name('
         Route::get('/orders/{id}', \App\Livewire\Admin\Shop\Orders\Show::class)->name('orders.show');
     });
 
-    // Enquiries
+    // Enquiries & Messages
     Route::get('/enquiries', \App\Livewire\Admin\Enquiries\Index::class)->name('enquiries.index');
+    Route::get('/contact-messages', \App\Livewire\Admin\ContactMessages\Index::class)->name('contact-messages');
 
     // Vault Access
     Route::get('/vault-access', \App\Livewire\Admin\Vault\Index::class)->name('vault-access.index');
