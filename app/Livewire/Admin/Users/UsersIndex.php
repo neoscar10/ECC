@@ -346,6 +346,21 @@ class UsersIndex extends Component
         User::find($id)->delete();
         session()->flash('success', 'User deleted successfully.');
     }
+
+    public function verifyUser($id)
+    {
+        $user = User::findOrFail($id);
+        
+        if ($user->phone_verified_at) {
+            session()->flash('error', 'User account is already verified.');
+            return;
+        }
+
+        $user->phone_verified_at = now();
+        $user->save();
+
+        session()->flash('success', 'User account verified successfully.');
+    }
     
     public function viewUser($id)
     {

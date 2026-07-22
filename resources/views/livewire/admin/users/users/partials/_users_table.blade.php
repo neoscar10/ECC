@@ -99,6 +99,9 @@
                                         @if($user->currentMembership)
                                             <li><a class="dropdown-item" href="#" wire:click.prevent="$dispatch('open-update-tier-modal', { membershipId: {{ $user->currentMembership->id }} })"><i class="mdi mdi-swap-vertical align-bottom me-2 text-muted"></i> Update Tier</a></li>
                                         @endif
+                                        @if(is_null($user->phone_verified_at))
+                                            <li><a class="dropdown-item" wire:click="verifyUser({{ $user->id }})"><i class="ri-check-double-line align-bottom me-2 text-muted"></i> Verify Account</a></li>
+                                        @endif
                                         @unless($user->hasRole('super_admin'))
                                             <li>
                                                 <a class="dropdown-item remove-item-btn" wire:click="confirmSuspendUser({{ $user->id }})">
