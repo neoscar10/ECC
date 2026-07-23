@@ -23,10 +23,10 @@
 
     {{-- Locked Overlay / Teaser UI --}}
     @if(!$isAllowed)
-        <div class="cms-gate-overlay w-100 py-4">
-            <div class="cms-gate-card p-4 p-md-5 rounded-4 shadow-lg border ecc-text-primary w-100 text-center" style="background: var(--ecc-bg-surface-2); border-color: var(--ecc-border) !important; box-shadow: 0 10px 30px var(--ecc-shadow) !important;">
+        <div class="cms-gate-overlay w-100 pt-1 pb-2">
+            <div class="cms-gate-card p-3 p-md-4 rounded-4 shadow-lg border ecc-text-primary w-100 text-center" style="background: var(--ecc-bg-surface-2); border-color: var(--ecc-border) !important; box-shadow: 0 10px 30px var(--ecc-shadow) !important;">
                 {{-- Icon --}}
-                <div class="mb-3">
+                <div class="mb-2">
                     @php
                         $icon = $message['icon'] ?? 'lock';
                         $iconName = match($icon) {
@@ -36,12 +36,12 @@
                             default => 'lock_person'
                         };
                     @endphp
-                    <span class="material-symbols-outlined fs-1" style="color: var(--ecc-primary);">{{ $iconName }}</span>
+                    <span class="material-symbols-outlined fs-2" style="color: var(--ecc-primary);">{{ $iconName }}</span>
                 </div>
 
                 {{-- Message --}}
-                <h4 class="fw-bold mb-2" style="color: var(--ecc-primary);">{{ $message['title'] ?? 'Access Restricted' }}</h4>
-                <p class="small mb-4 mx-auto" style="max-width: 500px; color: var(--ecc-text-secondary);">{{ $message['body'] ?? 'This content is exclusive to specific membership tiers.' }}</p>
+                <h4 class="fw-bold mb-1 fs-5" style="color: var(--ecc-primary);">{{ $message['title'] ?? 'Access Restricted' }}</h4>
+                <p class="small mb-3 mx-auto" style="max-width: 500px; color: var(--ecc-text-secondary);">{{ $message['body'] ?? 'This content is exclusive to specific membership tiers.' }}</p>
 
                 {{-- Action --}}
                 <div class="d-flex justify-content-center">

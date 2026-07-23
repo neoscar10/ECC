@@ -48,7 +48,7 @@
         @if($targetUrl)
             <a href="{{ $targetUrl }}" class="text-decoration-none text-dark d-block">
         @endif
-        <section class="cms-card-split mb-5 overflow-hidden rounded-4 border border-secondary border-opacity-25 ecc-bg-surface shadow-lg">
+        <section class="cms-card-split mb-3 overflow-hidden rounded-4 border border-secondary border-opacity-25 ecc-bg-surface shadow-lg">
             <div class="row g-0 align-items-stretch">
                 <!-- Image Section -->
                 <div class="col-lg-6 order-1">
@@ -61,7 +61,7 @@
 
                 <!-- Text Section -->
                 <div class="col-lg-6 order-2 d-flex align-items-center">
-                    <div class="cms-card-content-panel p-4 p-lg-5 w-100">
+                    <div class="cms-card-content-panel p-3 p-lg-4 w-100">
                         @if(!empty($content['badge_text']))
                             <div class="ecc-hero-badge mb-3">
                                 <i class="mdi mdi-star-four-points ecc-text-primary"></i>

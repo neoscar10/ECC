@@ -37,8 +37,8 @@
         @if($targetUrl)
             <a href="{{ $targetUrl }}" class="text-decoration-none text-dark d-block">
         @endif
-        <div class="card border-0 rounded-4 overflow-hidden mb-4" style="background: var(--ecc-bg-page); border: 1px solid rgba(199, 167, 90,0.1) !important; border-radius: 20px !important; @if($targetUrl) cursor: pointer; @endif">
-            <div class="card-body p-4 p-md-5">
+        <div class="card border-0 rounded-4 overflow-hidden mb-2" style="background: var(--ecc-bg-page); border: 1px solid rgba(199, 167, 90,0.1) !important; border-radius: 20px !important; @if($targetUrl) cursor: pointer; @endif">
+            <div class="card-body p-3 p-md-4">
                 <x-cms.partials.section-heading 
                     :title="$content['title']" 
                     :subtitle="$content['subtitle']" 

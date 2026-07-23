@@ -18,9 +18,9 @@
     $exploreAllUrl = ($this instanceof \App\Livewire\Pavilion\HomePage) ? $this->getExploreAllUrl($block) : null;
 @endphp
 
-<div class="cms-slider-block cms-fade-in" style="margin-bottom: 24px;">
+<div class="cms-slider-block cms-fade-in" style="margin-bottom: 12px;">
     {{-- Header --}}
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-2 mb-3 px-2">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-2 mb-2 px-2">
         <div>
             @if(!empty($content['badge_text']))
                 <div class="ecc-hero-badge mb-2" style="transform: scale(0.8); transform-origin: left;">
@@ -37,7 +37,7 @@
             @endif
         </div>
 
-        @if($exploreAllUrl)
+        @if($exploreAllUrl && ($access['is_allowed'] ?? true))
             <a href="{{ $exploreAllUrl }}" class="ecc-inline-link mb-lg-1">
                 Explore All
                 <i class="mdi mdi-chevron-right"></i>
