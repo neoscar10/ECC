@@ -395,18 +395,12 @@
                                 </ul>
                             </div>
                         </li>
-                        
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ request()->routeIs('admin.enquiries.index') ? 'active' : '' }}" href="{{ route('admin.enquiries.index') }}">
-                                <i class="ri-chat-voice-line"></i> <span data-key="t-contact-enquiries">Archive Enquiries</span>
+                                <i class="ri-chat-voice-line"></i> <span data-key="t-contact-enquiries">Contact Message</span>
                                 @if($newContactEnquiriesCount > 0)
                                     <span class="badge bg-danger ms-auto">{{ $newContactEnquiriesCount }}</span>
                                 @endif
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link menu-link {{ request()->routeIs('admin.contact-messages') ? 'active' : '' }}" href="{{ route('admin.contact-messages') }}">
-                                <i class="ri-mail-send-line"></i> <span data-key="t-contact-messages">Contact Messages</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -450,17 +444,15 @@
                         </li>
 
                         @php
-                            $isPaymentsActive = request()->routeIs('admin.payments.*');
+                            $isPaymentSettingsActive = request()->routeIs('admin.payments.gateways') || request()->routeIs('admin.payments.availability') || request()->routeIs('admin.payments.methods');
+                            $isPaymentOverviewActive = request()->routeIs('admin.payments.dashboard') || request()->routeIs('admin.payments.transactions') || request()->routeIs('admin.payments.failed') || request()->routeIs('admin.payments.audits');
                         @endphp
                         <li class="nav-item">
-                            <a class="nav-link menu-link {{ $isPaymentsActive ? 'active' : '' }}" href="#sidebarPayments" data-bs-toggle="collapse" role="button" aria-expanded="{{ $isPaymentsActive ? 'true' : 'false' }}" aria-controls="sidebarPayments">
-                                <i class="ri-bank-card-line"></i> <span data-key="t-payments">Payment Operations</span>
+                            <a class="nav-link menu-link {{ $isPaymentSettingsActive ? 'active' : '' }}" href="#sidebarPaymentSettings" data-bs-toggle="collapse" role="button" aria-expanded="{{ $isPaymentSettingsActive ? 'true' : 'false' }}" aria-controls="sidebarPaymentSettings">
+                                <i class="ri-bank-card-line"></i> <span data-key="t-payments">Payment Settings</span>
                             </a>
-                            <div class="collapse menu-dropdown {{ $isPaymentsActive ? 'show' : '' }}" id="sidebarPayments">
+                            <div class="collapse menu-dropdown {{ $isPaymentSettingsActive ? 'show' : '' }}" id="sidebarPaymentSettings">
                                 <ul class="nav nav-sm flex-column">
-                                    <li class="nav-item">
-                                        <a href="{{ route('admin.payments.dashboard') }}" class="nav-link {{ request()->routeIs('admin.payments.dashboard') ? 'active' : '' }}">Dashboard</a>
-                                    </li>
                                     <li class="nav-item">
                                         <a href="{{ route('admin.payments.gateways') }}" class="nav-link {{ request()->routeIs('admin.payments.gateways') ? 'active' : '' }}">Gateways</a>
                                     </li>
@@ -469,6 +461,19 @@
                                     </li>
                                     <li class="nav-item">
                                         <a href="{{ route('admin.payments.methods') }}" class="nav-link {{ request()->routeIs('admin.payments.methods') ? 'active' : '' }}">Gateway Methods</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ $isPaymentOverviewActive ? 'active' : '' }}" href="#sidebarPaymentOverview" data-bs-toggle="collapse" role="button" aria-expanded="{{ $isPaymentOverviewActive ? 'true' : 'false' }}" aria-controls="sidebarPaymentOverview">
+                                <i class="ri-line-chart-line"></i> <span data-key="t-payment-overview">Payment Overview</span>
+                            </a>
+                            <div class="collapse menu-dropdown {{ $isPaymentOverviewActive ? 'show' : '' }}" id="sidebarPaymentOverview">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.payments.dashboard') }}" class="nav-link {{ request()->routeIs('admin.payments.dashboard') ? 'active' : '' }}">Dashboard</a>
                                     </li>
                                     <li class="nav-item">
                                         <a href="{{ route('admin.payments.transactions') }}" class="nav-link {{ request()->routeIs('admin.payments.transactions') ? 'active' : '' }}">Transactions</a>
