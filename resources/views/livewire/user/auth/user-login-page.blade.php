@@ -662,7 +662,7 @@ document.addEventListener('click', function (e) {
         letter-spacing: .26em;
         font-size: clamp(20px, 4.4vw, 26px);
         font-weight: 800;
-        color: var(--ecc-gold-400);
+        color: var(--ecc-primary-dark);
         white-space: nowrap; /* prevents ugly wrapping on mobile */
     }
     .ecc-subtext{
@@ -670,7 +670,8 @@ document.addEventListener('click', function (e) {
         max-width: 360px;
         font-size: 14px;
         font-weight: 600;
-        color: rgba(199,167,90,.60);
+        color: var(--ecc-primary-dark);
+        opacity: 0.8;
         letter-spacing: .03em;
         line-height: 1.6;
     }
@@ -681,7 +682,7 @@ document.addEventListener('click', function (e) {
         font-size: 10px;
         font-weight: 800;
         letter-spacing: .20em;
-        color: rgba(199,167,90,.80);
+        color: var(--ecc-primary-dark);
         margin-bottom: 10px;
         margin-left: 4px;
     }
@@ -715,7 +716,8 @@ document.addEventListener('click', function (e) {
         left: 16px;
         top: 50%;
         transform: translateY(-50%);
-        color: rgba(199,167,90,.60);
+        color: var(--ecc-primary-dark);
+        opacity: 0.8;
         font-size: 22px;
         pointer-events: none !important;
         z-index: 3;
@@ -731,7 +733,8 @@ document.addEventListener('click', function (e) {
         width: 44px;
         border: 0;
         background: transparent;
-        color: rgba(199,167,90,.55);
+        color: var(--ecc-primary-dark);
+        opacity: 0.7;
         display:flex;
         align-items:center;
         justify-content:center;
@@ -740,7 +743,7 @@ document.addEventListener('click', function (e) {
         z-index: 4;
         pointer-events: auto;
     }
-    .ecc-eye-btn:hover{ color: var(--ecc-gold-400); background: rgba(199,167,90,.06); }
+    .ecc-eye-btn:hover{ color: var(--ecc-primary-dark); opacity: 1; background: rgba(199,167,90,.06); }
 
     /* Submit */
     .ecc-submit-btn{
@@ -778,17 +781,19 @@ document.addEventListener('click', function (e) {
     .ecc-link{
         font-size: 11px;
         letter-spacing: .18em;
-        color: rgba(199,167,90,.60);
+        color: var(--ecc-primary-dark);
+        opacity: 0.85;
         text-decoration: none;
         font-weight: 700;
     }
-    .ecc-link:hover{ color: var(--ecc-gold-400); text-decoration: underline; }
+    .ecc-link:hover{ color: var(--ecc-primary-dark); opacity: 1; text-decoration: underline; }
 
     /* Footer */
     .ecc-footer{
         font-size: 10px;
         letter-spacing: .25em;
-        color: rgba(199,167,90,.30);
+        color: var(--ecc-primary-dark);
+        opacity: 0.6;
         text-align: center;
     }
 
