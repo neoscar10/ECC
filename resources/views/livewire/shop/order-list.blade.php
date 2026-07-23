@@ -366,8 +366,7 @@
     </style>
     @endpush
 
-    <div class="row justify-content-center">
-        <div class="col-12 col-xxl-10 position-relative">
+    <div class="position-relative">
 
             <!-- Atmosphere glow -->
             <div class="ecc-history-glow d-none d-lg-block"></div>
@@ -551,5 +550,4 @@
             </section>
 
         </div>
-    </div>
 </div>
