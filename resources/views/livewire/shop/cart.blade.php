@@ -11,9 +11,8 @@
             }
 
             .ecc-cart-shell {
-                max-width: 1320px;
-                margin: 0 auto;
-                padding: 3rem 1.25rem 4rem;
+                width: 100%;
+                padding: 1.5rem 0 4rem;
             }
 
             .ecc-cart-hero {
@@ -234,10 +233,12 @@
             }
 
             .ecc-checkout-btn:disabled {
-                background: #3d392f;
-                color: var(--ecc-text-muted);
+                background: var(--ecc-bg-input);
+                color: var(--ecc-text-subtle);
+                opacity: 0.6;
                 box-shadow: none;
                 cursor: not-allowed;
+                border: 1px solid var(--ecc-border);
             }
 
             .ecc-checkout-note {
