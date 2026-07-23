@@ -24,6 +24,7 @@ class CheckoutPage extends Component
     
     // Address Form
     public $showAddressForm = false;
+    public $editingAddressId = null;
     public $addressForm = [
         'full_name' => '',
         'phone' => '',
@@ -201,7 +202,32 @@ class CheckoutPage extends Component
 
     public function openAddressForm()
     {
+        $this->editingAddressId = null;
+        $this->reset('addressForm');
+        $this->addressForm['country'] = 'India';
+        $this->addressForm['label'] = 'Home';
         $this->showAddressForm = true;
+    }
+
+    public function editAddress($id)
+    {
+        $address = \App\Models\Shop\UserAddress::find($id);
+        if ($address && $address->user_id === Auth::id()) {
+            $this->editingAddressId = $address->id;
+            $this->addressForm = [
+                'full_name' => $address->full_name,
+                'phone' => $address->phone,
+                'line1' => $address->line1,
+                'line2' => $address->line2,
+                'city' => $address->city,
+                'state' => $address->state,
+                'postal_code' => $address->postal_code,
+                'country' => $address->country,
+                'label' => $address->label,
+                'is_default' => (bool)$address->is_default,
+            ];
+            $this->showAddressForm = true;
+        }
     }
 
     public function saveAddress()
@@ -214,28 +240,48 @@ class CheckoutPage extends Component
             $user->addresses()->update(['is_default' => false]);
         }
 
-        $address = $user->addresses()->create([
-            'label' => $this->addressForm['label'],
-            'full_name' => $this->addressForm['full_name'],
-            'phone' => $this->addressForm['phone'],
-            'line1' => $this->addressForm['line1'],
-            'line2' => $this->addressForm['line2'],
-            'city' => $this->addressForm['city'],
-            'state' => $this->addressForm['state'],
-            'postal_code' => $this->addressForm['postal_code'],
-            'country' => $this->addressForm['country'],
-            'is_default' => $this->addressForm['is_default'],
-            'type' => 'shipping',
-        ]);
+        if ($this->editingAddressId) {
+            $address = $user->addresses()->find($this->editingAddressId);
+            if ($address) {
+                $address->update([
+                    'label' => $this->addressForm['label'],
+                    'full_name' => $this->addressForm['full_name'],
+                    'phone' => $this->addressForm['phone'],
+                    'line1' => $this->addressForm['line1'],
+                    'line2' => $this->addressForm['line2'],
+                    'city' => $this->addressForm['city'],
+                    'state' => $this->addressForm['state'],
+                    'postal_code' => $this->addressForm['postal_code'],
+                    'country' => $this->addressForm['country'],
+                    'is_default' => $this->addressForm['is_default'],
+                ]);
+                session()->flash('success', 'Address updated successfully.');
+            }
+        } else {
+            $address = $user->addresses()->create([
+                'label' => $this->addressForm['label'],
+                'full_name' => $this->addressForm['full_name'],
+                'phone' => $this->addressForm['phone'],
+                'line1' => $this->addressForm['line1'],
+                'line2' => $this->addressForm['line2'],
+                'city' => $this->addressForm['city'],
+                'state' => $this->addressForm['state'],
+                'postal_code' => $this->addressForm['postal_code'],
+                'country' => $this->addressForm['country'],
+                'is_default' => $this->addressForm['is_default'],
+                'type' => 'shipping',
+            ]);
+            $this->selectedAddressId = $address->id;
+            session()->flash('success', 'Address added successfully.');
+        }
 
-        $this->selectedAddressId = $address->id;
         $this->showAddressForm = false;
+        $this->editingAddressId = null;
         $this->reset('addressForm');
         $this->addressForm['country'] = 'India';
         $this->addressForm['label'] = 'Home';
 
         $this->loadData();
-        session()->flash('success', 'Address added successfully.');
     }
 
 

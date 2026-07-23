@@ -47,6 +47,7 @@
             text-decoration: none;
             display: block;
             width: 100%;
+            cursor: pointer;
         }
         .ecc-payment-card {
             padding: 1rem 1.25rem;
@@ -346,7 +347,7 @@
                     @if($showAddressForm)
                     <div class="ecc-form-panel mb-4 shadow-lg">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h4 class="mb-0 fs-5 fw-bold text-uppercase-less">Add New Shipping Address</h4>
+                            <h4 class="mb-0 fs-5 fw-bold text-uppercase-less">{{ $editingAddressId ? 'Edit Shipping Address' : 'Add New Shipping Address' }}</h4>
                             <button type="button" class="btn-close btn-close-white" wire:click="$set('showAddressForm', false)"></button>
                         </div>
                         
@@ -395,7 +396,7 @@
                                     </div>
                                 </div>
                                 <div class="col-12 mt-4">
-                                    <button type="submit" class="btn ecc-btn-primary px-5 py-2 fw-bold">SAVE ADDRESS</button>
+                                    <button type="submit" class="btn ecc-btn-primary px-5 py-2 fw-bold">{{ $editingAddressId ? 'UPDATE ADDRESS' : 'SAVE ADDRESS' }}</button>
                                     <button type="button" class="btn ecc-text-primary px-4 small" wire:click="$set('showAddressForm', false)">CANCEL</button>
                                 </div>
                             </div>
@@ -406,9 +407,9 @@
                     <div class="row g-3">
                         @forelse($addresses as $address)
                             <div class="col-12 col-md-6">
-                                <button type="button"
-                                        class="w-100 text-start ecc-address-card {{ (string) $selectedAddressId === (string) $address->id ? 'is-selected' : '' }}"
-                                        wire:click="selectAddress('{{ $address->id }}')">
+                                <div role="button"
+                                     class="w-100 text-start ecc-address-card {{ (string) $selectedAddressId === (string) $address->id ? 'is-selected' : '' }}"
+                                     wire:click="selectAddress('{{ $address->id }}')">
                                     <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
                                         <div>
                                             @if($address->is_default)
@@ -416,9 +417,17 @@
                                             @endif
                                         </div>
 
-                                        @if((string) $selectedAddressId === (string) $address->id)
-                                            <span class="material-symbols-outlined ecc-selected-icon">check_circle</span>
-                                        @endif
+                                        <div class="d-flex align-items-center gap-2">
+                                            <button type="button" 
+                                                    class="btn btn-link p-0 text-decoration-none d-flex align-items-center justify-content-center" 
+                                                    style="color: var(--ecc-primary); width: 28px; height: 28px; border-radius: 50%; background: rgba(199, 167, 90, 0.1);" 
+                                                    wire:click.stop="editAddress('{{ $address->id }}')">
+                                                <span class="material-symbols-outlined" style="font-size: 1.1rem;">edit</span>
+                                            </button>
+                                            @if((string) $selectedAddressId === (string) $address->id)
+                                                <span class="material-symbols-outlined ecc-selected-icon">check_circle</span>
+                                            @endif
+                                        </div>
                                     </div>
 
                                     <div class="fw-bold fs-5 text-uppercase-less mb-2">
@@ -437,7 +446,7 @@
                                     <div class="mt-3 fw-semibold">
                                         {{ $address->phone }}
                                     </div>
-                                </button>
+                                </div>
                             </div>
                         @empty
                             @if(!$showAddressForm)
