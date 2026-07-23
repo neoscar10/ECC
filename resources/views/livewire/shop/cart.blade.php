@@ -241,7 +241,7 @@
             }
 
             .ecc-checkout-note {
-                color: rgba(195, 185, 152, 0.55);
+                color: var(--ecc-text-secondary);
                 font-size: 0.72rem;
                 text-align: center;
                 margin-top: 0.9rem;
