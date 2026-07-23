@@ -20,6 +20,7 @@ class SettingsPage extends Component
     public bool $showChangePasswordModal = false;
     public bool $showMembershipDetailsModal = false;
     public bool $showUpgradeModal = false;
+    public bool $showDeleteAccountModal = false;
     public bool $hasUpgradeAvailable = false;
     public array $upgradeTiers = [];
     public ?int $selectedUpgradeTierId = null;
@@ -280,6 +281,35 @@ class SettingsPage extends Component
         }
 
         return redirect()->route('membership.upgrade.payment');
+    }
+
+    public function openDeleteAccountModal()
+    {
+        $this->showDeleteAccountModal = true;
+    }
+
+    public function closeDeleteAccountModal()
+    {
+        $this->showDeleteAccountModal = false;
+    }
+
+    public function deleteAccount(\App\Services\Auth\AuthService $authService, Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect('/');
+        }
+
+        // 1. Delete account safely using AuthService (same logic as API/Mobile App)
+        $authService->deleteAccount($user);
+
+        // 2. Clear web session and logout
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        session()->flash('settings_account_deleted', 'Your account has been successfully deleted.');
+        return redirect('/');
     }
 
     public function logout(Request $request)

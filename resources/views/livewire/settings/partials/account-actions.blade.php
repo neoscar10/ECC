@@ -106,11 +106,18 @@
         </div>
     </div>
 
-    <div class="mt-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mt-4">
         <button type="button" 
                 class="btn ecc-btn-logout px-4 px-lg-5 py-3"
                 wire:click="logout">
             LOG OUT
+        </button>
+
+        <button type="button" 
+                class="btn btn-outline-danger px-4 py-3 rounded-3 fw-bold"
+                style="border-color: rgba(220, 53, 69, 0.4); color: #dc3545;"
+                wire:click="openDeleteAccountModal">
+            <i class="mdi mdi-delete-outline me-1"></i> DELETE ACCOUNT
         </button>
     </div>
 </section>
