@@ -26,7 +26,7 @@ class Step3PersonalDetails extends Component
             $data = $draft->payload_json['personal_details'] ?? [];
         }
 
-        $this->full_name = $data['full_name'] ?? '';
+        $this->full_name = !empty($data['full_name']) ? $data['full_name'] : (auth()->user()?->name ?? '');
         $this->date_of_birth = $data['date_of_birth'] ?? $data['dob'] ?? '';
         $this->country = $data['country'] ?? 'India';
         $this->city = $data['city'] ?? '';
