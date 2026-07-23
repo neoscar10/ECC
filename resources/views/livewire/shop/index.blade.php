@@ -465,8 +465,8 @@
 
         .shop-card-head {
             display: flex;
-            justify-content: space-between;
-            gap: .85rem;
+            flex-direction: column;
+            gap: .5rem;
             align-items: start;
             margin-bottom: .85rem;
         }
