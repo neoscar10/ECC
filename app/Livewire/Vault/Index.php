@@ -530,6 +530,7 @@ class Index extends Component
                 'id' => $item->id,
                 'title' => $item->item_title ?? 'Secured Asset',
                 'description' => $item->notes ?? '',
+                'notes' => $item->notes ?? '',
                 'image_url' => $img,
                 'status_badge_label' => strtoupper($item->status ?? 'LOCKED'),
                 'reference_label' => $item->item_ref ?? null,

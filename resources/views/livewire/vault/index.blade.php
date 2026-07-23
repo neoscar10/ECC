@@ -164,9 +164,6 @@
                                         @if($artifact->description)
                                             <p class="ecc-vault-artifact-text {{ $vaultViewMode === 'list' ? 'pe-lg-5' : '' }}">{{ \Illuminate\Support\Str::limit($artifact->description, 100) }}</p>
                                         @endif
-                                        @if(isset($artifact->notes) && $artifact->notes)
-                                            <p class="ecc-vault-artifact-text {{ $vaultViewMode === 'list' ? 'pe-lg-5' : '' }}" style="color: #212529;">{{ $artifact->notes }}</p>
-                                        @endif
 
                                         <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mt-auto pt-3">
                                             <div class="d-flex align-items-center gap-3">
@@ -726,7 +723,7 @@
     }
 
     .ecc-vault-value-label {
-        color: rgba(245,239,225,.56);
+        color: var(--ecc-text-secondary);
         font-size: .72rem;
         font-weight: 900;
         letter-spacing: .18em;
@@ -744,11 +741,11 @@
     .ecc-vault-value-footer {
         margin-top: 1rem;
         padding-top: 1rem;
-        border-top: 1px solid rgba(245,239,225,.08);
+        border-top: 1px solid var(--ecc-border);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        color: rgba(245,239,225,.52);
+        color: var(--ecc-text-secondary);
         font-size: .64rem;
         font-weight: 900;
         letter-spacing: .18em;
@@ -836,7 +833,7 @@
     }
 
     .ecc-vault-artifact-text {
-        color: rgba(245,239,225,.60);
+        color: var(--ecc-text-secondary);
         line-height: 1.75;
         margin-bottom: 1rem;
     }
@@ -858,7 +855,8 @@
     }
 
     .ecc-vault-ref {
-        color: rgba(245,239,225,.35);
+        color: var(--ecc-text-secondary);
+        opacity: 0.6;
         font-size: .62rem;
         font-weight: 700;
         letter-spacing: .08em;
@@ -898,7 +896,7 @@
     }
 
     .ecc-vault-appraisal-text {
-        color: rgba(245,239,225,.56);
+        color: var(--ecc-text-secondary);
         line-height: 1.75;
         max-width: 260px;
         margin-bottom: 1.5rem;
@@ -923,7 +921,8 @@
         color: #16110a;
     }
     .ecc-vault-mini-stat-label {
-        color: rgba(245,239,225,.35);
+        color: var(--ecc-text-secondary);
+        opacity: 0.7;
         font-size: .62rem;
         font-weight: 800;
         letter-spacing: .12em;
