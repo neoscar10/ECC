@@ -61,235 +61,228 @@
             $galleryItems = collect($galleryBlock['content'])->filter()->values();
         }
         
+        // Also add the hero as first gallery item if gallery exists but hero is separate
+        $allGalleryItems = $galleryItems;
+        
         $lotBadge = $kicker;
-        $subtitle = ''; // Abstracted out of generic detail mostly into kicker/chips.
+        $subtitle = '';
         
         $specifications = collect($finalFactsGrid)->filter(fn ($row) => !empty($row['label']))->values();
     @endphp
 
     @section('title', $title)
 
-    {{-- GALLERY ROW --}}
-    <div class="archive-detail-gallery-grid">
-        <div class="row g-4">
-            <div class="col-lg-10">
-                <div class="archive-detail-stage">
-                    <div class="archive-detail-stage-inner">
-                        @if(!empty($mainImage))
-                            <img
-                                src="{{ is_array($mainImage) ? ($mainImage['url'] ?? null) : $mainImage }}"
-                                alt="{{ $title }}"
-                                id="archiveDetailMainImage"
-                            >
-                        @else
-                            <img
-                                src="https://placehold.co/1400x900/17130b/d4af37?text=Archive+Item"
-                                alt="{{ $title }}"
-                                id="archiveDetailMainImage"
-                            >
-                        @endif
+    {{-- MAIN CONTENT GRID (9/3 Split — mirrors shop page) --}}
+    <div class="row g-3 g-xl-4">
 
-                        @if($galleryItems->count() > 1)
-                            <button type="button" class="archive-detail-stage-btn prev" id="archiveDetailPrevBtn" aria-label="Previous image">
-                                <i class="mdi mdi-chevron-left"></i>
-                            </button>
-                            <button type="button" class="archive-detail-stage-btn next" id="archiveDetailNextBtn" aria-label="Next image">
-                                <i class="mdi mdi-chevron-right"></i>
-                            </button>
-                        @endif
+        {{-- LEFT: GALLERY STAGE + CONTENT (9/12) --}}
+        <div class="col-lg-9">
 
-                        @if(!empty($mainImage))
-                            <button type="button" class="archive-detail-stage-btn archive-detail-stage-utility" id="archiveDetailZoomBtn" onclick="window.dispatchEvent(new CustomEvent('eccZoomOpen'))" aria-label="Zoom image">
-                                <i class="mdi mdi-magnify-plus-outline"></i>
-                            </button>
-                        @endif
-                    </div>
-                </div>
+            {{-- GALLERY STAGE (Main image + desktop vertical thumbs in one card) --}}
+            <div class="archive-detail-gallery-stage mb-3">
 
-                @if($galleryItems->count() > 1)
-                    <div class="archive-detail-thumbs-mobile d-lg-none" id="archiveDetailThumbsMobile">
-                        @foreach($galleryItems as $index => $media)
-                            @php
-                                $thumbUrl = is_array($media)
-                                    ? ($media['thumb_url'] ?? $media['url'] ?? null)
-                                    : ($media->thumb_url ?? $media->url ?? null);
-
-                                $fullUrl = is_array($media)
-                                    ? ($media['url'] ?? null)
-                                    : ($media->url ?? null);
-                            @endphp
-
-                            <button
-                                type="button"
-                                class="archive-detail-thumb {{ $index === 0 ? 'active' : '' }}"
-                                data-index="{{ $index }}"
-                                data-full-src="{{ $fullUrl }}"
-                                aria-label="View image {{ $index + 1 }}"
-                            >
-                                <img src="{{ $thumbUrl ?: $fullUrl }}" alt="{{ $title }} thumbnail {{ $index + 1 }}">
-                            </button>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-
-            <div class="col-lg-2 d-none d-lg-block">
-                @if($galleryItems->count())
-                    <div class="archive-detail-thumbs-desktop" id="archiveDetailThumbsDesktop">
-                        @foreach($galleryItems->take(3) as $index => $media)
-                            @php
-                                $thumbUrl = is_array($media)
-                                    ? ($media['thumb_url'] ?? $media['url'] ?? null)
-                                    : ($media->thumb_url ?? $media->url ?? null);
-
-                                $fullUrl = is_array($media)
-                                    ? ($media['url'] ?? null)
-                                    : ($media->url ?? null);
-                            @endphp
-
-                            <button
-                                type="button"
-                                class="archive-detail-thumb {{ $index === 0 ? 'active' : '' }}"
-                                data-index="{{ $index }}"
-                                data-full-src="{{ $fullUrl }}"
-                                aria-label="View image {{ $index + 1 }}"
-                            >
-                                <img src="{{ $thumbUrl ?: $fullUrl }}" alt="{{ $title }} thumbnail {{ $index + 1 }}">
-
-                                @if($index === 1 && $galleryItems->count() > 2)
-                                    <div class="archive-detail-thumb-overlay" style="background:transparent; pointer-events:none;"></div>
-                                @elseif($index === 2 && $galleryItems->count() > 3)
-                                    <div class="archive-detail-thumb-overlay" style="background:transparent; pointer-events:none;"></div>
-                                @endif
-                            </button>
-                        @endforeach
-
-                        @if($galleryItems->count() > 3)
-                            <button type="button" class="archive-detail-thumb-more" aria-label="More images">
-                                <i class="mdi mdi-image-multiple fs-4"></i>
-                                <span>+{{ $galleryItems->count() - 3 }} More</span>
-                            </button>
-                        @endif
-                    </div>
-                @endif
-            </div>
-        </div>
-    </div>
-
-    {{-- MAIN CONTENT GRID --}}
-    <div class="row g-4 g-xl-5">
-        <div class="col-lg-8 col-xl-9">
-            
-            {{-- TITLE (Moved inside left column) --}}
-            <div class="mb-4">
-                @if(!empty($lotBadge))
-                    <span class="archive-detail-kicker">{{ $lotBadge }}</span>
-                @endif
-
-                <h1 class="archive-detail-title">{{ $title }}</h1>
-
-                @if(!empty($subtitle))
-                    <p class="archive-detail-subtitle">{{ $subtitle }}</p>
-                @endif
-            </div>
-
-            {{-- 2-Column Split for Line Texts and Specifications --}}
-            <div class="row g-4 mb-5">
-                {{-- Left Side: Line Texts --}}
-                <div class="col-md-6">
-                    <div class="archive-detail-meta-chips mt-0 mb-0 d-flex flex-column align-items-start gap-3">
-                        {{-- Loop the line items / chips combined organically from the payload--}}
-                        @forelse($finalChipsRow as $c)
-                            @php
-                                $l = is_array($c) ? ($c['label'] ?? null) : null;
-                                $v = is_array($c) ? ($c['value'] ?? null) : $c;
-                                $displayValue = $l ? "$l: $v" : $v;
-                            @endphp
-                            <div class="archive-detail-chip">
-                                <i class="mdi mdi-check-decagram-outline"></i>
-                                <span>
-                                    <span class="archive-detail-chip-accent">{{ $displayValue }}</span>
-                                </span>
-                            </div>
-                        @empty
-                            <div class="archive-detail-chip" style="opacity: 0.5;">
-                                <span>No line items available.</span>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-
-                {{-- Right Side: Specifications --}}
-                <div class="col-md-6">
-                    <h2 class="archive-detail-section-title" style="font-size: 1.25rem;">Specifications</h2>
-
-                    @if($specifications->count())
-                        <div class="archive-detail-specs">
-                            @foreach($specifications as $row)
-                                @php
-                                    $label = is_array($row) ? ($row['label'] ?? null) : ($row->label ?? null);
-                                    $value = is_array($row) ? ($row['value'] ?? null) : ($row->value ?? null);
-                                @endphp
-
-                                <div class="archive-detail-spec-row" style="padding: 0.6rem 0.15rem;">
-                                    <div class="archive-detail-spec-label">{{ $label }}</div>
-                                    <div class="archive-detail-spec-value">{{ $value }}</div>
-                                </div>
-                            @endforeach
-                        </div>
+                {{-- MAIN IMAGE WRAPPER --}}
+                <div class="archive-detail-stage-image-wrap">
+                    @if(!empty($mainImage))
+                        <img
+                            src="{{ is_array($mainImage) ? ($mainImage['url'] ?? null) : $mainImage }}"
+                            alt="{{ $title }}"
+                            id="archiveDetailMainImage"
+                        >
                     @else
-                        <div class="archive-detail-description-card p-3">
-                            <div class="archive-detail-richtext">
-                                <p class="mb-0 small">No specifications available.</p>
-                            </div>
-                        </div>
+                        <img
+                            src="https://placehold.co/1400x900/17130b/d4af37?text=Archive+Item"
+                            alt="{{ $title }}"
+                            id="archiveDetailMainImage"
+                        >
+                    @endif
+
+                    {{-- Prev / Next controls --}}
+                    @if($allGalleryItems->count() > 1)
+                        <button type="button" class="archive-detail-stage-control prev" id="archiveDetailPrevBtn" aria-label="Previous image">
+                            <i class="mdi mdi-chevron-left"></i>
+                        </button>
+                        <button type="button" class="archive-detail-stage-control next" id="archiveDetailNextBtn" aria-label="Next image">
+                            <i class="mdi mdi-chevron-right"></i>
+                        </button>
+                    @endif
+
+                    {{-- Zoom button --}}
+                    @if(!empty($mainImage))
+                        <button type="button" class="archive-detail-stage-control zoom" id="archiveDetailZoomBtn" onclick="window.dispatchEvent(new CustomEvent('eccZoomOpen'))" aria-label="Zoom image">
+                            <i class="mdi mdi-magnify-plus-outline"></i>
+                        </button>
                     @endif
                 </div>
+
+                {{-- DESKTOP THUMBNAILS (Vertical rail, inside the stage card) --}}
+                @if($allGalleryItems->count() > 1)
+                    <div class="archive-detail-stage-thumbs d-none d-lg-flex">
+                        <div class="archive-detail-thumb-rail scroll-luxury w-100" id="archiveDetailThumbsDesktop">
+                            @foreach($allGalleryItems as $index => $media)
+                                @php
+                                    $thumbUrl = is_array($media)
+                                        ? ($media['thumb_url'] ?? $media['url'] ?? null)
+                                        : ($media->thumb_url ?? $media->url ?? null);
+                                    $fullUrl = is_array($media)
+                                        ? ($media['url'] ?? null)
+                                        : ($media->url ?? null);
+                                @endphp
+                                <button
+                                    type="button"
+                                    class="archive-detail-thumb {{ $index === 0 ? 'active' : '' }}"
+                                    data-index="{{ $index }}"
+                                    data-full-src="{{ $fullUrl }}"
+                                    aria-label="View image {{ $index + 1 }}"
+                                >
+                                    <img src="{{ $thumbUrl ?: $fullUrl }}" alt="{{ $title }} thumbnail {{ $index + 1 }}">
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
 
-            {{-- Combine all markdown panels sequentially into the Provenance/Description flow --}}
-            @forelse($markdownBlocks as $s)
-                @php
-                    $st = $s['title'] ?? '';
-                    $acc = $s['access'] ?? ['can_view' => true];
-                    $can = (bool)($acc['can_view'] ?? true);
-                    $content = $s['content'] ?? null;
-                @endphp
-                <div class="mb-4">
-                    <div class="archive-detail-description-card">
-                        @if($st)
-                            <h2 class="archive-detail-section-title">{{ $st }}</h2>
-                        @endif
+            {{-- MOBILE THUMBNAILS (Below stage, hidden on desktop) --}}
+            @if($allGalleryItems->count() > 1)
+                <div class="d-lg-none mb-3">
+                    <div class="archive-detail-thumbs-mobile scroll-luxury" id="archiveDetailThumbsMobile">
+                        @foreach($allGalleryItems as $index => $media)
+                            @php
+                                $thumbUrl = is_array($media)
+                                    ? ($media['thumb_url'] ?? $media['url'] ?? null)
+                                    : ($media->thumb_url ?? $media->url ?? null);
+                                $fullUrl = is_array($media)
+                                    ? ($media['url'] ?? null)
+                                    : ($media->url ?? null);
+                            @endphp
+                            <button
+                                type="button"
+                                class="archive-detail-thumb {{ $index === 0 ? 'active' : '' }}"
+                                data-index="{{ $index }}"
+                                data-full-src="{{ $fullUrl }}"
+                                aria-label="View image {{ $index + 1 }}"
+                            >
+                                <img src="{{ $thumbUrl ?: $fullUrl }}" alt="{{ $title }} thumbnail {{ $index + 1 }}">
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
-                        <div class="archive-detail-richtext {{ $can ? '' : 'is-locked blur opacity-50 pe-none' }}">
-                            {!! \Illuminate\Support\Str::markdown($content ?: '') !!}
+            {{-- PRODUCT INFO BELOW GALLERY --}}
+            <div class="archive-detail-info-block mt-3">
+                <header class="mb-2">
+                    @if(!empty($lotBadge))
+                        <span class="archive-detail-kicker">{{ $lotBadge }}</span>
+                    @endif
+                    <h1 class="archive-detail-title">{{ $title }}</h1>
+                    @if(!empty($subtitle))
+                        <p class="archive-detail-subtitle">{{ $subtitle }}</p>
+                    @endif
+                </header>
+
+                <div class="archive-detail-divider mb-3"></div>
+
+                {{-- 2-Column Split for Line Texts and Specifications --}}
+                <div class="row g-3 mb-3">
+                    {{-- Left Side: Line Texts --}}
+                    <div class="col-md-6">
+                        <div class="archive-detail-meta-chips mt-0 mb-0 d-flex flex-column align-items-start gap-2">
+                            @forelse($finalChipsRow as $c)
+                                @php
+                                    $l = is_array($c) ? ($c['label'] ?? null) : null;
+                                    $v = is_array($c) ? ($c['value'] ?? null) : $c;
+                                    $displayValue = $l ? "$l: $v" : $v;
+                                @endphp
+                                <div class="archive-detail-chip">
+                                    <i class="mdi mdi-check-decagram-outline"></i>
+                                    <span>
+                                        <span class="archive-detail-chip-accent">{{ $displayValue }}</span>
+                                    </span>
+                                </div>
+                            @empty
+                                <div class="archive-detail-chip" style="opacity: 0.5;">
+                                    <span>No line items available.</span>
+                                </div>
+                            @endforelse
                         </div>
-                        
-                        @if(!$can)
-                            <div class="archive-detail-cert-card mt-3">
-                                <span class="material-symbols-outlined text-warning mb-2 fs-2">lock</span>
-                                <div class="archive-detail-cert-title">{{ $acc['lock_title'] ?? 'Inner Circle Access' }}</div>
-                                <div class="archive-detail-cert-subtitle">{{ $acc['lock_hint'] ?? 'Upgrade to view this section.' }}</div>
-                                <a href="{{ url('/membership/apply-intro') }}" class="archive-detail-outline-btn d-inline-block mt-3 px-4">Unlock Access</a>
+                    </div>
+
+                    {{-- Right Side: Specifications --}}
+                    <div class="col-md-6">
+                        <h2 class="archive-detail-section-title" style="font-size: 1.1rem;">Specifications</h2>
+
+                        @if($specifications->count())
+                            <div class="archive-detail-specs">
+                                @foreach($specifications as $row)
+                                    @php
+                                        $label = is_array($row) ? ($row['label'] ?? null) : ($row->label ?? null);
+                                        $value = is_array($row) ? ($row['value'] ?? null) : ($row->value ?? null);
+                                    @endphp
+                                    <div class="archive-detail-spec-row">
+                                        <div class="archive-detail-spec-label">{{ $label }}</div>
+                                        <div class="archive-detail-spec-value">{{ $value }}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="archive-detail-description-card p-3">
+                                <div class="archive-detail-richtext">
+                                    <p class="mb-0 small">No specifications available.</p>
+                                </div>
                             </div>
                         @endif
                     </div>
                 </div>
-            @empty
-                <div class="mb-4">
-                    <div class="archive-detail-description-card">
-                        <h2 class="archive-detail-section-title">Provenance</h2>
-                        <div class="archive-detail-richtext">
-                            <p>No narrative information available.</p>
+
+                <div class="archive-detail-divider mb-3"></div>
+
+                {{-- Markdown Blocks (Provenance / Description) --}}
+                @forelse($markdownBlocks as $s)
+                    @php
+                        $st = $s['title'] ?? '';
+                        $acc = $s['access'] ?? ['can_view' => true];
+                        $can = (bool)($acc['can_view'] ?? true);
+                        $content = $s['content'] ?? null;
+                    @endphp
+                    <div class="mb-3">
+                        <div class="archive-detail-description-card">
+                            @if($st)
+                                <h2 class="archive-detail-section-title">{{ $st }}</h2>
+                            @endif
+
+                            <div class="archive-detail-richtext {{ $can ? '' : 'is-locked blur opacity-50 pe-none' }}">
+                                {!! \Illuminate\Support\Str::markdown($content ?: '') !!}
+                            </div>
+                            
+                            @if(!$can)
+                                <div class="archive-detail-cert-card mt-3">
+                                    <span class="material-symbols-outlined text-warning mb-2 fs-2">lock</span>
+                                    <div class="archive-detail-cert-title">{{ $acc['lock_title'] ?? 'Inner Circle Access' }}</div>
+                                    <div class="archive-detail-cert-subtitle">{{ $acc['lock_hint'] ?? 'Upgrade to view this section.' }}</div>
+                                    <a href="{{ url('/membership/apply-intro') }}" class="archive-detail-outline-btn d-inline-block mt-3 px-4">Unlock Access</a>
+                                </div>
+                            @endif
                         </div>
                     </div>
-                </div>
-            @endforelse
-
+                @empty
+                    <div class="mb-3">
+                        <div class="archive-detail-description-card">
+                            <h2 class="archive-detail-section-title">Provenance</h2>
+                            <div class="archive-detail-richtext">
+                                <p>No narrative information available.</p>
+                            </div>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
         </div>
 
-        <div class="col-lg-4 col-xl-3">
+        {{-- RIGHT: SIDEBAR (3/12) — Estimate card, mirrors shop Add-to-Cart position --}}
+        <div class="col-lg-3">
             <div class="archive-detail-sidebar">
+                {{-- ESTIMATE SIDE CARD --}}
                 <div class="archive-detail-side-card">
                     <div class="archive-detail-side-kicker">{{ $estimateLabel }}</div>
 
@@ -300,7 +293,6 @@
                     @endif
 
                     <div class="archive-detail-side-actions">
-                        {{-- The Enquiry Button Trigger --}}
                         <button type="button" 
                                 class="archive-detail-solid-soft-btn w-100"
                                 data-bs-toggle="modal"
@@ -311,6 +303,7 @@
                     </div>
                 </div>
 
+                {{-- CERT CARD --}}
                 <div class="archive-detail-cert-card">
                     <i class="mdi mdi-seal-variant"></i>
                     <div class="archive-detail-cert-title">Certified Authenticity</div>
@@ -380,44 +373,107 @@
         padding-bottom: 1.5rem;
     }
 
-    .archive-detail-gallery-grid {
-        margin-bottom: 1.75rem;
-    }
-
-    .archive-detail-stage {
+    /* ── Gallery Stage (mirrors shop-detail-gallery-stage) ── */
+    .archive-detail-gallery-stage {
         position: relative;
-        border-radius: 28px;
+        border-radius: 22px;
         overflow: hidden;
-        border: 1px solid rgba(199, 167, 90,.14);
-        background:
-            radial-gradient(circle at center, rgba(199, 167, 90,.06), transparent 60%),
-            linear-gradient(180deg, var(--ecc-bg-hover), transparent),
-            #120f08;
-        box-shadow: 0 20px 42px rgba(0,0,0,.28);
-        min-height: 560px;
+        border: 1px solid var(--ecc-primary-border);
+        background: var(--ecc-bg-surface-2);
+        box-shadow: 0 12px 32px rgba(0,0,0,.3);
+        display: flex;
+        align-items: stretch;
+        padding: 1.25rem;
+        min-height: 480px;
+        height: clamp(480px, 60vh, 700px);
+        max-height: 700px;
     }
 
-    .archive-detail-stage-inner {
+    .archive-detail-stage-image-wrap {
+        flex-grow: 1;
         position: relative;
-        width: 100%;
-        min-height: 560px;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 2rem;
-        background: transparent;
+        height: 100%;
+        overflow: hidden;
     }
 
-    .archive-detail-stage-inner img {
+    .archive-detail-stage-image-wrap img#archiveDetailMainImage {
         width: 100%;
         height: 100%;
-        max-height: 500px;
+        max-width: 98%;
+        max-height: 98%;
         object-fit: contain;
-        object-position: center;
         display: block;
+        margin: auto;
+        transition: transform .7s ease;
     }
 
-    .archive-detail-stage-btn {
+    .archive-detail-stage-image-wrap:hover img#archiveDetailMainImage {
+        transform: scale(1.04);
+    }
+
+    /* ── Desktop thumbnail rail (inside stage card, vertical) ── */
+    .archive-detail-stage-thumbs {
+        flex-shrink: 0;
+        width: 90px;
+        height: 100%;
+        padding-left: 1rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .archive-detail-thumb-rail {
+        display: flex;
+        flex-direction: column;
+        gap: .75rem;
+        height: 100%;
+        overflow-y: auto;
+        scrollbar-width: none;
+    }
+
+    .archive-detail-thumb-rail::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* ── Shared thumbnail style ── */
+    .archive-detail-thumb {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--ecc-primary-border);
+        background: var(--ecc-bg-surface-2);
+        aspect-ratio: 1 / 1;
+        padding: 0;
+        transition: .2s ease;
+        box-shadow: 0 8px 16px rgba(0,0,0,.16);
+        width: 100%;
+        flex: 0 0 auto;
+    }
+
+    .archive-detail-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: .25s ease;
+        opacity: .74;
+    }
+
+    .archive-detail-thumb:hover img,
+    .archive-detail-thumb.active img {
+        opacity: 1;
+        transform: scale(1.03);
+    }
+
+    .archive-detail-thumb.active {
+        border-color: var(--ecc-primary);
+        box-shadow: 0 0 0 2px var(--ecc-primary-soft);
+    }
+
+    /* ── Stage controls (prev/next/zoom) ── */
+    .archive-detail-stage-control {
         position: absolute;
         z-index: 4;
         width: 44px;
@@ -429,107 +485,47 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        backdrop-filter: blur(8px);
         transition: .2s ease;
+        backdrop-filter: blur(8px);
     }
 
-    .archive-detail-stage-btn:hover {
+    .archive-detail-stage-control:hover {
         background: var(--ecc-primary);
         color: #111;
         border-color: var(--ecc-primary);
     }
 
-    .archive-detail-stage-btn.prev {
+    .archive-detail-stage-control.prev {
         left: 1rem;
         top: 50%;
         transform: translateY(-50%);
     }
 
-    .archive-detail-stage-btn.next {
+    .archive-detail-stage-control.next {
         right: 1rem;
         top: 50%;
         transform: translateY(-50%);
     }
 
-    .archive-detail-stage-utility {
+    .archive-detail-stage-control.zoom {
         right: 1rem;
         bottom: 1rem;
     }
 
-    .archive-detail-thumbs-desktop {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        height: 100%;
-    }
-
-    .archive-detail-thumb {
-        position: relative;
-        border-radius: 18px;
-        overflow: hidden;
-        border: 1px solid rgba(199, 167, 90,.14);
-        background: var(--ecc-bg-surface-2);
-        min-height: 118px;
-        padding: 0;
-        transition: .2s ease;
-        box-shadow: 0 12px 24px rgba(0,0,0,.16);
-    }
-
-    .archive-detail-thumb:hover,
-    .archive-detail-thumb.active {
-        border-color: var(--ecc-primary);
-        box-shadow: 0 0 0 2px rgba(199, 167, 90,.12);
-    }
-
-    .archive-detail-thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        transition: .25s ease;
-    }
-
-    .archive-detail-thumb:not(.active) img {
-        opacity: .74;
-    }
-
-    .archive-detail-thumb:hover img,
-    .archive-detail-thumb.active img {
-        opacity: 1;
-        transform: scale(1.03);
-    }
-
-    .archive-detail-thumb-more {
-        min-height: 118px;
-        border-radius: 18px;
-        border: 1px solid rgba(199, 167, 90,.16);
-        background: rgba(199, 167, 90,.08);
-        color: var(--ecc-primary);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: .25rem;
-        font-weight: 800;
-        font-size: .72rem;
-        letter-spacing: .08em;
-        text-transform: uppercase;
-        box-shadow: 0 12px 24px rgba(0,0,0,.16);
-    }
-
+    /* ── Mobile thumbnail strip ── */
     .archive-detail-thumbs-mobile {
         display: flex;
-        gap: .85rem;
+        gap: .75rem;
         overflow-x: auto;
         overflow-y: hidden;
-        padding-top: .95rem;
+        padding-top: .5rem;
         padding-bottom: .2rem;
         scrollbar-width: thin;
         scrollbar-color: rgba(199, 167, 90,.45) transparent;
     }
 
     .archive-detail-thumbs-mobile::-webkit-scrollbar {
-        height: 5px;
+        height: 4px;
     }
 
     .archive-detail-thumbs-mobile::-webkit-scrollbar-thumb {
@@ -538,18 +534,19 @@
     }
 
     .archive-detail-thumbs-mobile .archive-detail-thumb {
-        min-width: 110px;
-        width: 110px;
-        min-height: 110px;
-        height: 110px;
+        min-width: 80px;
+        width: 80px;
+        min-height: 80px;
+        height: 80px;
         flex: 0 0 auto;
     }
 
+    /* ── Info block ── */
     .archive-detail-kicker {
         display: inline-flex;
         align-items: center;
         gap: .45rem;
-        padding: .42rem .8rem;
+        padding: .38rem .75rem;
         border-radius: 999px;
         background: rgba(199, 167, 90,.12);
         border: 1px solid rgba(199, 167, 90,.18);
@@ -558,57 +555,65 @@
         font-weight: 900;
         letter-spacing: .1em;
         text-transform: uppercase;
+        margin-bottom: .5rem;
     }
 
     .archive-detail-title {
         color: var(--ecc-text-primary);
-        font-size: clamp(2rem, 3vw, 3.2rem);
+        font-size: clamp(1.8rem, 3vw, 3rem);
         line-height: 1.04;
         font-weight: 900;
         letter-spacing: -.045em;
-        margin: 1rem 0 .5rem;
+        margin: .5rem 0 .4rem;
     }
 
     .archive-detail-subtitle {
         color: var(--ecc-primary);
-        font-size: 1.08rem;
+        font-size: 1rem;
         line-height: 1.6;
         font-weight: 600;
         margin: 0;
     }
 
+    .archive-detail-divider {
+        height: 1px;
+        background: linear-gradient(90deg, var(--ecc-primary-border), transparent);
+    }
+
+    /* ── Chips ── */
     .archive-detail-meta-chips {
         display: flex;
         flex-wrap: wrap;
-        gap: .85rem;
-        margin-top: 1.4rem;
-        margin-bottom: 2rem;
+        gap: .75rem;
+        margin-top: .5rem;
+        margin-bottom: .75rem;
     }
 
     .archive-detail-chip {
         display: inline-flex;
         align-items: center;
-        gap: .65rem;
-        min-height: 48px;
-        padding: .8rem 1rem;
+        gap: .6rem;
+        min-height: 42px;
+        padding: .65rem .9rem;
         border-radius: 999px;
         background: rgba(199, 167, 90,.08);
         border: 1px solid rgba(199, 167, 90,.16);
         color: var(--ecc-text-primary);
-        font-size: .88rem;
+        font-size: .84rem;
         font-weight: 800;
         line-height: 1;
     }
 
     .archive-detail-chip i {
         color: var(--ecc-primary);
-        font-size: 1rem;
+        font-size: .95rem;
     }
 
     .archive-detail-chip-accent {
         color: var(--ecc-primary);
     }
 
+    /* ── Description cards ── */
     .archive-detail-description-card,
     .archive-detail-side-card,
     .archive-detail-cert-card {
@@ -621,8 +626,8 @@
     }
 
     .archive-detail-description-card {
-        padding: 1.6rem;
-        margin-bottom: 1.75rem;
+        padding: 1.4rem;
+        margin-bottom: 1rem;
     }
 
     .archive-detail-richtext,
@@ -630,8 +635,8 @@
     .archive-detail-richtext li,
     .archive-detail-richtext span {
         color: var(--ecc-text-secondary);
-        line-height: 1.9;
-        font-size: .98rem;
+        line-height: 1.85;
+        font-size: .96rem;
     }
 
     .archive-detail-richtext h1,
@@ -645,7 +650,7 @@
         line-height: 1.2;
         letter-spacing: -.03em;
         margin-top: 0;
-        margin-bottom: 1rem;
+        margin-bottom: .85rem;
     }
 
     .archive-detail-richtext h1 { font-size: 2rem; }
@@ -654,17 +659,17 @@
     .archive-detail-richtext strong { color: var(--ecc-text-primary); font-weight: 800; }
     .archive-detail-richtext ul,
     .archive-detail-richtext ol { padding-left: 1.1rem; margin-bottom: 1rem; }
-    .archive-detail-richtext li { margin-bottom: .45rem; }
+    .archive-detail-richtext li { margin-bottom: .4rem; }
 
     .archive-detail-section-title {
         color: var(--ecc-text-primary);
-        font-size: 1.75rem;
+        font-size: 1.5rem;
         font-weight: 900;
         letter-spacing: -.03em;
-        margin: 0 0 1.15rem;
+        margin: 0 0 1rem;
         display: inline-flex;
         align-items: center;
-        gap: .85rem;
+        gap: .75rem;
         text-transform: uppercase;
     }
 
@@ -672,14 +677,14 @@
         content: "";
         display: inline-block;
         width: 4px;
-        height: 28px;
+        height: 24px;
         border-radius: 999px;
         background: var(--ecc-primary);
         flex: 0 0 auto;
     }
 
     .archive-detail-specs {
-        border-radius: 22px;
+        border-radius: 14px;
         overflow: hidden;
         background: transparent;
     }
@@ -688,33 +693,34 @@
         display: flex;
         justify-content: space-between;
         gap: 1.5rem;
-        padding: 1rem .15rem;
+        padding: .7rem .15rem;
         border-bottom: 1px solid rgba(199, 167, 90,.10);
     }
 
     .archive-detail-spec-label {
         color: var(--ecc-text-secondary);
-        font-size: .96rem;
+        font-size: .92rem;
         font-weight: 500;
     }
 
     .archive-detail-spec-value {
         color: var(--ecc-text-primary);
-        font-size: .96rem;
+        font-size: .92rem;
         font-weight: 800;
         text-align: right;
     }
 
+    /* ── Sidebar ── */
     .archive-detail-sidebar {
         position: sticky;
         top: 98px;
         display: flex;
         flex-direction: column;
-        gap: 1.15rem;
+        gap: 1rem;
     }
 
     .archive-detail-side-card {
-        padding: 1.4rem;
+        padding: 1.35rem;
     }
 
     .archive-detail-side-kicker {
@@ -723,21 +729,21 @@
         font-weight: 900;
         letter-spacing: .16em;
         text-transform: uppercase;
-        margin-bottom: .7rem;
+        margin-bottom: .65rem;
     }
 
     .archive-detail-side-value {
         color: var(--ecc-primary);
-        font-size: clamp(1.8rem, 2vw, 2.5rem);
+        font-size: clamp(1.8rem, 2vw, 2.4rem);
         line-height: 1.15;
         font-weight: 900;
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.1rem;
     }
 
     .archive-detail-side-actions {
         display: flex;
         flex-direction: column;
-        gap: .85rem;
+        gap: .75rem;
     }
 
     .archive-detail-outline-btn,
@@ -780,13 +786,13 @@
         flex-direction: column;
         align-items: center;
         text-align: center;
-        gap: .35rem;
-        padding: 1.35rem;
+        gap: .3rem;
+        padding: 1.25rem;
     }
 
     .archive-detail-cert-card i {
         color: var(--ecc-primary);
-        font-size: 1.15rem;
+        font-size: 1.1rem;
     }
 
     .archive-detail-cert-title {
@@ -803,14 +809,12 @@
         line-height: 1.5;
     }
 
+    /* ── Responsive ── */
     @media (max-width: 991.98px) {
-        .archive-detail-stage,
-        .archive-detail-stage-inner {
-            min-height: 420px;
-        }
-
-        .archive-detail-stage-inner img {
-            max-height: 360px;
+        .archive-detail-gallery-stage {
+            min-height: 380px;
+            height: auto;
+            max-height: 520px;
         }
 
         .archive-detail-sidebar {
@@ -819,47 +823,48 @@
     }
 
     @media (max-width: 767.98px) {
-        .archive-detail-stage,
-        .archive-detail-stage-inner {
+        .archive-detail-gallery-stage {
             min-height: 300px;
-        }
-
-        .archive-detail-stage-inner {
-            padding: 1.25rem;
-        }
-
-        .archive-detail-stage-inner img {
-            max-height: 260px;
-        }
-
-        .archive-detail-meta-chips {
-            gap: .7rem;
-            margin-top: 1.2rem;
-            margin-bottom: 1.6rem;
-        }
-
-        .archive-detail-chip {
-            min-height: 44px;
-            padding: .72rem .85rem;
-            font-size: .82rem;
-        }
-
-        .archive-detail-description-card {
-            padding: 1.2rem;
-        }
-
-        .archive-detail-section-title {
-            font-size: 1.45rem;
+            max-height: 420px;
+            padding: 1rem;
         }
 
         .archive-detail-spec-row {
             flex-direction: column;
-            gap: .35rem;
-            padding: .9rem 0;
+            gap: .3rem;
+            padding: .75rem 0;
         }
 
         .archive-detail-spec-value {
             text-align: left;
+        }
+
+        .archive-detail-description-card {
+            padding: 1.1rem;
+        }
+
+        .archive-detail-chip {
+            min-height: 40px;
+            padding: .6rem .8rem;
+            font-size: .82rem;
+        }
+    }
+
+    @media (min-width: 992px) {
+        .archive-detail-thumb-rail {
+            flex-direction: column;
+            flex: 0 0 auto;
+            max-height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 0;
+        }
+
+        .archive-detail-thumb {
+            flex: 0 0 auto;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 10px;
         }
     }
 </style>
