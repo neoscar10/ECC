@@ -265,75 +265,84 @@
                                     </div>
                                 </div>
 
-                                @if(isset($selectedArtifact['tracking']) && $selectedArtifact['tracking'])
-                                    @php $track = $selectedArtifact['tracking']; @endphp
-                                    <div class="ecc-vault-tracking-drawer mt-4 p-4 rounded-4 bg-white-5 border border-white-5">
-                                        <div class="mb-4">
-    <div class="ecc-vault-standing-label mb-1">PHYSICAL DELIVERY STATUS</div>
-    <div class="fs-16 fw-bold ecc-text-primary mb-2">{{ $track['status_label'] }}</div>
-    @if($track['is_test_mode'])
-        <span class="badge bg-warning text-dark opacity-75">Simulated</span>
-    @endif
-</div>
-
-                                        <div class="row g-3 mb-4 fs-13">
-                                            @if($track['awb_code'])
-                                                <div class="col-6">
-                                                    <div class="text-white-50 mb-1" style="font-size: 10px;">AWB CODE</div>
-                                                    <div class="fw-semibold text-white">{{ $track['awb_code'] }}</div>
-                                                </div>
-                                            @endif
-                                            @if($track['courier_name'])
-                                                <div class="col-6">
-                                                    <div class="text-white-50 mb-1" style="font-size: 10px;">COURIER</div>
-                                                    <div class="fw-semibold text-white">{{ $track['courier_name'] }}</div>
-                                                </div>
-                                            @endif
-                                            <div class="col-12">
-                                                <div class="text-white-50 mb-1" style="font-size: 10px;">DELIVERY FEE PAID</div>
-                                                <div class="fw-semibold text-white">{{ number_format($track['delivery_fee'], 2) }} {{ $track['delivery_currency'] }}</div>
-                                            </div>
-                                        </div>
-
-                                        @if(!empty($track['events']))
-                                            <div class="ecc-vault-timeline mt-4 border-start border-white-10 ms-2 ps-3 position-relative">
-                                                @foreach($track['events'] as $event)
-                                                    <div class="mb-4 position-relative">
-                                                        <span class="position-absolute translate-middle p-1 rounded-circle bg-primary" style="top: 10px; left: -18px; border: 2px solid var(--ecc-surface);"></span>
-                                                        <div class="fs-14 fw-bold text-white mb-1">{{ $event['status_label'] }}</div>
-                                                        <div class="fs-12 text-white-50 mb-1">{{ $event['description'] }}</div>
-                                                        <div class="d-flex align-items-center gap-2 fs-10 opacity-50">
-                                                            <span><i class="mdi mdi-clock-outline me-1"></i>{{ \Carbon\Carbon::parse($event['event_time'])->format('M d, Y h:i A') }}</span>
-                                                            @if(!empty($event['location']))
-                                                                <span><i class="mdi mdi-map-marker-outline mx-1"></i>{{ $event['location'] }}</span>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @endif
-
-                                        @if($track['payment_status'] === 'pending_payment' || $track['payment_status'] === 'payment_failed')
-                                            <div class="mt-4 text-center">
-                                                <a href="{{ route('shop.checkout', ['vault_request_id' => $track['id']]) }}" class="btn btn-warning w-100 fw-bold">
-                                                    <i class="mdi mdi-credit-card-outline me-2"></i> PAY DELIVERY FEE
-                                                </a>
-                                            </div>
-                                        @endif
-                                    </div>
-                                @else
-                                    <div class="d-flex gap-3">
-                                        @if($selectedArtifact['has_pending_request'])
-                                            <div class="flex-grow-1 p-3 rounded-3 bg-warning-subtle border border-warning-subtle text-warning text-center fw-bold fs-12">
+                                 @if(!isset($selectedArtifact['tracking']) || !$selectedArtifact['tracking'])
+                                     <div class="d-flex gap-3">
+                                         @if($selectedArtifact['has_pending_request'])
+                                             <div class="flex-grow-1 p-3 rounded-3 bg-warning-subtle border border-warning-subtle text-warning text-center fw-bold fs-12">
                                                <i class="ri-time-line me-2"></i> REMOVAL REQUEST PENDING REVIEW
-                                            </div>
-                                        @else
-                                            <button class="btn ecc-vault-btn-outline w-100" wire:click="openRemovalModal">
-                                                REQUEST PHYSICAL DELIVERY
-                                            </button>
-                                        @endif
-                                    </div>
-                                @endif
+                                             </div>
+                                         @else
+                                             <button class="btn ecc-vault-btn-outline w-100" wire:click="openRemovalModal">
+                                                 REQUEST PHYSICAL DELIVERY
+                                             </button>
+                                         @endif
+                                     </div>
+                                 @endif
+                             </div>
+                         </div>
+
+                         @if(isset($selectedArtifact['tracking']) && $selectedArtifact['tracking'])
+                             @php $track = $selectedArtifact['tracking']; @endphp
+                             <div class="ecc-vault-tracking-drawer mt-4 p-4 rounded-4 bg-white-5 border border-white-5">
+                                 <div class="row g-3 align-items-center">
+                                     <div class="col-12 col-md-4">
+                                         <div class="ecc-vault-standing-label mb-1">PHYSICAL DELIVERY STATUS</div>
+                                         <div class="fs-16 fw-bold ecc-text-primary d-flex align-items-center gap-2 mb-2 mb-md-0">
+                                             <span>{{ $track['status_label'] }}</span>
+                                             @if($track['is_test_mode'])
+                                                 <span class="badge bg-warning text-dark opacity-75 fs-10 py-1 px-2" style="font-weight: 700;">Simulated</span>
+                                             @endif
+                                         </div>
+                                     </div>
+                                     <div class="col-12 col-md-8">
+                                         <div class="row g-3 fs-13">
+                                             @if($track['awb_code'])
+                                                 <div class="col-6 col-sm-4">
+                                                     <div class="text-white-50 mb-1" style="font-size: 10px;">AWB CODE</div>
+                                                     <div class="fw-semibold text-white">{{ $track['awb_code'] }}</div>
+                                                 </div>
+                                             @endif
+                                             @if($track['courier_name'])
+                                                 <div class="col-6 col-sm-4">
+                                                     <div class="text-white-50 mb-1" style="font-size: 10px;">COURIER</div>
+                                                     <div class="fw-semibold text-white">{{ $track['courier_name'] }}</div>
+                                                 </div>
+                                             @endif
+                                             <div class="col-12 col-sm-4">
+                                                 <div class="text-white-50 mb-1" style="font-size: 10px;">DELIVERY FEE PAID</div>
+                                                 <div class="fw-semibold text-white">{{ number_format($track['delivery_fee'], 2) }} {{ $track['delivery_currency'] }}</div>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
+
+                                 @if(!empty($track['events']))
+                                     <div class="ecc-vault-timeline mt-4 border-start border-white-10 ms-2 ps-3 position-relative">
+                                         @foreach($track['events'] as $event)
+                                             <div class="mb-4 position-relative">
+                                                 <span class="position-absolute translate-middle p-1 rounded-circle bg-primary" style="top: 10px; left: -18px; border: 2px solid var(--ecc-surface);"></span>
+                                                 <div class="fs-14 fw-bold text-white mb-1">{{ $event['status_label'] }}</div>
+                                                 <div class="fs-12 text-white-50 mb-1">{{ $event['description'] }}</div>
+                                                 <div class="d-flex align-items-center gap-2 fs-10 opacity-50">
+                                                     <span><i class="mdi mdi-clock-outline me-1"></i>{{ \Carbon\Carbon::parse($event['event_time'])->format('M d, Y h:i A') }}</span>
+                                                     @if(!empty($event['location']))
+                                                         <span><i class="mdi mdi-map-marker-outline mx-1"></i>{{ $event['location'] }}</span>
+                                                     @endif
+                                                 </div>
+                                             </div>
+                                         @endforeach
+                                     </div>
+                                 @endif
+
+                                 @if($track['payment_status'] === 'pending_payment' || $track['payment_status'] === 'payment_failed')
+                                     <div class="mt-4 text-center">
+                                         <a href="{{ route('shop.checkout', ['vault_request_id' => $track['id']]) }}" class="btn btn-warning w-100 fw-bold">
+                                             <i class="mdi mdi-credit-card-outline me-2"></i> PAY DELIVERY FEE
+                                         </a>
+                                     </div>
+                                 @endif
+                             </div>
+                         @endif
                             </div>
                         </div>
                     </div>
