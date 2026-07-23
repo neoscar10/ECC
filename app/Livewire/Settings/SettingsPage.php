@@ -19,6 +19,10 @@ class SettingsPage extends Component
     public bool $showEditProfileModal = false;
     public bool $showChangePasswordModal = false;
     public bool $showMembershipDetailsModal = false;
+    public bool $showUpgradeModal = false;
+    public bool $hasUpgradeAvailable = false;
+    public array $upgradeTiers = [];
+    public ?int $selectedUpgradeTierId = null;
     public bool $hasVaultAccess = false;
 
     public $avatarUpload;
@@ -81,6 +85,11 @@ class SettingsPage extends Component
             'full_name' => $user->full_name,
             'phone' => $user->phone,
         ];
+
+        $currentSortOrder = $membership['tier']['sort_order'] ?? 0;
+        $this->hasUpgradeAvailable = \App\Models\MembershipTier::where('is_active', true)
+            ->where('sort_order', '>', $currentSortOrder)
+            ->exists();
     }
 
     public function openEditProfileModal()
@@ -189,6 +198,88 @@ class SettingsPage extends Component
     public function closeMembershipDetailsModal()
     {
         $this->showMembershipDetailsModal = false;
+    }
+
+    public function openUpgradeModal()
+    {
+        $this->showMembershipDetailsModal = false;
+        
+        $user = Auth::user();
+        $currentTier = $user?->currentMembership?->membershipTier;
+        $currentSortOrder = $currentTier?->sort_order ?? 0;
+
+        $tiersQuery = \App\Models\MembershipTier::where('is_active', true)
+            ->where('sort_order', '>', $currentSortOrder)
+            ->with(['privileges' => fn($q) => $q->where('is_active', true)->orderBy('sort_order')])
+            ->with('features')
+            ->orderBy('sort_order', 'asc')
+            ->get();
+
+        $this->upgradeTiers = $tiersQuery->map(function ($t) {
+            $allPrivileges = $t->privileges->map(fn($p) => $p->label ?: $p->name)->all();
+            return [
+                'id' => $t->id,
+                'name' => $t->name,
+                'price' => (float)$t->price,
+                'price_formatted' => $t->price > 0 ? 'INR ' . number_format($t->price) : 'Free',
+                'duration_label' => 'Year',
+                'short_desc' => $t->description ?: 'Premium membership benefits.',
+                'perks' => array_slice($allPrivileges, 0, 3),
+                'benefits_list' => array_slice($allPrivileges, 0, 4),
+                'benefits_count' => count($allPrivileges)
+            ];
+        })->all();
+
+        if (count($this->upgradeTiers) > 0) {
+            $this->selectedUpgradeTierId = $this->upgradeTiers[0]['id'];
+        } else {
+            $this->selectedUpgradeTierId = null;
+        }
+
+        $this->showUpgradeModal = true;
+    }
+
+    public function closeUpgradeModal()
+    {
+        $this->showUpgradeModal = false;
+        $this->selectedUpgradeTierId = null;
+        $this->upgradeTiers = [];
+        $this->resetErrorBag('selectedUpgradeTierId');
+    }
+
+    public function selectUpgradeTier($tierId)
+    {
+        $this->selectedUpgradeTierId = $tierId;
+    }
+
+    public function confirmUpgrade(\App\Services\Membership\ApplicationWizardService $wiz)
+    {
+        if (!$this->selectedUpgradeTierId) {
+            $this->addError('selectedUpgradeTierId', 'Please select a membership tier to upgrade.');
+            return;
+        }
+
+        $user = Auth::user();
+        $currentTier = $user?->currentMembership?->membershipTier;
+        $currentSortOrder = $currentTier?->sort_order ?? 0;
+
+        $targetTier = \App\Models\MembershipTier::where('id', $this->selectedUpgradeTierId)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$targetTier || $targetTier->sort_order <= $currentSortOrder) {
+            $this->addError('selectedUpgradeTierId', 'Invalid tier selected.');
+            return;
+        }
+
+        $draft = $wiz->getOrCreateDraft();
+        if ($draft instanceof \App\Models\MembershipApplication) {
+            $draft->update([
+                'selected_tier_id' => $targetTier->id
+            ]);
+        }
+
+        return redirect()->route('membership.upgrade.payment');
     }
 
     public function logout(Request $request)

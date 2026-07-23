@@ -45,12 +45,19 @@
                 </div>
             </div>
 
-            <div class="modal-footer border-0 pt-0">
+            <div class="modal-footer border-0 pt-0 d-flex gap-2">
                 <button type="button" 
                         class="btn ecc-btn-outline-light px-4"
                         wire:click="closeMembershipDetailsModal">
                     Close
                 </button>
+                @if($hasUpgradeAvailable)
+                    <button type="button" 
+                            class="btn ecc-btn-primary px-4"
+                            wire:click="openUpgradeModal">
+                        Upgrade Membership
+                    </button>
+                @endif
             </div>
         </div>
     </div>

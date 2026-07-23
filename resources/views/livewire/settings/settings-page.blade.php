@@ -30,6 +30,7 @@
     @include('livewire.settings.partials.modals.edit-profile')
     @include('livewire.settings.partials.modals.change-password')
     @include('livewire.settings.partials.modals.membership-details')
+    @include('livewire.settings.partials.modals.upgrade-selection')
 </div>
 
 @push('styles')
