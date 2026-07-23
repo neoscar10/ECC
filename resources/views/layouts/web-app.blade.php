@@ -834,7 +834,7 @@
             </div>
         @endif
         <header class="luxe-header">
-            <div class="luxe-container py-3">
+            <div class="luxe-container">
                 <div class="d-flex align-items-center justify-content-between gap-3">
                     <div class="d-flex align-items-center gap-3 gap-lg-4 flex-grow-1">
                         <a href="{{ url('/') }}" class="luxe-brand">
