@@ -164,6 +164,9 @@
                                         @if($artifact->description)
                                             <p class="ecc-vault-artifact-text {{ $vaultViewMode === 'list' ? 'pe-lg-5' : '' }}">{{ \Illuminate\Support\Str::limit($artifact->description, 100) }}</p>
                                         @endif
+                                        @if($artifact->notes)
+                                            <p class="ecc-vault-artifact-text {{ $vaultViewMode === 'list' ? 'pe-lg-5' : '' }}" style="color: var(--ecc-text-primary);">{{ $artifact->notes }}</p>
+                                        @endif
 
                                         <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mt-auto pt-3">
                                             <div class="d-flex align-items-center gap-3">
@@ -216,7 +219,7 @@
 
     {{-- Artifact Details Modal --}}
     @if($selectedArtifact)
-        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);">
+        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content ecc-vault-modal-content">
                     <div class="modal-header border-0 pb-0">
@@ -734,7 +737,7 @@
     }
 
     .ecc-vault-value-amount {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: clamp(1.8rem, 3vw, 2.6rem);
         font-weight: 900;
         letter-spacing: -.04em;
@@ -827,7 +830,7 @@
     }
 
     .ecc-vault-artifact-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: 1.45rem;
         font-weight: 800;
         letter-spacing: -.03em;
@@ -888,7 +891,7 @@
     }
 
     .ecc-vault-appraisal-title {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: 1.2rem;
         font-weight: 800;
         letter-spacing: -.02em;
@@ -931,7 +934,7 @@
     }
 
     .ecc-vault-mini-stat-value {
-        color: #fff;
+        color: var(--ecc-text-primary);
         font-size: 1.25rem;
         font-weight: 900;
         letter-spacing: -.02em;
@@ -980,17 +983,24 @@
     }
 
     .ecc-vault-modal-content {
-        background: #17130b !important;
-        border: 1px solid rgba(199, 167, 90,0.2) !important;
-        border-radius: 1.5rem !important;
-        box-shadow: 0 25px 80px rgba(0,0,0,0.8) !important;
-    }
+    background: var(--ecc-bg-surface) !important;
+    border: 1px solid var(--ecc-border) !important;
+    border-radius: 1.5rem !important;
+    box-shadow: 0 25px 80px var(--ecc-shadow) !important;
+}
+
+/* Ensure text inside modal uses theme colors */
+.ecc-vault-modal-content .text-white,
+.ecc-vault-modal-content .text-white-50 {
+    color: var(--ecc-text-primary) !important;
+}
+.ecc-vault-modal-content .text-white-50 { color: var(--ecc-text-secondary) !important; }
 
     .ecc-vault-modal-title {
         font-size: 2.25rem;
         font-weight: 900;
         letter-spacing: -0.04em;
-        color: #fff;
+        color: var(--ecc-text-primary);
     }
 
     .ecc-vault-modal-total {
@@ -1020,9 +1030,9 @@
     .bg-white-5 { background: rgba(255,255,255,0.05); }
     .border-white-5 { border-color: rgba(255,255,255,0.05) !important; }
     .ecc-vault-input {
-        background: rgba(17,13,7,.98) !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
-        color: #fff !important;
+        background: var(--ecc-bg-surface-2) !important;
+        border: 1px solid var(--ecc-border) !important;
+        color: var(--ecc-text-primary) !important;
         border-radius: 0.75rem !important;
         padding: 0.75rem 1rem !important;
     }
