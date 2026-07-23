@@ -80,7 +80,7 @@ class AuctionAccessResolverService
                   return $this->buildLockedAccess(
                       'product_restricted',
                       ['required_tier_name' => 'Member'],
-                      ['type' => 'subscribe', 'label' => 'Join Now', 'deeplink' => '/register'],
+                      ['type' => 'subscribe', 'label' => 'Join Now', 'deeplink' => '/gated-entry'],
                       $userTier,
                       'lock'
                   );
