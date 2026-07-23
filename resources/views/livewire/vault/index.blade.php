@@ -164,7 +164,7 @@
                                         @if($artifact->description)
                                             <p class="ecc-vault-artifact-text {{ $vaultViewMode === 'list' ? 'pe-lg-5' : '' }}">{{ \Illuminate\Support\Str::limit($artifact->description, 100) }}</p>
                                         @endif
-                                        @if($artifact->notes)
+                                        @if(isset($artifact->notes) && $artifact->notes)
                                             <p class="ecc-vault-artifact-text {{ $vaultViewMode === 'list' ? 'pe-lg-5' : '' }}" style="color: var(--ecc-text-primary);">{{ $artifact->notes }}</p>
                                         @endif
 
