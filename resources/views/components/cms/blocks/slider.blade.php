@@ -18,7 +18,7 @@
     $exploreAllUrl = ($this instanceof \App\Livewire\Pavilion\HomePage) ? $this->getExploreAllUrl($block) : null;
 @endphp
 
-<div class="cms-slider-block cms-fade-in" style="margin-bottom: 60px;">
+<div class="cms-slider-block cms-fade-in" style="margin-bottom: 24px;">
     {{-- Header --}}
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-2 mb-3 px-2">
         <div>

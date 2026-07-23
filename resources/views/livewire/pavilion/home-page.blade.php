@@ -1,5 +1,5 @@
-<div class="container-xxl py-4 py-lg-5 ecc-explore-page">
-    <div class="d-flex flex-column gap-4 gap-xl-5">
+<div class="container-xxl pt-2 pb-4 ecc-explore-page">
+    <div class="d-flex flex-column gap-3 gap-xl-4">
 
         {{-- Zone 1: Home Hero (Top Blocks) --}}
         @if(!empty($homeHeroBlocks))

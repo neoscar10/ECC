@@ -39,7 +39,7 @@
         @if($targetUrl)
             <a href="{{ $targetUrl }}" class="text-decoration-none text-white d-block">
         @endif
-        <section class="ecc-hero-block position-relative overflow-hidden mb-5">
+        <section class="ecc-hero-block position-relative overflow-hidden mb-3">
             <div class="ecc-hero-bg">
                 <img src="{{ $media['image_url'] ?? asset('images/placeholder.jpg') }}"
                      alt="{{ $content['title'] }}"
