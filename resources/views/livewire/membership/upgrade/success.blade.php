@@ -45,26 +45,29 @@
 <style>
   :root{
     --ecc-gold:var(--ecc-primary);
-    --ecc-gold-pale:#E5C568;
-    --ecc-black:#0A0A0A;
-    --ecc-gray:#1C1C1C;
   }
 
   .ecc-success{
-    background: var(--ecc-black);
-    color: var(--ecc-gold);
+    background: var(--ecc-bg-page);
+    color: var(--ecc-text-primary);
     font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   }
 
   .ecc-success__grad{
     height: 66%;
-    background: linear-gradient(to bottom, rgba(199, 167, 90,.10), rgba(0,0,0,0));
+    background: linear-gradient(to bottom, rgba(199, 167, 90,.10), transparent);
     pointer-events:none;
+  }
+  html[data-theme="light"] .ecc-success__grad{
+    background: linear-gradient(to bottom, rgba(199, 167, 90,.03), transparent);
   }
 
   .ecc-success__tex{
     background-image: radial-gradient(circle at center, rgba(199, 167, 90, 0.08) 0%, transparent 80%);
     pointer-events:none;
+  }
+  html[data-theme="light"] .ecc-success__tex {
+    background-image: radial-gradient(circle at center, rgba(199, 167, 90, 0.03) 0%, transparent 80%);
   }
 
   .ecc-success__glow{
@@ -75,13 +78,16 @@
     transform: translate(-50%,-50%) scale(1.1);
     pointer-events:none;
   }
+  html[data-theme="light"] .ecc-success__glow {
+    background: rgba(199, 167, 90,.06);
+  }
 
   .ecc-success__icon{
     width: 112px; height: 112px;
     border-radius: 9999px;
-    border: 1px solid rgba(199, 167, 90,.40);
-    background: rgba(28,28,28,.80);
-    box-shadow: 0 30px 80px rgba(0,0,0,.60);
+    border: 1px solid var(--ecc-primary-border);
+    background: var(--ecc-bg-surface-2);
+    box-shadow: var(--ecc-shadow-card);
     display:flex; align-items:center; justify-content:center;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -99,38 +105,36 @@
     font-weight: 800;
     line-height: 1.05;
     letter-spacing: -0.02em;
-    color: var(--ecc-gold);
+    color: var(--ecc-text-primary);
   }
 
   .ecc-success__p{
     font-size: 16px;
-    color: rgba(229,197,104,.92);
+    color: var(--ecc-text-secondary);
     line-height: 1.7;
-    opacity: .92;
     font-weight: 500;
   }
 
   .ecc-success__divider{
     height: 1px;
     width: 80px;
-    background: rgba(199, 167, 90,.30);
+    background: var(--ecc-primary-border);
     margin: 10px auto;
   }
 
   .ecc-success__p2{
     font-size: 13px;
-    color: rgba(229,197,104,.85);
+    color: var(--ecc-text-secondary);
     line-height: 1.6;
-    opacity: .85;
     font-weight: 600;
   }
 
   .ecc-success__btn{
     height: 56px;
     border-radius: 12px;
-    border: 1px solid rgba(199, 167, 90,.50);
-    background: transparent;
-    color: var(--ecc-gold);
+    border: 1px solid var(--ecc-primary-border);
+    background: var(--ecc-primary-soft);
+    color: var(--ecc-primary);
     font-weight: 800;
     letter-spacing: .02em;
     box-shadow: 0 0 15px rgba(199, 167, 90,0.10);
@@ -142,17 +146,18 @@
   .ecc-success__btn::before{
     content:"";
     position:absolute; inset:0;
-    background: rgba(199, 167, 90,.05);
+    background: transparent;
     transition: background 220ms ease;
   }
   .ecc-success__btn > *{ position: relative; z-index: 1; }
 
   .ecc-success__btn:hover{
-    border-color: rgba(199, 167, 90,1);
+    border-color: var(--ecc-primary);
     transform: translateY(-1px);
+    color: var(--ecc-primary);
   }
   .ecc-success__btn:hover::before{
-    background: rgba(199, 167, 90,.10);
+    background: var(--ecc-primary-soft-2);
   }
 
   @media (min-width: 992px){
