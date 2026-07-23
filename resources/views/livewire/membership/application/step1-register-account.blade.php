@@ -215,8 +215,8 @@
               <span class="material-symbols-outlined" style="font-size: 16px; opacity: 0.6;">keyboard_arrow_down</span>
             </button>
 
-            <div x-show="open" class="position-absolute z-3 mt-1 shadow-lg" style="display: none; top: 100%; left: 0; width: 300px; border-radius: 12px; max-height: 280px; overflow-y: auto; background-color: var(--ecc-bg-surface) !important; border: 1px solid var(--ecc-border) !important;">
-              <div class="p-2 sticky-top" style="background-color: var(--ecc-bg-surface);">
+            <div x-show="open" class="position-absolute mt-1 shadow-lg" style="display: none; top: 100%; left: 0; width: 300px; border-radius: 12px; max-height: 280px; overflow-y: auto; background-color: var(--ecc-bg-surface) !important; border: 1px solid var(--ecc-border) !important; z-index: 1050;">
+              <div class="p-2 sticky-top" style="background-color: var(--ecc-bg-surface); z-index: 1060;">
                 <input type="text" x-model="search" class="form-control form-control-sm" placeholder="Search country..." style="background-color: var(--ecc-surface) !important; border: 1px solid var(--ecc-border) !important; color: var(--ecc-text-primary) !important; font-size: 13px;">
               </div>
               
