@@ -1,4 +1,4 @@
-<div class="container-xxl py-5 ecc-checkout-page">
+<div class="w-100 pt-2 pb-5 ecc-checkout-page">
     @push('styles')
     <style>
         .ecc-checkout-page {

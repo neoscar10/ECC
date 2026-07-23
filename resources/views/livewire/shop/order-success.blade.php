@@ -1,4 +1,4 @@
-<div class="container-xxl py-5 ecc-order-confirmation-page">
+<div class="w-100 pt-2 pb-5 ecc-order-confirmation-page">
     @push('styles')
     <style>
         .ecc-order-confirmation-page {

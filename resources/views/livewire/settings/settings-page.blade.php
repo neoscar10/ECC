@@ -1,4 +1,4 @@
-<div class="container-xxl py-4 py-lg-5 ecc-settings-page">
+<div class="w-100 pt-2 pb-4 ecc-settings-page">
     <div class="row g-4 g-xl-5">
         <!-- Left Column -->
         <div class="col-12 col-xl-3">

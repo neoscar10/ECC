@@ -1,5 +1,5 @@
-<div class="container-xxl py-4 py-lg-5 ecc-vault-page">
-    <div class="d-flex flex-column gap-4 gap-xl-5">
+<div class="w-100 pt-2 pb-4 ecc-vault-page">
+    <div class="d-flex flex-column gap-3 gap-xl-4">
 
         <!-- Header Section -->
         <section class="ecc-vault-header position-relative overflow-hidden">
