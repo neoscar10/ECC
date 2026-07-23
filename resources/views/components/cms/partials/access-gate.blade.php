@@ -46,9 +46,22 @@
                 {{-- Action --}}
                 <div class="d-flex justify-content-center">
                     @foreach($actions as $action)
-                        @if($action['type'] === 'upgrade_membership' || $action['type'] === 'subscribe')
-                            <a href="{{ $action['deeplink'] ?? '/membership/tiers' }}" class="btn fw-bold rounded-pill py-2 px-5" style="background: linear-gradient(180deg, var(--ecc-primary), var(--ecc-gold-500)); color: #16110a; border: none; box-shadow: 0 4px 15px rgba(199, 167, 90, 0.2);">
-                                {{ $action['label'] ?? 'Upgrade Now' }}
+                        @if($action['type'] === 'upgrade_membership')
+                            @if(isset($this) && method_exists($this, 'openAccessModal') && !empty($action['target_tier']['id']))
+                                <button type="button" 
+                                        wire:click.prevent="openAccessModal({{ $action['target_tier']['id'] }}, 'Section Content', 'lock')"
+                                        class="btn fw-bold rounded-pill py-2 px-5" 
+                                        style="background: linear-gradient(180deg, var(--ecc-primary), var(--ecc-gold-500)); color: #16110a; border: none; box-shadow: 0 4px 15px rgba(199, 167, 90, 0.2);">
+                                    {{ $action['label'] ?? 'Upgrade Now' }}
+                                </button>
+                            @else
+                                <a href="{{ $action['deeplink'] ?? '/membership/tiers' }}" class="btn fw-bold rounded-pill py-2 px-5" style="background: linear-gradient(180deg, var(--ecc-primary), var(--ecc-gold-500)); color: #16110a; border: none; box-shadow: 0 4px 15px rgba(199, 167, 90, 0.2);">
+                                    {{ $action['label'] ?? 'Upgrade Now' }}
+                                </a>
+                            @endif
+                        @elseif($action['type'] === 'subscribe')
+                            <a href="{{ $action['deeplink'] ?? '/gated-entry' }}" class="btn fw-bold rounded-pill py-2 px-5" style="background: linear-gradient(180deg, var(--ecc-primary), var(--ecc-gold-500)); color: #16110a; border: none; box-shadow: 0 4px 15px rgba(199, 167, 90, 0.2);">
+                                {{ $action['label'] ?? 'Join Now' }}
                             </a>
                         @endif
                     @endforeach
