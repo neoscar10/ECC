@@ -54,7 +54,7 @@
             </div>
         </section>
 
-        <!-- Main Content -->
+        <!-- vault-notes-fix-20230723 -->
         <section>
             <div class="row g-4 g-xl-5">
                 <!-- Left Sidebar -->
@@ -165,7 +165,7 @@
                                             <p class="ecc-vault-artifact-text {{ $vaultViewMode === 'list' ? 'pe-lg-5' : '' }}">{{ \Illuminate\Support\Str::limit($artifact->description, 100) }}</p>
                                         @endif
                                         @if(isset($artifact->notes) && $artifact->notes)
-                                            <p class="ecc-vault-artifact-text {{ $vaultViewMode === 'list' ? 'pe-lg-5' : '' }}" style="color: var(--ecc-text-primary);">{{ $artifact->notes }}</p>
+                                            <p class="ecc-vault-artifact-text {{ $vaultViewMode === 'list' ? 'pe-lg-5' : '' }}" style="color: #212529;">{{ $artifact->notes }}</p>
                                         @endif
 
                                         <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mt-auto pt-3">
@@ -271,15 +271,13 @@
                                 @if(isset($selectedArtifact['tracking']) && $selectedArtifact['tracking'])
                                     @php $track = $selectedArtifact['tracking']; @endphp
                                     <div class="ecc-vault-tracking-drawer mt-4 p-4 rounded-4 bg-white-5 border border-white-5">
-                                        <div class="d-flex justify-content-between align-items-center mb-4">
-                                            <div>
-                                                <div class="ecc-vault-standing-label mb-1">PHYSICAL DELIVERY STATUS</div>
-                                                <div class="fs-16 fw-bold ecc-text-primary">{{ $track['status_label'] }}</div>
-                                            </div>
-                                            @if($track['is_test_mode'])
-                                                <span class="badge bg-warning text-dark opacity-75">Simulated</span>
-                                            @endif
-                                        </div>
+                                        <div class="mb-4">
+    <div class="ecc-vault-standing-label mb-1">PHYSICAL DELIVERY STATUS</div>
+    <div class="fs-16 fw-bold ecc-text-primary mb-2">{{ $track['status_label'] }}</div>
+    @if($track['is_test_mode'])
+        <span class="badge bg-warning text-dark opacity-75">Simulated</span>
+    @endif
+</div>
 
                                         <div class="row g-3 mb-4 fs-13">
                                             @if($track['awb_code'])
