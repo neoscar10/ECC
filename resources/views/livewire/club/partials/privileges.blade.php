@@ -1,6 +1,6 @@
 <!-- Privileges -->
 <section>
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3 mb-lg-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-2 mb-lg-3">
         <h2 class="ecc-section-title mb-0">
             <span class="material-symbols-outlined me-2">stars</span>
             Your Privileges

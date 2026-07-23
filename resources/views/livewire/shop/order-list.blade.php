@@ -1,4 +1,4 @@
-<div class="w-100 pt-2 pb-5 ecc-order-history-page">
+<div class="w-100 pt-1 pb-5 ecc-order-history-page">
     @push('styles')
     <style>
         .ecc-order-history-page {
@@ -373,7 +373,7 @@
             <div class="ecc-history-glow d-none d-lg-block"></div>
 
             <!-- Header -->
-            <header class="mb-5 mb-xl-6 position-relative">
+            <header class="mb-4 position-relative">
                 <div class="d-flex align-items-center gap-3 mb-3" style="z-index: 10;">
                     <span class="ecc-accent-line"></span>
                     <span class="ecc-kicker">THE DIGITAL CURATOR</span>

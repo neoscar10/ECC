@@ -30,7 +30,7 @@
         </div>
     @endif
 
-    <div class="d-flex flex-column gap-4 gap-xl-5">
+    <div class="d-flex flex-column gap-3">
 
         <!-- Member Profile Hero -->
         @include('livewire.club.partials.hero')
@@ -40,7 +40,7 @@
 
         <!-- Ledger + Dossier -->
         <section>
-            <div class="row g-4">
+            <div class="row g-3 align-items-start">
                 <!-- Concierge Ledger -->
                 @include('livewire.club.partials.concierge-ledger')
 
