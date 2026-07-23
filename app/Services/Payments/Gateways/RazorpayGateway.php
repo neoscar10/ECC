@@ -54,6 +54,7 @@ class RazorpayGateway implements PaymentGatewayInterface
         $payload = [
             'amount' => $amountInPaise,
             'currency' => $payment->currency ?: 'INR',
+            'payment_capture' => 1,
             'receipt' => 'ecc_payment_' . $payment->id,
             'notes' => [
                 'internal_payment_id' => (string) $payment->id,
@@ -183,6 +184,9 @@ class RazorpayGateway implements PaymentGatewayInterface
             );
         }
 
+        // Ensure payment is captured on Razorpay if it is currently in 'authorized' status
+        $this->ensurePaymentCaptured($paymentId, $this->convertToPaise($payment), $payment->currency ?: 'INR');
+
         return PaymentResult::success(
             status: PaymentStatus::PAID,
             gateway: 'razorpay',
@@ -190,6 +194,43 @@ class RazorpayGateway implements PaymentGatewayInterface
             gatewayPaymentId: $paymentId,
             raw: $data->payload
         );
+    }
+
+    /**
+     * Ensure payment is captured on Razorpay if it is currently in 'authorized' status.
+     */
+    protected function ensurePaymentCaptured(string $paymentId, int $amountInPaise, string $currency = 'INR'): void
+    {
+        try {
+            $response = Http::withBasicAuth($this->keyId, $this->keySecret)
+                ->get("https://api.razorpay.com/v1/payments/{$paymentId}");
+
+            if ($response->successful()) {
+                $paymentData = $response->json();
+                if (($paymentData['status'] ?? '') === 'authorized') {
+                    Log::info("RazorpayGateway: Payment {$paymentId} is authorized. Triggering manual capture.", [
+                        'payment_id' => $paymentId,
+                        'amount' => $amountInPaise,
+                    ]);
+
+                    $captureResponse = Http::withBasicAuth($this->keyId, $this->keySecret)
+                        ->post("https://api.razorpay.com/v1/payments/{$paymentId}/capture", [
+                            'amount' => $amountInPaise,
+                            'currency' => $currency,
+                        ]);
+
+                    if ($captureResponse->successful()) {
+                        Log::info("RazorpayGateway: Payment {$paymentId} captured successfully.");
+                    } else {
+                        Log::error("RazorpayGateway: Payment capture API call failed for {$paymentId}", [
+                            'response' => $captureResponse->body(),
+                        ]);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error("RazorpayGateway: Error checking/capturing payment {$paymentId}: " . $e->getMessage());
+        }
     }
 
     /**
