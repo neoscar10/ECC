@@ -113,17 +113,19 @@ class AuctionBiddingService
             ]);
 
             // 8. Fire Events (Realtime)
-            event(new AuctionBidPlaced($bid));
-            // Fire Personal Event for Owner (allows is_me=true)
-            if ($user->id) {
-                event(new \App\Events\AuctionBidPlacedPersonal($bid, $user->id));
-            }
-            if ($extended) event(new AuctionExtended($lot, 'anti_sniping'));
-            
-             // Fire Timeline Event
-            if (isset($timelineEvent)) {
-                 event(new \App\Events\AuctionTimelineEventCreated($timelineEvent));
-            }
+            DB::afterCommit(function () use ($bid, $user, $extended, $lot, $timelineEvent) {
+                event(new AuctionBidPlaced($bid));
+                // Fire Personal Event for Owner (allows is_me=true)
+                if ($user->id) {
+                    event(new \App\Events\AuctionBidPlacedPersonal($bid, $user->id));
+                }
+                if ($extended) event(new AuctionExtended($lot, 'anti_sniping'));
+                
+                // Fire Timeline Event
+                if (isset($timelineEvent)) {
+                     event(new \App\Events\AuctionTimelineEventCreated($timelineEvent));
+                }
+            });
 
             // 9. Notifications (FCM)
             try {
