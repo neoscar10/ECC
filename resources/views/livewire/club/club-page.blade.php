@@ -427,7 +427,7 @@
     }
 
     .ecc-form-control {
-        background: var(--ecc-text-primary) !important;
+        background: var(--ecc-bg-surface) !important;
         border: 1px solid var(--ecc-primary-border) !important;
         color: var(--ecc-text-primary) !important;
         border-radius: .9rem !important;
@@ -437,13 +437,13 @@
     }
 
     .ecc-form-control:focus {
-        background: var(--ecc-border-soft) !important;
+        background: var(--ecc-bg-surface) !important;
         border-color: var(--ecc-primary-border) !important;
         color: var(--ecc-text-primary) !important;
     }
 
     .ecc-form-control option {
-        background: #1d170d;
+        background: var(--ecc-bg-surface);
         color: var(--ecc-text-primary);
     }
 

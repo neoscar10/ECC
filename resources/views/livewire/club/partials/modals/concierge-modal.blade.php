@@ -16,7 +16,7 @@
                 </div>
 
                 <button type="button"
-                        class="btn-close btn-close-white"
+                        class="btn-close"
                         aria-label="Close"
                         wire:click="closeConciergeModal"></button>
             </div>
