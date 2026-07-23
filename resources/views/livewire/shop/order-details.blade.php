@@ -499,8 +499,7 @@
                                             <div class="ecc-text-primary fw-bold">{{ $trackingData['awb_code'] ?? 'Not Assigned' }}</div>
                                         </div>
                                         <div class="col-6 col-md-3">
-                                            <div class="ecc-item-label">Shipping Paid</div>
-                                            <div class="ecc-text-primary fw-bold">{{ $trackingData['currency'] }} {{ number_format($trackingData['shipping_charge'], 2) }}</div>
+                                            <div class="ecc-text-primary fw-bold">{{ $formattedShipping }}</div>
                                         </div>
                                         <div class="col-6 col-md-3">
                                             <div class="ecc-item-label">Estimated Delivery</div>
