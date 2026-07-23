@@ -1068,6 +1068,7 @@
         })();
     </script>
 
+    @vite(['resources/js/app.js'])
     @livewireScripts
     @stack('scripts')
     @includeIf('layouts.partials._overlay_cleanup')
