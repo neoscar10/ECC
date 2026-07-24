@@ -28,7 +28,7 @@
                     <span>{{ $content['badge_text'] }}</span>
                 </div>
             @endif
-            <h2 class="ecc-block-title">
+            <h2 class="ecc-block-title pt-3">
                 {{ $content['title'] }}
             </h2>
 
