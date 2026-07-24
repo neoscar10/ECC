@@ -95,10 +95,19 @@
                                     @error('message') <span class="text-danger small mt-1">{{ $message }}</span> @enderror
                                 </div>
                                 <div class="col-12 mt-4">
-                                    <button type="submit" class="luxe-btn d-inline-flex align-items-center gap-2" wire:loading.attr="disabled">
-                                        <span wire:loading.remove wire:target="submit">Send Message</span>
-                                        <span wire:loading wire:target="submit">Sending...</span>
-                                        <span class="material-symbols-outlined" wire:loading.remove wire:target="submit">send</span>
+                                    <button type="submit" 
+                                            class="btn ecc-btn-primary w-100 py-3 px-4 d-inline-flex align-items-center justify-content-center gap-2 fw-bold text-uppercase" 
+                                            style="font-family: 'Newsreader', serif; font-size: 1.15rem; letter-spacing: 0.08em; border-radius: 12px; box-shadow: 0 4px 20px rgba(199, 167, 90, 0.25); transition: all 0.25s ease;"
+                                            wire:loading.attr="disabled"
+                                            wire:target="submit">
+                                        <span wire:loading.remove wire:target="submit" class="d-inline-flex align-items-center gap-2">
+                                            <span>SEND MESSAGE</span>
+                                            <span class="material-symbols-outlined fs-5">send</span>
+                                        </span>
+                                        <span wire:loading wire:target="submit" class="d-inline-flex align-items-center gap-2">
+                                            <span>SENDING...</span>
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        </span>
                                     </button>
                                 </div>
                             </div>
