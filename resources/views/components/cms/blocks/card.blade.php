@@ -48,7 +48,7 @@
         @if($targetUrl)
             <a href="{{ $targetUrl }}" class="text-decoration-none text-dark d-block">
         @endif
-        <section class="cms-card-split mb-3 overflow-hidden rounded-4 border border-secondary border-opacity-25 ecc-bg-surface shadow-lg">
+        <section class="cms-card-split mb-3 overflow-hidden rounded-4 border border-secondary border-opacity-25 ecc-bg-surface">
             <div class="row g-0 align-items-stretch">
                 <!-- Image Section -->
                 <div class="col-lg-6 order-1">
