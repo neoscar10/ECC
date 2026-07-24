@@ -448,13 +448,13 @@ class OtpService
         }
 
         // Determine effective OTP method for frontend response
-        $configuredOtpMethod = config('services.whatsapp.otp_method', 'template');
-        $effectiveOtpMethod = $configuredOtpMethod;
-
-        if (!$deliveryResult->success) {
-            if ($configuredOtpMethod === 'direct_message' || in_array($deliveryResult->failureReason, ['24_hour_window_expired', 'whatsapp_endpoint_not_found'], true)) {
-                $effectiveOtpMethod = 'direct_message';
-            }
+        if ($deliveryResult->success) {
+            // Outbound delivery succeeded! Show OTP input box to user on frontend.
+            $effectiveOtpMethod = 'template';
+        } else {
+            // Outbound delivery failed (e.g. 24h window closed or raw text rejected).
+            // Fall back to direct_message so user is prompted to send an inbound message.
+            $effectiveOtpMethod = 'direct_message';
         }
 
         $result = [
