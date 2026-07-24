@@ -1,8 +1,8 @@
-<div class="card">
+<div class="card h-100">
     <div class="card-header">
         <h5 class="card-title mb-0">Customer Details</h5>
     </div>
-    <div class="card-body">
+    <div class="card-body d-flex flex-column justify-content-between">
         <div class="d-flex align-items-center mb-3">
             <div class="flex-shrink-0">
                 <div class="avatar-sm">

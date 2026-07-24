@@ -24,7 +24,7 @@
         <div class="col-xl-9">
             @include('livewire.admin.shop.orders.partials._items-table')
             
-            <div class="row">
+            <div class="row mb-4">
                 <div class="col-md-6">
                     @include('livewire.admin.shop.orders.partials._sidebar-customer')
                 </div>

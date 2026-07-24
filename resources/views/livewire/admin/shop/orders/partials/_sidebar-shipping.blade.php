@@ -1,4 +1,4 @@
-<div class="card">
+<div class="card h-100">
     <div class="card-header">
         <div class="d-flex align-items-center">
             <h5 class="card-title flex-grow-1 mb-0">Shipping Address</h5>
