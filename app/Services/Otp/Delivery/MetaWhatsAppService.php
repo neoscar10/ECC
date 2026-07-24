@@ -60,13 +60,6 @@ class MetaWhatsAppService implements OtpDeliveryInterface
             return OtpDeliveryResult::skipped('whatsapp', 'WhatsApp service is disabled.');
         }
 
-        if (config('services.whatsapp.otp_method') === 'direct_message') {
-            Log::info('MetaWhatsApp: OTP method is direct_message. Skipping template delivery, waiting for user message.', [
-                'phone_last4' => substr($phone, -4),
-            ]);
-            return OtpDeliveryResult::skipped('whatsapp', 'Waiting for user direct message.');
-        }
-
         if (empty($this->accessToken) || empty($this->phoneNumberId)) {
             Log::warning('MetaWhatsApp: Missing credentials. OTP delivery skipped.', [
                 'phone_last4' => substr($phone, -4),
@@ -318,6 +311,23 @@ class MetaWhatsAppService implements OtpDeliveryInterface
             throw new OtpException(
                 'WhatsApp API authentication failed. Contact support.',
                 $status
+            );
+        }
+
+        // ── Check for 24-hour customer service window error (Code 131047, 470, 131026) ──
+        $isWindowExpired = in_array((int)$metaErrorCode, [131047, 470, 131026], true) ||
+            str_contains(strtolower($metaErrorMessage), '24 hours') ||
+            str_contains(strtolower($metaErrorMessage), 're-engagement') ||
+            str_contains(strtolower($metaErrorMessage), 'allowed window');
+
+        if ($isWindowExpired) {
+            Log::info('MetaWhatsApp: 24-hour customer window is closed for user. Fallback to direct message.', [
+                'phone_last4' => substr($phone, -4),
+            ]);
+            return OtpDeliveryResult::failure(
+                provider: 'whatsapp',
+                reason: '24_hour_window_expired',
+                retryable: false
             );
         }
 

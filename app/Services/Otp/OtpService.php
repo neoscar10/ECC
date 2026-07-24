@@ -419,7 +419,10 @@ class OtpService
             'max_attempts' => $maxVerifyAttempts,
         ]);
 
-        // 5. Dispatch WhatsApp Message
+        // Always cache plaintext OTP so inbound webhook can fulfill direct message requests
+        \Illuminate\Support\Facades\Cache::put('otp_plaintext_' . $phone, $otpPlaintext, now()->addMinutes($ttlMinutes));
+
+        // 5. Dispatch WhatsApp Message (attempt direct delivery first)
         $deliveryResult = $this->whatsappService->sendOtp($phone, $otpPlaintext, $template);
 
         // 6. Store Meta message ID if delivery was successful
@@ -437,22 +440,27 @@ class OtpService
             ]);
         }
 
+        // Determine effective OTP method for frontend response
+        $effectiveOtpMethod = config('services.whatsapp.otp_method', 'template');
+        if (!$deliveryResult->success) {
+            if ($deliveryResult->failureReason === '24_hour_window_expired' || $effectiveOtpMethod === 'direct_message') {
+                $effectiveOtpMethod = 'direct_message';
+            }
+        }
+
         $result = [
             'ttl_minutes' => $ttlMinutes,
             'resend_cooldown' => $resendCooldown,
             'reference_id' => (string) $verification->id,
             'message' => $deliveryResult->success
                 ? 'OTP sent successfully via WhatsApp.'
-                : 'OTP created but delivery may be delayed.',
+                : ($effectiveOtpMethod === 'direct_message'
+                    ? 'Please send a message to our WhatsApp number to receive your code.'
+                    : 'OTP created but delivery may be delayed.'),
             'delivered' => $deliveryResult->success,
-            'otp_method' => config('services.whatsapp.otp_method'),
+            'otp_method' => $effectiveOtpMethod,
             'whatsapp_number' => config('services.whatsapp.phone_number'),
         ];
-
-        // Cache the plaintext OTP temporarily if using direct_message so webhook can fulfill it
-        if (config('services.whatsapp.otp_method') === 'direct_message') {
-            \Illuminate\Support\Facades\Cache::put('otp_plaintext_' . $phone, $otpPlaintext, now()->addMinutes($ttlMinutes));
-        }
 
         if (self::shouldExposeDevOtp()) {
             $result['dev_otp'] = $otpPlaintext;
