@@ -226,8 +226,72 @@
     html[data-theme="light"] .archive-restricted-overlay,
     html[data-theme="light"] .ecc-lock-overlay,
     html[data-theme="light"] .shop-detail-bento-overlay,
-    html[data-theme="light"] .archive-card-gradient ~ .archive-card-body-overlay {
+    html[data-theme="light"] .archive-card-gradient ~ .archive-card-body-overlay,
+    html[data-theme="light"] .ecc-card__body,
+    html[data-theme="light"] .ecc-card__title,
+    html[data-theme="light"] .ecc-card__sub {
         color: #ffffff !important;
+    }
+
+    html[data-theme="light"] .ecc-card__title {
+        color: #ffffff !important;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+    }
+
+    html[data-theme="light"] .ecc-card__sub {
+        color: rgba(255, 255, 255, 0.85) !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+    }
+
+    /* Application wizard background and topbar fixes in light mode */
+    html[data-theme="light"] .ecc-step .ecc-bg-grad,
+    html[data-theme="light"] .ecc-pay .ecc-bg-grad {
+        display: none !important;
+    }
+    html[data-theme="light"] .ecc-step .ecc-bg-glow,
+    html[data-theme="light"] .ecc-pay .ecc-bg-glow {
+        opacity: 0.12 !important;
+    }
+    html[data-theme="light"] .ecc-step .ecc-topbar,
+    html[data-theme="light"] .ecc-pay .ecc-topbar {
+        background: var(--ecc-bg-surface) !important;
+        border-bottom: 1px solid var(--ecc-border) !important;
+    }
+
+    /* Card & overlay text readability in Light Mode */
+    html[data-theme="light"] .ecc-card__body,
+    html[data-theme="light"] .ecc-card__title,
+    html[data-theme="light"] .ecc-card__sub {
+        color: #ffffff !important;
+    }
+    html[data-theme="light"] .ecc-card__title {
+        color: #ffffff !important;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+    }
+    html[data-theme="light"] .ecc-card__sub {
+        color: rgba(255, 255, 255, 0.85) !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    }
+
+    /* Step 5 (Collector Intent) & Step 6 (Select Tier) & Step 7 (Payment) Light Theme Fixes */
+    html[data-theme="light"] .ecc-step .ecc-seg,
+    html[data-theme="light"] .ecc-step .ecc-focus,
+    html[data-theme="light"] .ecc-step .ecc-tier-card,
+    html[data-theme="light"] .ecc-step .ecc-rec,
+    html[data-theme="light"] .ecc-pay .ecc-tier-sum,
+    html[data-theme="light"] .ecc-pay .ecc-pay-info-box,
+    html[data-theme="light"] .ecc-pay .ecc-method,
+    html[data-theme="light"] .ecc-pay .ecc-inp {
+        background: var(--ecc-bg-surface) !important;
+        border-color: var(--ecc-border) !important;
+        color: var(--ecc-text-primary) !important;
+    }
+
+    html[data-theme="light"] .ecc-pay .ecc-pay-info-box p,
+    html[data-theme="light"] .ecc-step .ecc-focus__tx,
+    html[data-theme="light"] .ecc-step .ecc-tier-desc,
+    html[data-theme="light"] .ecc-step .ecc-tier-dur {
+        color: var(--ecc-text-secondary) !important;
     }
 
     html[data-theme="light"] .ecc-overlay-dark h1, html[data-theme="light"] .ecc-overlay-dark h2,

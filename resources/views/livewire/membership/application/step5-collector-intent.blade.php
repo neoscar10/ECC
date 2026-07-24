@@ -213,7 +213,7 @@
   }
 
   .ecc-topbar{
-    background: var(--ecc-bg-nav-transparent, rgba(2,2,2,.80));
+    background: var(--ecc-bg-surface, rgba(2,2,2,.80));
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--ecc-border-soft);
   }

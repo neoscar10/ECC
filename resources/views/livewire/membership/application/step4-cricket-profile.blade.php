@@ -291,13 +291,16 @@
     font-weight: 700;
     line-height: 1.1;
     margin-bottom: 4px;
+    color: #ffffff !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.9);
   }
   .ecc-card__sub{
     font-family: "Noto Sans", system-ui, sans-serif;
     font-size: 10px;
     letter-spacing: .20em;
     text-transform: uppercase;
-    color: var(--ecc-text-muted);
+    color: rgba(255, 255, 255, 0.85) !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9);
   }
 
   .ecc-card__check{
