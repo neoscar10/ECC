@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class ContactConfig extends Model
 {
-    protected $fillable = ['concierge_phone', 'support_email'];
+    protected $fillable = ['concierge_phone', 'support_email', 'contact_address'];
 }

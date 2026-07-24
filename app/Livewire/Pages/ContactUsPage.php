@@ -40,6 +40,9 @@ class ContactUsPage extends Component
 
     public function render()
     {
-        return view('livewire.pages.contact-us-page');
+        $contactConfig = \App\Models\ContactConfig::first();
+        return view('livewire.pages.contact-us-page', [
+            'contactConfig' => $contactConfig
+        ]);
     }
 }

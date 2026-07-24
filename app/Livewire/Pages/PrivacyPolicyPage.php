@@ -10,6 +10,9 @@ class PrivacyPolicyPage extends Component
 {
     public function render()
     {
-        return view('livewire.pages.privacy-policy-page');
+        $contactConfig = \App\Models\ContactConfig::first();
+        return view('livewire.pages.privacy-policy-page', [
+            'contactConfig' => $contactConfig
+        ]);
     }
 }

@@ -25,6 +25,7 @@ class ContactController extends Controller
         // Return DB values directly. If config doesn't exist, we return nulls.
         $conciergePhone = $config?->concierge_phone; // Nullable in DB
         $supportEmail = $config?->support_email;     // Nullable in DB
+        $contactAddress = $config?->contact_address;   // Nullable in DB
 
         // If no subjects in DB, return empty array. Do not auto-fill defaults.
         $mappedSubjects = $subjects->map(function ($subject) {
@@ -47,8 +48,15 @@ class ContactController extends Controller
                     'label' => 'Membership Support',
                     'type' => 'email',
                     'value' => $supportEmail
+                ],
+                [
+                    'key' => 'contact_address',
+                    'label' => 'Club Contact Address',
+                    'type' => 'address',
+                    'value' => $contactAddress
                 ]
             ],
+            'contact_address' => $contactAddress,
             'subjects' => $mappedSubjects
         ]);
     }

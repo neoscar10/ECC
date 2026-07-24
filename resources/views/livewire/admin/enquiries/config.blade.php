@@ -19,6 +19,11 @@
                                 <input type="email" class="form-control" id="support_email" wire:model="support_email" placeholder="members@executivecricket.club">
                                 @error('support_email') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
+                            <div class="col-12 mb-3">
+                                <label for="contact_address" class="form-label">Club Contact Address</label>
+                                <textarea class="form-control" id="contact_address" wire:model="contact_address" rows="2" placeholder="e.g. Executive Cricket Club Headquarters, Mayfair, London, UK"></textarea>
+                                @error('contact_address') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
                         </div>
 
                         <hr class="my-4">

@@ -11,6 +11,7 @@ class Config extends Component
 {
     public $concierge_phone;
     public $support_email;
+    public $contact_address;
     public $subjects = [];
     
     // For adding new subject
@@ -21,10 +22,12 @@ class Config extends Component
         $config = ContactConfig::firstOrCreate([], [
             'concierge_phone' => null,
             'support_email' => null,
+            'contact_address' => null,
         ]);
 
         $this->concierge_phone = $config->concierge_phone;
         $this->support_email = $config->support_email;
+        $this->contact_address = $config->contact_address;
 
         $this->loadSubjects();
     }
@@ -102,12 +105,14 @@ class Config extends Component
         $this->validate([
             'concierge_phone' => 'nullable|string|max:50',
             'support_email' => 'nullable|email|max:255',
+            'contact_address' => 'nullable|string|max:1000',
         ]);
 
         $config = ContactConfig::first(); // Should exist from mount
         $config->update([
             'concierge_phone' => $this->concierge_phone,
             'support_email' => $this->support_email,
+            'contact_address' => $this->contact_address,
         ]);
 
         $this->dispatch('start-notification', type: 'success', message: 'Contact details saved.');

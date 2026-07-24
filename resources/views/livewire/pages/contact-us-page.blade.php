@@ -21,32 +21,40 @@
                     </p>
 
                     <div class="d-flex align-items-start gap-3 mb-4">
-                        <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: rgba(199, 167, 90, 0.1); color: var(--ecc-primary);">
+                        <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(199, 167, 90, 0.1); color: var(--ecc-primary);">
                             <span class="material-symbols-outlined">location_on</span>
                         </div>
                         <div>
                             <h5 class="fw-bold mb-1" style="color: var(--ecc-text-primary);">Headquarters</h5>
-                            <p class="mb-0" style="color: var(--ecc-text-secondary);">123 Heritage Lane, Cricket Avenue<br>London, UK SW1A 1AA</p>
+                            <p class="mb-0" style="color: var(--ecc-text-secondary);">{!! nl2br(e($contactConfig?->contact_address ?? "123 Heritage Lane, Cricket Avenue\nLondon, UK SW1A 1AA")) !!}</p>
                         </div>
                     </div>
 
                     <div class="d-flex align-items-start gap-3 mb-4">
-                        <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: rgba(199, 167, 90, 0.1); color: var(--ecc-primary);">
+                        <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(199, 167, 90, 0.1); color: var(--ecc-primary);">
                             <span class="material-symbols-outlined">mail</span>
                         </div>
                         <div>
                             <h5 class="fw-bold mb-1" style="color: var(--ecc-text-primary);">Email Support</h5>
-                            <p class="mb-0" style="color: var(--ecc-text-secondary);">concierge@executivecricketclub.com</p>
+                            <p class="mb-0" style="color: var(--ecc-text-secondary);">
+                                <a href="mailto:{{ $contactConfig?->support_email ?? 'concierge@executivecricketclub.com' }}" style="color: inherit; text-decoration: none;">
+                                    {{ $contactConfig?->support_email ?? 'concierge@executivecricketclub.com' }}
+                                </a>
+                            </p>
                         </div>
                     </div>
 
                     <div class="d-flex align-items-start gap-3">
-                        <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: rgba(199, 167, 90, 0.1); color: var(--ecc-primary);">
+                        <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(199, 167, 90, 0.1); color: var(--ecc-primary);">
                             <span class="material-symbols-outlined">call</span>
                         </div>
                         <div>
                             <h5 class="fw-bold mb-1" style="color: var(--ecc-text-primary);">Phone</h5>
-                            <p class="mb-0" style="color: var(--ecc-text-secondary);">+44 (0) 20 7946 0123</p>
+                            <p class="mb-0" style="color: var(--ecc-text-secondary);">
+                                <a href="tel:{{ $contactConfig?->concierge_phone ?? '+44 (0) 20 7946 0123' }}" style="color: inherit; text-decoration: none;">
+                                    {{ $contactConfig?->concierge_phone ?? '+44 (0) 20 7946 0123' }}
+                                </a>
+                            </p>
                         </div>
                     </div>
                 </div>
