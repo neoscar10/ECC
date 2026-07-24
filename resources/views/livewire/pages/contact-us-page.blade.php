@@ -100,14 +100,9 @@
                                             style="font-family: 'Newsreader', serif; font-size: 1.15rem; letter-spacing: 0.08em; border-radius: 12px; box-shadow: 0 4px 20px rgba(199, 167, 90, 0.25); transition: all 0.25s ease;"
                                             wire:loading.attr="disabled"
                                             wire:target="submit">
-                                        <span wire:loading.remove wire:target="submit" class="d-inline-flex align-items-center gap-2">
-                                            <span>SEND MESSAGE</span>
-                                            <span class="material-symbols-outlined fs-5">send</span>
-                                        </span>
-                                        <span wire:loading wire:target="submit" class="d-inline-flex align-items-center gap-2">
-                                            <span>SENDING...</span>
-                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        </span>
+                                        <span>SEND MESSAGE</span>
+                                        <span wire:loading.remove wire:target="submit" class="material-symbols-outlined fs-5">send</span>
+                                        <span wire:loading wire:target="submit" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                     </button>
                                 </div>
                             </div>
