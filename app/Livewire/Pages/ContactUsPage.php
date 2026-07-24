@@ -27,12 +27,24 @@ class ContactUsPage extends Component
     {
         $this->validate();
 
-        ContactMessage::create([
+        $contactMsg = ContactMessage::create([
             'name' => $this->name,
             'email' => $this->email,
             'subject' => $this->subject,
             'message' => $this->message,
         ]);
+
+        // Send email to platform contact email
+        try {
+            $config = \App\Models\ContactConfig::first();
+            $recipientEmail = $config?->support_email ?: config('mail.from.address');
+
+            if ($recipientEmail) {
+                \Illuminate\Support\Facades\Mail::to($recipientEmail)->send(new \App\Mail\ContactMessageReceivedMail($contactMsg));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send contact inquiry email: ' . $e->getMessage());
+        }
 
         $this->reset(['name', 'email', 'subject', 'message']);
         $this->successMessage = true;
