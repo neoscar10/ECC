@@ -1,7 +1,7 @@
 @props(['title' => null, 'subtitle' => null, 'badge' => null])
 
 @if($title || $subtitle || $badge)
-    <div {{ $attributes->merge(['class' => 'ecc-block-header mb-4']) }}>
+    <div {{ $attributes->merge(['class' => 'ecc-block-header mb-4 pt-3']) }}>
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 @if($badge)
