@@ -25,7 +25,8 @@ class MetaWhatsAppService implements OtpDeliveryInterface
     public function __construct()
     {
         $this->enabled         = (bool) config('services.whatsapp.enabled', false);
-        $this->accessToken     = (string) config('services.whatsapp.access_token', '');
+        $rawToken              = (string) config('services.whatsapp.access_token', '');
+        $this->accessToken     = rtrim(trim($rawToken), '.');
         $this->phoneNumberId   = (string) config('services.whatsapp.phone_number_id', '');
         $this->templateName    = (string) config('services.whatsapp.template_name', 'authentication');
         $this->templateLanguage = (string) config('services.whatsapp.template_language', 'en_US');
@@ -74,20 +75,49 @@ class MetaWhatsAppService implements OtpDeliveryInterface
         // ── Build payload ──
         $payload = $this->buildOtpPayload($phone, $otp, $template);
 
+        // ── Dispatch primary request ──
+        $result = $this->dispatchPayload($phone, $payload);
+
+        // ── Fallback to Raw Text if template dispatch failed ──
+        if (!$result->success && !$this->sendRawText) {
+            Log::info('MetaWhatsApp: Primary template dispatch failed. Attempting Raw Text direct fallback.', [
+                'phone_last4' => substr($phone, -4),
+                'primary_reason' => $result->failureReason,
+            ]);
+
+            $rawMessage = "*Executive Club Cricket*\n\nYour verification code is:\n*{$otp}*\n\nValid for 5 minutes.";
+            try {
+                $fallbackResult = $this->sendRawMessage($phone, $rawMessage);
+                if ($fallbackResult->success) {
+                    Log::info('MetaWhatsApp: Raw Text fallback delivered successfully via active 24h window.', [
+                        'phone_last4' => substr($phone, -4),
+                    ]);
+                    return $fallbackResult;
+                }
+            } catch (\Exception $e) {
+                Log::warning('MetaWhatsApp: Raw Text fallback attempt failed: ' . $e->getMessage(), [
+                    'phone_last4' => substr($phone, -4),
+                ]);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Dispatch HTTP payload to Meta API.
+     */
+    private function dispatchPayload(string $phone, array $payload): OtpDeliveryResult
+    {
         Log::debug('MetaWhatsApp Sending Payload:', [
             'url' => "{$this->baseUrl}/{$this->phoneNumberId}/messages",
-            'template_has_variables_resolved' => $this->templateHasVariables,
-            'template_has_button_resolved' => (bool) config('services.whatsapp.template_has_button', true),
             'payload' => $payload,
         ]);
 
-        // ── Dispatch HTTP Request ──
         try {
             $response = Http::withToken($this->accessToken)
                 ->timeout($this->timeout)
                 ->retry($this->retryTimes, $this->retrySleepMs, function (\Exception $exception, $request) {
-                    // Only retry on connection/timeout errors or 5xx status codes.
-                    // Do NOT retry on 4xx (bad request, auth error, rate limit).
                     if ($exception instanceof \Illuminate\Http\Client\ConnectionException) {
                         return true;
                     }
@@ -122,33 +152,18 @@ class MetaWhatsAppService implements OtpDeliveryInterface
             Log::error('MetaWhatsApp: Unexpected exception during API call.', [
                 'phone_last4' => substr($phone, -4),
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
 
-        Log::debug('MetaWhatsApp Received Response:', [
-            'status' => $response->status(),
-            'body' => $response->json() ?? $response->body(),
-        ]);
-
-        // ── Handle error responses ──
         if ($response->failed()) {
             return $this->handleFailedResponse($response, $phone);
         }
 
-        // ── Extract Meta Message ID on success ──
         $data = $response->json();
         $messageId = $data['messages'][0]['id'] ?? null;
 
-        if (!$messageId) {
-            Log::warning('MetaWhatsApp: Success response but no message ID found.', [
-                'phone_last4' => substr($phone, -4),
-                'response_keys' => array_keys($data),
-            ]);
-        }
-
-        Log::info('MetaWhatsApp: OTP delivered successfully.', [
+        Log::info('MetaWhatsApp: Delivered successfully.', [
             'phone_last4' => substr($phone, -4),
             'meta_message_id' => $messageId,
         ]);
