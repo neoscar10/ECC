@@ -1,10 +1,10 @@
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
         <h5 class="card-title mb-0">Order Items</h5>
     </div>
     <div class="card-body">
-        <div class="table-responsive table-card">
-            <table class="table align-middle table-nowrap">
+        <div class="table-responsive table-card mb-0">
+            <table class="table align-middle table-nowrap mb-0">
                 <thead class="table-light text-muted">
                     <tr>
                         <th scope="col">Product</th>
@@ -21,15 +21,7 @@
                                     <div class="flex-shrink-0 avatar-md bg-light rounded p-1">
                                         @php
                                             $img = $item->product ? $item->product->images->first() : null;
-                                            $imgUrl = $img ? $img->url : null; // Assuming 'url' accessor or similar on ShopProductImage model? 
-                                            // Let's check ShopProductImage model or assume standard 'url' / 'path'.
-                                            // Ideally we use a helper or accessor on ShopProduct if it exists.
-                                            // Given previous codebase patterns, let's assume 'url' or 'disk' path. 
-                                            // If using Spatie MediaLibrary, it's ->getUrl().
-                                            // Users codebase seems custom. Let's try to access 'url' attribute if it exists, or check the model.
-                                            // Wait, I didn't check ShopProductImage model. 
-                                            // Let's assume standard 'image_url' or similar if available, or just try to display if we have a path.
-                                            // Actually, safely fallback to icon if no image.
+                                            $imgUrl = $img ? $img->url : null; 
                                         @endphp
                                         
                                         @if($item->product && $item->product->images->isNotEmpty())
@@ -63,7 +55,7 @@
             </table>
         </div>
 
-        <div class="row justify-content-end mt-4">
+        <div class="row justify-content-end mt-2 pt-2 border-top border-top-dashed">
             <div class="col-lg-4 col-md-6">
                 <table class="table table-borderless table-sm mb-0">
                     <tbody>
