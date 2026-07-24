@@ -2,7 +2,7 @@
 
 <div {{ $attributes->merge(['class' => 'cms-placement-zone cms-zone-' . $placement]) }}>
     @forelse($blocks as $block)
-        <div class="cms-block-wrapper mb-3" data-block-id="{{ $block['id'] }}" data-block-type="{{ $block['type'] }}">
+        <div class="cms-block-wrapper mb-4" data-block-id="{{ $block['id'] }}" data-block-type="{{ $block['type'] }}">
             @switch($block['type'])
                 @case('banner')
                     <x-cms.blocks.banner :block="$block" />
@@ -32,7 +32,7 @@
 @if($placement === 'home-hero')
     <style>
         .cms-zone-home-hero .cms-block-wrapper {
-            margin-bottom: 1.5rem !important;
+            margin-bottom: 2rem !important;
         }
         .cms-zone-home-hero .cms-section-heading h4 {
             font-size: 1.75rem;

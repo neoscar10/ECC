@@ -71,13 +71,11 @@
         background: linear-gradient(135deg, var(--ecc-primary) 0%, #B8961E 100%);
         color: var(--ecc-text-primary);
         border: none;
-        box-shadow: 0 4px 20px rgba(199, 167, 90,0.25);
         transition: all 0.3s ease;
     }
     .cms-btn-gold:hover {
         background: linear-gradient(135deg, #E5C05B 0%, var(--ecc-primary) 100%);
         transform: scale(1.02);
-        box-shadow: 0 6px 25px rgba(199, 167, 90,0.35);
         color: var(--ecc-text-primary);
     }
     @keyframes cmsFadeIn {

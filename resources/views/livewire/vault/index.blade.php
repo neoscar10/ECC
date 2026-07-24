@@ -1,4 +1,4 @@
-<div class="w-100 pt-2 pb-4 ecc-vault-page">
+<div class="w-100 pb-4 ecc-vault-page">
     <div class="d-flex flex-column gap-3 gap-xl-4">
 
         <!-- Header Section -->
@@ -581,8 +581,8 @@
     .ecc-vault-page .border-white-10 { border-color: var(--ecc-border-soft) !important; }
 
     .ecc-vault-header {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
+        padding-top: 0.25rem;
+        padding-bottom: 0.75rem;
         position: relative;
     }
 

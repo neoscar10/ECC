@@ -1,5 +1,5 @@
 <div class="w-100 pt-1 pb-3 ecc-explore-page">
-    <div class="d-flex flex-column gap-2 gap-xl-3">
+    <div class="d-flex flex-column gap-3 gap-xl-4">
 
         {{-- Zone 1: Home Hero (Top Blocks) --}}
         @if(!empty($homeHeroBlocks))
@@ -40,7 +40,6 @@
         border-radius: 1.75rem;
         border: 1px solid var(--ecc-primary-border);
         background: var(--ecc-bg-surface);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     }
 
     .ecc-hero-bg {
