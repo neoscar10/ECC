@@ -423,7 +423,14 @@ class OtpService
         \Illuminate\Support\Facades\Cache::put('otp_plaintext_' . $phone, $otpPlaintext, now()->addMinutes($ttlMinutes));
 
         // 5. Dispatch WhatsApp Message (attempt direct delivery first)
-        $deliveryResult = $this->whatsappService->sendOtp($phone, $otpPlaintext, $template);
+        try {
+            $deliveryResult = $this->whatsappService->sendOtp($phone, $otpPlaintext, $template);
+        } catch (\Exception $e) {
+            Log::warning('OtpService: Outbound WhatsApp dispatch attempt failed: ' . $e->getMessage(), [
+                'phone_last4' => substr($phone, -4),
+            ]);
+            $deliveryResult = \App\Services\Otp\OtpDeliveryResult::failure('whatsapp', $e->getMessage());
+        }
 
         // 6. Store Meta message ID if delivery was successful
         if ($deliveryResult->success && $deliveryResult->providerMessageId) {
@@ -441,9 +448,11 @@ class OtpService
         }
 
         // Determine effective OTP method for frontend response
-        $effectiveOtpMethod = config('services.whatsapp.otp_method', 'template');
+        $configuredOtpMethod = config('services.whatsapp.otp_method', 'template');
+        $effectiveOtpMethod = $configuredOtpMethod;
+
         if (!$deliveryResult->success) {
-            if ($deliveryResult->failureReason === '24_hour_window_expired' || $effectiveOtpMethod === 'direct_message') {
+            if ($configuredOtpMethod === 'direct_message' || in_array($deliveryResult->failureReason, ['24_hour_window_expired', 'whatsapp_endpoint_not_found'], true)) {
                 $effectiveOtpMethod = 'direct_message';
             }
         }

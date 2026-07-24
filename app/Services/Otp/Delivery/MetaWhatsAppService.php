@@ -306,6 +306,19 @@ class MetaWhatsAppService implements OtpDeliveryInterface
             );
         }
 
+        // ── 404 Not Found (Invalid Phone Number ID / Endpoint) ──
+        if ($status === 404) {
+            Log::warning('MetaWhatsApp: Phone Number ID or endpoint not found (404).', [
+                'phone_last4' => substr($phone, -4),
+                'meta_error_message' => $metaErrorMessage,
+            ]);
+            return OtpDeliveryResult::failure(
+                provider: 'whatsapp',
+                reason: 'whatsapp_endpoint_not_found',
+                retryable: false
+            );
+        }
+
         // ── Auth/Permission Errors (401, 403) ──
         if (in_array($status, [401, 403], true)) {
             throw new OtpException(
