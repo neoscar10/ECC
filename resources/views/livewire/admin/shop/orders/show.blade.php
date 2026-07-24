@@ -33,6 +33,8 @@
                 </div>
             </div>
 
+            @include('livewire.admin.shop.orders.partials._sidebar-fulfillment')
+
             @include('livewire.admin.shop.orders.partials._timeline')
             @include('livewire.admin.shop.orders.partials._payment-events')
         </div>
@@ -41,7 +43,6 @@
         <div class="col-xl-3">
             @include('livewire.admin.shop.orders.partials._sidebar-status-manager')
             @include('livewire.admin.shop.orders.partials._sidebar-payment')
-            @include('livewire.admin.shop.orders.partials._sidebar-fulfillment')
         </div>
     </div>
 
