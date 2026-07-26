@@ -5,7 +5,7 @@
 
 <div class="position-relative overflow-hidden" style="min-height: max(884px, 100dvh); height: 100dvh; width: 100%;">
     {{-- Background layers --}}
-    <div class="position-fixed top-0 start-0 w-100 h-100" style="z-index:0; background: var(--ecc-bg); pointer-events:none;">
+    <div class="position-fixed top-0 start-0 w-100 h-100" style="z-index:0; background: var(--ecc-bg-page, #ffffff); pointer-events:none;">
         {{-- Soft gold glow --}}
         <div class="position-absolute"
              style="
@@ -14,25 +14,11 @@
                 transform: translate(-50%, -50%);
                 width: 600px;
                 height: 600px;
-                background: rgba(199, 167, 90,.05);
+                background: rgba(199, 167, 90,.04);
                 border-radius: 9999px;
                 filter: blur(120px);
                 animation: eccSubtlePulse 4s ease-in-out infinite;
              "></div>
-
-        {{-- Textured overlay (same spirit as stitched) --}}
-        <div class="position-absolute top-0 start-0 w-100 h-100"
-             style="
-                opacity: .20;
-                mix-blend-mode: overlay;
-                background-size: cover;
-                background-position: center;
-                background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAYFyWwA4wJDkBYEx0LZPPZizi4Vcs8axAGO4ziGEpJmwCtWXgkjzs5U-dMXwxfeIGLKJ4oEeWbJgaDqkGWa8kJtS9Eai0VO7T3TAfkqRK5Tbn9jytQBooXQtcQ-WoBN4vmP5N7ccLz_s1tQKXI5HWCIhMwF05rl_jbGxXNjxhQv8lnSEnpYz-2Z9RZqEpTp9F7M81pAC7zko79hyV3q6OEC68wwXSlLBgnqDfUN18lXW13YPAl-mkWiRLTaYw2eUBCuN4mipJaL5Z3');
-             "></div>
-
-        {{-- Dark radial vignette --}}
-        <div class="position-absolute top-0 start-0 w-100 h-100"
-             style="background: radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(5,5,5,.90) 70%);"></div>
     </div>
 
     {{-- Foreground --}}
@@ -42,15 +28,11 @@
         {{-- Center logo area --}}
         <div class="flex-shrink-0 d-flex align-items-center justify-content-center">
             <div class="text-center position-relative select-none" style="cursor: default;">
-                {{-- Diamond icon --}}
+                {{-- Official ECC Logo Crest --}}
                 <div class="mb-4">
-                    <span class="material-symbols-outlined"
-                          style="
-                            font-size: 40px;
-                            color: var(--ecc-primary);
-                            opacity: .85;
-                            filter: drop-shadow(0 0 8px rgba(199, 167, 90,.40));
-                          ">diamond</span>
+                    <img src="{{ asset('ecc_logo_dark.png') }}"
+                         style="width: 84px; height: 84px; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(199, 167, 90,.25));"
+                         alt="ECC Logo">
                 </div>
 
                 {{-- ECC + shadow ECC --}}
