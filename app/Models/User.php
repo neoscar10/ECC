@@ -100,7 +100,14 @@ class User extends Authenticatable implements JWTSubject
 
     public function currentMembership()
     {
-        return $this->hasOne(Membership::class)->where('status', 'active')->latest('started_at');
+        return $this->hasOne(Membership::class)
+            ->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('expires_at')
+                  ->orWhere('expires_at', '>', now());
+            })
+            ->orderBy('started_at', 'desc')
+            ->orderBy('id', 'desc');
     }
 
     public function memberships()

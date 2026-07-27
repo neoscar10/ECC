@@ -9,5 +9,6 @@ Artisan::command('inspire', function () {
 
 \Illuminate\Support\Facades\Schedule::command('archive:publish-scheduled')->everyMinute()->withoutOverlapping();
 \Illuminate\Support\Facades\Schedule::command('auctions:check-lifecycle')->everyMinute()->withoutOverlapping();
+\Illuminate\Support\Facades\Schedule::command('memberships:expire')->everyFiveMinutes()->withoutOverlapping();
 
 
