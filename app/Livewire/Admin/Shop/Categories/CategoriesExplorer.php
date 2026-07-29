@@ -22,6 +22,12 @@ class CategoriesExplorer extends Component
     public $showMoveModal = false;
     public $showDeleteModal = false;
 
+    // --- Product Modal Compatibility State ---
+    public $isEditMode = false;
+    public $createStep = 1;
+    public $variationsOnlyMode = false;
+    public $showCreateProductModal = false;
+
     public $selectedCategoryId;
     
     // --- Form Fields ---
@@ -29,6 +35,14 @@ class CategoriesExplorer extends Component
     public $slug; // Auto-generated or manual
     public $targetParentId;
     public $is_active = true;
+
+    public function hasCategoryDefaults($category = null): bool
+    {
+        $cat = $category ?? $this->currentFolder;
+        if (!$cat) return false;
+
+        return (bool) ($cat->has_defaults ?? false);
+    }
 
     // --- Lifecycle ---
 

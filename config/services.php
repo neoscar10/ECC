@@ -52,4 +52,15 @@ return [
         'default_region'      => env('PHONE_DEFAULT_REGION', 'IN'),
     ],
 
+    'waty_whatsapp' => [
+        'enabled'            => env('WATY_WHATSAPP_ENABLED', true),
+        'base_url'           => env('WATY_WHATSAPP_BASE_URL', 'https://bizlawn.storesite.in/api'),
+        'api_token'          => env('WATY_WHATSAPP_API_TOKEN'),
+        'otp_account'        => env('WATY_WHATSAPP_OTP_ACCOUNT', 'mobile_app'),
+        'admin_phone_number' => env('WATY_WHATSAPP_ADMIN_PHONE_NUMBER', ''),
+        'timeout'            => env('WATY_WHATSAPP_TIMEOUT', 15),
+        'retry_times'        => env('WATY_WHATSAPP_RETRY_TIMES', 2),
+        'retry_sleep_ms'     => env('WATY_WHATSAPP_RETRY_SLEEP_MS', 200),
+    ],
+
 ];

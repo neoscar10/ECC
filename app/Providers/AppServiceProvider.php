@@ -22,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
             return match ($mode) {
                 'dev' => $app->make(\App\Services\Otp\Delivery\DevOtpDeliveryService::class),
                 'meta_whatsapp' => $app->make(\App\Services\Otp\Delivery\MetaWhatsAppService::class),
+                'waty_whatsapp' => $app->make(\App\Services\Otp\Delivery\WatyWhatsAppService::class),
                 default => throw new \InvalidArgumentException("Unsupported OTP delivery mode: {$mode}"),
             };
         });

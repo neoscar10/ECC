@@ -87,9 +87,20 @@
                                 <input type="text" class="form-control" placeholder="Search in this folder..." wire:model.live.debounce.300ms="search">
                                 <i class="ri-search-line search-icon"></i>
                             </div>
-                            <button class="btn btn-success" wire:click="initiateCreate">
-                                <i class="ri-add-line align-bottom me-1"></i> New Category
-                            </button>
+                            @if($this->currentFolder && $this->currentFolder->children_count == 0)
+                                @php
+                                    $defaultsConfigured = $this->hasCategoryDefaults($this->currentFolder);
+                                @endphp
+                                <span class="d-inline-block" tabindex="0" @if(!$defaultsConfigured) data-bs-toggle="tooltip" data-bs-placement="top" title="Please configure Category Defaults before adding products" @endif>
+                                    <button class="btn btn-primary" @if(!$defaultsConfigured) disabled style="pointer-events: none;" @else wire:click="initiateCreateProduct" @endif>
+                                        <i class="ri-add-line align-bottom me-1"></i> Add Product
+                                    </button>
+                                </span>
+                            @else
+                                <button class="btn btn-success" wire:click="initiateCreate">
+                                    <i class="ri-add-line align-bottom me-1"></i> New Category
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -159,8 +170,21 @@
                                 <tr>
                                     <td colspan="6" class="text-center py-5">
                                         <div class="text-muted">
-                                            <i class="ri-folder-add-line fs-24 mb-2 d-block"></i>
-                                            <p class="mb-0">This folder is empty.</p>
+                                            @if($this->currentFolder && $this->currentFolder->children_count == 0)
+                                                <i class="ri-shopping-bag-line fs-24 mb-2 d-block text-primary"></i>
+                                                <p class="mb-3">No products in this category yet.</p>
+                                                @php
+                                                    $defaultsConfigured = $this->hasCategoryDefaults($this->currentFolder);
+                                                @endphp
+                                                <span class="d-inline-block" tabindex="0" @if(!$defaultsConfigured) data-bs-toggle="tooltip" data-bs-placement="top" title="Please configure Category Defaults before adding products" @endif>
+                                                    <button class="btn btn-primary btn-sm" @if(!$defaultsConfigured) disabled style="pointer-events: none;" @else wire:click="initiateCreateProduct" @endif>
+                                                        <i class="ri-add-line align-bottom me-1"></i> Add Product
+                                                    </button>
+                                                </span>
+                                            @else
+                                                <i class="ri-folder-add-line fs-24 mb-2 d-block"></i>
+                                                <p class="mb-0">This folder is empty.</p>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
