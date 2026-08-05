@@ -238,11 +238,17 @@ class AdminDashboardMetricsService
                 if ($item instanceof \App\Models\Shop\ShopProductVariant) {
                     $item->display_product_title = $item->product?->title;
                     $item->display_caption = $item->optionValues->pluck('caption')->implode(' - ');
-                    $item->restock_url = route('admin.shop.inventory', ['search' => $item->product?->title]);
+                    $item->restock_url = route('admin.shop.inventory', [
+                        'search' => $item->product?->title,
+                        'adjustProductId' => $item->shop_product_id
+                    ]);
                 } else {
                     $item->display_product_title = $item->title;
                     $item->display_caption = 'N/A';
-                    $item->restock_url = route('admin.shop.inventory', ['search' => $item->title]);
+                    $item->restock_url = route('admin.shop.inventory', [
+                        'search' => $item->title,
+                        'adjustProductId' => $item->id
+                    ]);
                 }
                 return $item;
             });

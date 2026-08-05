@@ -1,5 +1,5 @@
 <!-- View Modal -->
-<div wire:ignore.self class="modal fade zoomIn" id="viewModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
+<div wire:ignore.self wire:key="membership-view-modal" class="modal fade zoomIn" id="viewModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
      data-bs-keyboard="false">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">

@@ -5,26 +5,31 @@ namespace App\Livewire\Admin\Auctions\Enquiries;
 use App\Models\Auctions\AuctionEnquiry;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Url;
 
 class Index extends Component
 {
     use WithPagination;
 
     // Filter properties
+    #[Url]
     public $search = '';
+    #[Url]
     public $status = '';
     
     // Action properties
     public $selectedEnquiry = null;
     
+    #[Url]
     public $viewId = null;
-    
-    // Clean URL query string
-    protected $queryString = [
-        'search' => ['except' => ''],
-        'status' => ['except' => ''],
-        'viewId' => ['except' => null],
-    ];
+
+    public function mount()
+    {
+        if ($this->viewId) {
+            $this->viewEnquiry($this->viewId);
+            $this->viewId = null;
+        }
+    }
 
     public function updatingSearch()
     {

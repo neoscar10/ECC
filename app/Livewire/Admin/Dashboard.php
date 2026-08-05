@@ -57,6 +57,12 @@ class Dashboard extends Component
         $this->updateChart($service);
     }
 
+    public function setChartRange(string $range, AdminDashboardMetricsService $service)
+    {
+        $this->chartRange = $range;
+        $this->updateChart($service);
+    }
+
     public function updatedChartSource(AdminDashboardMetricsService $service)
     {
         $this->updateChart($service);

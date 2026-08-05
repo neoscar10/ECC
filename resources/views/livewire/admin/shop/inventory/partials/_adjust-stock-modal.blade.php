@@ -1,5 +1,5 @@
 <!-- Stock Adjustment Modal -->
-<div class="modal fade" id="adjustStockModal" tabindex="-1" aria-labelledby="adjustStockLabel" aria-hidden="true" wire:ignore.self>
+<div class="modal fade" id="adjustStockModal" tabindex="-1" aria-labelledby="adjustStockLabel" aria-hidden="true" wire:ignore.self wire:key="shop-adjust-stock-modal">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-light p-3">

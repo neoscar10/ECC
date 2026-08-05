@@ -36,7 +36,6 @@ class Index extends Component
     {
         if ($this->applicationId) {
             $this->view($this->applicationId);
-            $this->applicationId = null;
         }
     }
 
@@ -44,11 +43,13 @@ class Index extends Component
 
     public function updatedSearch()
     {
+        $this->applicationId = null;
         $this->resetPage();
     }
 
     public function updatedStatusFilter()
     {
+        $this->applicationId = null;
         $this->resetPage();
     }
 
@@ -208,6 +209,10 @@ class Index extends Component
     {
         $query = MembershipApplication::with(['user', 'membershipTier']);
 
+        if ($this->applicationId) {
+            $query->where('id', $this->applicationId);
+        }
+
         if ($this->search) {
             $query->whereHas('user', function($q) {
                 $q->withTrashed()
@@ -219,7 +224,11 @@ class Index extends Component
         }
 
         if ($this->statusFilter) {
-            $query->where('status', $this->statusFilter);
+            if ($this->statusFilter === 'pending') {
+                $query->whereIn('status', ['submitted', 'under_review']);
+            } else {
+                $query->where('status', $this->statusFilter);
+            }
         }
 
         $applications = $query->latest('submitted_at')->paginate(10);

@@ -1,5 +1,5 @@
 <!-- Approve Modal -->
-<div wire:ignore.self class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
+<div wire:ignore.self wire:key="membership-approve-modal" class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
      data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -23,7 +23,7 @@
 </div>
 
 <!-- Reject Modal -->
-<div wire:ignore.self class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+<div wire:ignore.self wire:key="membership-reject-modal" class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">

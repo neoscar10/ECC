@@ -10,6 +10,7 @@
             <div class="hstack gap-2">
                 <select class="form-select" wire:model.live="statusFilter">
                     <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
                     <option value="draft">Draft</option>
                     <option value="submitted">Submitted</option>
                     <option value="under_review">Under Review</option>

@@ -7,6 +7,7 @@ use App\Models\Shop\ShopProductVariationValue;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Url;
 
 class Index extends Component
 {
@@ -14,16 +15,16 @@ class Index extends Component
 
     protected $paginationTheme = 'bootstrap';
 
+    #[Url]
     public $search = '';
+    #[Url]
     public $filterStatus = 'all'; // all, in_stock, low_stock, out_of_stock
     public $filterType = 'all';   // all, simple, variant
     public $sortField = 'updated_at';
     public $sortDirection = 'desc';
 
-    protected $queryString = [
-        'search' => ['except' => ''],
-        'filterStatus' => ['except' => 'all'],
-    ];
+    #[Url]
+    public $adjustProductId = null;
 
     public $lowStockThreshold = 5;
 
@@ -36,6 +37,10 @@ class Index extends Component
     public function mount()
     {
         $this->lowStockThreshold = config('shop.low_stock_threshold', 5);
+
+        if ($this->adjustProductId) {
+            $this->openAdjustStockModal($this->adjustProductId);
+        }
     }
 
     public function updatingSearch() { $this->resetPage(); }
@@ -62,6 +67,7 @@ class Index extends Component
 
         $this->showAdjustModal = true;
         $this->dispatch('show-adjust-stock-modal');
+        $this->adjustProductId = null;
     }
 
     public function closeAdjustStockModal()

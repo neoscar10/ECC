@@ -132,7 +132,7 @@
     </div>
     
     {{-- View Modal --}}
-    <div wire:ignore.self class="modal fade" id="viewEnquiryModal" tabindex="-1" aria-labelledby="viewEnquiryModalLabel" aria-hidden="true">
+    <div wire:ignore.self wire:key="general-enquiry-view-modal" class="modal fade" id="viewEnquiryModal" tabindex="-1" aria-labelledby="viewEnquiryModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">

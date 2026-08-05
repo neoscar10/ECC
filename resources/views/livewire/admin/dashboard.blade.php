@@ -38,7 +38,7 @@
                 :value="$kpis['pending_applications'] ?? 0" 
                 icon="ri-file-list-3-line" 
                 color="warning" 
-                link="{{ route('admin.membership.applications', ['statusFilter' => 'submitted']) }}" 
+                link="{{ route('admin.membership.applications', ['statusFilter' => 'pending']) }}" 
             />
         </div>
         <div class="col-xl-3 col-md-6">
@@ -101,10 +101,10 @@
                     <!-- Range Selector -->
                     <div class="flex-shrink-0">
                         <div class="btn-group btn-group-sm" role="group">
-                            <button type="button" wire:click="$set('chartRange', 'today')" class="btn {{ $chartRange == 'today' ? 'btn-primary' : 'btn-soft-primary' }}">Today</button>
-                            <button type="button" wire:click="$set('chartRange', '1w')" class="btn {{ $chartRange == '1w' ? 'btn-primary' : 'btn-soft-primary' }}">1W</button>
-                            <button type="button" wire:click="$set('chartRange', '1m')" class="btn {{ $chartRange == '1m' ? 'btn-primary' : 'btn-soft-primary' }}">1M</button>
-                            <button type="button" wire:click="$set('chartRange', 'custom')" class="btn {{ $chartRange == 'custom' ? 'btn-primary' : 'btn-soft-primary' }}">Custom</button>
+                            <button type="button" wire:click="setChartRange('today')" class="btn {{ $chartRange == 'today' ? 'btn-primary' : 'btn-soft-primary' }}">Today</button>
+                            <button type="button" wire:click="setChartRange('1w')" class="btn {{ $chartRange == '1w' ? 'btn-primary' : 'btn-soft-primary' }}">1W</button>
+                            <button type="button" wire:click="setChartRange('1m')" class="btn {{ $chartRange == '1m' ? 'btn-primary' : 'btn-soft-primary' }}">1M</button>
+                            <button type="button" wire:click="setChartRange('custom')" class="btn {{ $chartRange == 'custom' ? 'btn-primary' : 'btn-soft-primary' }}">Custom</button>
                         </div>
                     </div>
 
@@ -131,7 +131,7 @@
                 <div class="card-header align-items-center d-flex">
                     <h4 class="card-title mb-0 flex-grow-1">Pending Applications</h4>
                     <div class="flex-shrink-0">
-                        <a href="{{ route('admin.membership.applications', ['statusFilter' => 'submitted']) }}" class="btn btn-soft-info btn-sm">View All</a>
+                        <a href="{{ route('admin.membership.applications', ['statusFilter' => 'pending']) }}" class="btn btn-soft-info btn-sm">View All</a>
                     </div>
                 </div>
                 <div class="card-body">
@@ -154,7 +154,7 @@
                                         <td>{{ $app->membershipTier?->name }}</td>
                                         <td>{{ $app->created_at->format('d M, Y') }}</td>
                                         <td>
-                                            <button type="button" wire:click="view({{ $app->id }})" class="btn btn-sm btn-soft-primary">Review</button>
+                                            <a href="{{ route('admin.membership.applications', ['applicationId' => $app->id]) }}" class="btn btn-sm btn-soft-primary">Review</a>
                                         </td>
                                     </tr>
                                 @empty
@@ -176,7 +176,7 @@
                 <div class="card-header align-items-center d-flex">
                     <h4 class="card-title mb-0 flex-grow-1">Recent New Enquiries</h4>
                     <div class="flex-shrink-0">
-                        <a href="{{ route('admin.enquiries.index') }}" class="btn btn-soft-info btn-sm">View All</a>
+                        <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#enquiriesModal" class="btn btn-soft-info btn-sm">View All</a>
                     </div>
                 </div>
                 <div class="card-body">
@@ -515,7 +515,7 @@
     document.addEventListener('livewire:initialized', () => {
         // Handle chart data updates
         Livewire.on('chartDataUpdated', (eventData) => {
-            var data = eventData[0];
+            var data = Array.isArray(eventData) ? eventData[0] : eventData;
             if (salesChart) {
                 salesChart.updateOptions({
                     xaxis: {
