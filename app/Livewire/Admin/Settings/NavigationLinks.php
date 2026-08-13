@@ -52,6 +52,6 @@ class NavigationLinks extends Component
 
     public function render()
     {
-        return view('livewire.admin.settings.navigation-links');
+        return view('livewire.admin.settings.navigation-links')->layout('layouts.admin');
     }
 }
