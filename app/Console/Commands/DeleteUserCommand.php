@@ -30,10 +30,10 @@ class DeleteUserCommand extends Command
         $identifier = $this->argument('identifier');
         $this->info("Searching for user with identifier: {$identifier}...");
 
-        // Find user by email or phone (including soft-deleted and anonymized ones)
+        // Find user by email or phone (using LIKE to handle country codes or prefixes)
         $user = User::withTrashed()
-            ->where('email', $identifier)
-            ->orWhere('phone', $identifier)
+            ->where('email', 'like', "%{$identifier}%")
+            ->orWhere('phone', 'like', "%{$identifier}%")
             ->orWhere('email', 'like', "del\_%\_%{$identifier}%")
             ->orWhere('phone', 'like', "del\_%\_%{$identifier}%")
             ->first();
