@@ -41,7 +41,7 @@ class DeleteUserCommand extends Command
         // Also clean up pending tables even if user doesn't exist
         $this->info("Cleaning up pending registrations and OTPs for {$identifier}...");
         DB::table('pending_registrations')->where('phone', 'like', "%{$identifier}%")->orWhere('email', 'like', "%{$identifier}%")->delete();
-        DB::table('otp_verifications')->where('identifier', 'like', "%{$identifier}%")->delete();
+        DB::table('otp_verifications')->where('phone', 'like', "%{$identifier}%")->delete();
         DB::table('password_reset_tokens')->where('email', $identifier)->delete();
 
         if (!$user) {
