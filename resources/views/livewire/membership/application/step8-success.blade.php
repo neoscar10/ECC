@@ -1,7 +1,5 @@
 <div class="ecc-success position-relative min-vh-100 overflow-hidden d-flex flex-column justify-content-between">
-  {{-- gradient + texture --}}
-  <div class="ecc-success__grad position-absolute top-0 start-0 end-0"></div>
-  <div class="ecc-success__tex position-absolute top-0 start-0 end-0 bottom-0"></div>
+  {{-- gradient + texture removed for clear white background --}}
 
   <div class="flex-none" style="height:40px;"></div>
 
@@ -64,16 +62,7 @@
     font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   }
 
-  .ecc-success__grad{
-    height: 66%;
-    background: linear-gradient(to bottom, rgba(199, 167, 90,.10), rgba(0,0,0,0));
-    pointer-events:none;
-  }
 
-  .ecc-success__tex{
-    background-image: radial-gradient(circle at center, rgba(199, 167, 90, 0.08) 0%, transparent 80%);
-    pointer-events:none;
-  }
 
   .ecc-success__glow{
     width: 120px; height: 120px;
