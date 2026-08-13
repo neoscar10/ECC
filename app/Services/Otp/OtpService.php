@@ -236,6 +236,10 @@ class OtpService
     {
         $target = $channel === 'email' ? $user->email : $this->resolvePhone($user, $identifier);
         
+        if ($channel === 'whatsapp' && filter_var($target, FILTER_VALIDATE_EMAIL)) {
+            throw new OtpException("No registered WhatsApp number found for this account. Please select Email.", 422);
+        }
+        
         $config = config('otp.purposes.password_reset');
         $ttl = $config['ttl_minutes'] ?? 10;
 
@@ -255,6 +259,10 @@ class OtpService
     {
         $target = $channel === 'email' ? $user->email : $this->resolvePhone($user, $identifier);
         
+        if ($channel === 'whatsapp' && filter_var($target, FILTER_VALIDATE_EMAIL)) {
+            throw new OtpException("No registered WhatsApp number found for this account.", 422);
+        }
+        
         return $this->verifyOtp(
             target: $target,
             purpose: 'password_reset',
@@ -266,33 +274,48 @@ class OtpService
     /**
      * Request a Login OTP for the given user and identifier.
      */
-    public function requestLoginOtp(User $user, string $identifier): array
+    public function requestLoginOtp(User $user, string $identifier, ?string $channel = null): array
     {
-        $rawPhone = $this->resolvePhone($user, $identifier);
+        $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+        $channel = $channel ?? ($isEmail ? 'email' : 'whatsapp');
+        
+        $target = $channel === 'email' ? $user->email : $this->resolvePhone($user, $identifier);
+        
+        if ($channel === 'whatsapp' && filter_var($target, FILTER_VALIDATE_EMAIL)) {
+            throw new OtpException("No registered WhatsApp number found for this account.", 422);
+        }
+
         $config = config('otp.purposes.login');
         $ttl = $config['ttl_minutes'] ?? 5;
 
         return $this->generateAndStoreOtp(
             user: $user,
-            target: $rawPhone,
+            target: $target,
             purpose: 'login',
             ttlMinutes: $ttl,
-            channel: 'whatsapp'
+            channel: $channel
         );
     }
 
     /**
      * Verify the Login OTP.
      */
-    public function verifyLoginOtp(User $user, string $identifier, string $otp): bool
+    public function verifyLoginOtp(User $user, string $identifier, string $otp, ?string $channel = null): bool
     {
-        $rawPhone = $this->resolvePhone($user, $identifier);
+        $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+        $channel = $channel ?? ($isEmail ? 'email' : 'whatsapp');
+        
+        $target = $channel === 'email' ? $user->email : $this->resolvePhone($user, $identifier);
+        
+        if ($channel === 'whatsapp' && filter_var($target, FILTER_VALIDATE_EMAIL)) {
+            throw new OtpException("No registered WhatsApp number found for this account.", 422);
+        }
         
         return $this->verifyOtp(
-            target: $rawPhone,
+            target: $target,
             purpose: 'login',
             otp: $otp,
-            channel: 'whatsapp'
+            channel: $channel
         );
     }
 
