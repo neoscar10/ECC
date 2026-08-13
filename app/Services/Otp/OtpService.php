@@ -402,19 +402,6 @@ class OtpService
         $ipRequestKey = 'otp_request_ip:' . $purpose . ':' . request()->ip();
         $targetRequestKey = 'otp_request_' . $channel . ':' . $purpose . ':' . $targetValue;
 
-        if (RateLimiter::tooManyAttempts($ipRequestKey, $maxAttempts)) {
-            $seconds = RateLimiter::availableIn($ipRequestKey);
-            Log::warning('OtpService: IP OTP request limit exceeded.', ['ip' => request()->ip(), 'purpose' => $purpose]);
-            throw new OtpException("Too many verification code requests. Please try again in " . ceil($seconds / 60) . " minutes.", 429);
-        }
-
-        if (RateLimiter::tooManyAttempts($targetRequestKey, $maxAttempts)) {
-            $seconds = RateLimiter::availableIn($targetRequestKey);
-            Log::warning("OtpService: {$channel} OTP request limit exceeded.", ['target' => substr($targetValue, -4), 'purpose' => $purpose]);
-            throw new OtpException("Too many verification code requests for this {$channel}. Please try again in " . ceil($seconds / 60) . " minutes.", 429);
-        }
-
-        // ── Resend Cooldown Check per target & purpose ──
         $query = OtpVerification::where('purpose', $purpose);
         if ($channel === 'whatsapp') {
             $query->where('phone', $phone);
@@ -436,10 +423,6 @@ class OtpService
                 throw new OtpException("Please wait before requesting another verification code.", 429);
             }
         }
-
-        // Increment rate limit hits (decay window)
-        RateLimiter::hit($ipRequestKey, $decaySeconds);
-        RateLimiter::hit($targetRequestKey, $decaySeconds);
 
         // 2. Invalidate previous pending OTPs
         $pendingQuery = OtpVerification::pending()->where('purpose', $purpose);
