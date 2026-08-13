@@ -44,6 +44,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('meta')->group(function () {
         Route::get('cricket-profile-options', [\App\Http\Controllers\Api\V1\MetaController::class, 'getCricketProfileOptions']);
         Route::get('collector-intent-options', [\App\Http\Controllers\Api\V1\MetaController::class, 'getCollectorIntentOptions']);
+        Route::get('navigation-links', [\App\Http\Controllers\Api\V1\NavigationLinksController::class, 'index']);
     });
 
     // Protected Application Routes

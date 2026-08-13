@@ -21,8 +21,20 @@
     <div class="flex-grow-1 text-center">
         @php
             $displayTitle = trim($title);
-            if (strtolower($displayTitle) === 'home') {
-                $displayTitle = 'Explore'; // Normalize Home to Explore per user example
+            $lowerTitle = strtolower($displayTitle);
+            
+            if ($lowerTitle === 'home' || $lowerTitle === 'explore') {
+                $displayTitle = \App\Models\Setting::get('nav_label_explore', 'Explore');
+            } elseif ($lowerTitle === 'archive') {
+                $displayTitle = \App\Models\Setting::get('nav_label_archive', 'Archive');
+            } elseif ($lowerTitle === 'auctions') {
+                $displayTitle = \App\Models\Setting::get('nav_label_auctions', 'Auctions');
+            } elseif ($lowerTitle === 'club') {
+                $displayTitle = \App\Models\Setting::get('nav_label_club', 'Club');
+            } elseif ($lowerTitle === 'shop') {
+                $displayTitle = \App\Models\Setting::get('nav_label_shop', 'Shop');
+            } elseif ($lowerTitle === 'profile' || $lowerTitle === 'settings') {
+                $displayTitle = \App\Models\Setting::get('nav_label_profile', 'Profile');
             }
             if (!empty($displayTitle) && !str_starts_with(strtolower($displayTitle), 'the ')) {
                 $displayTitle = 'The ' . $displayTitle;

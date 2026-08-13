@@ -155,6 +155,11 @@ Route::middleware(['auth:web', EnsureAdminRole::class])->prefix('admin')->name('
         Route::get('/failed', \App\Livewire\Admin\Payments\FailedPayments::class)->name('failed');
         Route::get('/audits', \App\Livewire\Admin\Payments\AuditLogs::class)->name('audits');
     });
+
+    // Settings
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/navigation', \App\Livewire\Admin\Settings\NavigationLinks::class)->name('navigation');
+    });
 });
 
 // Membership Application Flow (Public/Mixed)

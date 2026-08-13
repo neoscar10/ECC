@@ -2,12 +2,12 @@
   $active = $active ?? null;
 
   $items = [
-    ['key'=>'explore','label'=>'Explore','icon'=>'explore',       'href'=>url('/home')],
-    ['key'=>'archive','label'=>'Archive','icon'=>'inventory_2',   'href'=>url('/archive')],
-    ['key'=>'auctions','label'=>'Auctions','icon'=>'gavel',       'href'=>url('/auctions')],
-    ['key'=>'club',    'label'=>'Club',   'icon'=>'shield_person','href'=>url('/club')],
-    ['key'=>'shop',    'label'=>'Shop',   'icon'=>'storefront',   'href'=>route('shop.index')],
-    ['key'=>'settings','label'=>'Profile','icon'=>'account_circle','href'=>url('/settings')],
+    ['key'=>'explore','label'=>\App\Models\Setting::get('nav_label_explore', 'Explore'),'icon'=>'explore',       'href'=>url('/home')],
+    ['key'=>'archive','label'=>\App\Models\Setting::get('nav_label_archive', 'Archive'),'icon'=>'inventory_2',   'href'=>url('/archive')],
+    ['key'=>'auctions','label'=>\App\Models\Setting::get('nav_label_auctions', 'Auctions'),'icon'=>'gavel',       'href'=>url('/auctions')],
+    ['key'=>'club',    'label'=>\App\Models\Setting::get('nav_label_club', 'Club'),   'icon'=>'shield_person','href'=>url('/club')],
+    ['key'=>'shop',    'label'=>\App\Models\Setting::get('nav_label_shop', 'Shop'),   'icon'=>'storefront',   'href'=>route('shop.index')],
+    ['key'=>'settings','label'=>\App\Models\Setting::get('nav_label_profile', 'Profile'),'icon'=>'account_circle','href'=>url('/settings')],
   ];
 
   $path = trim(request()->path(), '/');

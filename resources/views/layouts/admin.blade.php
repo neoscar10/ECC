@@ -494,6 +494,18 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link menu-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" href="#sidebarSettings" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('admin.settings.*') ? 'true' : 'false' }}" aria-controls="sidebarSettings">
+                                <i class="ri-settings-3-line"></i> <span data-key="t-settings">Settings</span>
+                            </a>
+                            <div class="collapse menu-dropdown {{ request()->routeIs('admin.settings.*') ? 'show' : '' }}" id="sidebarSettings">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.settings.navigation') }}" class="nav-link {{ request()->routeIs('admin.settings.navigation') ? 'active' : '' }}" data-key="t-navigation-links">Navigation Links</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="nav-item">
                             <form method="POST" action="{{ route('logout') }}" id="sidebar-logout-form" class="d-none">
                                 @csrf
                             </form>
