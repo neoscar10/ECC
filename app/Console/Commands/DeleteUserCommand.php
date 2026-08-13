@@ -117,8 +117,10 @@ class DeleteUserCommand extends Command
             DB::table('payments')->where('user_id', $userId)->delete();
 
             // Contact enquiries / messages
-            DB::table('contact_messages')->where('user_id', $userId)->delete();
-            DB::table('contact_enquiries')->where('email', $user->email)->delete();
+            if ($user->email) {
+                DB::table('contact_messages')->where('email', $user->email)->delete();
+            }
+            DB::table('contact_enquiries')->where('user_id', $userId)->delete();
 
             // Finally, force delete the user record
             DB::table('users')->where('id', $userId)->delete();
