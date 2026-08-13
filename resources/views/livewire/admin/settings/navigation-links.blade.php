@@ -14,8 +14,22 @@
         </div>
     </div>
 
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-info border-0 shadow-sm mb-0">
+                <div class="d-flex align-items-center">
+                    <i class="ri-information-line fs-3 me-2"></i>
+                    <div>
+                        <h6 class="alert-heading fw-bold mb-1">About Navigation Links</h6>
+                        <p class="mb-0">These labels control the names of the main navigation items in the user frontend and the mobile application. Changing them here will instantly reflect across the platform.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
-        <div class="col-xl-6">
+        <div class="col-12">
             <div class="card shadow-sm border-0">
                 <div class="card-header border-bottom-dashed">
                     <h5 class="card-title mb-0">App Navigation Labels</h5>
@@ -29,61 +43,51 @@
                     @endif
 
                     <form wire:submit="save">
-                        <div class="mb-3">
-                            <label for="explore" class="form-label">Explore Link Label</label>
-                            <input type="text" class="form-control" id="explore" wire:model="explore" placeholder="Explore">
-                            @error('explore') <span class="text-danger small">{{ $message }}</span> @enderror
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="explore" class="form-label">Explore Link Label</label>
+                                <input type="text" class="form-control" id="explore" wire:model="explore" placeholder="Explore">
+                                @error('explore') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="archive" class="form-label">Archive Link Label</label>
+                                <input type="text" class="form-control" id="archive" wire:model="archive" placeholder="Archive">
+                                @error('archive') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="auctions" class="form-label">Auctions Link Label</label>
+                                <input type="text" class="form-control" id="auctions" wire:model="auctions" placeholder="Auctions">
+                                @error('auctions') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="club" class="form-label">Club Link Label</label>
+                                <input type="text" class="form-control" id="club" wire:model="club" placeholder="Club">
+                                @error('club') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="shop" class="form-label">Shop Link Label</label>
+                                <input type="text" class="form-control" id="shop" wire:model="shop" placeholder="Shop">
+                                @error('shop') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label for="profile" class="form-label">Profile Link Label</label>
+                                <input type="text" class="form-control" id="profile" wire:model="profile" placeholder="Profile">
+                                @error('profile') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="archive" class="form-label">Archive Link Label</label>
-                            <input type="text" class="form-control" id="archive" wire:model="archive" placeholder="Archive">
-                            @error('archive') <span class="text-danger small">{{ $message }}</span> @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="auctions" class="form-label">Auctions Link Label</label>
-                            <input type="text" class="form-control" id="auctions" wire:model="auctions" placeholder="Auctions">
-                            @error('auctions') <span class="text-danger small">{{ $message }}</span> @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="club" class="form-label">Club Link Label</label>
-                            <input type="text" class="form-control" id="club" wire:model="club" placeholder="Club">
-                            @error('club') <span class="text-danger small">{{ $message }}</span> @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="shop" class="form-label">Shop Link Label</label>
-                            <input type="text" class="form-control" id="shop" wire:model="shop" placeholder="Shop">
-                            @error('shop') <span class="text-danger small">{{ $message }}</span> @enderror
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="profile" class="form-label">Profile Link Label</label>
-                            <input type="text" class="form-control" id="profile" wire:model="profile" placeholder="Profile">
-                            @error('profile') <span class="text-danger small">{{ $message }}</span> @enderror
-                        </div>
-
-                        <div>
-                            <button type="submit" class="btn btn-primary w-100">
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary px-5">
                                 <span wire:loading.remove wire:target="save">Save Changes</span>
                                 <span wire:loading wire:target="save">Saving...</span>
                             </button>
                         </div>
                     </form>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-6">
-            <div class="alert alert-info border-0 shadow-sm">
-                <div class="d-flex align-items-center">
-                    <i class="ri-information-line fs-3 me-2"></i>
-                    <div>
-                        <h6 class="alert-heading fw-bold mb-1">About Navigation Links</h6>
-                        <p class="mb-0">These labels control the names of the main navigation items in the user frontend and the mobile application. Changing them here will instantly reflect across the platform.</p>
-                    </div>
                 </div>
             </div>
         </div>
