@@ -89,7 +89,6 @@ class DeleteUserCommand extends Command
             DB::table('auction_notification_subscriptions')->where('user_id', $userId)->delete();
 
             // Memberships and Applications
-            DB::table('membership_application_drafts')->where('user_id', $userId)->delete();
             DB::table('membership_applications')->where('user_id', $userId)->delete();
             DB::table('memberships')->where('user_id', $userId)->delete();
             DB::table('user_memberships')->where('user_id', $userId)->delete();
