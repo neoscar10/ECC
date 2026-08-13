@@ -75,7 +75,7 @@ class UserLoginPage extends Component
     /**
      * --- FORGOT PASSWORD FLOW ---
      */
-    public function requestResetOtp(): void
+    public function requestResetOtp(\App\Services\Otp\OtpService $otpService): void
     {
         $this->validate([
             'identity' => ['required', 'string', 'max:255'],
@@ -90,21 +90,8 @@ class UserLoginPage extends Component
         }
 
         $this->otpIdentifier = $this->identity;
-        $this->step = 2; // Move to Select Channel step
-        $this->errorMessage = null;
-    }
-
-    public function sendResetOtp(\App\Services\Otp\OtpService $otpService): void
-    {
-        $this->validate([
-            'selectedChannel' => ['required', 'in:whatsapp,email'],
-        ]);
-
-        $user = $this->resolveUserByIdentity($this->otpIdentifier);
-        if (!$user) {
-            $this->setMode('forgot');
-            return;
-        }
+        $isEmail = filter_var($this->identity, FILTER_VALIDATE_EMAIL);
+        $this->selectedChannel = $isEmail ? 'email' : 'whatsapp';
         
         try {
             $data = $otpService->requestPasswordResetOtp($user, $this->otpIdentifier, $this->selectedChannel);
@@ -121,11 +108,13 @@ class UserLoginPage extends Component
                 $this->showOtpInput = true;
             }
 
-            $this->step = 3; // Move to OTP verification step
+            $this->step = 2; // Move straight to OTP verification step
             $this->errorMessage = null;
             $this->dispatch('ecc-otp-countdown-reset', seconds: $this->resendRemaining);
         } catch (\App\Exceptions\OtpException $e) {
-            $this->errorMessage = $e->getMessage();
+            throw ValidationException::withMessages([
+                'identity' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -152,8 +141,8 @@ class UserLoginPage extends Component
             return;
         }
 
-        // OTP is verified, move to Step 4 (New Password)
-        $this->step = 4;
+        // OTP is verified, move to Step 3 (New Password)
+        $this->step = 3;
         $this->errorMessage = null;
     }
 
