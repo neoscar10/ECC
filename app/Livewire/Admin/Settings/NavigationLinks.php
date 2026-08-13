@@ -29,25 +29,22 @@ class NavigationLinks extends Component
     public function save()
     {
         $this->validate([
-            'explore' => 'required|string|max:50',
-            'archive' => 'required|string|max:50',
-            'auctions' => 'required|string|max:50',
-            'club' => 'required|string|max:50',
-            'shop' => 'required|string|max:50',
-            'profile' => 'required|string|max:50',
+            'explore' => 'nullable|string|max:50',
+            'archive' => 'nullable|string|max:50',
+            'auctions' => 'nullable|string|max:50',
+            'club' => 'nullable|string|max:50',
+            'shop' => 'nullable|string|max:50',
+            'profile' => 'nullable|string|max:50',
         ]);
 
-        Setting::set('nav_label_explore', $this->explore);
-        Setting::set('nav_label_archive', $this->archive);
-        Setting::set('nav_label_auctions', $this->auctions);
-        Setting::set('nav_label_club', $this->club);
-        Setting::set('nav_label_shop', $this->shop);
-        Setting::set('nav_label_profile', $this->profile);
+        Setting::set('nav_label_explore', $this->explore ?: 'Explore');
+        Setting::set('nav_label_archive', $this->archive ?: 'Archive');
+        Setting::set('nav_label_auctions', $this->auctions ?: 'Auctions');
+        Setting::set('nav_label_club', $this->club ?: 'Club');
+        Setting::set('nav_label_shop', $this->shop ?: 'Shop');
+        Setting::set('nav_label_profile', $this->profile ?: 'Profile');
 
-        $this->dispatch('notify', [
-            'type' => 'success',
-            'message' => 'Navigation links updated successfully.'
-        ]);
+        session()->flash('success', 'Navigation links updated successfully.');
     }
 
     public function render()
