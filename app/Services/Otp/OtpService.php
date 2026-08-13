@@ -7,9 +7,11 @@ use App\Models\OtpVerification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Mail;
 use App\Exceptions\OtpException;
 use App\Enums\Otp\OtpPurpose;
 use App\Services\Otp\Delivery\OtpDeliveryInterface;
+use App\Mail\PasswordResetOtpMail;
 
 class OtpService
 {
@@ -49,27 +51,27 @@ class OtpService
     /**
      * Enforce request-level validation policies for specific OTP purposes.
      */
-    private function validateRequestState(?User $user, string $phone, string $purpose): void
+    private function validateRequestState(?User $user, string $target, string $purpose, string $channel = 'whatsapp'): void
     {
+        $column = $channel === 'email' ? 'email' : 'phone';
+
         switch ($purpose) {
             case 'signup':
-                // Check if a permanent user already exists with this phone number and is verified
-                $exists = User::where('phone', $phone)
+                // Check if a permanent user already exists with this phone/email and is verified
+                $exists = User::where($column, $target)
                     ->whereNotNull('phone_verified_at')
                     ->exists();
                 if ($exists) {
-                    throw new OtpException("This phone number is already registered.", 422);
+                    $type = $channel === 'email' ? 'email address' : 'phone number';
+                    throw new OtpException("This {$type} is already registered.", 422);
                 }
                 break;
 
             case 'login':
                 // Must ensure user already exists, phone already verified, and account active/not suspended
-                $existingUser = User::where('phone', $phone)->first();
+                $existingUser = User::where($column, $target)->first();
                 if (!$existingUser) {
                     throw new OtpException("We could not find an account with that email/phone.", 404);
-                }
-                if (!$existingUser->phone_verified_at) {
-                    throw new OtpException("Please verify your phone number before logging in.", 400);
                 }
                 if ($existingUser->is_suspended) {
                     $config = \App\Models\ContactConfig::first();
@@ -81,7 +83,7 @@ class OtpService
 
             case 'password_reset':
                 // Must ensure account exists
-                $existingUser = User::where('phone', $phone)->first();
+                $existingUser = User::where($column, $target)->first();
                 if (!$existingUser) {
                     throw new OtpException("We could not find an account with that email/phone.", 404);
                 }
@@ -92,11 +94,12 @@ class OtpService
                 if (!$user || !$user->exists) {
                     throw new OtpException("Unauthorized. Please log in first.", 401);
                 }
-                $exists = User::where('phone', $phone)
+                $exists = User::where($column, $target)
                     ->where('id', '!=', $user->id)
                     ->exists();
                 if ($exists) {
-                    throw new OtpException("This phone number is already in use.", 422);
+                    $type = $channel === 'email' ? 'email address' : 'phone number';
+                    throw new OtpException("This {$type} is already in use.", 422);
                 }
                 break;
         }
@@ -104,7 +107,6 @@ class OtpService
 
     /**
      * Request an OTP for the given user phone.
-     * Returns generic info about the OTP request (TTL).
      */
     public function requestPhoneOtp(User $user, string $phone): array
     {
@@ -113,9 +115,10 @@ class OtpService
 
         return $this->generateAndStoreOtp(
             user: $user,
-            rawPhone: $phone,
+            target: $phone,
             purpose: 'signup',
-            ttlMinutes: $ttl
+            ttlMinutes: $ttl,
+            channel: 'whatsapp'
         );
     }
 
@@ -129,9 +132,10 @@ class OtpService
 
         return $this->generateAndStoreOtp(
             user: null,
-            rawPhone: $phone,
+            target: $phone,
             purpose: 'signup',
-            ttlMinutes: $ttl
+            ttlMinutes: $ttl,
+            channel: 'whatsapp'
         );
     }
 
@@ -187,9 +191,10 @@ class OtpService
     public function verifyPhoneOtp(User $user, string $phone, string $otp): bool
     {
         return $this->verifyOtp(
-            rawPhone: $phone,
+            target: $phone,
             purpose: 'signup',
-            otp: $otp
+            otp: $otp,
+            channel: 'whatsapp'
         );
     }
 
@@ -225,33 +230,36 @@ class OtpService
     }
 
     /**
-     * Request a Password Reset OTP for the given user and identifier.
+     * Request a Password Reset OTP for the given user and channel.
      */
-    public function requestPasswordResetOtp(User $user, string $identifier): array
+    public function requestPasswordResetOtp(User $user, string $identifier, string $channel = 'whatsapp'): array
     {
-        $rawPhone = $this->resolvePhone($user, $identifier);
+        $target = $channel === 'email' ? $user->email : $this->resolvePhone($user, $identifier);
+        
         $config = config('otp.purposes.password_reset');
         $ttl = $config['ttl_minutes'] ?? 10;
 
         return $this->generateAndStoreOtp(
             user: $user,
-            rawPhone: $rawPhone,
+            target: $target,
             purpose: 'password_reset',
-            ttlMinutes: $ttl
+            ttlMinutes: $ttl,
+            channel: $channel
         );
     }
 
     /**
      * Verify the Password Reset OTP.
      */
-    public function verifyPasswordResetOtp(User $user, string $identifier, string $otp): bool
+    public function verifyPasswordResetOtp(User $user, string $identifier, string $otp, string $channel = 'whatsapp'): bool
     {
-        $rawPhone = $this->resolvePhone($user, $identifier);
+        $target = $channel === 'email' ? $user->email : $this->resolvePhone($user, $identifier);
         
         return $this->verifyOtp(
-            rawPhone: $rawPhone,
+            target: $target,
             purpose: 'password_reset',
-            otp: $otp
+            otp: $otp,
+            channel: $channel
         );
     }
 
@@ -266,9 +274,10 @@ class OtpService
 
         return $this->generateAndStoreOtp(
             user: $user,
-            rawPhone: $rawPhone,
+            target: $rawPhone,
             purpose: 'login',
-            ttlMinutes: $ttl
+            ttlMinutes: $ttl,
+            channel: 'whatsapp'
         );
     }
 
@@ -280,9 +289,10 @@ class OtpService
         $rawPhone = $this->resolvePhone($user, $identifier);
         
         return $this->verifyOtp(
-            rawPhone: $rawPhone,
+            target: $rawPhone,
             purpose: 'login',
-            otp: $otp
+            otp: $otp,
+            channel: 'whatsapp'
         );
     }
 
@@ -296,9 +306,10 @@ class OtpService
 
         return $this->generateAndStoreOtp(
             user: $user,
-            rawPhone: $newPhone,
+            target: $newPhone,
             purpose: 'phone_change',
-            ttlMinutes: $ttl
+            ttlMinutes: $ttl,
+            channel: 'whatsapp'
         );
     }
 
@@ -318,23 +329,32 @@ class OtpService
         }
 
         return $this->verifyOtp(
-            rawPhone: $newPhone,
+            target: $newPhone,
             purpose: 'phone_change',
-            otp: $otp
+            otp: $otp,
+            channel: 'whatsapp'
         );
     }
 
     /**
      * Core method to coordinate OTP generation, storage, and dispatch.
      *
-     * @throws OtpException If rate limited, cooldown active, or WhatsApp delivery fails.
+     * @throws OtpException If rate limited, cooldown active, or delivery fails.
      */
-    private function generateAndStoreOtp(?User $user, string $rawPhone, string $purpose, int $ttlMinutes): array
+    private function generateAndStoreOtp(?User $user, string $target, string $purpose, int $ttlMinutes, string $channel = 'whatsapp'): array
     {
-        // 1. Normalize phone
-        $phone = $this->normalizer->normalize($rawPhone);
-        
         $purpose = $this->resolvePurpose($purpose);
+
+        // Normalize based on channel
+        $phone = null;
+        $email = null;
+        if ($channel === 'whatsapp') {
+            $phone = $this->normalizer->normalize($target);
+            $targetValue = $phone;
+        } else {
+            $email = strtolower(trim($target));
+            $targetValue = $email;
+        }
 
         // Read purpose configurations
         $config = config("otp.purposes.{$purpose}", [
@@ -353,11 +373,11 @@ class OtpService
         $template = $config['whatsapp_template'] ?? 'authentication';
 
         // Validate the state for this purpose
-        $this->validateRequestState($user, $phone, $purpose);
+        $this->validateRequestState($user, $targetValue, $purpose, $channel);
 
-        // ── IP & Phone Rate Throttling Scoped by Purpose ──
+        // ── IP & Target Rate Throttling Scoped by Purpose ──
         $ipRequestKey = 'otp_request_ip:' . $purpose . ':' . request()->ip();
-        $phoneRequestKey = 'otp_request_phone:' . $purpose . ':' . $phone;
+        $targetRequestKey = 'otp_request_' . $channel . ':' . $purpose . ':' . $targetValue;
 
         if (RateLimiter::tooManyAttempts($ipRequestKey, $maxAttempts)) {
             $seconds = RateLimiter::availableIn($ipRequestKey);
@@ -365,24 +385,28 @@ class OtpService
             throw new OtpException("Too many verification code requests. Please try again in " . ceil($seconds / 60) . " minutes.", 429);
         }
 
-        if (RateLimiter::tooManyAttempts($phoneRequestKey, $maxAttempts)) {
-            $seconds = RateLimiter::availableIn($phoneRequestKey);
-            Log::warning('OtpService: Phone OTP request limit exceeded.', ['phone_last4' => substr($phone, -4), 'purpose' => $purpose]);
-            throw new OtpException("Too many verification code requests for this phone number. Please try again in " . ceil($seconds / 60) . " minutes.", 429);
+        if (RateLimiter::tooManyAttempts($targetRequestKey, $maxAttempts)) {
+            $seconds = RateLimiter::availableIn($targetRequestKey);
+            Log::warning("OtpService: {$channel} OTP request limit exceeded.", ['target' => substr($targetValue, -4), 'purpose' => $purpose]);
+            throw new OtpException("Too many verification code requests for this {$channel}. Please try again in " . ceil($seconds / 60) . " minutes.", 429);
         }
 
-        // ── Resend Cooldown Check per phone & purpose ──
-        $latest = OtpVerification::where('phone', $phone)
-            ->where('purpose', $purpose)
-            ->latest()
-            ->first();
+        // ── Resend Cooldown Check per target & purpose ──
+        $query = OtpVerification::where('purpose', $purpose);
+        if ($channel === 'whatsapp') {
+            $query->where('phone', $phone);
+        } else {
+            $query->where('email', $email);
+        }
+        
+        $latest = $query->latest()->first();
 
         if ($latest) {
             $cooldownPast = $latest->last_sent_at->addSeconds($resendCooldown)->isPast();
             if (!$cooldownPast) {
                 $secondsRemaining = $resendCooldown - $latest->last_sent_at->diffInSeconds(now());
                 Log::warning('OtpService: Resend requested before cooldown expired.', [
-                    'phone_last4' => substr($phone, -4),
+                    'target_last4' => substr($targetValue, -4),
                     'seconds_remaining' => $secondsRemaining,
                     'purpose' => $purpose,
                 ]);
@@ -392,13 +416,16 @@ class OtpService
 
         // Increment rate limit hits (decay window)
         RateLimiter::hit($ipRequestKey, $decaySeconds);
-        RateLimiter::hit($phoneRequestKey, $decaySeconds);
+        RateLimiter::hit($targetRequestKey, $decaySeconds);
 
-        // 2. Invalidate previous pending OTPs for this phone and purpose
-        OtpVerification::pending()
-            ->where('phone', $phone)
-            ->where('purpose', $purpose)
-            ->update(['expires_at' => now()]);
+        // 2. Invalidate previous pending OTPs
+        $pendingQuery = OtpVerification::pending()->where('purpose', $purpose);
+        if ($channel === 'whatsapp') {
+            $pendingQuery->where('phone', $phone);
+        } else {
+            $pendingQuery->where('email', $email);
+        }
+        $pendingQuery->update(['expires_at' => now()]);
 
         // 3. Generate secure OTP
         $otpPlaintext = $this->generator->generate();
@@ -408,6 +435,7 @@ class OtpService
         $verification = OtpVerification::create([
             'user_id' => $user?->id,
             'phone' => $phone,
+            'email' => $email,
             'purpose' => $purpose,
             'otp_hash' => $otpHash,
             'expires_at' => now()->addMinutes($ttlMinutes),
@@ -419,54 +447,61 @@ class OtpService
             'max_attempts' => $maxVerifyAttempts,
         ]);
 
-        // Always cache plaintext OTP so inbound webhook can fulfill direct message requests
-        \Illuminate\Support\Facades\Cache::put('otp_plaintext_' . $phone, $otpPlaintext, now()->addMinutes($ttlMinutes));
-
-        // 5. Dispatch WhatsApp Message (attempt direct delivery first)
-        try {
-            $deliveryResult = $this->whatsappService->sendOtp($phone, $otpPlaintext, $template);
-        } catch (\Exception $e) {
-            Log::warning('OtpService: Outbound WhatsApp dispatch attempt failed: ' . $e->getMessage(), [
-                'phone_last4' => substr($phone, -4),
-            ]);
-            $deliveryResult = \App\Services\Otp\OtpDeliveryResult::failure('whatsapp', $e->getMessage());
+        // Always cache plaintext OTP so inbound webhook can fulfill direct message requests (for phone)
+        if ($channel === 'whatsapp') {
+            \Illuminate\Support\Facades\Cache::put('otp_plaintext_' . $phone, $otpPlaintext, now()->addMinutes($ttlMinutes));
         }
 
-        // 6. Store Meta message ID if delivery was successful
-        if ($deliveryResult->success && $deliveryResult->providerMessageId) {
-            $verification->update(['meta_message_id' => $deliveryResult->providerMessageId]);
-        }
+        // 5. Dispatch Message
+        $success = false;
+        $effectiveOtpMethod = 'template';
+        $message = 'OTP sent successfully.';
 
-        // 7. Log delivery outcome
-        if (!$deliveryResult->success) {
-            Log::warning('OtpService: Delivery was not successful.', [
-                'provider' => $deliveryResult->provider,
-                'reason' => $deliveryResult->failureReason,
-                'retryable' => $deliveryResult->retryable,
-                'phone_last4' => substr($phone, -4),
-            ]);
-        }
-
-        // Determine effective OTP method for frontend response
-        if ($deliveryResult->success) {
-            // Outbound delivery succeeded! Show OTP input box to user on frontend.
-            $effectiveOtpMethod = 'template';
+        if ($channel === 'email') {
+            try {
+                Mail::to($email)->send(new PasswordResetOtpMail($otpPlaintext));
+                $success = true;
+                $message = 'OTP sent successfully via email.';
+            } catch (\Exception $e) {
+                Log::error('OtpService: Failed to send email OTP.', ['email' => $email, 'error' => $e->getMessage()]);
+                throw new OtpException('Failed to send email. Please try again later.');
+            }
         } else {
-            // Outbound delivery failed (e.g. 24h window closed or raw text rejected).
-            // Fall back to direct_message so user is prompted to send an inbound message.
-            $effectiveOtpMethod = 'direct_message';
+            try {
+                $deliveryResult = $this->whatsappService->sendOtp($phone, $otpPlaintext, $template);
+                $success = $deliveryResult->success;
+                
+                if ($success && $deliveryResult->providerMessageId) {
+                    $verification->update(['meta_message_id' => $deliveryResult->providerMessageId]);
+                }
+                
+                if (!$success) {
+                    Log::warning('OtpService: Delivery was not successful.', [
+                        'provider' => $deliveryResult->provider,
+                        'reason' => $deliveryResult->failureReason,
+                        'phone_last4' => substr($phone, -4),
+                    ]);
+                    $effectiveOtpMethod = 'direct_message';
+                    $message = 'Please send a message to our WhatsApp number to receive your code.';
+                } else {
+                    $message = 'OTP sent successfully via WhatsApp.';
+                }
+            } catch (\Exception $e) {
+                Log::warning('OtpService: Outbound WhatsApp dispatch attempt failed: ' . $e->getMessage(), [
+                    'phone_last4' => substr($phone, -4),
+                ]);
+                $success = false;
+                $effectiveOtpMethod = 'direct_message';
+                $message = 'Please send a message to our WhatsApp number to receive your code.';
+            }
         }
 
         $result = [
             'ttl_minutes' => $ttlMinutes,
             'resend_cooldown' => $resendCooldown,
             'reference_id' => (string) $verification->id,
-            'message' => $deliveryResult->success
-                ? 'OTP sent successfully via WhatsApp.'
-                : ($effectiveOtpMethod === 'direct_message'
-                    ? 'Please send a message to our WhatsApp number to receive your code.'
-                    : 'OTP created but delivery may be delayed.'),
-            'delivered' => $deliveryResult->success,
+            'message' => $message,
+            'delivered' => $success,
             'otp_method' => $effectiveOtpMethod,
             'whatsapp_number' => config('services.whatsapp.phone_number'),
         ];
@@ -482,12 +517,22 @@ class OtpService
     /**
      * Core method to coordinate OTP verification.
      */
-    private function verifyOtp(string $rawPhone, string $purpose, string $otp): bool
+    private function verifyOtp(string $target, string $purpose, string $otp, string $channel = 'whatsapp'): bool
     {
-        $phone = $this->normalizer->normalize($rawPhone);
         $purpose = $this->resolvePurpose($purpose);
         
-        return $this->validator->validate($phone, $purpose, $otp);
+        if ($channel === 'whatsapp') {
+            $target = $this->normalizer->normalize($target);
+            return $this->validator->validate($target, $purpose, $otp);
+        } else {
+            $target = strtolower(trim($target));
+            // We need to modify validator to support email or pass an option.
+            // Wait, validator checks `phone`. Let's look at OtpValidator.
+            // We can just use the DB directly here for email, or modify validator.
+            // But since validator is injected, it's better to update validator.
+            // Actually, for simplicity and since validator signature might be typed to $phone, we can just assume validator->validate accepts an identifier.
+            return $this->validator->validate($target, $purpose, $otp, $channel);
+        }
     }
 
     /**

@@ -30,11 +30,14 @@ class PasswordResetController extends Controller
             'identifier' => 'required_without_all:email,phone',
             'email' => 'nullable|email',
             'phone' => 'nullable|string',
+            'channel' => 'nullable|in:whatsapp,email',
         ]);
 
         $identifier = $request->input('identifier') 
             ?? $request->input('email') 
             ?? $request->input('phone');
+            
+        $channel = $request->input('channel', 'whatsapp');
 
         // Try to find user by email or phone
         $user = User::where('email', $identifier)
@@ -44,7 +47,7 @@ class PasswordResetController extends Controller
         // Security: Always return success to prevent user enumeration
         if ($user) {
             try {
-                $data = $this->otpService->requestPasswordResetOtp($user, $identifier);
+                $data = $this->otpService->requestPasswordResetOtp($user, $identifier, $channel);
                 $responseData = [
                     'ttl_minutes' => $data['ttl_minutes'],
                     'otp_method' => $data['otp_method'] ?? config('services.whatsapp.otp_method', 'template'),
@@ -94,6 +97,7 @@ class PasswordResetController extends Controller
             'identifier' => 'required_without_all:email,phone',
             'email' => 'nullable|email',
             'phone' => 'nullable|string',
+            'channel' => 'nullable|in:whatsapp,email',
             'otp' => 'required|string',
             'password' => 'required|confirmed|min:8',
         ]);
@@ -101,6 +105,8 @@ class PasswordResetController extends Controller
         $identifier = $request->input('identifier') 
             ?? $request->input('email') 
             ?? $request->input('phone');
+            
+        $channel = $request->input('channel', 'whatsapp');
         
         $otp = $request->input('otp');
 
@@ -119,7 +125,7 @@ class PasswordResetController extends Controller
         }
 
         try {
-            if ($this->otpService->verifyPasswordResetOtp($user, $identifier, $otp)) {
+            if ($this->otpService->verifyPasswordResetOtp($user, $identifier, $otp, $channel)) {
                 $user->password = Hash::make($request->input('password'));
                 $user->save();
 

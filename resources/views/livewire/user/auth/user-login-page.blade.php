@@ -136,8 +136,8 @@
                         <div class="pt-2">
                             <button type="submit" class="ecc-submit-btn w-100" wire:loading.attr="disabled" wire:target="requestResetOtp">
                                 <span class="ecc-btn-default d-inline-flex align-items-center justify-content-center gap-2" wire:loading.class="d-none" wire:target="requestResetOtp">
-                                    Send Verification Code
-                                    <span class="material-symbols-outlined ecc-arrow">send</span>
+                                    Continue
+                                    <span class="material-symbols-outlined ecc-arrow">arrow_forward</span>
                                 </span>
                                 <span class="ecc-btn-loading d-none align-items-center justify-content-center gap-2" wire:loading.delay.class.remove="d-none" wire:target="requestResetOtp">
                                     Processing...
@@ -150,8 +150,57 @@
                             <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase">Back to Login</a>
                         </div>
                     </form>
-                @else
-                    {{-- Step 2: Verify & Reset --}}
+                @elseif($step === 2)
+                    {{-- Step 2: Choose Channel --}}
+                    <form wire:submit.prevent="sendResetOtp" class="ecc-form">
+                        <div class="ecc-field mb-4">
+                            <label class="ecc-label text-uppercase d-block mb-3">Where should we send your code?</label>
+                            
+                            <div class="d-flex flex-column gap-3">
+                                <label class="ecc-radio-card p-3 rounded d-flex align-items-center gap-3" style="border: 1px solid var(--ecc-border-strong); cursor: pointer; transition: all 0.2s; background: rgba(0,0,0,0.02);">
+                                    <input type="radio" wire:model="selectedChannel" value="whatsapp" class="form-check-input mt-0" style="width: 20px; height: 20px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fab fa-whatsapp fs-4" style="color: #25D366;"></i>
+                                        <div>
+                                            <div class="fw-bold" style="color: var(--ecc-primary-dark);">WhatsApp</div>
+                                            <div class="small text-muted" style="font-size: 11px;">Send to my registered WhatsApp number</div>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <label class="ecc-radio-card p-3 rounded d-flex align-items-center gap-3" style="border: 1px solid var(--ecc-border-strong); cursor: pointer; transition: all 0.2s; background: rgba(0,0,0,0.02);">
+                                    <input type="radio" wire:model="selectedChannel" value="email" class="form-check-input mt-0" style="width: 20px; height: 20px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="material-symbols-outlined fs-4 text-secondary">mail</span>
+                                        <div>
+                                            <div class="fw-bold" style="color: var(--ecc-primary-dark);">Email</div>
+                                            <div class="small text-muted" style="font-size: 11px;">Send to my registered email address</div>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            @error('selectedChannel') <div class="ecc-error mt-2">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" class="ecc-submit-btn w-100" wire:loading.attr="disabled" wire:target="sendResetOtp">
+                                <span class="ecc-btn-default d-inline-flex align-items-center justify-content-center gap-2" wire:loading.class="d-none" wire:target="sendResetOtp">
+                                    Send Verification Code
+                                    <span class="material-symbols-outlined ecc-arrow">send</span>
+                                </span>
+                                <span class="ecc-btn-loading d-none align-items-center justify-content-center gap-2" wire:loading.delay.class.remove="d-none" wire:target="sendResetOtp">
+                                    Sending...
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <a href="#" wire:click.prevent="$set('step', 1)" class="ecc-link text-uppercase">Back</a>
+                        </div>
+                    </form>
+                @elseif($step === 3)
+                    {{-- Step 3: Verify OTP --}}
                     <form wire:submit.prevent="verifyResetOtp" class="ecc-form">
                         @if(!$showOtpInput && $otpMethod === 'direct_message')
                             <h5 class="text-center mb-3" style="color: var(--ecc-primary-dark);">Request Verification Code</h5>
@@ -201,6 +250,75 @@
                             </div>
                         @endif
 
+                        <div class="pt-2">
+                            <button type="submit" class="ecc-submit-btn w-100" wire:loading.attr="disabled" wire:target="verifyResetOtp">
+                                <span class="ecc-btn-default d-inline-flex align-items-center justify-content-center gap-2" wire:loading.class="d-none" wire:target="verifyResetOtp">
+                                    Verify Code
+                                    <span class="material-symbols-outlined ecc-arrow">verified_user</span>
+                                </span>
+                                <span class="ecc-btn-loading d-none align-items-center justify-content-center gap-2" wire:loading.delay.class.remove="d-none" wire:target="verifyResetOtp">
+                                    Verifying...
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </span>
+                            </button>
+                        </div>
+
+
+                        <div class="ecc-timer-container text-center mt-4" 
+                             x-data="{
+                                seconds: {{ $resendRemaining }},
+                                running: false,
+                                display: '00:00',
+                                interval: null,
+                                init() {
+                                    this.startTimer(this.seconds);
+                                    window.addEventListener('ecc-otp-countdown-reset', (e) => {
+                                        this.startTimer(e.detail.seconds);
+                                    });
+                                },
+                                startTimer(secs) {
+                                    if (this.interval) clearInterval(this.interval);
+                                    this.seconds = secs;
+                                    if (this.seconds <= 0) {
+                                        this.running = false;
+                                        return;
+                                    }
+                                    this.running = true;
+                                    this.updateDisplay();
+                                    this.interval = setInterval(() => {
+                                        this.seconds--;
+                                        this.updateDisplay();
+                                        if (this.seconds <= 0) {
+                                            clearInterval(this.interval);
+                                            this.running = false;
+                                            @this.set('resendRemaining', 0);
+                                        }
+                                    }, 1000);
+                                },
+                                updateDisplay() {
+                                    const m = Math.floor(this.seconds / 60);
+                                    const s = this.seconds % 60;
+                                    this.display = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                                }
+                             }">
+                            <div x-show="running" style="display: none;">
+                                <span class="ecc-timer-text" style="color: var(--ecc-primary-dark);">Resend code in <span x-text="display" style="color: var(--ecc-primary-dark); font-weight: bold;">00:00</span></span>
+                                <div class="mt-2">
+                                    <a href="#" wire:click.prevent="$set('step', 2)" class="ecc-link text-uppercase" style="font-size: 11px;">Change Method</a>
+                                    <span class="mx-2 opacity-25">|</span>
+                                    <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase" style="font-size: 11px;">Cancel</a>
+                                </div>
+                            </div>
+                            <div x-show="!running" style="display: none;">
+                                <a href="#" wire:click.prevent="sendResetOtp" class="ecc-link text-uppercase">Resend Code</a>
+                                <span class="mx-2 opacity-25">|</span>
+                                <a href="#" wire:click.prevent="$set('step', 2)" class="ecc-link text-uppercase">Change Method</a>
+                            </div>
+                        </div>
+                    </form>
+                @elseif($step === 4)
+                    {{-- Step 4: Reset Password --}}
+                    <form wire:submit.prevent="updatePassword" class="ecc-form">
                         <div class="ecc-field mb-3">
                             <label for="new_password" class="ecc-label text-uppercase">New Passcode</label>
                             <div class="position-relative">
@@ -247,66 +365,16 @@
                         </div>
 
                         <div class="pt-2">
-                            <button type="submit" class="ecc-submit-btn w-100" wire:loading.attr="disabled" wire:target="verifyResetOtp">
-                                <span class="ecc-btn-default d-inline-flex align-items-center justify-content-center gap-2" wire:loading.class="d-none" wire:target="verifyResetOtp">
+                            <button type="submit" class="ecc-submit-btn w-100" wire:loading.attr="disabled" wire:target="updatePassword">
+                                <span class="ecc-btn-default d-inline-flex align-items-center justify-content-center gap-2" wire:loading.class="d-none" wire:target="updatePassword">
                                     Update Password & Login
                                     <span class="material-symbols-outlined ecc-arrow">verified_user</span>
                                 </span>
-                                <span class="ecc-btn-loading d-none align-items-center justify-content-center gap-2" wire:loading.delay.class.remove="d-none" wire:target="verifyResetOtp">
+                                <span class="ecc-btn-loading d-none align-items-center justify-content-center gap-2" wire:loading.delay.class.remove="d-none" wire:target="updatePassword">
                                     Finalizing...
                                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                 </span>
                             </button>
-                        </div>
-
-                        <div class="ecc-timer-container text-center mt-4" 
-                             x-data="{
-                                seconds: {{ $resendRemaining }},
-                                running: false,
-                                display: '00:00',
-                                interval: null,
-                                init() {
-                                    this.startTimer(this.seconds);
-                                    window.addEventListener('ecc-otp-countdown-reset', (e) => {
-                                        this.startTimer(e.detail.seconds);
-                                    });
-                                },
-                                startTimer(secs) {
-                                    if (this.interval) clearInterval(this.interval);
-                                    this.seconds = secs;
-                                    if (this.seconds <= 0) {
-                                        this.running = false;
-                                        return;
-                                    }
-                                    this.running = true;
-                                    this.updateDisplay();
-                                    this.interval = setInterval(() => {
-                                        this.seconds--;
-                                        this.updateDisplay();
-                                        if (this.seconds <= 0) {
-                                            clearInterval(this.interval);
-                                            this.running = false;
-                                            @this.set('resendRemaining', 0);
-                                        }
-                                    }, 1000);
-                                },
-                                updateDisplay() {
-                                    const m = Math.floor(this.seconds / 60);
-                                    const s = this.seconds % 60;
-                                    this.display = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                                }
-                             }">
-                            <div x-show="running" style="display: none;">
-                                <span class="ecc-timer-text" style="color: var(--ecc-primary-dark);">Resend code in <span x-text="display" style="color: var(--ecc-primary-dark); font-weight: bold;">00:00</span></span>
-                                <div class="mt-2">
-                                    <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase" style="font-size: 11px;">Back to Login</a>
-                                </div>
-                            </div>
-                            <div x-show="!running" style="display: none;">
-                                <a href="#" wire:click.prevent="requestResetOtp" class="ecc-link text-uppercase">Resend Code</a>
-                                <span class="mx-2 opacity-25">|</span>
-                                <a href="#" wire:click.prevent="setMode('password')" class="ecc-link text-uppercase">Back to Login</a>
-                            </div>
                         </div>
                     </form>
                 @endif

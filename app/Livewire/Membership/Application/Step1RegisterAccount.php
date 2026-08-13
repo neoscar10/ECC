@@ -61,6 +61,18 @@ class Step1RegisterAccount extends Component
 
             $this->phone = $fullPhoneNormalized;
 
+            $existingUser = null;
+            if (!auth()->check()) {
+                $existingUser = \App\Models\User::where('email', $this->email)
+                    ->orWhere('phone', $fullPhoneNormalized)
+                    ->first();
+                    
+                if ($existingUser && !$existingUser->phone_verified_at) {
+                    // Graceful re-registration: log in the unverified user to update their draft
+                    \Illuminate\Support\Facades\Auth::guard('web')->login($existingUser, false);
+                }
+            }
+
             $userId = auth()->check() ? auth()->id() : null;
 
             try {

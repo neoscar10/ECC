@@ -28,6 +28,7 @@ class UserLoginPage extends Component
     // Web-specific state management
     public string $mode = 'password'; // password, forgot, otp
     public int $step = 1;
+    public string $selectedChannel = 'whatsapp'; // whatsapp or email
     public string $otp = '';
     public string $newPassword = '';
     public string $newPassword_confirmation = '';
@@ -62,7 +63,7 @@ class UserLoginPage extends Component
 
     public function setMode(string $mode): void
     {
-        $this->reset(['mode', 'step', 'otp', 'newPassword', 'newPassword_confirmation', 'otpIdentifier', 'errorMessage', 'showResetPassword', 'devOtp', 'resendRemaining']);
+        $this->reset(['mode', 'step', 'selectedChannel', 'otp', 'newPassword', 'newPassword_confirmation', 'otpIdentifier', 'errorMessage', 'showResetPassword', 'devOtp', 'resendRemaining']);
         $this->mode = $mode;
     }
 
@@ -74,7 +75,7 @@ class UserLoginPage extends Component
     /**
      * --- FORGOT PASSWORD FLOW ---
      */
-    public function requestResetOtp(\App\Services\Otp\OtpService $otpService): void
+    public function requestResetOtp(): void
     {
         $this->validate([
             'identity' => ['required', 'string', 'max:255'],
@@ -88,43 +89,43 @@ class UserLoginPage extends Component
             ]);
         }
 
+        $this->otpIdentifier = $this->identity;
+        $this->step = 2; // Move to Select Channel step
+        $this->errorMessage = null;
+    }
+
+    public function sendResetOtp(\App\Services\Otp\OtpService $otpService): void
+    {
+        $this->validate([
+            'selectedChannel' => ['required', 'in:whatsapp,email'],
+        ]);
+
+        $user = $this->resolveUserByIdentity($this->otpIdentifier);
+        if (!$user) {
+            $this->setMode('forgot');
+            return;
+        }
+        
         try {
-            $data = $otpService->requestPasswordResetOtp($user, $this->identity);
+            $data = $otpService->requestPasswordResetOtp($user, $this->otpIdentifier, $this->selectedChannel);
             $this->otpTtl = $data['ttl_minutes'];
-            $this->otpIdentifier = $this->identity;
             $this->devOtp = $data['dev_otp'] ?? null;
             
             $this->otpMethod = $data['otp_method'] ?? config('services.whatsapp.otp_method', 'template');
             $this->whatsappNumber = (string) ($data['whatsapp_number'] ?? config('services.whatsapp.phone_number', ''));
-            $this->resendRemaining = $data['resend_cooldown'] ?? app(\App\Services\Otp\OtpService::class)->getCooldownRemainingByPhone($user->phone ?? $this->identity, 'password_reset');
+            $this->resendRemaining = $data['resend_cooldown'] ?? 60;
             
-            if ($this->otpMethod === 'direct_message') {
+            if ($this->otpMethod === 'direct_message' && $this->selectedChannel === 'whatsapp') {
                 $this->showOtpInput = false;
             } else {
                 $this->showOtpInput = true;
             }
 
-            $this->step = 2;
+            $this->step = 3; // Move to OTP verification step
             $this->errorMessage = null;
             $this->dispatch('ecc-otp-countdown-reset', seconds: $this->resendRemaining);
         } catch (\App\Exceptions\OtpException $e) {
-            $user = $this->resolveUserByIdentity($this->identity);
-            $cooldown = $user ? app(\App\Services\Otp\OtpService::class)->getCooldownRemainingByPhone($user->phone ?? $this->identity, 'password_reset') : 0;
-            
-            if ($cooldown > 0) {
-                $this->resendRemaining = $cooldown;
-                $this->step = 2;
-                $this->errorMessage = $e->getMessage();
-                $this->dispatch('ecc-otp-countdown-reset', seconds: $this->resendRemaining);
-            } else {
-                if ($this->step === 2) {
-                    $this->errorMessage = $e->getMessage();
-                } else {
-                    throw ValidationException::withMessages([
-                        'identity' => $e->getMessage(),
-                    ]);
-                }
-            }
+            $this->errorMessage = $e->getMessage();
         }
     }
 
@@ -132,7 +133,6 @@ class UserLoginPage extends Component
     {
         $this->validate([
             'otp' => ['required', 'string', 'size:6'],
-            'newPassword' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         if (!$this->otpIdentifier) {
@@ -143,7 +143,7 @@ class UserLoginPage extends Component
         $user = $this->resolveUserByIdentity($this->otpIdentifier);
 
         try {
-            if (!$user || !$otpService->verifyPasswordResetOtp($user, $this->otpIdentifier, $this->otp)) {
+            if (!$user || !$otpService->verifyPasswordResetOtp($user, $this->otpIdentifier, $this->otp, $this->selectedChannel)) {
                 $this->addError('otp', 'Invalid or expired OTP.');
                 return;
             }
@@ -152,9 +152,27 @@ class UserLoginPage extends Component
             return;
         }
 
-        // Reset Password
-        $user->password = \Illuminate\Support\Facades\Hash::make($this->newPassword);
-        $user->save();
+        // OTP is verified, move to Step 4 (New Password)
+        $this->step = 4;
+        $this->errorMessage = null;
+    }
+
+    public function updatePassword(): void
+    {
+        $this->validate([
+            'newPassword' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        if (!$this->otpIdentifier) {
+            $this->setMode('forgot');
+            return;
+        }
+
+        $user = $this->resolveUserByIdentity($this->otpIdentifier);
+        if ($user) {
+            $user->password = \Illuminate\Support\Facades\Hash::make($this->newPassword);
+            $user->save();
+        }
 
         session()->flash('success', 'Your password has been reset successfully. Please log in with your new password.');
         $this->setMode('login');
@@ -232,6 +250,12 @@ class UserLoginPage extends Component
         } catch (\App\Exceptions\OtpException $e) {
             $this->addError('otp', $e->getMessage());
             return;
+        }
+
+        // If the user's phone wasn't previously verified (e.g., they abandoned registration in step 2),
+        // successfully logging in via OTP proves they own the phone, so we verify them now.
+        if (!$user->phone_verified_at) {
+            $user->update(['phone_verified_at' => now()]);
         }
 
         // Attempt session login using web guard

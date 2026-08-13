@@ -13,20 +13,23 @@ class OtpValidator
     /**
      * Enforce validation policies on OTP verification.
      */
-    private function validateVerifyState(string $phone, string $purpose): void
+    private function validateVerifyState(string $target, string $purpose, string $channel = 'whatsapp'): void
     {
+        $column = $channel === 'email' ? 'email' : 'phone';
+
         switch ($purpose) {
             case 'signup':
-                $exists = \App\Models\User::where('phone', $phone)
+                $exists = \App\Models\User::where($column, $target)
                     ->whereNotNull('phone_verified_at')
                     ->exists();
                 if ($exists) {
-                    throw new OtpException("This phone number is already registered.", 422);
+                    $type = $channel === 'email' ? 'email address' : 'phone number';
+                    throw new OtpException("This {$type} is already registered.", 422);
                 }
                 break;
 
             case 'login':
-                $existingUser = \App\Models\User::where('phone', $phone)->first();
+                $existingUser = \App\Models\User::where($column, $target)->first();
                 if (!$existingUser) {
                     throw new OtpException("We could not find an account with that email/phone.", 404);
                 }
@@ -39,7 +42,7 @@ class OtpValidator
                 break;
 
             case 'password_reset':
-                $existingUser = \App\Models\User::where('phone', $phone)->first();
+                $existingUser = \App\Models\User::where($column, $target)->first();
                 if (!$existingUser) {
                     throw new OtpException("We could not find an account with that email/phone.", 404);
                 }
@@ -50,11 +53,12 @@ class OtpValidator
                 if (!$user || !$user->exists) {
                     throw new OtpException("Unauthorized. Please log in first.", 401);
                 }
-                $exists = \App\Models\User::where('phone', $phone)
+                $exists = \App\Models\User::where($column, $target)
                     ->where('id', '!=', $user->id)
                     ->exists();
                 if ($exists) {
-                    throw new OtpException("This phone number is already in use.", 422);
+                    $type = $channel === 'email' ? 'email address' : 'phone number';
+                    throw new OtpException("This {$type} is already in use.", 422);
                 }
                 break;
         }
@@ -63,23 +67,24 @@ class OtpValidator
     /**
      * Verify the provided OTP against the latest record.
      *
-     * @param string $phone
+     * @param string $target
      * @param string $purpose
      * @param string $otp
+     * @param string $channel
      * @return bool
      * @throws OtpException
      */
-    public function validate(string $phone, string $purpose, string $otp): bool
+    public function validate(string $target, string $purpose, string $otp, string $channel = 'whatsapp'): bool
     {
         if ($purpose instanceof \App\Enums\Otp\OtpPurpose) {
             $purpose = $purpose->value;
         }
 
         // Run validation policies for the state first
-        $this->validateVerifyState($phone, $purpose);
+        $this->validateVerifyState($target, $purpose, $channel);
 
         $ipVerifyKey = 'otp_verify_ip:' . $purpose . ':' . request()->ip();
-        $phoneVerifyKey = 'otp_verify_phone:' . $purpose . ':' . $phone;
+        $targetVerifyKey = 'otp_verify_' . $channel . ':' . $purpose . ':' . $target;
 
         if (RateLimiter::tooManyAttempts($ipVerifyKey, 10)) {
             $seconds = RateLimiter::availableIn($ipVerifyKey);
@@ -87,19 +92,23 @@ class OtpValidator
             throw new OtpException("Too many verification attempts. Please try again in " . ceil($seconds / 60) . " minutes.", 429);
         }
 
-        if (RateLimiter::tooManyAttempts($phoneVerifyKey, 10)) {
-            $seconds = RateLimiter::availableIn($phoneVerifyKey);
-            Log::warning('OtpValidator: Phone OTP verification limit exceeded.', ['phone_last4' => substr($phone, -4), 'purpose' => $purpose]);
-            throw new OtpException("Too many verification attempts for this phone number. Please try again in " . ceil($seconds / 60) . " minutes.", 429);
+        if (RateLimiter::tooManyAttempts($targetVerifyKey, 10)) {
+            $seconds = RateLimiter::availableIn($targetVerifyKey);
+            Log::warning("OtpValidator: {$channel} OTP verification limit exceeded.", ['target_last4' => substr($target, -4), 'purpose' => $purpose]);
+            throw new OtpException("Too many verification attempts for this {$channel}. Please try again in " . ceil($seconds / 60) . " minutes.", 429);
         }
 
         RateLimiter::hit($ipVerifyKey, 900); // 15 minutes = 900 seconds
-        RateLimiter::hit($phoneVerifyKey, 900);
+        RateLimiter::hit($targetVerifyKey, 900);
 
-        $verification = OtpVerification::where('phone', $phone)
-            ->where('purpose', $purpose)
-            ->latest()
-            ->first();
+        $query = OtpVerification::where('purpose', $purpose);
+        if ($channel === 'whatsapp') {
+            $query->where('phone', $target);
+        } else {
+            $query->where('email', $target);
+        }
+        
+        $verification = $query->latest()->first();
 
         if (!$verification) {
             throw new OtpException("Invalid verification code.", 400);
@@ -118,7 +127,7 @@ class OtpValidator
 
         if ($verification->attempts >= $maxVerifyAttempts || !$verification->hasAttemptsRemaining()) {
             Log::warning('OtpValidator: Locked out due to max attempts exceeded.', [
-                'phone_last4' => substr($phone, -4),
+                'target_last4' => substr($target, -4),
                 'attempts' => $verification->attempts,
                 'max_attempts' => $maxVerifyAttempts,
                 'purpose' => $purpose,
@@ -131,14 +140,14 @@ class OtpValidator
         if (Hash::check($otp, $verification->otp_hash)) {
             $verification->markVerified();
             RateLimiter::clear($ipVerifyKey);
-            RateLimiter::clear($phoneVerifyKey);
+            RateLimiter::clear($targetVerifyKey);
             return true;
         }
 
         // Check if the incremented attempts reached the max attempts
         if ($verification->refresh()->attempts >= $maxVerifyAttempts || !$verification->hasAttemptsRemaining()) {
             Log::warning('OtpValidator: Locked out due to max attempts exceeded.', [
-                'phone_last4' => substr($phone, -4),
+                'target_last4' => substr($target, -4),
                 'attempts' => $verification->attempts,
                 'max_attempts' => $maxVerifyAttempts,
                 'purpose' => $purpose,
@@ -149,4 +158,3 @@ class OtpValidator
         throw new OtpException("Invalid verification code.", 400);
     }
 }
-
