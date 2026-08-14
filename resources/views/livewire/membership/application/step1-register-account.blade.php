@@ -56,13 +56,13 @@
         <div>
           <label class="ecc-label">Full Name</label>
           <input type="text" wire:model="name" class="form-control ecc-input" placeholder="Enter your name">
-          @error('name') <div class="ecc-err">{{ $message }}</div> @enderror
+          @error('name') <div class="ecc-err">{!! $message !!}</div> @enderror
         </div>
 
         <div>
           <label class="ecc-label">Email Address</label>
           <input type="email" wire:model="email" class="form-control ecc-input" placeholder="email@example.com">
-          @error('email') <div class="ecc-err">{{ $message }}</div> @enderror
+          @error('email') <div class="ecc-err">{!! $message !!}</div> @enderror
         </div>
 
         <div>
@@ -236,7 +236,7 @@
             <input type="text" wire:model="phone" class="form-control ecc-input" placeholder="98765 43210" style="border-radius: 0 12px 12px 0 !important;">
           </div>
           <div class="ecc-hint">Standard rates may apply for OTP verification.</div>
-          @error('phone') <div class="ecc-err">{{ $message }}</div> @enderror
+          @error('phone') <div class="ecc-err">{!! $message !!}</div> @enderror
         </div>
 
         <div class="row g-3">

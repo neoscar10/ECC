@@ -76,7 +76,12 @@ class Step1RegisterAccount extends Component
             $userId = auth()->check() ? auth()->id() : null;
 
             try {
-                $validated = $this->validate(MembershipRules::accountRegistration($userId));
+                $rules = MembershipRules::accountRegistration($userId);
+                $messages = [
+                    'email.unique' => 'This email is already registered. <a href="' . route('login') . '" class="fw-bold text-decoration-underline" style="color: inherit;">Log in here</a> instead.',
+                    'phone.unique' => 'This number is already registered. <a href="' . route('login') . '" class="fw-bold text-decoration-underline" style="color: inherit;">Log in here</a> instead.'
+                ];
+                $validated = $this->validate($rules, $messages);
             } catch (\Illuminate\Validation\ValidationException $e) {
                 $this->phone = $originalPhone; // Restore original input on validation error
                 throw $e;
