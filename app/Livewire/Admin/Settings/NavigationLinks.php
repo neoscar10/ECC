@@ -29,12 +29,12 @@ class NavigationLinks extends Component
     public function save()
     {
         $this->validate([
-            'explore' => 'nullable|string|max:50',
-            'archive' => 'nullable|string|max:50',
-            'auctions' => 'nullable|string|max:50',
-            'club' => 'nullable|string|max:50',
-            'shop' => 'nullable|string|max:50',
-            'profile' => 'nullable|string|max:50',
+            'explore' => 'nullable|string|max:15',
+            'archive' => 'nullable|string|max:15',
+            'auctions' => 'nullable|string|max:15',
+            'club' => 'nullable|string|max:15',
+            'shop' => 'nullable|string|max:15',
+            'profile' => 'nullable|string|max:15',
         ]);
 
         Setting::set('nav_label_explore', $this->explore ?: 'Explore');
