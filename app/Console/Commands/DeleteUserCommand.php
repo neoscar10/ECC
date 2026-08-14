@@ -101,15 +101,12 @@ class DeleteUserCommand extends Command
                     $query->select('id')->from('shop_order_items')->where('shop_order_id', $order->id);
                 })->delete();
                 DB::table('shop_order_items')->where('shop_order_id', $order->id)->delete();
-                // If there are order status histories or payments linked to order
-                DB::table('payments')->where('order_id', $order->id)->delete();
                 DB::table('shop_orders')->where('id', $order->id)->delete();
             }
 
             // Orders table (if different from shop_orders)
             $orders2 = DB::table('orders')->where('user_id', $userId)->get();
             foreach ($orders2 as $order) {
-                DB::table('payments')->where('order_id', $order->id)->delete();
                 DB::table('orders')->where('id', $order->id)->delete();
             }
 
