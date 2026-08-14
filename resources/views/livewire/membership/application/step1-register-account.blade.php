@@ -277,6 +277,13 @@
             </span>
           </button>
         </div>
+        
+        @if(!auth()->check())
+        <div class="text-center mt-3">
+          <span class="ecc-hint d-inline" style="font-size: 13px;">Already have an account?</span>
+          <a href="{{ route('login') }}" class="text-decoration-none ms-1 fw-bold" style="color: var(--ecc-primary); font-size: 13px; font-family: 'Noto Sans', sans-serif;">Log In</a>
+        </div>
+        @endif
       </form>
 
     </div>
