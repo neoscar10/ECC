@@ -80,7 +80,7 @@ class DeleteUserCommand extends Command
             // Vault
             $vaultItems = DB::table('user_vault_items')->where('user_id', $userId)->get();
             foreach ($vaultItems as $item) {
-                DB::table('vault_removal_requests')->where('user_vault_item_id', $item->id)->delete();
+                DB::table('vault_removal_requests')->where('vault_item_id', $item->id)->delete();
                 DB::table('user_vault_items')->where('id', $item->id)->delete();
             }
 
