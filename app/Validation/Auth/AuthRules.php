@@ -43,14 +43,16 @@ class AuthRules
     public static function requestOtp(): array
     {
         return [
-            'phone' => 'required|string',
+            'identifier' => 'required_without:phone|string',
+            'phone' => 'nullable|string',
         ];
     }
 
     public static function verifyOtp(): array
     {
         return [
-            'phone' => 'required|string',
+            'identifier' => 'required_without:phone|string',
+            'phone' => 'nullable|string',
             'otp' => 'required|digits:6',
         ];
     }

@@ -37,7 +37,8 @@ class PasswordResetController extends Controller
             ?? $request->input('email') 
             ?? $request->input('phone');
             
-        $channel = $request->input('channel', 'whatsapp');
+        $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+        $channel = $isEmail ? 'email' : 'whatsapp';
 
         // Try to find user by email or phone
         $user = User::where('email', $identifier)
@@ -106,7 +107,8 @@ class PasswordResetController extends Controller
             ?? $request->input('email') 
             ?? $request->input('phone');
             
-        $channel = $request->input('channel', 'whatsapp');
+        $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+        $channel = $isEmail ? 'email' : 'whatsapp';
         
         $otp = $request->input('otp');
 

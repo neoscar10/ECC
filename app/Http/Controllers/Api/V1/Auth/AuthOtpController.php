@@ -36,9 +36,10 @@ class AuthOtpController extends Controller
         }
 
         try {
-            $otpData = $this->authService->requestOtp($request->phone);
+            $identity = $request->input('identifier') ?? $request->input('phone');
+            $otpData = $this->authService->requestOtp($identity);
             if (!$otpData) {
-                return $this->error('We could not find an account with that email/phone.', 404);
+                return $this->error('We could not find an account with that email/mobile number.', 404);
             }
         } catch (OtpException $e) {
             return $this->error($e->getMessage(), $e->getCode() ?: 400);
@@ -69,7 +70,8 @@ class AuthOtpController extends Controller
         }
 
         try {
-            $user = $this->authService->verifyOtp($request->phone, $request->otp);
+            $identity = $request->input('identifier') ?? $request->input('phone');
+            $user = $this->authService->verifyOtp($identity, $request->otp);
             if (!$user) {
                 return $this->error('Invalid OTP or account not found.', 404);
             }
