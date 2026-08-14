@@ -465,7 +465,11 @@ class OtpService
 
         if ($channel === 'email') {
             try {
-                Mail::to($email)->send(new PasswordResetOtpMail($otpPlaintext));
+                if ($purpose === 'login') {
+                    Mail::to($email)->send(new \App\Mail\LoginOtpMail($otpPlaintext));
+                } else {
+                    Mail::to($email)->send(new \App\Mail\PasswordResetOtpMail($otpPlaintext));
+                }
                 $success = true;
                 $message = 'OTP sent successfully via email.';
             } catch (\Exception $e) {
