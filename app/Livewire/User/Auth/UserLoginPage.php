@@ -165,7 +165,7 @@ class UserLoginPage extends Component
         }
 
         session()->flash('success', 'Your password has been reset successfully. Please log in with your new password.');
-        $this->setMode('login');
+        $this->setMode('password');
     }
 
     /**
