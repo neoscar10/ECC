@@ -18,6 +18,7 @@ class Step1RegisterAccount extends Component
     public string $password = '';
     public string $password_confirmation = '';
     public ?string $errorMessage = null;
+    public bool $showLoginPrompt = false;
 
     public function mount()
     {
@@ -70,6 +71,10 @@ class Step1RegisterAccount extends Component
                 if ($existingUser && !$existingUser->phone_verified_at) {
                     // Graceful re-registration: log in the unverified user to update their draft
                     \Illuminate\Support\Facades\Auth::guard('web')->login($existingUser, false);
+                } elseif ($existingUser && $existingUser->phone_verified_at) {
+                    $this->phone = $originalPhone; // Restore original input
+                    $this->showLoginPrompt = true;
+                    return;
                 }
             }
 
