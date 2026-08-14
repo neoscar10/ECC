@@ -12,6 +12,7 @@ class OtpVerification extends Model
     protected $fillable = [
         'user_id',
         'phone',
+        'email',
         'purpose',
         'otp_hash',
         'meta_message_id',
