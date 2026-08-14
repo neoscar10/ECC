@@ -425,7 +425,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fs-12 text-white-50 mb-1">Phone</label>
-                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.blur="addressForm.phone">
+                                        <input type="text" class="form-control ecc-vault-input form-control-sm" wire:model.blur="addressForm.phone" maxlength="10" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
                                         @error('addressForm.phone') <span class="text-danger fs-11">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-12">

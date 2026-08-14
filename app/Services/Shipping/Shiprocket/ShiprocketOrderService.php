@@ -37,7 +37,7 @@ class ShiprocketOrderService
             throw new \Exception("Cannot initiate shipment: related order not found.");
         }
 
-        if ($order->payment_status !== 'paid') {
+        if ($order->payment_status !== 'paid' && !in_array(strtolower($order->payment_status), ['unpaid', 'pending_payment'])) {
             throw new \Exception("Shipment cannot be initiated until payment is confirmed.");
         }
 
@@ -242,8 +242,8 @@ class ShiprocketOrderService
             'order_id' => $orderId,
             'order_date' => $orderDate,
             'pickup_location' => $shipment->pickup_location ?? config('shiprocket.pickup_location'),
-            'billing_customer_name' => $firstNameParts[0],
-            'billing_last_name' => $firstNameParts[1] ?? '',
+            'billing_customer_name' => $firstNameParts[0] ?: 'Customer',
+            'billing_last_name' => $firstNameParts[1] ?? $firstNameParts[0] ?? 'Name',
             'billing_address' => $address['line1'] ?? 'No Address Provided',
             'billing_address_2' => $address['line2'] ?? '',
             'billing_city' => $address['city'] ?? 'City',
@@ -251,7 +251,7 @@ class ShiprocketOrderService
             'billing_state' => $address['state'] ?? 'State',
             'billing_country' => $address['country'] ?? 'India',
             'billing_email' => $address['email'] ?? $customer?->email ?? 'noemail@example.com',
-            'billing_phone' => $address['phone'] ?? $customer?->phone ?? '9999999999',
+            'billing_phone' => substr(preg_replace('/[^0-9]/', '', $address['phone'] ?? $customer?->phone ?? '9999999999'), -10),
             'shipping_is_billing' => true,
             'order_items' => $orderItems,
             'payment_method' => $paymentMethod,

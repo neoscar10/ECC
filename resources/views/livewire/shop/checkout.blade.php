@@ -360,7 +360,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="ecc-form-label">Phone Number</label>
-                                    <input type="text" class="form-control ecc-input" wire:model="addressForm.phone">
+                                    <input type="text" class="form-control ecc-input" wire:model="addressForm.phone" maxlength="10" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
                                     @error('addressForm.phone') <span class="text-danger small">{{ $message }}</span> @enderror
                                 </div>
                                 <div class="col-12">

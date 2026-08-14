@@ -406,7 +406,7 @@ class Index extends Component
             if ($this->showAddressForm) {
                 $this->validate([
                     'addressForm.full_name' => 'required|string|max:255',
-                    'addressForm.phone' => 'required|string|max:20',
+                    'addressForm.phone' => 'required|digits:10',
                     'addressForm.line1' => 'required|string|max:255',
                     'addressForm.city' => 'required|string|max:100',
                     'addressForm.state' => 'required|string|max:100',
