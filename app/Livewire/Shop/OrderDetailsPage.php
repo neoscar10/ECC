@@ -40,6 +40,8 @@ class OrderDetailsPage extends Component
     public $conciergeUrl;
     public $shippingLabel = 'Shipping';
     public $taxLabel = 'Tax';
+    public $canResumePayment = false;
+    public $resumePaymentUrl = null;
 
     public function mount($orderId)
     {
@@ -99,6 +101,15 @@ class OrderDetailsPage extends Component
         $this->conciergeUrl = route('home'); // Fallback to home
         
         $this->trackingData = app(\App\Services\Shipping\ShipmentTrackingPresenter::class)->forCustomer($this->order->shippingShipment);
+
+        // Resume payment logic
+        if (in_array($this->order->payment_status, ['pending_payment', 'pending', 'failed'])) {
+            $latestPayment = $this->order->latestPayment;
+            if ($latestPayment) {
+                $this->canResumePayment = true;
+                $this->resumePaymentUrl = route('payments.retry', ['payment' => $latestPayment->id]);
+            }
+        }
     }
 
     protected function setStatusBadge()

@@ -661,7 +661,18 @@
                                 </div>
                             </div>
 
-
+                            @if($canResumePayment && $resumePaymentUrl)
+                                <div class="mt-4 pt-3 border-top" style="border-color: var(--ecc-border-soft) !important;">
+                                    <div class="alert alert-warning border-0 p-3 mb-3 d-flex align-items-center gap-2" style="background: rgba(240, 200, 89, 0.1); color: #f0c859; font-size: 13px;">
+                                        <span class="material-symbols-outlined fs-5">info</span>
+                                        <div>Your payment is pending. Please complete the payment to process your order.</div>
+                                    </div>
+                                    <a href="{{ $resumePaymentUrl }}" class="btn ecc-btn-primary w-100 py-3 d-flex align-items-center justify-content-center gap-2" style="font-size: 15px;">
+                                        <span class="material-symbols-outlined fs-5">payment</span>
+                                        <span>Complete Payment</span>
+                                    </a>
+                                </div>
+                            @endif
 
                                 <p class="ecc-summary-note mt-4 mb-0">
                                     All qualifying items include digital provenance and authenticity support where applicable.
