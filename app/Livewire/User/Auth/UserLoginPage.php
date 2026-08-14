@@ -94,6 +94,7 @@ class UserLoginPage extends Component
         $this->selectedChannel = $isEmail ? 'email' : 'whatsapp';
         
         try {
+            $this->reset('otp');
             $data = $otpService->requestPasswordResetOtp($user, $this->otpIdentifier, $this->selectedChannel);
             $this->otpTtl = $data['ttl_minutes'];
             $this->devOtp = $data['dev_otp'] ?? null;
@@ -177,6 +178,7 @@ class UserLoginPage extends Component
         ]);
 
         try {
+            $this->reset('otp');
             $data = $authService->requestOtp($this->identity);
             if (!$data) {
                 throw ValidationException::withMessages([
