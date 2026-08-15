@@ -4,7 +4,8 @@
   <div class="ecc-bg-glow"></div>
 
   <header class="ecc-topbar position-sticky top-0 z-3">
-    <div class="container-fluid px-4 py-3 d-flex align-items-center justify-content-between">
+    <div class="container-fluid px-4 py-3">
+      <div class="mx-auto ecc-max d-flex align-items-center justify-content-between">
       <button type="button" class="ecc-icon-btn" onclick="window.location.href='{{ route('membership.application.step3') }}'">
         <span class="material-symbols-outlined">arrow_back_ios_new</span>
       </button>
@@ -18,6 +19,7 @@
 
       <div style="width:40px;"></div>
     </div>
+      </div>
   </header>
 
   <main class="container-fluid px-4 pt-4 pb-5 position-relative z-2">
@@ -53,7 +55,7 @@
 
         {{-- Preferred Formats --}}
         <div>
-          <div class="ecc-section-title mb-3">Preferred Formats</div>
+          <div class="ecc-section-title mb-3">Preferred Formats <span class="text-muted fw-normal text-lowercase" style="font-size:10px;">(Optional)</span></div>
 
           <div class="row g-3">
             @foreach($this->formatOptions() as $opt)
@@ -83,7 +85,7 @@
 
         {{-- Eras --}}
         <div>
-          <h2 class="ecc-era-q mb-3">Which eras resonate with you?</h2>
+          <h2 class="ecc-era-q mb-3">Which eras resonate with you? <span class="text-muted fw-normal" style="font-size:13px;">(Optional)</span></h2>
 
           <div class="d-flex flex-wrap gap-2">
             @foreach($this->eraOptions() as $era)
@@ -390,3 +392,4 @@
   }
 </style>
 @endpush
+

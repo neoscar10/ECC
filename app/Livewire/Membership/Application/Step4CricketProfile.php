@@ -101,8 +101,8 @@ class Step4CricketProfile extends Component
         try {
             $validated = $this->validate(MembershipRules::cricketProfile());
             $svc->saveStep4CricketProfile([
-                'formats' => $validated['preferred_formats'],
-                'eras' => $validated['eras'],
+                'formats' => $validated['preferred_formats'] ?? [],
+                'eras' => $validated['eras'] ?? [],
                 'skipped' => false
             ]);
 

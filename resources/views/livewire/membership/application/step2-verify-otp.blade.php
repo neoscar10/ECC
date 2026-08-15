@@ -4,7 +4,8 @@
   <div class="ecc-bg-glow"></div>
 
   <header class="ecc-topbar position-absolute top-0 start-0 end-0 z-3">
-    <div class="container-fluid px-4 py-3 d-flex align-items-center justify-content-between">
+    <div class="container-fluid px-4 py-3">
+      <div class="mx-auto ecc-max d-flex align-items-center justify-content-between">
       <button type="button" class="ecc-icon-btn" onclick="window.location.href='{{ route('membership.application.step1') }}'">
         <span class="material-symbols-outlined">arrow_back_ios_new</span>
       </button>
@@ -15,6 +16,7 @@
 
       <div style="width:40px;"></div>
     </div>
+      </div>
   </header>
 
   <main class="position-relative z-2 text-center w-100 ecc-wizard-container" style="max-width: 480px;">
@@ -427,3 +429,4 @@
         eccInitOtpTimer(@js($resendRemaining));
     });
 </script>
+

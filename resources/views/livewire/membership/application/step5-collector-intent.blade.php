@@ -4,7 +4,8 @@
   <div class="ecc-bg-glow"></div>
 
   <header class="ecc-topbar position-sticky top-0 z-3">
-    <div class="container-fluid px-4 py-3 d-flex align-items-center justify-content-between">
+    <div class="container-fluid px-4 py-3">
+      <div class="mx-auto ecc-max d-flex align-items-center justify-content-between">
       <button type="button" class="ecc-icon-btn" onclick="window.location.href='{{ route('membership.application.step4') }}'">
         <span class="material-symbols-outlined">arrow_back_ios_new</span>
       </button>
@@ -20,6 +21,7 @@
         <span class="material-symbols-outlined">help</span>
       </button>
     </div>
+      </div>
   </header>
 
   <main class="container-fluid px-4 pt-4 pb-5 position-relative z-2">
@@ -53,7 +55,7 @@
 
         {{-- HISTORY --}}
         <section>
-          <div class="ecc-section-title mb-3">History</div>
+          <div class="ecc-section-title mb-3">History <span class="text-muted fw-normal text-lowercase" style="font-size:10px;">(Optional)</span></div>
           <div class="ecc-q mb-3">Have you previously acquired match-worn or signed memorabilia?</div>
 
           <div class="ecc-seg">
@@ -75,7 +77,7 @@
 
         {{-- FOCUS --}}
         <section>
-          <div class="ecc-section-title mb-3">Focus</div>
+          <div class="ecc-section-title mb-3">Focus <span class="text-muted fw-normal text-lowercase" style="font-size:10px;">(Optional)</span></div>
           <div class="ecc-q mb-3">What interests you most?</div>
 
           <div class="row g-3">
@@ -114,7 +116,7 @@
         <section>
           <div class="d-flex align-items-end justify-content-between mb-3">
             <div>
-              <div class="ecc-section-title mb-1">Horizon</div>
+              <div class="ecc-section-title mb-1">Horizon <span class="text-muted fw-normal text-lowercase" style="font-size:10px;">(Optional)</span></div>
               <div class="ecc-q mb-0">Investment Timeline</div>
             </div>
             <div class="ecc-hlabel">{{ $this->horizonLabel }}</div>
@@ -398,3 +400,4 @@
   }
 </style>
 @endpush
+

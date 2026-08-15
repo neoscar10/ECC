@@ -4,7 +4,8 @@
   <div class="ecc-bg-glow"></div>
 
   <header class="ecc-topbar position-sticky top-0 z-3">
-    <div class="container-fluid px-4 py-3 d-flex align-items-center justify-content-between">
+    <div class="container-fluid px-4 py-3">
+      <div class="mx-auto ecc-max d-flex align-items-center justify-content-between">
       <button type="button" class="ecc-icon-btn" onclick="window.location.href='/membership/apply-intro'">
         <span class="material-symbols-outlined">arrow_back_ios_new</span>
       </button>
@@ -18,33 +19,13 @@
 
       <div style="width:40px;"></div>
     </div>
+      </div>
   </header>
 
   <main class="container-fluid px-4 pt-4 pb-5 position-relative z-2">
     <div class="mx-auto ecc-max">
 
-      <!-- Login Prompt Popup / Modal (Alpine) -->
-      <div x-data="{ show: @entangle('showLoginPrompt') }" x-cloak>
-        <div x-show="show" class="position-fixed inset-0 z-50 d-flex align-items-center justify-content-center" style="top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);">
-          <div @click.outside="show = false" class="p-4" style="background: var(--ecc-surface); border: 1px solid var(--ecc-border); border-radius: 16px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-            <div class="mb-3">
-              <span class="material-symbols-outlined text-warning" style="font-size: 48px; color: var(--ecc-primary) !important;">person_alert</span>
-            </div>
-            <h3 class="ecc-h1-lite mb-2" style="font-size: 24px;">Account Exists</h3>
-            <p class="ecc-sub mb-4">An account with this email or phone number is already registered. Please log in instead.</p>
-            
-            <div class="d-flex flex-column gap-2">
-              <a href="{{ route('login') }}" class="btn ecc-continue w-100 py-3 d-flex justify-content-center align-items-center gap-2 text-decoration-none">
-                Log In Now
-                <span class="material-symbols-outlined" style="font-size: 18px;">login</span>
-              </a>
-              <button type="button" @click="show = false" class="btn btn-link text-decoration-none mt-2" style="color: var(--ecc-text-muted); font-size: 13px;">
-                Use a different email or phone
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       <div class="d-flex align-items-center justify-content-between mb-4">
         <div class="ecc-step-kicker">STEP I OF VIII</div>
@@ -311,6 +292,31 @@
 
     </div>
   </main>
+
+  <!-- Login Prompt Popup / Modal (Alpine) -->
+  <div x-data="{ show: @entangle('showLoginPrompt') }" x-cloak>
+    <div x-show="show" class="position-fixed inset-0" style="display: none; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 9999;">
+      <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+        <div @click.outside="show = false" class="p-4" style="background: var(--ecc-surface); border: 1px solid var(--ecc-border); border-radius: 16px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+          <div class="mb-3">
+            <span class="material-symbols-outlined text-warning" style="font-size: 48px; color: var(--ecc-primary) !important;">person_alert</span>
+          </div>
+          <h3 class="ecc-h1-lite mb-2" style="font-size: 24px;">Account Exists</h3>
+          <p class="ecc-sub mb-4">An account with this email or phone number is already registered. Please log in instead.</p>
+          
+          <div class="d-flex flex-column gap-2">
+            <a href="{{ route('login') }}" class="btn ecc-continue w-100 py-3 d-flex justify-content-center align-items-center gap-2 text-decoration-none">
+              Log In Now
+              <span class="material-symbols-outlined" style="font-size: 18px;">login</span>
+            </a>
+            <button type="button" @click="show = false" class="btn btn-link text-decoration-none mt-2" style="color: var(--ecc-text-muted); font-size: 13px;">
+              Use a different email or phone
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 @push('styles')
@@ -495,3 +501,4 @@
   .ecc-pass-toggle:hover{ color: var(--ecc-primary); }
 </style>
 @endpush
+

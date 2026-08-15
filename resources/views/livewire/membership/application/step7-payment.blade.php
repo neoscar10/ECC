@@ -4,7 +4,8 @@
   <div class="ecc-bg-glow"></div>
 
   <header class="ecc-topbar position-sticky top-0 z-3">
-    <div class="container-fluid px-4 py-3 d-flex align-items-center justify-content-between">
+    <div class="container-fluid px-4 py-3">
+      <div class="mx-auto ecc-max d-flex align-items-center justify-content-between">
       <button type="button" class="ecc-icon-btn" onclick="(history.length>1)?history.back():window.location.href='{{ route('membership.application.step6') }}'">
         <span class="material-symbols-outlined">arrow_back_ios_new</span>
       </button>
@@ -34,6 +35,7 @@
         </div>
       </div>
     </div>
+      </div>
   </header>
 
   <main class="container-fluid px-4 pt-4 pb-4 position-relative z-2">
@@ -265,3 +267,4 @@
   [wire:loading] { display: none; }
 </style>
 @endpush
+

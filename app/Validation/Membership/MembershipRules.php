@@ -21,18 +21,18 @@ class MembershipRules
     {
         return [
             'full_name' => 'required|string|min:3|max:120',
-            'date_of_birth' => 'required|date|before:today',
+            'date_of_birth' => 'nullable|date|before:today',
             'country' => 'required|string|max:80',
-            'city' => 'required|string|max:80',
+            'city' => 'nullable|string|max:80',
         ];
     }
 
     public static function cricketProfile(): array
     {
         return [
-            'preferred_formats' => 'required|array|min:1',
+            'preferred_formats' => 'nullable|array',
             'preferred_formats.*' => 'in:TEST,ODI,T20,LEAGUES',
-            'eras' => 'required|array',
+            'eras' => 'nullable|array',
             'eras.*' => 'in:GOLDEN_AGE_1890_1914,POST_WAR_50S,WEST_INDIES_DOMINANCE,ODI_90S_ERA,MODERN_ERA,WOMENS_CRICKET',
         ];
     }
@@ -40,9 +40,9 @@ class MembershipRules
     public static function collectorIntent(): array
     {
         return [
-            'has_acquired_memorabilia_before' => 'required|boolean',
-            'focus' => 'required|in:LEGACY,RARITY,VALUE',
-            'investment_horizon' => 'required|in:Y1_5,Y5_10,Y10_PLUS',
+            'has_acquired_memorabilia_before' => 'nullable|boolean',
+            'focus' => 'nullable|in:LEGACY,RARITY,VALUE',
+            'investment_horizon' => 'nullable|in:Y1_5,Y5_10,Y10_PLUS',
             'interests' => 'nullable|array',
         ];
     }

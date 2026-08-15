@@ -6,7 +6,8 @@
 
   {{-- Header --}}
   <header class="ecc-topbar position-sticky top-0 z-3">
-    <div class="container-fluid px-4 py-3 d-flex align-items-center justify-content-between">
+    <div class="container-fluid px-4 py-3">
+      <div class="mx-auto ecc-max d-flex align-items-center justify-content-between">
       <button type="button" class="ecc-icon-btn" onclick="window.location.href='{{ route('membership.application.step2') }}'">
         <span class="material-symbols-outlined">arrow_back_ios_new</span>
       </button>
@@ -20,6 +21,7 @@
 
       <div style="width:40px;"></div>
     </div>
+      </div>
   </header>
 
   {{-- Body --}}
@@ -53,7 +55,7 @@
       <form wire:submit.prevent="submit" class="d-flex flex-column gap-4">
         {{-- Full Name --}}
         <div class="ecc-field">
-          <label class="ecc-label" for="full_name">Full Name</label>
+          <label class="ecc-label" for="full_name">Full Name <span class="text-danger">*</span></label>
           <div class="position-relative">
             <input id="full_name" type="text"
                    wire:model.defer="full_name"
@@ -66,36 +68,21 @@
         </div>
 
         {{-- DOB --}}
-        <div class="ecc-field" wire:ignore x-data="{
-             initFlatpickr() {
-                 flatpickr($refs.dobInput, {
-                     dateFormat: 'Y-m-d',
-                     altInput: true,
-                     altFormat: 'd / m / Y',
-                     maxDate: 'today',
-                     disableMobile: true,
-                     allowInput: true,
-                     onChange: (selectedDates, dateStr) => {
-                         $wire.set('date_of_birth', dateStr);
-                     }
-                 });
-             }
-        }" x-init="initFlatpickr()">
-          <label class="ecc-label" for="date_of_birth">Date of Birth</label>
+        <div class="ecc-field">
+          <label class="ecc-label" for="date_of_birth">Date of Birth <span class="text-muted fw-normal" style="font-size:11px;">(Optional)</span></label>
           <div class="position-relative">
-            <input id="date_of_birth" type="text"
-                   x-ref="dobInput"
+            <input id="date_of_birth" type="date"
                    wire:model.defer="date_of_birth"
                    class="form-control ecc-input @error('date_of_birth') is-invalid @enderror"
-                   placeholder="DD / MM / YYYY">
-            <span class="material-symbols-outlined ecc-input-ic" style="cursor: pointer;" @click="$refs.dobInput._flatpickr.open()">calendar_month</span>
+                   max="{{ date('Y-m-d') }}"
+                   style="color-scheme: dark;">
           </div>
           @error('date_of_birth') <div class="ecc-err mt-2">{{ $message }}</div> @enderror
         </div>
 
         {{-- Country --}}
         <div class="ecc-field">
-          <label class="ecc-label" for="country">Country of Residence</label>
+          <label class="ecc-label" for="country">Country of Residence <span class="text-danger">*</span></label>
           <div class="position-relative">
             <select id="country" wire:model.defer="country" class="form-select ecc-input ecc-select @error('country') is-invalid @enderror">
               <option value="" disabled>Select Country</option>
@@ -110,7 +97,7 @@
 
         {{-- City --}}
         <div class="ecc-field">
-          <label class="ecc-label" for="city">City</label>
+          <label class="ecc-label" for="city">City <span class="text-muted fw-normal" style="font-size:11px;">(Optional)</span></label>
           <div class="position-relative">
             <input id="city" type="text"
                    wire:model.defer="city"
@@ -390,3 +377,4 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 @endpush
+
