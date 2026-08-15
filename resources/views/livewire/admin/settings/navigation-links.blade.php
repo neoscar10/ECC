@@ -47,10 +47,10 @@
                             <i class="ri-drag-move-2-line align-middle me-1"></i> Drag and drop the items below to reorder how they appear in the navigation menu.
                         </div>
 
-                        <ul class="list-group mb-4" wire:sortable="updateOrder">
+                        <ul class="list-group mb-4" id="nav-sortable">
                             @foreach($items as $index => $item)
-                                <li class="list-group-item d-flex align-items-center" wire:sortable.item="{{ $item['key'] }}" wire:key="item-{{ $item['key'] }}">
-                                    <i class="ri-drag-move-2-line text-muted me-3" wire:sortable.handle style="cursor: grab; font-size: 1.2rem;" title="Drag to reorder"></i>
+                                <li class="list-group-item d-flex align-items-center" data-key="{{ $item['key'] }}" wire:key="item-{{ $item['key'] }}">
+                                    <i class="ri-drag-move-2-line text-muted me-3" style="cursor: grab; font-size: 1.2rem;" title="Drag to reorder"></i>
                                     
                                     <div class="flex-grow-1 row align-items-center mb-0">
                                         <div class="col-md-4">
@@ -77,3 +77,32 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        let el = document.getElementById('nav-sortable');
+        if (el) {
+            new Sortable(el, {
+                handle: '.ri-drag-move-2-line',
+                animation: 150,
+                onEnd: function (evt) {
+                    let items = [];
+                    el.querySelectorAll('li').forEach((li, index) => {
+                        items.push({
+                            value: li.getAttribute('data-key'),
+                            order: index + 1
+                        });
+                    });
+                    
+                    let componentId = el.closest('[wire\\:id]').getAttribute('wire:id');
+                    let component = Livewire.find(componentId);
+                    if (component) {
+                        component.call('updateOrder', items);
+                    }
+                }
+            });
+        }
+    });
+</script>

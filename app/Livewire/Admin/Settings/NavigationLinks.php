@@ -57,6 +57,7 @@ class NavigationLinks extends Component
             }
         }
         $this->items = $sortedItems;
+        $this->save();
     }
 
     public function save()
