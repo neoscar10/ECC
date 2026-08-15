@@ -797,7 +797,7 @@
       elseif (request()->is('shop*') || request()->is('products*')) { $active = 'shop'; }
       elseif (request()->is('home*')) { $active = 'explore'; }
 
-      $mainItems = [
+      $rawMainItems = [
         ['key'=>'explore', 'label'=>\App\Models\Setting::get('nav_label_explore', 'Explore'),  'icon'=>'explore',          'href'=>url('/home')],
         ['key'=>'archive', 'label'=>\App\Models\Setting::get('nav_label_archive', 'Archive'),  'icon'=>'inventory_2',      'href'=>url('/archive')],
         ['key'=>'auctions','label'=>\App\Models\Setting::get('nav_label_auctions', 'Auctions'), 'icon'=>'gavel',            'href'=>url('/auctions')],
@@ -806,6 +806,26 @@
         ['key'=>'orders',  'label'=>'Orders',   'icon'=>'receipt_long',     'href'=>route('shop.orders')],
         ['key'=>'settings','label'=>\App\Models\Setting::get('nav_label_profile', 'Profile'), 'icon'=>'account_circle',  'href'=>route('settings')],
       ];
+
+      $sequenceJson = \App\Models\Setting::get('nav_sequence');
+      $sequence = $sequenceJson ? json_decode($sequenceJson, true) : ['explore', 'archive', 'auctions', 'club', 'shop', 'profile'];
+      
+      $mainItems = [];
+      foreach ($sequence as $k) {
+          $actualKey = $k === 'profile' ? 'settings' : $k;
+          foreach ($rawMainItems as $item) {
+              if ($item['key'] === $actualKey) {
+                  $mainItems[] = $item;
+                  break;
+              }
+          }
+      }
+      foreach ($rawMainItems as $item) {
+          $mappedKey = $item['key'] === 'settings' ? 'profile' : $item['key'];
+          if (!in_array($mappedKey, $sequence)) {
+              $mainItems[] = $item;
+          }
+      }
 
       $isOn = fn($k) => $active === $k;
       $cartCount = $cartCount ?? 0;

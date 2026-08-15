@@ -1,13 +1,32 @@
 @php
   $active = $active ?? null;
 
-  $mainItems = [
+  $rawMainItems = [
     ['key'=>'explore','label'=>\App\Models\Setting::get('nav_label_explore', 'Explore'),'icon'=>'explore',      'href'=>url('/home')],
     ['key'=>'archive','label'=>\App\Models\Setting::get('nav_label_archive', 'Archive'),'icon'=>'inventory_2',   'href'=>url('/archive')],
     ['key'=>'auctions','label'=>\App\Models\Setting::get('nav_label_auctions', 'Auctions'),'icon'=>'gavel',      'href'=>url('/auctions')],
     ['key'=>'club',    'label'=>\App\Models\Setting::get('nav_label_club', 'Club'),   'icon'=>'shield_person', 'href'=>url('/club')],
     ['key'=>'shop',    'label'=>\App\Models\Setting::get('nav_label_shop', 'Shop'),   'icon'=>'storefront',    'href'=>route('shop.index')],
   ];
+
+  $sequenceJson = \App\Models\Setting::get('nav_sequence');
+  $sequence = $sequenceJson ? json_decode($sequenceJson, true) : ['explore', 'archive', 'auctions', 'club', 'shop', 'profile'];
+  
+  $mainItems = [];
+  foreach ($sequence as $k) {
+      foreach ($rawMainItems as $item) {
+          if ($item['key'] === $k) {
+              $mainItems[] = $item;
+              break;
+          }
+      }
+  }
+  // Append any that might not be in sequence just in case
+  foreach ($rawMainItems as $item) {
+      if (!in_array($item['key'], $sequence)) {
+          $mainItems[] = $item;
+      }
+  }
 
   $bottomItems = [
     ['key'=>'settings','label'=>\App\Models\Setting::get('nav_label_profile', 'Profile'),'icon'=>'account_circle','href'=>url('/settings')],

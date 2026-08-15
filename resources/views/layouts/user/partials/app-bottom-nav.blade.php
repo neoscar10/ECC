@@ -1,7 +1,7 @@
 @php
   $active = $active ?? null;
 
-  $items = [
+  $rawItems = [
     ['key'=>'explore','label'=>\App\Models\Setting::get('nav_label_explore', 'Explore'),'icon'=>'explore',       'href'=>url('/home')],
     ['key'=>'archive','label'=>\App\Models\Setting::get('nav_label_archive', 'Archive'),'icon'=>'inventory_2',   'href'=>url('/archive')],
     ['key'=>'auctions','label'=>\App\Models\Setting::get('nav_label_auctions', 'Auctions'),'icon'=>'gavel',       'href'=>url('/auctions')],
@@ -9,6 +9,26 @@
     ['key'=>'shop',    'label'=>\App\Models\Setting::get('nav_label_shop', 'Shop'),   'icon'=>'storefront',   'href'=>route('shop.index')],
     ['key'=>'settings','label'=>\App\Models\Setting::get('nav_label_profile', 'Profile'),'icon'=>'account_circle','href'=>url('/settings')],
   ];
+
+  $sequenceJson = \App\Models\Setting::get('nav_sequence');
+  $sequence = $sequenceJson ? json_decode($sequenceJson, true) : ['explore', 'archive', 'auctions', 'club', 'shop', 'profile'];
+  
+  $items = [];
+  foreach ($sequence as $k) {
+      $actualKey = $k === 'profile' ? 'settings' : $k;
+      foreach ($rawItems as $item) {
+          if ($item['key'] === $actualKey) {
+              $items[] = $item;
+              break;
+          }
+      }
+  }
+  foreach ($rawItems as $item) {
+      $mappedKey = $item['key'] === 'settings' ? 'profile' : $item['key'];
+      if (!in_array($mappedKey, $sequence)) {
+          $items[] = $item;
+      }
+  }
 
   $path = trim(request()->path(), '/');
 
