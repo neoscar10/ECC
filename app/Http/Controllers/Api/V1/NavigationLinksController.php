@@ -37,10 +37,7 @@ class NavigationLinksController extends Controller
         $orderedLinks = [];
         foreach ($sequence as $key) {
             if (isset($labels[$key])) {
-                $orderedLinks[] = [
-                    'key' => $key,
-                    'label' => $labels[$key],
-                ];
+                $orderedLinks[$key] = $labels[$key];
             }
         }
 
