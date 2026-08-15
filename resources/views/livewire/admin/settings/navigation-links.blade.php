@@ -43,43 +43,27 @@
                     @endif
 
                     <form wire:submit="save">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="explore" class="form-label">Explore Link Label <span class="text-muted fw-normal" style="font-size: 11px;">(Max 15 chars)</span></label>
-                                <input type="text" class="form-control" id="explore" wire:model="explore" placeholder="Explore" maxlength="15">
-                                @error('explore') <span class="text-danger small">{{ $message }}</span> @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="archive" class="form-label">Archive Link Label <span class="text-muted fw-normal" style="font-size: 11px;">(Max 15 chars)</span></label>
-                                <input type="text" class="form-control" id="archive" wire:model="archive" placeholder="Archive" maxlength="15">
-                                @error('archive') <span class="text-danger small">{{ $message }}</span> @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="auctions" class="form-label">Auctions Link Label <span class="text-muted fw-normal" style="font-size: 11px;">(Max 15 chars)</span></label>
-                                <input type="text" class="form-control" id="auctions" wire:model="auctions" placeholder="Auctions" maxlength="15">
-                                @error('auctions') <span class="text-danger small">{{ $message }}</span> @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="club" class="form-label">Club Link Label <span class="text-muted fw-normal" style="font-size: 11px;">(Max 15 chars)</span></label>
-                                <input type="text" class="form-control" id="club" wire:model="club" placeholder="Club" maxlength="15">
-                                @error('club') <span class="text-danger small">{{ $message }}</span> @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="shop" class="form-label">Shop Link Label <span class="text-muted fw-normal" style="font-size: 11px;">(Max 15 chars)</span></label>
-                                <input type="text" class="form-control" id="shop" wire:model="shop" placeholder="Shop" maxlength="15">
-                                @error('shop') <span class="text-danger small">{{ $message }}</span> @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-4">
-                                <label for="profile" class="form-label">Profile Link Label <span class="text-muted fw-normal" style="font-size: 11px;">(Max 15 chars)</span></label>
-                                <input type="text" class="form-control" id="profile" wire:model="profile" placeholder="Profile" maxlength="15">
-                                @error('profile') <span class="text-danger small">{{ $message }}</span> @enderror
-                            </div>
+                        <div class="alert alert-warning mb-3">
+                            <i class="ri-drag-move-2-line align-middle me-1"></i> Drag and drop the items below to reorder how they appear in the navigation menu.
                         </div>
+
+                        <ul class="list-group mb-4" wire:sortable="updateOrder">
+                            @foreach($items as $index => $item)
+                                <li class="list-group-item d-flex align-items-center" wire:sortable.item="{{ $item['key'] }}" wire:key="item-{{ $item['key'] }}">
+                                    <i class="ri-drag-move-2-line text-muted me-3" wire:sortable.handle style="cursor: grab; font-size: 1.2rem;" title="Drag to reorder"></i>
+                                    
+                                    <div class="flex-grow-1 row align-items-center mb-0">
+                                        <div class="col-md-4">
+                                            <label for="item_{{ $item['key'] }}" class="form-label mb-0 fw-semibold text-capitalize">{{ $item['key'] }} Link Label</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" id="item_{{ $item['key'] }}" wire:model="items.{{ $index }}.label" placeholder="{{ ucfirst($item['key']) }}" maxlength="15">
+                                            @error("items.{$index}.label") <span class="text-danger small">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
 
                         <div class="text-end">
                             <button type="submit" class="btn btn-primary px-5">

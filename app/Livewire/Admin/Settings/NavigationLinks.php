@@ -9,42 +9,75 @@ use Livewire\Attributes\Title;
 #[Title('Navigation Links Settings')]
 class NavigationLinks extends Component
 {
-    public $explore;
-    public $archive;
-    public $auctions;
-    public $club;
-    public $shop;
-    public $profile;
+    public array $items = [];
 
     public function mount()
     {
-        $this->explore = Setting::get('nav_label_explore', 'Explore');
-        $this->archive = Setting::get('nav_label_archive', 'Archive');
-        $this->auctions = Setting::get('nav_label_auctions', 'Auctions');
-        $this->club = Setting::get('nav_label_club', 'Club');
-        $this->shop = Setting::get('nav_label_shop', 'Shop');
-        $this->profile = Setting::get('nav_label_profile', 'Profile');
+        $defaultSequence = ['explore', 'archive', 'auctions', 'club', 'shop', 'profile'];
+        
+        $sequenceJson = Setting::get('nav_sequence');
+        $sequence = $sequenceJson ? json_decode($sequenceJson, true) : $defaultSequence;
+        
+        foreach ($defaultSequence as $key) {
+            if (!in_array($key, $sequence)) {
+                $sequence[] = $key;
+            }
+        }
+
+        $labels = [
+            'explore' => Setting::get('nav_label_explore', 'Explore'),
+            'archive' => Setting::get('nav_label_archive', 'Archive'),
+            'auctions' => Setting::get('nav_label_auctions', 'Auctions'),
+            'club' => Setting::get('nav_label_club', 'Club'),
+            'shop' => Setting::get('nav_label_shop', 'Shop'),
+            'profile' => Setting::get('nav_label_profile', 'Profile'),
+        ];
+
+        foreach ($sequence as $key) {
+            if (isset($labels[$key])) {
+                $this->items[] = [
+                    'key' => $key,
+                    'label' => $labels[$key],
+                ];
+            }
+        }
+    }
+
+    public function updateOrder($list)
+    {
+        $newOrderKeys = collect($list)->sortBy('order')->pluck('value')->toArray();
+        
+        $sortedItems = [];
+        foreach ($newOrderKeys as $key) {
+            foreach ($this->items as $item) {
+                if ($item['key'] === $key) {
+                    $sortedItems[] = $item;
+                    break;
+                }
+            }
+        }
+        $this->items = $sortedItems;
     }
 
     public function save()
     {
         $this->validate([
-            'explore' => 'nullable|string|max:15',
-            'archive' => 'nullable|string|max:15',
-            'auctions' => 'nullable|string|max:15',
-            'club' => 'nullable|string|max:15',
-            'shop' => 'nullable|string|max:15',
-            'profile' => 'nullable|string|max:15',
+            'items.*.label' => 'required|string|max:15',
+        ], [
+            'items.*.label.required' => 'The label is required.',
+            'items.*.label.max' => 'The label must not be greater than 15 characters.',
         ]);
 
-        Setting::set('nav_label_explore', $this->explore ?: 'Explore');
-        Setting::set('nav_label_archive', $this->archive ?: 'Archive');
-        Setting::set('nav_label_auctions', $this->auctions ?: 'Auctions');
-        Setting::set('nav_label_club', $this->club ?: 'Club');
-        Setting::set('nav_label_shop', $this->shop ?: 'Shop');
-        Setting::set('nav_label_profile', $this->profile ?: 'Profile');
+        $sequence = [];
+        foreach ($this->items as $item) {
+            $key = $item['key'];
+            $sequence[] = $key;
+            Setting::set("nav_label_{$key}", $item['label']);
+        }
 
-        session()->flash('success', 'Navigation links updated successfully.');
+        Setting::set('nav_sequence', json_encode($sequence));
+
+        session()->flash('success', 'Navigation links and sequence updated successfully.');
     }
 
     public function render()
