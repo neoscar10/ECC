@@ -101,9 +101,9 @@
 
   .ecc-success__p{
     font-size: 16px;
-    color: rgba(229,197,104,.92) !important;
+    color: var(--ecc-primary-dark) !important;
     line-height: 1.7;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   .ecc-success__divider{
@@ -115,7 +115,7 @@
 
   .ecc-success__p2{
     font-size: 13px;
-    color: rgba(229,197,104,.85) !important;
+    color: var(--ecc-primary-dark) !important;
     line-height: 1.6;
     font-weight: 600;
   }
