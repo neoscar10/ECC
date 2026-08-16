@@ -162,13 +162,25 @@ class ArchiveProductService
         }
 
         if ($product->price_min_amount && $product->price_max_amount) {
-            return '₹' . number_format($product->price_min_amount / 1000) . 'k - ₹' . number_format($product->price_max_amount / 1000) . 'k';
+            return $this->formatAmount($product->price_min_amount) . ' - ' . $this->formatAmount($product->price_max_amount);
         }
 
         if ($product->price_min_amount) {
-            return 'From ₹' . number_format($product->price_min_amount / 1000) . 'k';
+            return 'From ' . $this->formatAmount($product->price_min_amount);
         }
 
         return 'Request';
+    }
+
+    private function formatAmount($amount): string
+    {
+        if ($amount < 1000) {
+            return '₹' . number_format($amount);
+        }
+        
+        $kAmount = $amount / 1000;
+        $formatted = number_format($kAmount, 2, '.', '');
+        $formatted = rtrim(rtrim($formatted, '0'), '.');
+        return '₹' . $formatted . 'k';
     }
 }
