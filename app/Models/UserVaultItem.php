@@ -37,17 +37,23 @@ class UserVaultItem extends Model
 
     public function removalRequests()
     {
-        return $this->hasMany(VaultRemovalRequest::class, 'vault_item_id');
+        return $this->belongsToMany(VaultRemovalRequest::class, 'user_vault_item_vault_removal_request');
     }
 
-    public function pendingRemovalRequest()
+    public function getPendingRemovalRequestAttribute()
     {
-        return $this->hasOne(VaultRemovalRequest::class, 'vault_item_id')->where('status', 'pending');
+        if ($this->relationLoaded('removalRequests')) {
+            return $this->removalRequests->where('status', 'pending')->first();
+        }
+        return $this->removalRequests()->where('status', 'pending')->first();
     }
 
-    public function latestDeliveryRequest()
+    public function getLatestDeliveryRequestAttribute()
     {
-        return $this->hasOne(VaultRemovalRequest::class, 'vault_item_id')->latestOfMany();
+        if ($this->relationLoaded('removalRequests')) {
+            return $this->removalRequests->sortByDesc('created_at')->first();
+        }
+        return $this->removalRequests()->latest('created_at')->first();
     }
 
     public function getTotalValueAttribute()

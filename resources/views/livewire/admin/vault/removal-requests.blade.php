@@ -81,12 +81,20 @@
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                @if($request->vaultItem->display_image_url)
-                                                    <img src="{{ $request->vaultItem->display_image_url }}" class="avatar-xs rounded me-2 object-fit-cover" alt="">
+                                                @php $firstItem = $request->vaultItems->first(); @endphp
+                                                @if($firstItem && $firstItem->display_image_url)
+                                                    <img src="{{ $firstItem->display_image_url }}" class="avatar-xs rounded me-2 object-fit-cover" alt="">
                                                 @endif
                                                 <div>
-                                                    <h5 class="fs-13 mb-0">{{ $request->vaultItem->item_title }}</h5>
-                                                    <p class="text-muted mb-0 fs-11">{{ $request->vaultItem->item_ref }} • {{ $request->vaultItem->quantity }} qty</p>
+                                                    <h5 class="fs-13 mb-0">
+                                                        {{ $firstItem ? $firstItem->item_title : 'No Items' }}
+                                                        @if($request->vaultItems->count() > 1)
+                                                            <span class="badge bg-light text-muted ms-1">+{{ $request->vaultItems->count() - 1 }} more</span>
+                                                        @endif
+                                                    </h5>
+                                                    @if($firstItem)
+                                                        <p class="text-muted mb-0 fs-11">{{ $firstItem->item_ref }} • {{ $firstItem->quantity }} qty</p>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </td>
@@ -154,7 +162,7 @@
                                                     {{-- Awaiting Payment message --}}
                                                     <span class="text-muted fs-11 align-self-center fst-italic">Awaiting payment...</span>
                                                 @elseif($request->payment_status === 'paid' && $request->status === 'pending')
-                                                    <button onclick="confirmApproval({{ $request->id }}, '{{ addslashes($request->user?->name ?? 'Unknown Member') }}', '{{ addslashes($request->vaultItem->item_title) }}', '{{ $request->delivery_currency ?? 'INR' }} {{ number_format($request->delivery_fee, 2) }}', '{{ $request->selected_courier_name ?? 'Standard' }}', '{{ $request->delivery_postal_code }}', '{{ $request->chargeable_weight_kg ?? 0.0 }}')" class="btn btn-sm btn-soft-info" title="Approve for Fulfillment">
+                                                    <button onclick="confirmApproval({{ $request->id }}, '{{ addslashes($request->user?->name ?? 'Unknown Member') }}', '{{ addslashes($request->vaultItems->pluck('item_title')->implode(', ')) }}', '{{ $request->delivery_currency ?? 'INR' }} {{ number_format($request->delivery_fee, 2) }}', '{{ $request->selected_courier_name ?? 'Standard' }}', '{{ $request->delivery_postal_code }}', '{{ $request->chargeable_weight_kg ?? 0.0 }}')" class="btn btn-sm btn-soft-info" title="Approve for Fulfillment">
                                                         <i class="ri-check-line"></i> Approve
                                                     </button>
                                                     <button onclick="confirmRejection({{ $request->id }}, true)" class="btn btn-sm btn-soft-danger" title="Reject Request">
@@ -225,17 +233,19 @@
                             <!-- Left Column: Asset & Customer Details -->
                             <div class="col-md-4 border-end">
                                 <h6 class="text-primary text-uppercase fs-12 mb-3">Asset & Customer</h6>
-                                <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
-                                    @if($selectedRequest->vaultItem->display_image_url)
-                                        <img src="{{ $selectedRequest->vaultItem->display_image_url }}" class="avatar-sm rounded me-3 object-fit-cover" alt="">
-                                    @endif
-                                    <div>
-                                        <h5 class="fs-14 mb-1">{{ $selectedRequest->vaultItem->item_title }}</h5>
-                                        <p class="text-muted mb-0 fs-12">Ref: {{ $selectedRequest->vaultItem->item_ref }}</p>
-                                        <p class="text-muted mb-0 fs-12">Quantity: {{ $selectedRequest->vaultItem->quantity }} qty</p>
+                                @foreach($selectedRequest->vaultItems as $item)
+                                    <div class="d-flex align-items-center mb-2 p-2 bg-light rounded">
+                                        @if($item->display_image_url)
+                                            <img src="{{ $item->display_image_url }}" class="avatar-sm rounded me-3 object-fit-cover" alt="">
+                                        @endif
+                                        <div>
+                                            <h5 class="fs-14 mb-1">{{ $item->item_title }}</h5>
+                                            <p class="text-muted mb-0 fs-12">Ref: {{ $item->item_ref }}</p>
+                                            <p class="text-muted mb-0 fs-12">Quantity: {{ $item->quantity }} qty</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="mb-3">
+                                @endforeach
+                                <div class="mb-3 mt-3">
                                     <span class="text-muted d-block fs-11">Member Name:</span>
                                     <span class="fs-13 fw-semibold text-dark">{{ $selectedRequest->user?->name ?? 'Unknown Member' }}</span>
                                 </div>
@@ -572,6 +582,10 @@
                                     <button type="button" class="btn btn-soft-success btn-sm" onclick="confirmRefund({{ $selectedRequest->id }})">
                                         <i class="ri-refund-2-line"></i> Mark Refund Handled
                                     </button>
+                                @elseif($selectedRequest->payment_status === 'pending_payment')
+                                    <button type="button" class="btn btn-soft-danger btn-sm" onclick="confirmCancelUnpaid({{ $selectedRequest->id }})">
+                                        <i class="ri-delete-bin-line"></i> Cancel Request
+                                    </button>
                                 @endif
 
                                 <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal" wire:click="closeDetails">Close</button>
@@ -763,6 +777,29 @@
             });
         }
     };
+
+    function confirmCancelUnpaid(id) {
+        Swal.fire({
+            title: 'Cancel Unpaid Request?',
+            html: `
+                <div class="text-start">
+                    <p class="mb-2 text-muted">Are you sure you want to cancel this unpaid delivery request?</p>
+                    <div class="alert alert-warning py-2 fs-12 mb-0 mt-2">
+                        <i class="ri-alert-line me-1"></i> This will delete the request and make the items available for delivery again in the user's vault.
+                    </div>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Cancel Request',
+            confirmButtonColor: '#f06548',
+            cancelButtonText: 'Keep Request'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                @this.call('cancelUnpaidRequest', id);
+            }
+        });
+    }
 </script>
 @endpush
 

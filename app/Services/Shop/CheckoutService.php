@@ -151,38 +151,25 @@ class CheckoutService
             $orderItemsData = [];
             $currency = 'INR';
 
-                // 1. Process Items & Deduct Stock
+                // 1. Process Items (No stock deduction during draft phase)
                 foreach ($cart->items as $item) {
                     if ($item->shop_product_variant_id) {
-                        // Variant Product Logic (Lock the specific combination)
-                        $variant = \App\Models\Shop\ShopProductVariant::where('id', $item->shop_product_variant_id)
-                            ->lockForUpdate()
-                            ->first();
-                        
+                        $variant = \App\Models\Shop\ShopProductVariant::find($item->shop_product_variant_id);
                         if (!$variant) {
                             throw new Exception("Variant combination not found.", 404);
                         }
-                        
                         if ($variant->stock_qty < $item->quantity) {
                             $labels = $item->variationValues->pluck('caption')->implode(' / ');
                             throw new Exception("Insufficient stock for {$labels}. Requested: {$item->quantity}, Available: {$variant->stock_qty}", 409);
                         }
-                        
-                        $variant->decrement('stock_qty', $item->quantity);
-                        
                     } else {
-                        // Simple Product Logic
-                        $product = $item->product()->lockForUpdate()->first();
-                        
+                        $product = $item->product;
                         if (!$product) {
                             throw new Exception("Product not found or unavailable.", 404);
                         }
-                        
                         if ($product->stock_qty < $item->quantity) {
                              throw new Exception("Insufficient stock for {$product->title}. Requested: {$item->quantity}, Available: {$product->stock_qty}", 409);
                         }
-                        
-                        $product->decrement('stock_qty', $item->quantity);
                     }
 
                 $lineTotal = $item->quantity * $item->unit_price;
@@ -205,7 +192,7 @@ class CheckoutService
             $order = ShopOrder::create([
                 'user_id' => $user->id,
                 'order_number' => $orderNumber,
-                'status' => $isPaid ? 'paid' : 'pending_payment',
+                'status' => $isPaid ? 'paid' : 'draft',
                 'payment_status' => $isPaid ? 'paid' : 'unpaid',
                 'currency' => $currency,
                 'subtotal' => $subtotal,
@@ -247,8 +234,10 @@ class CheckoutService
                 $orderItem->variationValues()->attach($itemData['variation_value_ids']);
             }
 
-            // 4. Clear Cart
-            $this->cartService->clearCart($user);
+            // 4. Do NOT Clear Cart here (it stays until payment succeeds)
+            if ($isPaid) {
+                $this->cartService->clearCart($user);
+            }
 
             // 5. Update Rate Quote with Order ID
             if (!empty($shippingQuote['rate_quote_id'])) {
@@ -264,7 +253,9 @@ class CheckoutService
 
         // Shiprocket: Create local shipping_shipment from the checkout quote
         try {
-            app(\App\Services\Shipping\ShipmentService::class)->prepareCourierSelectionForShopOrder($order);
+            if ($isPaid) {
+                app(\App\Services\Shipping\ShipmentService::class)->prepareCourierSelectionForShopOrder($order);
+            }
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Shiprocket: Failed to create shipping shipment after order placement', [
                 'order_id' => $order->id,
@@ -284,12 +275,39 @@ class CheckoutService
             return $order;
         }
 
-        $order->update([
-            'payment_status' => 'paid',
-            'status' => 'paid', // Or 'processing' if fulfillment is next step
-            'paid_at' => now(),
-            'meta_json' => array_merge($order->meta_json ?? [], ['payment_details' => $paymentDetails]),
-        ]);
+        DB::transaction(function () use ($order, $paymentDetails) {
+            $order->load(['items.product', 'items.variant', 'user']);
+
+            // 1. Deduct Stock
+            foreach ($order->items as $item) {
+                if ($item->shop_product_variant_id) {
+                    $variant = \App\Models\Shop\ShopProductVariant::where('id', $item->shop_product_variant_id)
+                        ->lockForUpdate()
+                        ->first();
+                    if ($variant) {
+                        $variant->decrement('stock_qty', $item->quantity);
+                    }
+                } else {
+                    $product = $item->product()->lockForUpdate()->first();
+                    if ($product) {
+                        $product->decrement('stock_qty', $item->quantity);
+                    }
+                }
+            }
+
+            // 2. Clear Cart
+            if ($order->user) {
+                $this->cartService->clearCart($order->user);
+            }
+
+            // 3. Update Order Status
+            $order->update([
+                'payment_status' => 'paid',
+                'status' => 'paid', // Or 'processing' if fulfillment is next step
+                'paid_at' => now(),
+                'meta_json' => array_merge($order->meta_json ?? [], ['payment_details' => $paymentDetails]),
+            ]);
+        });
 
         // Shiprocket Phase 3 Integration: Automatic Courier Selection
         try {
@@ -323,11 +341,14 @@ class CheckoutService
         return DB::transaction(function () use ($order, $reason) {
             $order->load(['items.variationValues']);
 
-            foreach ($order->items as $item) {
-                if ($item->shop_product_variant_id) {
-                    $item->variant()->increment('stock_qty', $item->quantity);
-                } else if ($item->product) {
-                    $item->product()->increment('stock_qty', $item->quantity);
+            // Only restore stock if the order wasn't a draft
+            if ($order->status !== 'draft') {
+                foreach ($order->items as $item) {
+                    if ($item->shop_product_variant_id) {
+                        $item->variant()->increment('stock_qty', $item->quantity);
+                    } else if ($item->product) {
+                        $item->product()->increment('stock_qty', $item->quantity);
+                    }
                 }
             }
 
@@ -356,12 +377,13 @@ class CheckoutService
             $order->load(['items.variationValues']);
 
             // Restore Stock
-            // Restore Stock
-            foreach ($order->items as $item) {
-                if ($item->shop_product_variant_id) {
-                    $item->variant()->increment('stock_qty', $item->quantity);
-                } else if ($item->product) {
-                    $item->product()->increment('stock_qty', $item->quantity);
+            if ($order->status !== 'draft') {
+                foreach ($order->items as $item) {
+                    if ($item->shop_product_variant_id) {
+                        $item->variant()->increment('stock_qty', $item->quantity);
+                    } else if ($item->product) {
+                        $item->product()->increment('stock_qty', $item->quantity);
+                    }
                 }
             }
 

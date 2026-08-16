@@ -22,7 +22,9 @@ class OrderListPage extends Component
     public function mount()
     {
         $this->loadStats();
-        $this->totalOrdersCount = ShopOrder::where('user_id', Auth::id())->count();
+        $this->totalOrdersCount = ShopOrder::where('user_id', Auth::id())
+            ->where('status', '!=', 'draft')
+            ->count();
     }
 
     public function loadMore()
@@ -54,6 +56,7 @@ class OrderListPage extends Component
     public function render()
     {
         $orders = ShopOrder::where('user_id', Auth::id())
+            ->where('status', '!=', 'draft')
             ->with(['items.product.images', 'items.variationValues'])
             ->latest('placed_at')
             ->latest('created_at')

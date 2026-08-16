@@ -46,7 +46,7 @@ class Show extends Component
     public function render()
     {
         $items = $this->user->vaultItems()
-            ->with('pendingRemovalRequest')
+            ->with('removalRequests')
             ->latest('locked_at')
             ->paginate(10);
 

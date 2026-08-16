@@ -113,8 +113,8 @@ class RemovalRequests extends Component
                 throw new \Exception("Only paid and approved delivery requests can be fulfilled.");
             }
 
-            if (!$request->vaultItem || $request->vaultItem->status !== 'locked') {
-                throw new \Exception("Vault item is already removed or invalid.");
+            if ($request->vaultItems->isEmpty() || $request->vaultItems->contains('status', '!=', 'locked')) {
+                throw new \Exception("One or more vault items are already removed or invalid.");
             }
 
             if (empty($request->selected_courier_company_id)) {
@@ -250,12 +250,32 @@ class RemovalRequests extends Component
             session()->flash('error', 'Failed to complete delivery: ' . $e->getMessage());
         }
     }
+
+    public function cancelUnpaidRequest(int $id)
+    {
+        try {
+            $request = VaultRemovalRequest::findOrFail($id);
+            if ($request->payment_status !== 'pending_payment') {
+                throw new \Exception("Only unpaid requests can be cancelled.");
+            }
+
+            $request->delete();
+            session()->flash('success', 'Unpaid request cancelled successfully.');
+
+            if ($this->selectedRequestId === $id) {
+                $this->closeDetails();
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to cancel request: ' . $e->getMessage());
+        }
+    }
  
     #[Layout('layouts.admin')]
     public function render()
     {
         $query = VaultRemovalRequest::query()
-            ->with(['user', 'vaultItem', 'address', 'shippingShipment'])
+            ->with(['user', 'vaultItems', 'address', 'shippingShipment'])
+            ->where('status', '!=', VaultRemovalRequest::STATUS_DRAFT)
             ->latest('requested_at');
  
         if ($this->search) {
@@ -263,7 +283,7 @@ class RemovalRequests extends Component
                 $q->whereHas('user', function ($uq) {
                     $uq->where('name', 'like', '%' . $this->search . '%')
                       ->orWhere('email', 'like', '%' . $this->search . '%');
-                })->orWhereHas('vaultItem', function ($ivq) {
+                })->orWhereHas('vaultItems', function ($ivq) {
                     $ivq->where('item_title', 'like', '%' . $this->search . '%')
                         ->orWhere('item_ref', 'like', '%' . $this->search . '%');
                 });
@@ -284,7 +304,7 @@ class RemovalRequests extends Component
  
         $requests = $query->paginate(15);
         $selectedRequest = $this->selectedRequestId 
-            ? VaultRemovalRequest::with(['user', 'vaultItem', 'address', 'shippingShipment'])->find($this->selectedRequestId) 
+            ? VaultRemovalRequest::with(['user', 'vaultItems', 'address', 'shippingShipment'])->find($this->selectedRequestId) 
             : null;
  
         return view('livewire.admin.vault.removal-requests', [

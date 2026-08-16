@@ -96,6 +96,51 @@ class ShippingMeasurementService
     }
 
     /**
+     * Calculate total package measurement from multiple Vault Items.
+     */
+    public function measurementFromVaultItems($vaultItems): array
+    {
+        $totalWeight = 0;
+        $maxLength = 0;
+        $maxBreadth = 0;
+        $totalHeight = 0;
+        $hasFallback = false;
+        $itemsData = [];
+
+        foreach ($vaultItems as $vaultItem) {
+            $measurement = $this->measurementFromVaultItem($vaultItem);
+            
+            if ($measurement['has_fallback']) {
+                $hasFallback = true;
+            }
+
+            $totalWeight += ($measurement['weight_kg'] ?? 0);
+            
+            // Logic: items are stacked by height, taking the largest footprint
+            $maxLength = max($maxLength, (float) ($measurement['length_cm'] ?? 0));
+            $maxBreadth = max($maxBreadth, (float) ($measurement['breadth_cm'] ?? 0));
+            $totalHeight += (float) ($measurement['height_cm'] ?? 0);
+
+            $itemsData = array_merge($itemsData, $measurement['items'] ?? []);
+        }
+
+        $volumetricWeight = $this->volumetricWeightKg($maxLength, $maxBreadth, $totalHeight);
+        $chargeableWeight = $this->chargeableWeightKg($totalWeight, $volumetricWeight);
+
+        return [
+            'weight_kg' => round($totalWeight, 3),
+            'length_cm' => round($maxLength, 2),
+            'breadth_cm' => round($maxBreadth, 2),
+            'height_cm' => round($totalHeight, 2),
+            'volumetric_weight_kg' => $volumetricWeight,
+            'chargeable_weight_kg' => $chargeableWeight,
+            'source' => 'vault_items',
+            'items' => $itemsData,
+            'has_fallback' => $hasFallback,
+        ];
+    }
+
+    /**
      * Calculate total package measurement from a Vault Item.
      */
     public function measurementFromVaultItem(\App\Models\UserVaultItem $vaultItem): array

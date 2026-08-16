@@ -202,4 +202,166 @@ class VaultDeliveryQuoteService
             ];
         }
     }
+
+    /**
+     * Get delivery quote for multiple Vault Items and selected address.
+     */
+    public function quoteForVaultItems(
+        $vaultItems,
+        UserAddress $address,
+        ?User $user = null,
+        array $options = []
+    ): array {
+        $deliveryPincode = $address->postal_code;
+
+        if (!$deliveryPincode) {
+            return [
+                'success' => false,
+                'message' => 'Delivery is not available for this address.',
+                'reason' => 'missing_pincode',
+                'delivery_fee' => 0.00,
+                'currency' => 'INR',
+            ];
+        }
+
+        $resolvedUser = $user ?: $vaultItems->first()->user ?: auth('web')->user();
+
+        return $this->quoteForVaultItemsAndPincode($vaultItems, $deliveryPincode, $resolvedUser, $options);
+    }
+
+    /**
+     * Get delivery quote for multiple Vault Items and delivery pincode.
+     */
+    public function quoteForVaultItemsAndPincode(
+        $vaultItems,
+        string $deliveryPincode,
+        ?User $user = null,
+        array $options = []
+    ): array {
+        try {
+            $pickupPincode = config('shiprocket.pickup_pincode');
+            if (!$pickupPincode) {
+                return [
+                    'success' => false,
+                    'message' => 'Delivery is not available for this address.',
+                    'reason' => 'missing_pickup_pincode',
+                    'delivery_fee' => 0.00,
+                    'currency' => 'INR',
+                ];
+            }
+
+            $deliveryPincode = trim($deliveryPincode);
+            if (empty($deliveryPincode)) {
+                return [
+                    'success' => false,
+                    'message' => 'Delivery is not available for this address.',
+                    'reason' => 'missing_pincode',
+                    'delivery_fee' => 0.00,
+                    'currency' => 'INR',
+                ];
+            }
+
+            $measurement = $this->measurementService->measurementFromVaultItems($vaultItems);
+
+            if (empty($measurement['weight_kg']) || empty($measurement['length_cm']) || empty($measurement['breadth_cm']) || empty($measurement['height_cm'])) {
+                return [
+                    'success' => false,
+                    'message' => 'Delivery is not available for this address.',
+                    'reason' => 'invalid_measurement',
+                    'delivery_fee' => 0.00,
+                    'currency' => 'INR',
+                ];
+            }
+
+            $resolvedUser = $user ?: $vaultItems->first()->user ?: auth('web')->user();
+            
+            $payload = [
+                'shippable_type' => UserVaultItem::class,
+                'shippable_id' => $vaultItems->first()->id, // Poly relation to the first item for the quote record
+                'user_id' => $resolvedUser ? $resolvedUser->id : null,
+                'pickup_pincode' => $pickupPincode,
+                'delivery_pincode' => $deliveryPincode,
+                'payment_mode' => 'prepaid',
+                'weight_kg' => $measurement['weight_kg'],
+                'length_cm' => $measurement['length_cm'],
+                'breadth_cm' => $measurement['breadth_cm'],
+                'height_cm' => $measurement['height_cm'],
+                'volumetric_weight_kg' => $measurement['volumetric_weight_kg'],
+                'chargeable_weight_kg' => $measurement['chargeable_weight_kg'],
+            ];
+
+            $response = $this->courierService->fetchAvailableCouriers($payload);
+            
+            if (empty($response) || (isset($response['success']) && $response['success'] === false)) {
+                return [
+                    'success' => false,
+                    'message' => 'Delivery is not available for this address.',
+                    'reason' => 'shiprocket_error',
+                    'delivery_fee' => 0.00,
+                    'currency' => 'INR',
+                ];
+            }
+
+            $availableCouriers = $this->courierService->extractAvailableCouriers($response);
+            $selectedCourier = $this->courierService->selectBestCourier($availableCouriers);
+
+            if (!$selectedCourier) {
+                return [
+                    'success' => false,
+                    'message' => 'Delivery is not available for this address.',
+                    'reason' => 'no_courier_available',
+                    'delivery_fee' => 0.00,
+                    'currency' => 'INR',
+                ];
+            }
+
+            $quote = $this->courierService->storeQuote($payload, $response, $selectedCourier);
+
+            $deliveryFee = (float) ($selectedCourier['total_charge'] ?? 0);
+            if ($deliveryFee <= 0) {
+                $deliveryFee = (float) ($selectedCourier['freight_charge'] ?? 0) + (float) ($selectedCourier['cod_charge'] ?? 0);
+            }
+
+            return [
+                'success' => true,
+                'message' => 'Delivery quote calculated.',
+                'delivery_fee' => $deliveryFee,
+                'currency' => 'INR',
+                'pickup_pincode' => $pickupPincode,
+                'delivery_pincode' => $deliveryPincode,
+                'payment_mode' => 'prepaid',
+                'measurement' => [
+                    'weight_kg' => $measurement['weight_kg'],
+                    'length_cm' => $measurement['length_cm'],
+                    'breadth_cm' => $measurement['breadth_cm'],
+                    'height_cm' => $measurement['height_cm'],
+                    'volumetric_weight_kg' => $measurement['volumetric_weight_kg'],
+                    'chargeable_weight_kg' => $measurement['chargeable_weight_kg'],
+                    'source' => $measurement['source'],
+                    'has_fallback' => $measurement['has_fallback'],
+                ],
+                'selected_courier' => [
+                    'courier_company_id' => $selectedCourier['courier_company_id'],
+                    'courier_name' => $selectedCourier['courier_name'],
+                    'rating' => $selectedCourier['rating'],
+                    'freight_charge' => $selectedCourier['freight_charge'],
+                    'cod_charge' => $selectedCourier['cod_charge'],
+                    'total_charge' => $selectedCourier['total_charge'],
+                    'etd' => $selectedCourier['etd'] ?? null,
+                    'estimated_delivery_days' => $selectedCourier['estimated_delivery_days'],
+                    'raw' => $selectedCourier['raw'] ?? [],
+                ],
+                'rate_quote_id' => $quote->id,
+            ];
+
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'message' => 'Delivery is not available for this address.',
+                'reason' => 'shiprocket_error',
+                'delivery_fee' => 0.00,
+                'currency' => 'INR',
+            ];
+        }
+    }
 }

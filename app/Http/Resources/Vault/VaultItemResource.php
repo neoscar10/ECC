@@ -58,7 +58,7 @@ class VaultItemResource extends JsonResource
                 'total_value' => (string) $this->total_value,
                 // Description might need to come from source if not snapshotted
                 'description' => $this->notes, 
-                'has_pending_request' => $this->pendingRemovalRequest()->exists(),
+                'has_pending_request' => $this->pending_removal_request !== null,
             ],
 
             'media' => [

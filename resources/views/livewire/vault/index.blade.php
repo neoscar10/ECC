@@ -110,6 +110,9 @@
 
                         @if($supportsVaultViewToggle)
                             <div class="d-flex align-items-center gap-2">
+                                <button class="btn ecc-btn-primary py-1 px-3 fs-13 me-2" wire:click="openMultiDeliveryModal()">
+                                    <i class="mdi mdi-truck-delivery-outline me-1"></i> REQUEST DELIVERY
+                                </button>
                                 <button type="button"
                                         class="btn ecc-vault-toggle-btn {{ $vaultViewMode === 'grid' ? 'is-active' : '' }}"
                                         wire:click="setVaultView('grid')">
@@ -122,6 +125,10 @@
                                     <i class="mdi mdi-format-list-bulleted"></i>
                                 </button>
                             </div>
+                        @else
+                            <button class="btn ecc-btn-primary py-1 px-3 fs-13" wire:click="openMultiDeliveryModal()">
+                                <i class="mdi mdi-truck-delivery-outline me-1"></i> REQUEST DELIVERY
+                            </button>
                         @endif
                     </div>
 
@@ -272,7 +279,7 @@
                                                <i class="ri-time-line me-2"></i> REMOVAL REQUEST PENDING REVIEW
                                              </div>
                                          @else
-                                             <button class="btn ecc-vault-btn-outline w-100" wire:click="openRemovalModal">
+                                             <button class="btn ecc-vault-btn-outline w-100" wire:click="openMultiDeliveryModal({{ $selectedArtifact['id'] }})">
                                                  REQUEST PHYSICAL DELIVERY
                                              </button>
                                          @endif
@@ -352,13 +359,13 @@
     @endif
 
     {{-- Request Removal Modal --}}
-    @if($showRemovalModal && $selectedArtifact)
+    @if($showMultiDeliveryModal)
         <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.4); z-index: 1060;">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content ecc-vault-modal-content border-warning-subtle">
                     <div class="modal-header border-0">
                         <h5 class="modal-title text-white fw-bold">REQUEST PHYSICAL DELIVERY</h5>
-                        <button type="button" class="btn-close btn-close-white ms-auto" wire:click="$set('showRemovalModal', false)"></button>
+                        <button type="button" class="btn-close btn-close-white ms-auto" wire:click="closeMultiDeliveryModal"></button>
                     </div>
                     <div class="modal-body p-4 pt-1">
                         <div class="alert alert-warning-subtle border-0 rounded-3 mb-4 fs-13 lh-base">
@@ -366,6 +373,50 @@
                             Delivery requests are subject to review by the ECC administration. Once approved, the item will be prepared for physical dispatch to your designated address.
                         </div>
 
+                        <!-- Items Selection Section (Full Width, 2 per row) -->
+                        <div class="mb-4 border-bottom border-white-10 pb-4">
+                            <label class="ecc-vault-standing-label mb-2">SELECT VAULT ITEMS FOR DELIVERY</label>
+                            @php
+                                $availableItems = collect($mappedArtifacts)->filter(fn($a) => !$a->has_pending_request && $a->status_badge_label === 'LOCKED');
+                            @endphp
+                            
+                            @if($availableItems->isEmpty())
+                                <div class="alert alert-dark border border-white-10 text-white-50 fs-13">
+                                    You have no items available for physical delivery right now.
+                                </div>
+                            @else
+                                <div class="row g-2 max-h-300 overflow-auto" style="max-height: 250px; overflow-y: auto; overflow-x: hidden;">
+                                    @foreach($availableItems as $artifact)
+                                        <div class="col-md-6">
+                                            <label class="ecc-address-card w-100 m-0">
+                                                <input type="checkbox" wire:model.live="selectedVaultItemIds" value="{{ $artifact->id }}" class="btn-check">
+                                                <div class="ecc-address-card-inner p-2 rounded-3 border transition-all {{ in_array($artifact->id, $selectedVaultItemIds) ? 'border-warning bg-warning-subtle text-dark' : 'border-white-5 bg-white-5' }} position-relative c-pointer">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <img src="{{ $artifact->image_url }}" alt="" class="rounded ms-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                                        <div class="flex-grow-1">
+                                                            <div class="{{ in_array($artifact->id, $selectedVaultItemIds) ? 'text-dark' : 'text-white' }} fs-13 fw-bold">{{ $artifact->title }}</div>
+                                                            <div class="{{ in_array($artifact->id, $selectedVaultItemIds) ? 'text-dark-50' : 'text-white-50' }} fs-11">{{ number_format($artifact->total_value) }} {{ $artifact->currency }}</div>
+                                                        </div>
+                                                        <div class="pe-2">
+                                                            @if(in_array($artifact->id, $selectedVaultItemIds))
+                                                                <span class="badge bg-dark text-white py-1 px-2"><i class="ri-check-line me-1"></i>SELECTED</span>
+                                                            @else
+                                                                <span class="btn btn-sm btn-outline-light py-1 px-2 fs-10 border-white-10 text-white-50">+ ADD</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @if(empty($selectedVaultItemIds))
+                                    <div class="text-danger fs-11 mt-1 fw-semibold">Please select at least one item to deliver.</div>
+                                @endif
+                            @endif
+                        </div>
+
+                        <!-- Delivery Info Section -->
                         <!-- Address Section -->
                         @if (session()->has('error'))
                             <div class="alert alert-danger fs-13 lh-base border-0 rounded-3 mb-4">
@@ -387,7 +438,7 @@
                                 <div class="ecc-address-selector">
                                     <div class="row g-2">
                                         @foreach($addresses as $addr)
-                                            <div class="col-12">
+                                            <div class="col-md-6">
                                                 <label class="ecc-address-card w-100 m-0">
                                                     <input type="radio" wire:model.live="selectedAddressId" value="{{ $addr->id }}" class="btn-check">
                                                     <div class="ecc-address-card-inner p-3 rounded-3 border border-white-5 bg-white-5 position-relative c-pointer transition-all">
@@ -547,8 +598,8 @@
                             <textarea wire:model="removalMessage" class="form-control ecc-vault-input" rows="2" placeholder="Delivery notes or special instructions..."></textarea>
                         </div>
 
-                        <div class="d-flex gap-3 mt-4">
-                            <button class="btn btn-link text-white-50 text-decoration-none fw-bold fs-13" wire:click="closeArtifactModal">CANCEL</button>
+                <div class="d-flex gap-3 mt-4 pt-3 border-top border-white-10">
+                    <button class="btn btn-link text-white-50 text-decoration-none fw-bold fs-13" wire:click="closeMultiDeliveryModal">CANCEL</button>
                             <button class="btn ecc-btn-primary px-4 ms-auto" 
                                     wire:click="submitRemovalRequest"
                                     wire:loading.attr="disabled"

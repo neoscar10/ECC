@@ -37,6 +37,7 @@ class VaultRemovalRequest extends Model
 
     // ── Request Status Constants ──
 
+    const STATUS_DRAFT     = 'draft';
     const STATUS_PENDING   = 'pending';
     const STATUS_APPROVED  = 'approved';
     const STATUS_REJECTED  = 'rejected';
@@ -58,9 +59,9 @@ class VaultRemovalRequest extends Model
         return $this->belongsTo(User::class);
     }
  
-    public function vaultItem()
+    public function vaultItems()
     {
-        return $this->belongsTo(UserVaultItem::class, 'vault_item_id');
+        return $this->belongsToMany(UserVaultItem::class, 'user_vault_item_vault_removal_request');
     }
  
     public function reviewedByAdmin()

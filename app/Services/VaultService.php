@@ -90,26 +90,32 @@ class VaultService
     }
 
     /**
-     * Create a removal (physical delivery) request for a vault item.
+     * Create a removal (physical delivery) request for multiple vault items.
      */
-    public function requestRemoval(UserVaultItem $item, User $user, ?string $message = null, $addressId = null, $addressData = null, ?array $quoteData = null): \App\Models\VaultRemovalRequest
+    public function requestRemoval($items, User $user, ?string $message = null, $addressId = null, $addressData = null, ?array $quoteData = null): \App\Models\VaultRemovalRequest
     {
         // 1. Authorization
-        if ($item->user_id !== $user->id) {
-            throw new \Exception("Unauthorized: You do not own this vault item.");
-        }
+        foreach ($items as $item) {
+            if ($item->user_id !== $user->id) {
+                throw new \Exception("Unauthorized: You do not own vault item #{$item->id}.");
+            }
 
-        if ($item->status !== 'locked') {
-            throw new \Exception("Invalid state: This item is already removed or processed.");
+            if ($item->status !== 'locked') {
+                throw new \Exception("Invalid state: Vault item #{$item->id} is already removed or processed.");
+            }
         }
 
         // 2. Prevent duplicate active requests
-        $exists = \App\Models\VaultRemovalRequest::where('vault_item_id', $item->id)
+        $itemIds = is_array($items) ? array_map(fn($i) => $i->id, $items) : $items->pluck('id')->toArray();
+        $exists = DB::table('user_vault_item_vault_removal_request')
+            ->join('vault_removal_requests', 'vault_removal_requests.id', '=', 'user_vault_item_vault_removal_request.vault_removal_request_id')
+            ->whereIn('user_vault_item_id', $itemIds)
             ->whereIn('status', [\App\Models\VaultRemovalRequest::STATUS_PENDING, \App\Models\VaultRemovalRequest::STATUS_APPROVED])
+            ->whereNull('vault_removal_requests.deleted_at')
             ->exists();
 
         if ($exists) {
-            throw new \Exception("A removal request for this item is already in progress.");
+            throw new \Exception("A removal request for one or more of these items is already in progress.");
         }
 
         // 3. Address resolution
@@ -185,15 +191,23 @@ class VaultService
             ];
         }
 
+        $initialStatus = \App\Models\VaultRemovalRequest::STATUS_PENDING;
+        if (isset($quoteAttributes['payment_status']) && $quoteAttributes['payment_status'] === \App\Models\VaultRemovalRequest::PAYMENT_PENDING) {
+            $initialStatus = 'draft';
+        }
+
         // 4. Create request
-        return \App\Models\VaultRemovalRequest::create(array_merge([
+        $request = \App\Models\VaultRemovalRequest::create(array_merge([
             'user_id' => $user->id,
-            'vault_item_id' => $item->id,
-            'status' => \App\Models\VaultRemovalRequest::STATUS_PENDING,
+            'status' => $initialStatus,
             'message' => $message,
             'requested_at' => now(),
             'address_id' => $resolvedAddressId,
         ], $snapshot, $quoteAttributes));
+
+        $request->vaultItems()->attach($itemIds);
+
+        return $request;
     }
 
     /**
@@ -268,8 +282,10 @@ class VaultService
         }
 
         DB::transaction(function() use ($request, $admin, $note) {
-            // 1. Mark vault item as removed
-            $this->markRemoved($request->vaultItem, $admin, $note ?: $request->admin_note);
+            // 1. Mark vault items as removed
+            foreach ($request->vaultItems as $item) {
+                $this->markRemoved($item, $admin, $note ?: $request->admin_note);
+            }
 
             // 2. Mark request as completed
             $request->update([

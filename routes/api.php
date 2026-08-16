@@ -218,6 +218,10 @@ Route::prefix('v1')->group(function () {
         Route::get('{id}', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'show']);
         Route::post('{id}/request-removal', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'requestRemoval']);
         Route::match(['get', 'post'], '{id}/delivery-quote', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'deliveryQuote']);
+        
+        // Multi-item delivery routes
+        Route::post('request-removal', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'requestMultiRemoval']);
+        Route::match(['get', 'post'], 'delivery-quote', [\App\Http\Controllers\Api\V1\Vault\VaultController::class, 'deliveryMultiQuote']);
     });
 
     // Auction Subscriptions

@@ -83,7 +83,7 @@ class CheckoutPage extends Component
 
         if ($this->vaultRequestId) {
             $this->isVaultDelivery = true;
-            $request = \App\Models\VaultRemovalRequest::with('vaultItem')->find($this->vaultRequestId);
+            $request = \App\Models\VaultRemovalRequest::with('vaultItems')->find($this->vaultRequestId);
             
             if (!$request || $request->user_id !== $user->id || !in_array($request->payment_status, ['pending_payment', 'payment_failed'])) {
                 session()->flash('error', 'Invalid or expired vault delivery request.');
@@ -110,17 +110,18 @@ class CheckoutPage extends Component
                 'formatted_total' => '₹' . number_format($shippingFee, 2),
             ];
 
-            $img = $request->vaultItem->display_image_url ?? 'https://placehold.co/100x100/17130b/d4af37?text=Secured+Asset';
+            $this->summaryItems = collect();
+            foreach ($request->vaultItems as $vaultItem) {
+                $img = $vaultItem->display_image_url ?? 'https://placehold.co/100x100/17130b/d4af37?text=Secured+Asset';
 
-            $this->summaryItems = collect([
-                (object) [
-                    'title' => $request->vaultItem->item_title ?? 'Secured Asset',
+                $this->summaryItems->push((object) [
+                    'title' => $vaultItem->item_title ?? 'Secured Asset',
                     'quantity' => 1,
                     'image_url' => $img,
-                    'formatted_total' => '₹' . number_format($shippingFee, 2),
-                    'meta' => 'Physical Delivery Fee',
-                ]
-            ]);
+                    'formatted_total' => 'Included in Delivery Fee',
+                    'meta' => 'Vault Asset',
+                ]);
+            }
 
             $this->canPlaceOrder = true;
             $this->shippingCourierName = $request->selected_courier_name ?? null;
