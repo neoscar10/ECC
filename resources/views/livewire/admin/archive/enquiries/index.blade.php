@@ -133,11 +133,19 @@
                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                     <li><a href="#" wire:click.prevent="viewEnquiry({{ $enquiry->id }})" class="dropdown-item"><i class="ri-eye-fill align-bottom me-2 text-muted"></i> View</a></li>
                                                     <li><a class="dropdown-item edit-item-btn" href="#" wire:click.prevent="updateStatus({{ $enquiry->id }}, 'interested')"><i class="ri-thumb-up-fill align-bottom me-2 text-muted"></i> Mark Interested</a></li>
-                                                    <li>
-                                                        <a class="dropdown-item" href="#" wire:click.prevent="attemptLogSale({{ $enquiry->id }})">
-                                                            <i class="ri-shopping-cart-2-line align-bottom me-2 text-primary"></i> Log Sale
-                                                        </a>
-                                                    </li>
+                                                    @if($enquiry->archive_order_id)
+                                                        <li>
+                                                            <span class="dropdown-item text-success pe-none">
+                                                                <i class="ri-check-double-line align-bottom me-2"></i> Sale Logged
+                                                            </span>
+                                                        </li>
+                                                    @else
+                                                        <li>
+                                                            <a class="dropdown-item" href="#" wire:click.prevent="attemptLogSale({{ $enquiry->id }})">
+                                                                <i class="ri-shopping-cart-2-line align-bottom me-2 text-primary"></i> Log Sale
+                                                            </a>
+                                                        </li>
+                                                    @endif
                                                     <li><a class="dropdown-item remove-item-btn" href="#" wire:click.prevent="updateStatus({{ $enquiry->id }}, 'closed')"><i class="ri-check-double-fill align-bottom me-2 text-muted"></i> Mark Closed</a></li>
                                                 </ul>
                                             </div>
