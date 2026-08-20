@@ -433,38 +433,33 @@
                                 @endphp
                                 @if($firstGroup && $firstGroup->values->isNotEmpty())
                                     <div class="px-5 pt-4 flex gap-2 overflow-x-auto pb-2 relative z-10">
-                                        @foreach($firstGroup->values->take(4) as $value)
+                                        @foreach($firstGroup->values as $value)
                                             @php
                                                 $swatchUrl = route('shop.show', ['slug' => $product->slug, 'v' => [$firstGroup->id => $value->id]]);
                                                 $hoverImageUrl = $value->presentation_image_path ? url('storage/' . $value->presentation_image_path) : $productImage;
                                             @endphp
                                             @if($firstGroup->presentation_type === 'image' || $value->presentation_image_path)
                                                 <img
-                                                    class="w-10 h-10 rounded-sm border border-outline-variant cursor-pointer hover:border-primary transition-colors object-cover"
+                                                    class="w-10 h-10 rounded-sm border border-outline-variant cursor-pointer hover:border-primary transition-colors object-cover flex-shrink-0"
                                                     @mouseover="activeImage = '{{ $hoverImageUrl }}'; activeSwatch = {{ $value->id }}"
                                                     :class="{ 'border-primary': activeSwatch === {{ $value->id }} }"
                                                     src="{{ $hoverImageUrl }}"
                                                 />
                                             @elseif($firstGroup->presentation_type === 'color' && $value->color_hex)
                                                 <span
-                                                    class="w-10 h-10 rounded-sm border border-outline-variant cursor-pointer hover:border-primary transition-colors flex items-center justify-center"
+                                                    class="w-10 h-10 rounded-sm border border-outline-variant cursor-pointer hover:border-primary transition-colors flex items-center justify-center flex-shrink-0"
                                                     @mouseover="activeSwatch = {{ $value->id }}"
                                                     style="background-color: {{ $value->color_hex }};"
                                                 ></span>
                                             @else
                                                 <span
-                                                    class="w-10 h-10 rounded-sm border border-outline-variant cursor-pointer hover:border-primary transition-colors flex items-center justify-center text-xs font-bold px-1"
+                                                    class="w-10 h-10 rounded-sm border border-outline-variant cursor-pointer hover:border-primary transition-colors flex items-center justify-center text-xs font-bold px-1 flex-shrink-0"
                                                     @mouseover="activeSwatch = {{ $value->id }}"
                                                 >
                                                     {{ $value->caption }}
                                                 </span>
                                             @endif
                                         @endforeach
-                                        @if($firstGroup->values->count() > 4)
-                                            <div class="w-10 h-10 rounded-sm border border-outline-variant flex items-center justify-center bg-surface-container text-label-sm font-label-sm text-secondary">
-                                                +{{ $firstGroup->values->count() - 4 }}
-                                            </div>
-                                        @endif
                                     </div>
                                 @endif
                             @endif
