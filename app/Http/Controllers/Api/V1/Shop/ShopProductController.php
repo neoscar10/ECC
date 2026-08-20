@@ -37,6 +37,8 @@ class ShopProductController extends Controller
             $request->input('per_page', 20)
         );
 
+        $products->getCollection()->loadMissing(['variationGroups.values', 'categories', 'tags']);
+
         return $this->success(
             ShopProductResource::collection($products),
             'Products fetched successfully.',
@@ -59,7 +61,8 @@ class ShopProductController extends Controller
             'images', 
             'categories.parent', 
             'tags.group', 
-            'variationGroups.values.images' // Eager load value images
+            'variationGroups.values.images', // Eager load value images
+            'sizeGuide'
         ])->active()->findOrFail($id);
 
         return $this->success(

@@ -61,6 +61,16 @@ class ShopProductDetailResource extends JsonResource
             'currency' => $this->currency,
             'base_price' => number_format($this->base_price, 2, '.', ''),
 
+            'size_guide' => $this->sizeGuide ? [
+                'id' => $this->sizeGuide->id,
+                'name' => $this->sizeGuide->name,
+                'description' => $this->sizeGuide->description,
+                'how_to_measure_text' => $this->sizeGuide->how_to_measure_text,
+                'how_to_measure_image_url' => $this->sizeGuide->how_to_measure_image_path ? url('storage/' . $this->sizeGuide->how_to_measure_image_path) : null,
+                'table_data' => $this->sizeGuide->table_data,
+                'cm_to_inch_multiplier' => $this->sizeGuide->cm_to_inch_multiplier,
+            ] : null,
+
             'media' => $this->images->map(function ($img, $index) {
                 return [
                     'id' => $img->id,

@@ -17,6 +17,37 @@ class ShopProductResource extends JsonResource
         // We'll rely on the model attributes or load them.
         $maxVarPrice = $this->computed_max_price ?? $this->base_price; 
 
+        $showcaseGroup = $this->relationLoaded('variationGroups') ? $this->variationGroups->firstWhere('show_on_list', true) : null;
+        // Fallback to first group if none are marked for show_on_list
+        if (!$showcaseGroup && $this->relationLoaded('variationGroups')) {
+            $showcaseGroup = $this->variationGroups->first();
+        }
+
+        $formattedShowcaseGroup = null;
+        if ($showcaseGroup) {
+            $formattedShowcaseGroup = [
+                'id' => $showcaseGroup->id,
+                'name' => $showcaseGroup->name,
+                'presentation' => $showcaseGroup->presentation_type,
+                'has_gallery_images' => (bool)$showcaseGroup->has_images,
+                'values' => $showcaseGroup->values->map(function ($val) use ($showcaseGroup) {
+                    return [
+                        'id' => $val->id,
+                        'label' => $val->caption,
+                        'price' => number_format($val->price, 2, '.', ''),
+                        'stock' => $val->stock_qty,
+                        'is_default' => (bool)$val->is_default,
+                        'presentation_image_url' => $val->presentation_image_path ? url('storage/' . $val->presentation_image_path) : null,
+                        'display' => [
+                            'image_url' => $showcaseGroup->presentation_type == 'image' && $val->presentation_image_path 
+                                ? url('storage/' . $val->presentation_image_path) : null,
+                            'color_hex' => $showcaseGroup->presentation_type == 'color' ? $val->color_hex : null,
+                        ],
+                    ];
+                }),
+            ];
+        }
+
         return [
             'id' => $this->id,
             'slug' => $this->slug,
@@ -60,7 +91,8 @@ class ShopProductResource extends JsonResource
                 ]
             ]),
 
-            'has_variations' => $this->variationGroups->isNotEmpty(),
+            'has_variations' => $this->relationLoaded('variationGroups') && $this->variationGroups->isNotEmpty(),
+            'showcase_variation_group' => $formattedShowcaseGroup,
             'created_at' => $this->created_at->toIso8601String(),
         ];
     }
