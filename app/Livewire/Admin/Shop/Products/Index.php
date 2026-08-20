@@ -516,6 +516,7 @@ class Index extends Component
                 'presentation_type' => $group->presentation_type,
                 'has_images' => (bool)$group->has_images,
                 'sort_order' => $group->sort_order,
+                'show_on_list' => (bool)$group->show_on_list,
                 'values' => []
             ];
 
@@ -792,6 +793,15 @@ class Index extends Component
             
             // If no conflict, we allow it. (No need to loop disable, as others must be false)
         }
+    public function handleVariationShowOnListToggle($enabledIndex)
+    {
+        if ($this->variationGroups[$enabledIndex]['show_on_list'] ?? false) {
+            foreach ($this->variationGroups as $index => $group) {
+                if ($index !== $enabledIndex) {
+                    $this->variationGroups[$index]['show_on_list'] = false;
+                }
+            }
+        }
     }
 
     public function setVariationDefault($groupIndex, $valueIndex)
@@ -894,6 +904,7 @@ class Index extends Component
             'name' => '',
             'presentation_type' => 'text',
             'has_images' => false,
+            'show_on_list' => false,
             'sort_order' => 0, 
             'values' => [
                 [
@@ -1311,6 +1322,7 @@ class Index extends Component
                 'name' => $gData['name'],
                 'presentation_type' => $gData['presentation_type'],
                 'has_images' => $gData['has_images'] ?? false,
+                'show_on_list' => $gData['show_on_list'] ?? false,
                 'sort_order' => $gIndex,
             ];
             

@@ -426,23 +426,23 @@
                             {{-- Swatches hover preview --}}
                             @if($product->variationGroups->isNotEmpty())
                                 @php
-                                    $firstGroup = $product->variationGroups->first();
+                                    $showcaseGroup = $product->variationGroups->firstWhere('show_on_list', true) ?? $product->variationGroups->first();
                                 @endphp
-                                @if($firstGroup && $firstGroup->values->isNotEmpty())
+                                @if($showcaseGroup && $showcaseGroup->values->isNotEmpty())
                                     <div class="px-5 pt-4 flex gap-2 overflow-x-auto pb-2 relative z-10">
-                                        @foreach($firstGroup->values as $value)
+                                        @foreach($showcaseGroup->values as $value)
                                             @php
-                                                $swatchUrl = route('shop.show', ['slug' => $product->slug, 'v' => [$firstGroup->id => $value->id]]);
+                                                $swatchUrl = route('shop.show', ['slug' => $product->slug, 'v' => [$showcaseGroup->id => $value->id]]);
                                                 $hoverImageUrl = $value->presentation_image_path ? url('storage/' . $value->presentation_image_path) : $productImage;
                                             @endphp
-                                            @if($firstGroup->presentation_type === 'image' || $value->presentation_image_path)
+                                            @if($showcaseGroup->presentation_type === 'image' || $value->presentation_image_path)
                                                 <img
                                                     class="w-10 h-10 rounded-sm border border-outline-variant cursor-pointer hover:border-primary transition-colors object-cover flex-shrink-0"
                                                     @mouseover="activeImage = '{{ $hoverImageUrl }}'; activeSwatch = {{ $value->id }}"
                                                     :class="{ 'border-primary': activeSwatch === {{ $value->id }} }"
                                                     src="{{ $hoverImageUrl }}"
                                                 />
-                                            @elseif($firstGroup->presentation_type === 'color' && $value->color_hex)
+                                            @elseif($showcaseGroup->presentation_type === 'color' && $value->color_hex)
                                                 <span
                                                     class="w-10 h-10 rounded-sm border border-outline-variant cursor-pointer hover:border-primary transition-colors flex items-center justify-center flex-shrink-0"
                                                     @mouseover="activeSwatch = {{ $value->id }}"

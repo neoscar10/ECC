@@ -85,11 +85,11 @@
                     <div id="collapse{{ $gIndex }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ $gIndex }}">
                         <div class="accordion-body border-top">
                             <div class="row g-3 mb-4">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label class="form-label">Group Name</label>
                                     <input type="text" class="form-control" wire:model.live="variationGroups.{{ $gIndex }}.name" placeholder="Size, Color...">
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <label class="form-label">Type</label>
                                     <select class="form-select" wire:model.live="variationGroups.{{ $gIndex }}.presentation_type">
                                         <option value="text">Text (Label)</option>
@@ -102,6 +102,13 @@
                                     <div class="form-check form-switch mt-2">
                                         <input class="form-check-input" type="checkbox" wire:model.live="variationGroups.{{ $gIndex }}.has_images" wire:change="handleVariationImageToggle({{ $gIndex }})">
                                         <label class="form-check-label text-muted text-sm">Has Images</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Showcase on List?</label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" wire:model.live="variationGroups.{{ $gIndex }}.show_on_list" wire:change="handleVariationShowOnListToggle({{ $gIndex }})">
+                                        <label class="form-check-label text-muted text-sm">Show Options</label>
                                     </div>
                                 </div>
                             </div>

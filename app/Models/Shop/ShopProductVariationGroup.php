@@ -16,12 +16,14 @@ class ShopProductVariationGroup extends Model
         'presentation_type',
         'has_images',
         'sort_order',
+        'show_on_list',
     ];
 
     protected $casts = [
         'has_images' => 'boolean',
         'sort_order' => 'integer',
         'shop_product_id' => 'integer',
+        'show_on_list' => 'boolean',
     ];
 
     public function product(): BelongsTo
