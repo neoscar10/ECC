@@ -426,7 +426,7 @@
                             {{-- Swatches hover preview --}}
                             @if($product->variationGroups->isNotEmpty())
                                 @php
-                                    $showcaseGroup = $product->variationGroups->firstWhere('show_on_list', true) ?? $product->variationGroups->first();
+                                    $showcaseGroup = $product->variationGroups->firstWhere('show_on_list', true);
                                 @endphp
                                 @if($showcaseGroup && $showcaseGroup->values->isNotEmpty())
                                     <div class="px-5 pt-4 flex gap-2 overflow-x-auto pb-2 relative z-10">

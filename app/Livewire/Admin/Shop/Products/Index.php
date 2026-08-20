@@ -906,7 +906,7 @@ class Index extends Component
             'name' => '',
             'presentation_type' => 'text',
             'has_images' => false,
-            'show_on_list' => false,
+            'show_on_list' => true,
             'sort_order' => 0, 
             'values' => [
                 [

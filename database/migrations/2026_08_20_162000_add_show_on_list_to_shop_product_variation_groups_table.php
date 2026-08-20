@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('shop_product_variation_groups', function (Blueprint $table) {
-            $table->boolean('show_on_list')->default(false);
+            $table->boolean('show_on_list')->default(true);
         });
     }
 
