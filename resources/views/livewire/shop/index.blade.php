@@ -180,9 +180,8 @@
                 <button
                     type="button"
                     wire:click="$set('activeCategoryId', null)"
-                    class="flex items-center space-x-2 p-2 transition-all rounded-xl w-full text-left {{ empty($activeCategoryId) ? 'text-primary font-bold border-l-4 border-primary bg-surface-container-high' : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-high' }}"
+                    class="flex items-center p-2 transition-all rounded-xl w-full text-left {{ empty($activeCategoryId) ? 'text-primary font-bold border-l-4 border-primary bg-surface-container-high' : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-high' }}"
                 >
-                    <span class="material-symbols-outlined">grid_view</span>
                     <span class="text-body-md font-body-md">All Collections</span>
                 </button>
 
@@ -200,18 +199,7 @@
                             wire:click="$set('activeCategoryId', {{ $categoryActive ? 'null' : "'$categoryId'" }})"
                             class="flex items-center justify-between p-2 transition-all rounded-xl w-full text-left {{ $categoryActive ? 'text-primary font-bold border-l-4 border-primary bg-surface-container-high' : ($childActive ? 'text-primary font-bold bg-surface-container-high' : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-high') }}"
                         >
-                            <div class="flex items-center space-x-2">
-                                <span class="material-symbols-outlined">
-                                    @if(str_contains(strtolower($categoryName), 'backpack')) backpack
-                                    @elseif(str_contains(strtolower($categoryName), 'cricket')) sports_cricket
-                                    @elseif(str_contains(strtolower($categoryName), 'ipl')) star
-                                    @elseif(str_contains(strtolower($categoryName), 'bag')) sports_kabaddi
-                                    @elseif(str_contains(strtolower($categoryName), 'shoe')) ice_skating
-                                    @else folder
-                                    @endif
-                                </span>
-                                <span class="text-body-md font-body-md">{{ $categoryName }}</span>
-                            </div>
+                            <span class="text-body-md font-body-md">{{ $categoryName }}</span>
                             @if($hasChildren)
                                 <span class="material-symbols-outlined text-sm">{{ $categoryActive || $childActive ? 'expand_more' : 'chevron_right' }}</span>
                             @endif
