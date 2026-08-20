@@ -110,6 +110,7 @@
                                         <input class="form-check-input" type="checkbox" wire:model.live="variationGroups.{{ $gIndex }}.show_on_list" wire:change="handleVariationShowOnListToggle({{ $gIndex }})">
                                         <label class="form-check-label text-muted text-sm">Show Options</label>
                                     </div>
+                                    <div class="form-text text-muted small mt-1" style="font-size: 11px; line-height: 1.2;">Show this group's swatches or size buttons on the main shop list page preview.</div>
                                 </div>
                             </div>
     
