@@ -17,21 +17,36 @@
     </div>
 
     <!-- Price Range & Quantity -->
-    <div class="col-md-4">
-        <label class="form-label">Min Price (Price from)</label>
-        <input type="number" class="form-control" wire:model="priceMin" placeholder="e.g. 1000">
-        @error('priceMin') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+    <div class="col-12 mt-2">
+        <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" id="includePriceRange" wire:model.live="includePriceRange">
+            <label class="form-check-label" for="includePriceRange">Include Price Range</label>
+        </div>
     </div>
-    <div class="col-md-4">
-        <label class="form-label">Max Price (Price to)</label>
-        <input type="number" class="form-control" wire:model="priceMax" placeholder="e.g. 5000">
-        @error('priceMax') <span class="text-danger text-sm">{{ $message }}</span> @enderror
-    </div>
-    <div class="col-md-4">
-        <label class="form-label">Quantity <span class="text-danger">*</span></label>
-        <input type="number" min="1" class="form-control" wire:model="quantity" placeholder="1">
-        @error('quantity') <span class="text-danger text-sm">{{ $message }}</span> @enderror
-    </div>
+
+    @if($includePriceRange)
+        <div class="col-md-4">
+            <label class="form-label">Min Price (Price from)</label>
+            <input type="number" class="form-control" wire:model="priceMin" placeholder="e.g. 1000">
+            @error('priceMin') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Max Price (Price to)</label>
+            <input type="number" class="form-control" wire:model="priceMax" placeholder="e.g. 5000">
+            @error('priceMax') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Quantity <span class="text-danger">*</span></label>
+            <input type="number" min="1" class="form-control" wire:model="quantity" placeholder="1">
+            @error('quantity') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+        </div>
+    @else
+        <div class="col-md-4">
+            <label class="form-label">Quantity <span class="text-danger">*</span></label>
+            <input type="number" min="1" class="form-control" wire:model="quantity" placeholder="1">
+            @error('quantity') <span class="text-danger text-sm">{{ $message }}</span> @enderror
+        </div>
+    @endif
     
     <!-- Shipping Dimensions -->
     <div class="col-12 mt-2">

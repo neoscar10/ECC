@@ -39,7 +39,7 @@ class SendFcmToUserJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(FcmSender $sender): void
+    public function handle(FcmSender $sender, \App\Services\Notifications\WhatsAppNotificationSender $waSender): void
     {
         \Illuminate\Support\Facades\Log::info("Job [SendFcmToUserJob] starting", [
             'user_id' => $this->userId,
@@ -49,6 +49,9 @@ class SendFcmToUserJob implements ShouldQueue
         $user = User::find($this->userId);
         if ($user) {
             $sender->sendToUser($user, $this->title, $this->body, $this->data, $this->options);
+            
+            // Mirror to WhatsApp
+            $waSender->sendToUser($this->userId, $this->title, $this->body, $this->data);
         } else {
             \Illuminate\Support\Facades\Log::warning("Job [SendFcmToUserJob]: User not found", ['user_id' => $this->userId]);
         }

@@ -44,6 +44,8 @@ class PaymentFinalizationService
                 return $this->vaultDeliveryPaymentService->finalizePaidVaultDelivery($payment);
             case PaymentPurpose::AUCTION_SETTLEMENT:
                 return $this->auctionSettlementPaymentService->finalizePaidAuctionSettlement($payment);
+            case PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT:
+                return $this->finalizePaidArchiveEnquiry($payment);
             default:
                 throw new InvalidArgumentException("Unsupported payment purpose: {$payment->purpose}");
         }
@@ -64,6 +66,8 @@ class PaymentFinalizationService
                 return $this->vaultDeliveryPaymentService->markPaymentFailedVaultDelivery($payment, $reason);
             case PaymentPurpose::AUCTION_SETTLEMENT:
                 return $this->auctionSettlementPaymentService->markPaymentFailedAuctionSettlement($payment, $reason);
+            case PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT:
+                return $this->markPaymentFailedArchiveEnquiry($payment, $reason);
             default:
                 throw new InvalidArgumentException("Unsupported payment purpose: {$payment->purpose}");
         }
@@ -75,5 +79,20 @@ class PaymentFinalizationService
     public function finalizeFailedPayment(Payment $payment, string $reason)
     {
         return $this->markPaymentFailed($payment, $reason);
+    }
+
+    protected function finalizePaidArchiveEnquiry(Payment $payment)
+    {
+        $enquiry = $payment->payable;
+        if ($enquiry) {
+            $enquiry->update(['status' => 'paid']);
+            // If they need to log a sale or do something else, we can trigger an event or handle it here
+            // e.g. event(new ArchiveEnquiryPaid($enquiry));
+        }
+    }
+
+    protected function markPaymentFailedArchiveEnquiry(Payment $payment, string $reason)
+    {
+        // No action strictly needed for the enquiry itself, it remains awaiting payment
     }
 }

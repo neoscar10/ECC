@@ -43,6 +43,29 @@ class VaultDeliveryQuoteService
             ];
         }
 
+        // Check if the address belongs to a negotiated delivery country
+        if ($address->deliveryCountry && $address->deliveryCountry->delivery_type === 'negotiated') {
+            $measurement = $this->measurementService->measurementFromVaultItem($vaultItem);
+            return [
+                'success' => true,
+                'message' => 'To be discussed',
+                'delivery_fee' => 0.00,
+                'currency' => 'INR',
+                'delivery_type' => 'negotiated',
+                'measurement' => [
+                    'weight_kg' => $measurement['weight_kg'],
+                    'length_cm' => $measurement['length_cm'],
+                    'breadth_cm' => $measurement['breadth_cm'],
+                    'height_cm' => $measurement['height_cm'],
+                    'volumetric_weight_kg' => $measurement['volumetric_weight_kg'],
+                    'chargeable_weight_kg' => $measurement['chargeable_weight_kg'],
+                    'source' => $measurement['source'],
+                    'has_fallback' => $measurement['has_fallback'],
+                ],
+                'rate_quote_id' => null,
+            ];
+        }
+
         $resolvedUser = $user ?: $vaultItem->user ?: auth('web')->user();
 
         return $this->quoteForVaultItemAndPincode($vaultItem, $deliveryPincode, $resolvedUser, $options);
@@ -221,6 +244,29 @@ class VaultDeliveryQuoteService
                 'reason' => 'missing_pincode',
                 'delivery_fee' => 0.00,
                 'currency' => 'INR',
+            ];
+        }
+
+        // Check if the address belongs to a negotiated delivery country
+        if ($address->deliveryCountry && $address->deliveryCountry->delivery_type === 'negotiated') {
+            $measurement = $this->measurementService->measurementFromVaultItems($vaultItems);
+            return [
+                'success' => true,
+                'message' => 'To be discussed',
+                'delivery_fee' => 0.00,
+                'currency' => 'INR',
+                'delivery_type' => 'negotiated',
+                'measurement' => [
+                    'weight_kg' => $measurement['weight_kg'],
+                    'length_cm' => $measurement['length_cm'],
+                    'breadth_cm' => $measurement['breadth_cm'],
+                    'height_cm' => $measurement['height_cm'],
+                    'volumetric_weight_kg' => $measurement['volumetric_weight_kg'],
+                    'chargeable_weight_kg' => $measurement['chargeable_weight_kg'],
+                    'source' => $measurement['source'],
+                    'has_fallback' => $measurement['has_fallback'],
+                ],
+                'rate_quote_id' => null,
             ];
         }
 

@@ -9,4 +9,5 @@ class PaymentPurpose
     const MEMBERSHIP_RENEWAL = 'membership_renewal';
     const VAULT_DELIVERY = 'vault_delivery';
     const AUCTION_SETTLEMENT = 'auction_settlement';
+    const ARCHIVE_ENQUIRY_PAYMENT = 'archive_enquiry_payment';
 }

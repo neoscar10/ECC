@@ -20,6 +20,7 @@
     <link href="{{ asset('velzon/assets/css/custom.min.css') }}" rel="stylesheet" type="text/css" />
 
     @livewireStyles
+    @stack('styles')
 </head>
 
 <body>
@@ -35,5 +36,6 @@
     <script src="{{ asset('velzon/assets/js/plugins.js') }}"></script>
 
     @livewireScripts
+    @stack('scripts')
 </body>
 </html>

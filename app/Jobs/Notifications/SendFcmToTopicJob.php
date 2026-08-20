@@ -38,12 +38,15 @@ class SendFcmToTopicJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(FcmSender $sender): void
+    public function handle(FcmSender $sender, \App\Services\Notifications\WhatsAppNotificationSender $waSender): void
     {
         \Illuminate\Support\Facades\Log::info("Job [SendFcmToTopicJob] starting", [
             'topic' => $this->topic,
             'title' => $this->title
         ]);
         $sender->sendToTopic($this->topic, $this->title, $this->body, $this->data, $this->options);
+        
+        // Mirror to WhatsApp
+        $waSender->sendToTopic($this->topic, $this->title, $this->body, $this->data);
     }
 }

@@ -17,6 +17,9 @@ class CheckoutSummaryResource extends JsonResource
             'tax_amount' => $this['tax_amount'],
             'discount_amount' => $this['discount_amount'],
             'total_amount' => $this['total_amount'],
+            'requires_shipping' => $this['requires_shipping'] ?? true,
+            'delivery_type' => $this['shipping_quote']['delivery_type'] ?? 'courier',
+            'shipping_message' => $this['shipping_quote']['message'] ?? null,
             'items' => collect($this['items'])->map(fn($item) => [
                 'product_id' => $item['shop_product_id'],
                 'title' => $item['title'],

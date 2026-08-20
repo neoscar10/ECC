@@ -15,7 +15,6 @@ Route::middleware(['auth', 'ensure_registration_complete'])->group(function () {
     Route::get('/archive', \App\Livewire\Archive\ArchiveBrowse::class)->name('archive.index');
     Route::get('/vault', \App\Livewire\Vault\Index::class)->name('vault.index');
 
-    Route::get('/archive/products/{id}', \App\Livewire\Archive\ArchiveProductShow::class)->name('archive.products.show');
     Route::get('/pavilion/{type}/{slugOrId}', \App\Livewire\Pavilion\ContentDetailPage::class)->name('pavilion.detail');
     Route::get('/club', \App\Livewire\Club\ClubPage::class)->name('club');
     Route::get('/settings', \App\Livewire\Settings\SettingsPage::class)->name('settings');
@@ -30,20 +29,6 @@ Route::middleware(['auth', 'ensure_registration_complete'])->group(function () {
     Route::get('/order-details/{orderId}', \App\Livewire\Shop\OrderDetailsPage::class)->name('shop.order-details');
     Route::get('/order-success/{orderId}', \App\Livewire\Shop\OrderSuccessPage::class)->name('shop.order-success');
     Route::get('/shop/{slug}', \App\Livewire\Shop\Show::class)->name('shop.show');
-    
-    // Payments
-    Route::get('/payments/{payment}/pay', [\App\Http\Controllers\Web\Payment\GenericPaymentController::class, 'pay'])->name('payments.pay');
-    Route::get('/payments/{payment}/retry', [\App\Http\Controllers\Web\Payment\GenericPaymentController::class, 'retry'])->name('payments.retry');
-    Route::get('/payments/razorpay/{payment}/pay', [\App\Http\Controllers\Web\Payment\RazorpayPaymentController::class, 'pay'])->name('payments.razorpay.pay');
-    Route::post('/payments/razorpay/verify', [\App\Http\Controllers\Web\Payment\RazorpayPaymentController::class, 'verify'])->name('payments.razorpay.verify');
-    Route::get('/payments/razorpay/{payment}/retry', [\App\Http\Controllers\Web\Payment\RazorpayPaymentController::class, 'retry'])->name('payments.razorpay.retry');
-    // Cashfree Phase 3: developer debug page confirming session creation (no SDK yet)
-    Route::get('/payments/cashfree/{payment}/pay', [\App\Http\Controllers\Web\Payment\CashfreePaymentController::class, 'pay'])->name('payments.cashfree.pay');
-    Route::post('/payments/cashfree/verify', [\App\Http\Controllers\Web\Payment\CashfreePaymentController::class, 'verify'])->name('payments.cashfree.verify');
-    Route::get('/payments/cashfree/return/{payment}', [\App\Http\Controllers\Web\Payment\CashfreePaymentController::class, 'return'])->name('payments.cashfree.return');
-    Route::get('/payments/failed', function () {
-        return view('shop.payment.failed');
-    })->name('payments.failed');
 });
 
 Route::get('/home', \App\Livewire\Pavilion\HomePage::class)
@@ -62,6 +47,34 @@ Route::get('/splash', SplashScreen::class)->name('splash');
 
 Route::get('/contact', \App\Livewire\Pages\ContactUsPage::class)->name('contact');
 Route::get('/privacy', \App\Livewire\Pages\PrivacyPolicyPage::class)->name('privacy');
+
+// Public Archive Enquiry Payment Routes
+Route::get('/archive/products/{id}', \App\Livewire\Archive\ArchiveProductShow::class)->name('archive.products.show');
+Route::get('/archive/enquiry/{enquiry}/checkout', \App\Livewire\Archive\EnquiryCheckout::class)
+    ->name('archive.enquiry.checkout')
+    ->middleware('signed');
+    
+Route::get('/archive/enquiry/{enquiry}/success', function (\App\Models\Archive\ArchiveProductEnquiry $enquiry) {
+    return view('shop.payment.success', [
+        'title' => 'Payment Successful',
+        'message' => 'Thank you for your payment. Your archive item enquiry is now fully settled.',
+        'redirectUrl' => route('home'),
+        'redirectText' => 'Return to ECC'
+    ]);
+})->name('archive.enquiry.success');
+
+// Public Payment Routes
+Route::get('/payments/{payment}/pay', [\App\Http\Controllers\Web\Payment\GenericPaymentController::class, 'pay'])->name('payments.pay');
+Route::get('/payments/{payment}/retry', [\App\Http\Controllers\Web\Payment\GenericPaymentController::class, 'retry'])->name('payments.retry');
+Route::get('/payments/razorpay/{payment}/pay', [\App\Http\Controllers\Web\Payment\RazorpayPaymentController::class, 'pay'])->name('payments.razorpay.pay');
+Route::post('/payments/razorpay/verify', [\App\Http\Controllers\Web\Payment\RazorpayPaymentController::class, 'verify'])->name('payments.razorpay.verify');
+Route::get('/payments/razorpay/{payment}/retry', [\App\Http\Controllers\Web\Payment\RazorpayPaymentController::class, 'retry'])->name('payments.razorpay.retry');
+Route::get('/payments/cashfree/{payment}/pay', [\App\Http\Controllers\Web\Payment\CashfreePaymentController::class, 'pay'])->name('payments.cashfree.pay');
+Route::post('/payments/cashfree/verify', [\App\Http\Controllers\Web\Payment\CashfreePaymentController::class, 'verify'])->name('payments.cashfree.verify');
+Route::get('/payments/cashfree/return/{payment}', [\App\Http\Controllers\Web\Payment\CashfreePaymentController::class, 'return'])->name('payments.cashfree.return');
+Route::get('/payments/failed', function () {
+    return view('shop.payment.failed');
+})->name('payments.failed');
 
 Route::middleware('guest')->group(function () {
     Route::get('/admin/login', [AuthController::class, 'index'])->name('admin.login');
@@ -88,7 +101,10 @@ Route::middleware(['auth:web', EnsureAdminRole::class])->prefix('admin')->name('
         Route::get('/products', \App\Livewire\Admin\Archive\Products\Index::class)->name('products');
         Route::get('/products/{id}', \App\Livewire\Admin\Archive\Products\Show::class)->name('products.show');
         Route::get('/enquiries', \App\Livewire\Admin\Archive\Enquiries\Index::class)->name('enquiries');
+        Route::get('/ownership', \App\Livewire\Admin\Archive\Ownership\Index::class)->name('ownership.index');
+        Route::get('/ownership/{id}', \App\Livewire\Admin\Archive\Ownership\Show::class)->name('ownership.show');
         Route::get('/orders', \App\Livewire\Admin\Archive\Orders\Index::class)->name('orders.index');
+        Route::get('/orders/{id}', \App\Livewire\Admin\Archive\Orders\Show::class)->name('orders.show');
     });
 
     // Auctions
@@ -125,6 +141,9 @@ Route::middleware(['auth:web', EnsureAdminRole::class])->prefix('admin')->name('
         Route::get('/inventory', \App\Livewire\Admin\Shop\Inventory\Index::class)->name('inventory');
         Route::get('/orders', \App\Livewire\Admin\Shop\Orders\Index::class)->name('orders');
         Route::get('/orders/{id}', \App\Livewire\Admin\Shop\Orders\Show::class)->name('orders.show');
+        
+        Route::get('/size-guides', \App\Livewire\Admin\Shop\SizeGuides\Index::class)->name('size-guides.index');
+        Route::get('/size-guides/{guide}', \App\Livewire\Admin\Shop\SizeGuides\Show::class)->name('size-guides.show');
     });
 
     // Enquiries & Messages
@@ -145,6 +164,12 @@ Route::middleware(['auth:web', EnsureAdminRole::class])->prefix('admin')->name('
         Route::get('/vault', \App\Livewire\Admin\Reports\VaultLedgerReport::class)->name('vault');
     });
 
+    // Address Settings
+    Route::prefix('address-settings')->name('address-settings.')->group(function () {
+        Route::get('/groups', \App\Livewire\Admin\AddressSettings\Groups\Index::class)->name('groups');
+        Route::get('/countries', \App\Livewire\Admin\AddressSettings\Countries\Index::class)->name('countries');
+    });
+
     // Payments Management
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/dashboard', \App\Livewire\Admin\Payments\Dashboard::class)->name('dashboard');
@@ -159,6 +184,7 @@ Route::middleware(['auth:web', EnsureAdminRole::class])->prefix('admin')->name('
     // Settings
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/navigation', \App\Livewire\Admin\Settings\NavigationLinks::class)->name('navigation');
+        Route::get('/change-password', \App\Livewire\Admin\Settings\ChangePassword::class)->name('change-password');
     });
 });
 

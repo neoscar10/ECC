@@ -40,9 +40,21 @@
         </div>
     </div>
     
-    <!-- Tags Column -->
+    <!-- Tags & Size Guide Column -->
     <div class="col-md-6">
         <div class="d-flex flex-column h-100">
+            <!-- Size Guide Section -->
+            <div class="mb-4 pb-3 border-bottom">
+                <label class="form-label fw-bold">Size Guide</label>
+                <div class="text-muted fs-11 mb-2">Attach a size guide to display on the product detail page. If none is selected, the category's size guide will be used (if any).</div>
+                <select class="form-select form-select-sm bg-light" wire:model="size_guide_id">
+                    <option value="">None (Use Category Default)</option>
+                    @foreach($sizeGuides as $guide)
+                        <option value="{{ $guide->id }}">{{ $guide->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             <div class="mb-3">
                 <label class="form-label fw-bold">Tags / Attributes</label>
                 <div class="text-muted fs-11">Select one tag per group (Optional/Searchable).</div>

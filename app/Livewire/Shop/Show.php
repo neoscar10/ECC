@@ -6,12 +6,16 @@ use App\Models\Shop\ShopProduct;
 use App\Services\Shop\CartService;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class Show extends Component
 {
     public $slug;
     public $product;
+    
+    #[Url(except: [])]
+    public $v = [];
     
     // UI State
     public $quantity = 1;
@@ -47,14 +51,18 @@ class Show extends Component
         $this->variationGroups = $this->product->variationGroups->toArray();
         $this->selectedVariationValues = [];
 
-        // Evaluate Defaults
+        // Evaluate Defaults and URL Params
         foreach ($this->product->variationGroups as $group) {
-            $def = $group->values->where('is_default', true)->first();
-            if (!$def && $group->values->isNotEmpty()) {
-                $def = $group->values->first();
-            }
-            if ($def) {
-                $this->selectedVariationValues[$group->id] = $def->id;
+            if (isset($this->v[$group->id])) {
+                $this->selectedVariationValues[$group->id] = (int)$this->v[$group->id];
+            } else {
+                $def = $group->values->where('is_default', true)->first();
+                if (!$def && $group->values->isNotEmpty()) {
+                    $def = $group->values->first();
+                }
+                if ($def) {
+                    $this->selectedVariationValues[$group->id] = $def->id;
+                }
             }
         }
 
@@ -238,9 +246,34 @@ class Show extends Component
 
     public function render()
     {
+        // Compute Size Guide
+        $sizeGuide = null;
+        if ($this->product->size_guide_id) {
+            $sizeGuide = \App\Models\Shop\ShopSizeGuide::find($this->product->size_guide_id);
+        } else {
+            foreach ($this->product->categories as $category) {
+                if ($category->size_guide_id) {
+                    $sizeGuide = \App\Models\Shop\ShopSizeGuide::find($category->size_guide_id);
+                    break;
+                }
+            }
+        }
+
+        // Compute Related Products — from same category, excluding current
+        $categoryIds = $this->product->categories->pluck('id');
+        $relatedProducts = \App\Models\Shop\ShopProduct::with(['images'])
+            ->active()
+            ->whereHas('categories', fn($q) => $q->whereIn('shop_categories.id', $categoryIds))
+            ->where('id', '!=', $this->product->id)
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+
         return view('livewire.shop.show', [
-            'displayPrice' => $this->product->currency ?? 'INR',
-            'featureBullets' => [], 
+            'displayPrice'    => $this->product->currency ?? 'INR',
+            'featureBullets'  => [],
+            'sizeGuide'       => $sizeGuide,
+            'relatedProducts' => $relatedProducts,
         ])->layout('layouts.web-app', [
             'title' => $this->product->title ?? 'Club Store',
         ]);

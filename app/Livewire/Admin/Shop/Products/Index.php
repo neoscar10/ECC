@@ -55,11 +55,13 @@ class Index extends Component
     public $length_cm;
     public $breadth_cm;
     public $height_cm;
+    public $requires_shipping = true;
 
     public $categorySearch = '';
     
     // Step 2: Attributes
     public $selectedCategories = []; // Array of IDs
+    public $size_guide_id = null;
     
     // Tags
 
@@ -157,6 +159,7 @@ class Index extends Component
         return view('livewire.admin.shop.products.index', [
             'products' => $products,
             'categories' => ShopCategory::orderBy('name')->get(), // For filter dropdown
+            'sizeGuides' => \App\Models\Shop\ShopSizeGuide::orderBy('name')->get(),
         ]);
     }
 
@@ -335,6 +338,7 @@ class Index extends Component
         $chargeable = max((float)$this->weight_kg, $volumetric);
 
         $this->reviewData['shipping'] = [
+            'requires_shipping' => $this->requires_shipping,
             'has_shipping' => (bool)$this->weight_kg || $volumetric > 0,
             'weight_kg' => $this->weight_kg,
             'length_cm' => $this->length_cm,
@@ -480,6 +484,8 @@ class Index extends Component
         $this->length_cm = $product->length_cm;
         $this->breadth_cm = $product->breadth_cm;
         $this->height_cm = $product->height_cm;
+        $this->requires_shipping = $product->requires_shipping;
+        $this->size_guide_id = $product->size_guide_id;
 
         // Simple Stock Logic
         $this->stock_qty = $product->stock_qty;
@@ -951,6 +957,7 @@ class Index extends Component
             'length_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
             'breadth_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
             'height_cm' => ['nullable', 'numeric', 'min:0.1', 'max:999.99'],
+            'requires_shipping' => 'boolean',
         ]);
 
         if (($this->length_cm || $this->breadth_cm || $this->height_cm) && (!$this->length_cm || !$this->breadth_cm || !$this->height_cm)) {
@@ -974,10 +981,12 @@ class Index extends Component
                 'deactivation_reason' => !$this->is_active ? $this->deactivation_reason : null,
                 'low_stock_threshold' => $this->low_stock_threshold ?: 5,
                 'stock_qty' => $this->has_variants ? null : $this->stock_qty,
-                'weight_kg' => $this->weight_kg,
-                'length_cm' => $this->length_cm,
-                'breadth_cm' => $this->breadth_cm,
-                'height_cm' => $this->height_cm,
+                'weight_kg' => $this->weight_kg === '' ? null : $this->weight_kg,
+                'length_cm' => $this->length_cm === '' ? null : $this->length_cm,
+                'breadth_cm' => $this->breadth_cm === '' ? null : $this->breadth_cm,
+                'height_cm' => $this->height_cm === '' ? null : $this->height_cm,
+                'requires_shipping' => $this->requires_shipping,
+                'size_guide_id' => $this->size_guide_id ?: null,
             ]);
 
             // 2. Attach Categories
@@ -1085,6 +1094,8 @@ class Index extends Component
         $this->length_cm = null;
         $this->breadth_cm = null;
         $this->height_cm = null;
+        $this->requires_shipping = true;
+        $this->size_guide_id = null;
         
         $this->variationsOnlyMode = false;
     }
@@ -1180,6 +1191,7 @@ class Index extends Component
             'base_price' => 'required|numeric|min:0',
             'deactivation_reason' => !$this->is_active ? 'required|string|min:5' : 'nullable',
             'low_stock_threshold' => ['required', 'integer', 'min:0'],
+            'requires_shipping' => 'boolean',
         ]);
 
 
@@ -1193,6 +1205,8 @@ class Index extends Component
             'is_active' => $this->is_active,
             'deactivation_reason' => !$this->is_active ? $this->deactivation_reason : null,
             'low_stock_threshold' => $this->low_stock_threshold ?: 5,
+            'requires_shipping' => $this->requires_shipping,
+            'size_guide_id' => $this->size_guide_id ?: null,
         ]);
     }
 
@@ -1212,10 +1226,10 @@ class Index extends Component
             }
 
             $product->update([
-                'weight_kg' => $this->weight_kg,
-                'length_cm' => $this->length_cm,
-                'breadth_cm' => $this->breadth_cm,
-                'height_cm' => $this->height_cm,
+                'weight_kg' => $this->weight_kg === '' ? null : $this->weight_kg,
+                'length_cm' => $this->length_cm === '' ? null : $this->length_cm,
+                'breadth_cm' => $this->breadth_cm === '' ? null : $this->breadth_cm,
+                'height_cm' => $this->height_cm === '' ? null : $this->height_cm,
             ]);
         }
     }
@@ -1247,6 +1261,7 @@ class Index extends Component
         ]);
 
         $product->categories()->sync($this->selectedCategories);
+        $product->update(['size_guide_id' => $this->size_guide_id ?: null]);
 
         // Tags: Detach all then re-attach active ones
         $product->tags()->detach();

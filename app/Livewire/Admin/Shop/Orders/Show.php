@@ -19,6 +19,9 @@ class Show extends Component
     public $showCancelModal = false;
     public $cancelReason = '';
     public $restoreStock = true; // Default to true
+    
+    // Negotiated Shipping Modal State
+    public $showMarkDeliveryPaidModal = false;
 
     // Shiprocket Phase 5 Modal State
     public $showInitiateShipmentModal = false;
@@ -207,6 +210,30 @@ class Show extends Component
             session()->flash('success', 'Order marked as Paid.');
         } catch (Exception $e) {
             session()->flash('error', 'Error: ' . $e->getMessage());
+        }
+    }
+
+    public function openMarkDeliveryPaidModal()
+    {
+        $this->showMarkDeliveryPaidModal = true;
+    }
+
+    public function closeMarkDeliveryPaidModal()
+    {
+        $this->showMarkDeliveryPaidModal = false;
+    }
+
+    public function markDeliveryPaid()
+    {
+        if ($this->order->delivery_payment_status === 'paid') return;
+
+        try {
+            $this->order->update(['delivery_payment_status' => 'paid']);
+            $this->showMarkDeliveryPaidModal = false;
+            session()->flash('success', 'Negotiated shipping fee marked as Paid.');
+        } catch (Exception $e) {
+            session()->flash('error', 'Error: ' . $e->getMessage());
+            $this->showMarkDeliveryPaidModal = false;
         }
     }
 

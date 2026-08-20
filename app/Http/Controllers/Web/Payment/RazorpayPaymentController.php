@@ -26,7 +26,7 @@ class RazorpayPaymentController extends Controller
      */
     public function pay(Payment $payment)
     {
-        if ($payment->user_id !== auth()->id()) {
+        if ($payment->purpose !== \App\Support\Payments\PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT && $payment->user_id !== auth()->id()) {
             abort(403, 'Unauthorized access to payment.');
         }
 
@@ -115,7 +115,7 @@ class RazorpayPaymentController extends Controller
 
         $payment = Payment::findOrFail($request->input('internal_payment_id'));
 
-        if ($payment->user_id !== auth()->id()) {
+        if ($payment->purpose !== \App\Support\Payments\PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT && $payment->user_id !== auth()->id()) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
@@ -190,7 +190,7 @@ class RazorpayPaymentController extends Controller
      */
     public function retry(Payment $payment)
     {
-        if ($payment->user_id !== auth()->id()) {
+        if ($payment->purpose !== \App\Support\Payments\PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT && $payment->user_id !== auth()->id()) {
             abort(403, 'Unauthorized access to payment.');
         }
 
@@ -211,7 +211,7 @@ class RazorpayPaymentController extends Controller
                 payable: $payable,
                 amount: $payment->amount,
                 purpose: $payment->purpose ?: 'shop_order',
-                user: auth()->user(),
+                user: $payment->user,
                 gateway: $payment->gateway ?: 'razorpay'
             );
 
@@ -243,6 +243,10 @@ class RazorpayPaymentController extends Controller
 
         if ($payment->payable_type === \App\Models\VaultRemovalRequest::class) {
             return route('vault.index');
+        }
+
+        if ($payment->payable_type === \App\Models\Archive\ArchiveProductEnquiry::class) {
+            return route('archive.enquiry.success', ['enquiry' => $payment->payable_id]);
         }
 
         // Fallback

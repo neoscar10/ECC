@@ -54,6 +54,7 @@ class Index extends Component
     public $categoryId; // selected category
     public $priceMin;
     public $priceMax;
+    public $includePriceRange = true;
     public $quantity = 1;
     public $currency = 'INR';
 
@@ -193,8 +194,8 @@ class Index extends Component
             $this->validate([
                 'title' => 'required|string|max:255',
                 'categoryId' => 'required|exists:archive_categories,id',
-                'priceMin' => 'nullable|integer|min:0',
-                'priceMax' => 'nullable|integer|min:0',
+                'priceMin' => $this->includePriceRange ? 'nullable|integer|min:0' : '',
+                'priceMax' => $this->includePriceRange ? 'nullable|integer|min:0' : '',
                 'quantity' => 'required|integer|min:1',
                 'descriptionUnlocked' => 'nullable|string',
                 'goLiveAt' => 'nullable|required_if:goLiveNow,false|date',
@@ -318,6 +319,7 @@ class Index extends Component
         
         $this->priceMin = $product->price_min_amount;
         $this->priceMax = $product->price_max_amount;
+        $this->includePriceRange = !is_null($product->price_min_amount) || !is_null($product->price_max_amount);
         $this->quantity = $product->quantity ?? 1;
 
         // Shipping Dimensions
@@ -413,8 +415,8 @@ class Index extends Component
                 'archive_category_id' => $this->categoryId,
                 'description_unlocked' => $this->descriptionUnlocked,
                 // 'description_locked' => $this->descriptionLocked, // Removed/Consolidated
-                'price_min_amount' => $this->priceMin,
-                'price_max_amount' => $this->priceMax,
+                'price_min_amount' => $this->includePriceRange ? $this->priceMin : null,
+                'price_max_amount' => $this->includePriceRange ? $this->priceMax : null,
                 'quantity' => $this->quantity ?? 1,
                 'currency' => $this->currency,
                 'go_live_now' => $this->goLiveNow,
@@ -518,8 +520,8 @@ class Index extends Component
             'archive_category_id' => $this->categoryId,
             'description_unlocked' => $this->descriptionUnlocked,
             'description_locked' => $this->descriptionLocked,
-            'price_min_amount' => $this->priceMin,
-            'price_max_amount' => $this->priceMax,
+            'price_min_amount' => $this->includePriceRange ? $this->priceMin : null,
+            'price_max_amount' => $this->includePriceRange ? $this->priceMax : null,
             'quantity' => $this->quantity ?? 1,
             'go_live_now' => $this->goLiveNow,
             'go_live_at' => $this->goLiveNow ? null : $this->goLiveAt,
@@ -1135,7 +1137,8 @@ class Index extends Component
 
     public function resetForm()
     {
-        $this->reset(['title', 'categoryId', 'priceMin', 'priceMax', 'quantity', 'descriptionUnlocked']);
+        $this->reset(['title', 'categoryId', 'priceMin', 'priceMax', 'includePriceRange', 'quantity', 'descriptionUnlocked']);
+        $this->includePriceRange = true;
         $this->reset(['goLiveNow', 'goLiveAt', 'allowsEarlyAccess', 'restrictionMode', 'restrictionType', 'restrictedMinTierId', 'restrictedPrivateTierId']);
         $this->reset(['blurEnabled', 'clearViewTierIds', 'computedVisibilityTierIds']);
         $this->selectedRandomTiers = [];

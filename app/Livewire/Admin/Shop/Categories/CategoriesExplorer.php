@@ -35,6 +35,7 @@ class CategoriesExplorer extends Component
     public $slug; // Auto-generated or manual
     public $targetParentId;
     public $is_active = true;
+    public $size_guide_id = null;
 
     public function hasCategoryDefaults($category = null): bool
     {
@@ -156,7 +157,7 @@ class CategoriesExplorer extends Component
 
     public function initiateCreate()
     {
-        $this->reset(['name', 'slug', 'is_active']);
+        $this->reset(['name', 'slug', 'is_active', 'size_guide_id']);
         $this->is_active = true;
         $this->showCreateModal = true;
         // Dispatch browser event if using bootstrap modal manually
@@ -184,6 +185,7 @@ class CategoriesExplorer extends Component
             'name' => $this->name,
             'slug' => $slug,
             'is_active' => $this->is_active,
+            'size_guide_id' => $this->size_guide_id ?: null,
         ]);
 
         $this->showCreateModal = false;
@@ -199,6 +201,7 @@ class CategoriesExplorer extends Component
         $this->selectedCategoryId = $id;
         $category = ShopCategory::find($id);
         $this->name = $category->name;
+        $this->size_guide_id = $category->size_guide_id;
         // Slug editing ignored for now as per plan, unless we want to allow it.
         $this->showRenameModal = true;
         $this->dispatch('show-rename-modal');
@@ -212,12 +215,15 @@ class CategoriesExplorer extends Component
 
         $category = ShopCategory::find($this->selectedCategoryId);
 
-        if ($category->name !== $this->name) {
+        if ($category->name !== $this->name || $category->size_guide_id !== $this->size_guide_id) {
              // Update slug? "choose stable slug unless explicitly changed"
              // Prompt said: "name (+ auto slug update or keep slug stable; choose stable slug unless explicitly changed)"
              // Let's keep slug stable for SEO stability unless we add a specific slug field. 
              // Simplicity: just update name.
-             $category->update(['name' => $this->name]);
+             $category->update([
+                 'name' => $this->name,
+                 'size_guide_id' => $this->size_guide_id ?: null,
+             ]);
         }
 
         $this->showRenameModal = false;
@@ -300,6 +306,7 @@ class CategoriesExplorer extends Component
 
     public function render()
     {
-        return view('livewire.admin.shop.categories.categories-explorer');
+        $sizeGuides = \App\Models\Shop\ShopSizeGuide::orderBy('name')->get();
+        return view('livewire.admin.shop.categories.categories-explorer', compact('sizeGuides'));
     }
 }

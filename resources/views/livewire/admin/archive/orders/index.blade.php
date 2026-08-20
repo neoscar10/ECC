@@ -78,7 +78,7 @@
                             <tbody class="list form-check-all">
                                 @forelse ($orders as $order)
                                     <tr>
-                                        <td><a href="#" class="fw-medium link-primary">{{ $order->order_number }}</a></td>
+                                        <td><a href="{{ route('admin.archive.orders.show', $order->id) }}" class="fw-medium link-primary">{{ $order->order_number }}</a></td>
                                         <td>
                                             {{ $order->sold_at->format('d M, Y') }}<br>
                                             <small class="text-muted">{{ $order->sold_at->format('h:i A') }}</small>

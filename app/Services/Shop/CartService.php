@@ -205,6 +205,12 @@ class CartService
         return $cart->fresh();
     }
 
+    public function cartRequiresShipping(User $user): bool
+    {
+        $cart = $this->getCart($user);
+        return $cart->items->contains(fn($item) => $item->product->requires_shipping);
+    }
+
     // --- Helpers ---
 
     private function resolveVariations(ShopProduct $product, array $inputIds): Collection

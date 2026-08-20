@@ -33,6 +33,19 @@ class CheckoutShippingQuoteService
             ];
         }
 
+        // Check if the address belongs to a negotiated delivery country
+        if ($address->deliveryCountry && $address->deliveryCountry->delivery_type === 'negotiated') {
+            return [
+                'success' => true,
+                'shipping_charge' => 0,
+                'currency' => 'INR',
+                'delivery_type' => 'negotiated',
+                'message' => 'To be discussed',
+                'measurement' => $this->measurementService->measurementFromCartItems($cartItems),
+                'rate_quote_id' => null,
+            ];
+        }
+
         return $this->quoteForPincode($user, $cartItems, $deliveryPincode);
     }
 

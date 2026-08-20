@@ -34,6 +34,7 @@ class CheckoutPage extends Component
         'state' => '',
         'postal_code' => '',
         'country' => 'India',
+        'delivery_country_id' => '',
         'label' => 'Home',
         'is_default' => false,
     ];
@@ -51,21 +52,54 @@ class CheckoutPage extends Component
     public $shippingEtd = null;
     public $canPlaceOrder = false;
 
-    protected $rules = [
-        'addressForm.full_name' => 'required|string|max:255',
-        'addressForm.phone' => 'required|digits:10',
-        'addressForm.line1' => 'required|string|max:255',
-        'addressForm.line2' => 'nullable|string|max:255',
-        'addressForm.city' => 'required|string|max:100',
-        'addressForm.state' => 'required|string|max:100',
-        'addressForm.postal_code' => 'required|string|max:20',
-        'addressForm.country' => 'required|string|max:100',
-    ];
+    public $deliveryCountries = [];
+    public $addressFieldsConfig = [];
+
+    public function rules()
+    {
+        $rules = [
+            'addressForm.delivery_country_id' => 'required|exists:delivery_countries,id',
+            'addressForm.country' => 'nullable|string|max:100',
+            'addressForm.label' => 'nullable|string|max:50',
+            'addressForm.is_default' => 'boolean',
+        ];
+
+        $possibleFields = ['full_name', 'phone', 'line1', 'line2', 'city', 'state', 'postal_code'];
+        foreach ($possibleFields as $field) {
+            $rules["addressForm.$field"] = 'nullable|string|max:255';
+        }
+
+        foreach ($this->addressFieldsConfig as $config) {
+            $field = $config['name'];
+            if ($config['is_required'] ?? false) {
+                $rules["addressForm.$field"] = 'required|string|max:255';
+            }
+        }
+
+        return $rules;
+    }
 
     public function mount()
     {
         $this->paymentGateway = config('payments.default_gateway', 'razorpay');
+        $this->deliveryCountries = \App\Models\DeliveryCountry::with('addressGroup')->where('is_active', true)->get();
         return $this->loadData();
+    }
+
+    public function updatedAddressFormDeliveryCountryId($value)
+    {
+        $this->updateAddressFieldsConfig($value);
+    }
+
+    protected function updateAddressFieldsConfig($countryId)
+    {
+        $country = collect($this->deliveryCountries)->firstWhere('id', $countryId);
+        if ($country && $country->addressGroup) {
+            $this->addressFieldsConfig = $country->addressGroup->fields ?? [];
+            $this->addressForm['country'] = $country->name;
+        } else {
+            $this->addressFieldsConfig = [];
+        }
     }
 
     public function loadData()
@@ -139,6 +173,9 @@ class CheckoutPage extends Component
                 $this->shippingError = $summaryData['shipping_error'] ?? null;
                 $this->canPlaceOrder = $summaryData['can_place_order'] ?? false;
 
+                // Courier info from quote
+                $shippingQuote = $summaryData['shipping_quote'] ?? null;
+
                 // Determine shipping display text
                 $shippingFee = $summaryData['shipping_fee'];
                 if (!$this->selectedAddressId) {
@@ -147,6 +184,9 @@ class CheckoutPage extends Component
                 } elseif ($this->shippingError) {
                     $formattedShipping = 'Unavailable';
                     $shippingDisplayClass = 'text-danger';
+                } elseif (($shippingQuote['delivery_type'] ?? 'courier') === 'negotiated') {
+                    $formattedShipping = 'To be discussed';
+                    $shippingDisplayClass = 'ecc-text-gold';
                 } elseif ($shippingFee > 0) {
                     $formattedShipping = '₹' . number_format($shippingFee, 2);
                     $shippingDisplayClass = '';
@@ -205,8 +245,10 @@ class CheckoutPage extends Component
     {
         $this->editingAddressId = null;
         $this->reset('addressForm');
-        $this->addressForm['country'] = 'India';
+        $this->addressForm['country'] = '';
+        $this->addressForm['delivery_country_id'] = '';
         $this->addressForm['label'] = 'Home';
+        $this->addressFieldsConfig = [];
         $this->showAddressForm = true;
     }
 
@@ -224,9 +266,11 @@ class CheckoutPage extends Component
                 'state' => $address->state,
                 'postal_code' => $address->postal_code,
                 'country' => $address->country,
+                'delivery_country_id' => $address->delivery_country_id,
                 'label' => $address->label,
                 'is_default' => (bool)$address->is_default,
             ];
+            $this->updateAddressFieldsConfig($address->delivery_country_id);
             $this->showAddressForm = true;
         }
     }
@@ -245,31 +289,33 @@ class CheckoutPage extends Component
             $address = $user->addresses()->find($this->editingAddressId);
             if ($address) {
                 $address->update([
-                    'label' => $this->addressForm['label'],
-                    'full_name' => $this->addressForm['full_name'],
-                    'phone' => $this->addressForm['phone'],
-                    'line1' => $this->addressForm['line1'],
-                    'line2' => $this->addressForm['line2'],
-                    'city' => $this->addressForm['city'],
-                    'state' => $this->addressForm['state'],
-                    'postal_code' => $this->addressForm['postal_code'],
-                    'country' => $this->addressForm['country'],
-                    'is_default' => $this->addressForm['is_default'],
+                    'label' => $this->addressForm['label'] ?? null,
+                    'full_name' => $this->addressForm['full_name'] ?? null,
+                    'phone' => $this->addressForm['phone'] ?? null,
+                    'line1' => $this->addressForm['line1'] ?? null,
+                    'line2' => $this->addressForm['line2'] ?? null,
+                    'city' => $this->addressForm['city'] ?? null,
+                    'state' => $this->addressForm['state'] ?? null,
+                    'postal_code' => $this->addressForm['postal_code'] ?? null,
+                    'country' => $this->addressForm['country'] ?? null,
+                    'delivery_country_id' => $this->addressForm['delivery_country_id'] ?? null,
+                    'is_default' => $this->addressForm['is_default'] ?? false,
                 ]);
                 session()->flash('success', 'Address updated successfully.');
             }
         } else {
             $address = $user->addresses()->create([
-                'label' => $this->addressForm['label'],
-                'full_name' => $this->addressForm['full_name'],
-                'phone' => $this->addressForm['phone'],
-                'line1' => $this->addressForm['line1'],
-                'line2' => $this->addressForm['line2'],
-                'city' => $this->addressForm['city'],
-                'state' => $this->addressForm['state'],
-                'postal_code' => $this->addressForm['postal_code'],
-                'country' => $this->addressForm['country'],
-                'is_default' => $this->addressForm['is_default'],
+                'label' => $this->addressForm['label'] ?? null,
+                'full_name' => $this->addressForm['full_name'] ?? null,
+                'phone' => $this->addressForm['phone'] ?? null,
+                'line1' => $this->addressForm['line1'] ?? null,
+                'line2' => $this->addressForm['line2'] ?? null,
+                'city' => $this->addressForm['city'] ?? null,
+                'state' => $this->addressForm['state'] ?? null,
+                'postal_code' => $this->addressForm['postal_code'] ?? null,
+                'country' => $this->addressForm['country'] ?? null,
+                'delivery_country_id' => $this->addressForm['delivery_country_id'] ?? null,
+                'is_default' => $this->addressForm['is_default'] ?? false,
                 'type' => 'shipping',
             ]);
             $this->selectedAddressId = $address->id;
@@ -279,8 +325,10 @@ class CheckoutPage extends Component
         $this->showAddressForm = false;
         $this->editingAddressId = null;
         $this->reset('addressForm');
-        $this->addressForm['country'] = 'India';
+        $this->addressForm['country'] = '';
+        $this->addressForm['delivery_country_id'] = '';
         $this->addressForm['label'] = 'Home';
+        $this->addressFieldsConfig = [];
 
         $this->loadData();
     }

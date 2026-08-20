@@ -20,6 +20,7 @@ class UserAddressResource extends JsonResource
             'state' => $this->state,
             'postal_code' => $this->postal_code,
             'country' => $this->country,
+            'delivery_country_id' => $this->delivery_country_id,
             'is_default' => $this->is_default,
             'type' => $this->type,
         ];

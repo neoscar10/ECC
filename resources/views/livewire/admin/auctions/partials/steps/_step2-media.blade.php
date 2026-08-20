@@ -51,13 +51,19 @@
             <div id="auction-new-main" class="d-flex gap-2 mt-2 pb-2 overflow-auto custom-scrollbar">
                 @foreach ($newImages as $i => $tempImg)
                      <div class="avatar-md bg-white border rounded p-1 flex-shrink-0 position-relative" style="width: 80px; height: 80px;" wire:key="new-main-{{ $i }}" data-index="{{ $i }}">
-                         @try
-                             <img src="{{ $tempImg->temporaryUrl() }}" class="img-fluid rounded h-100 object-cover cursor-move">
-                         @catch(\Exception $e)
+                         @php
+                             $imgUrl = null;
+                             try {
+                                 $imgUrl = $tempImg->temporaryUrl();
+                             } catch (\Exception $e) {}
+                         @endphp
+                         @if($imgUrl)
+                             <img src="{{ $imgUrl }}" class="img-fluid rounded h-100 object-cover cursor-move">
+                         @else
                              <div class="bg-light d-flex align-items-center justify-content-center" style="height: 100%;">
                                  <i class="ri-image-line fs-20 text-muted"></i>
                              </div>
-                         @endtry
+                         @endif
                          <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 rounded-circle shadow-sm" 
                                 style="width: 20px; height: 20px; min-width: 20px; transform: translate(30%, -30%); padding: 0;"
                                 wire:click.prevent.stop="removeNewImage({{ $i }})">
@@ -132,13 +138,19 @@
             <div id="auction-new-360" class="d-flex gap-2 mt-2 pb-2 overflow-auto custom-scrollbar">
                 @foreach ($new360Images as $i => $tempImg)
                      <div class="avatar-md bg-white border rounded p-1 flex-shrink-0 position-relative" style="width: 80px; height: 80px;" wire:key="new-360-{{ $i }}" data-index="{{ $i }}">
-                         @try
-                             <img src="{{ $tempImg->temporaryUrl() }}" class="img-fluid rounded h-100 object-cover cursor-move">
-                         @catch(\Exception $e)
+                         @php
+                             $imgUrl = null;
+                             try {
+                                 $imgUrl = $tempImg->temporaryUrl();
+                             } catch (\Exception $e) {}
+                         @endphp
+                         @if($imgUrl)
+                             <img src="{{ $imgUrl }}" class="img-fluid rounded h-100 object-cover cursor-move">
+                         @else
                              <div class="bg-light d-flex align-items-center justify-content-center" style="height: 100%;">
                                  <i class="ri-image-line fs-20 text-muted"></i>
                              </div>
-                         @endtry
+                         @endif
                          <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 rounded-circle shadow-sm" 
                                 style="width: 20px; height: 20px; min-width: 20px; transform: translate(30%, -30%); padding: 0;"
                                 wire:click.prevent.stop="removeNew360Image({{ $i }})">

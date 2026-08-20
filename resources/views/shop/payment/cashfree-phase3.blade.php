@@ -1,119 +1,145 @@
-<x-layouts.web-app title="Cashfree Payment — Session Created">
-    <div class="ecc-container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
+<x-dynamic-component :component="(isset($payment) && $payment->purpose === \App\Support\Payments\PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT) ? 'layouts.guest' : 'layouts.web-app'" title="Secure Payment — ECC">
+    <div class="container py-5" style="max-width: 680px;">
 
-                {{-- Phase 3 Banner --}}
-                <div class="alert alert-info border-0 mb-4 d-flex align-items-start gap-3">
-                    <i class="mdi mdi-flask-outline fs-4 mt-1"></i>
-                    <div>
-                        <strong>Developer Debug View — Phase 3</strong><br>
-                        <small class="text-muted">
-                            Cashfree order/session created successfully. The full payment checkout UI (Cashfree SDK integration)
-                            will be implemented in Phase 4. This page confirms the backend session creation is working.
-                        </small>
+        {{-- ═══════════════════════════════════════════════
+             ORDER / PAYMENT SUMMARY HEADER
+        ═══════════════════════════════════════════════ --}}
+        <div class="mb-4 text-center">
+            <div class="d-inline-flex align-items-center gap-2 mb-3" style="opacity:.7;">
+                <span style="font-size:.7rem; letter-spacing:.2em; font-weight:800; color:rgba(245,239,225,.45); text-transform:uppercase;">Cashfree Secure Checkout</span>
+            </div>
+
+            <div class="p-4 mb-0" style="background: var(--ecc-bg-input); border: 1px solid var(--ecc-border); border-radius: 1rem;">
+                <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                    <div class="text-start">
+                        <div style="font-size:.7rem; letter-spacing:.15em; font-weight:800; color: var(--ecc-text-secondary); text-transform:uppercase; margin-bottom:.3rem;">
+                            Payment
+                        </div>
+                        <div style="font-weight:800; color: var(--ecc-text-primary); font-size:1rem;">
+                            {{ 'Payment #' . $payment->id }}
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div style="font-size:.7rem; letter-spacing:.15em; font-weight:800; color: var(--ecc-text-secondary); text-transform:uppercase; margin-bottom:.3rem;">Amount</div>
+                        <div style="font-size:1.6rem; font-weight:900; color: var(--ecc-primary); letter-spacing:-.02em;">
+                            ₹{{ number_format($payment->amount, 2) }}
+                        </div>
                     </div>
                 </div>
 
-                {{-- Session Created Card --}}
-                <div class="card bg-dark text-white shadow border-success mb-4">
-                    <div class="card-header border-success d-flex align-items-center gap-2">
-                        <i class="mdi mdi-check-circle text-success fs-5"></i>
-                        <strong>Cashfree Order / Payment Session Created</strong>
-                        <span class="badge bg-{{ $environment === 'production' ? 'danger' : 'warning' }} ms-auto">
-                            {{ strtoupper($environment) }}
-                        </span>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-dark table-sm mb-0">
-                            <tbody>
-                                <tr>
-                                    <td class="text-muted" style="width: 40%">Internal Payment ID</td>
-                                    <td><strong>#{{ $payment->id }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Gateway</td>
-                                    <td><span class="badge bg-primary">cashfree</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Cashfree Order ID</td>
-                                    <td><code>{{ $payment->gateway_order_id ?? 'N/A' }}</code></td>
-                                </tr>
-                                @if($cfOrderId)
-                                <tr>
-                                    <td class="text-muted">cf_order_id</td>
-                                    <td><code>{{ $cfOrderId }}</code></td>
-                                </tr>
-                                @endif
-                                <tr>
-                                    <td class="text-muted">Payment Session ID</td>
-                                    <td>
-                                        @if($paymentSessionId)
-                                            <code class="text-success">{{ Str::limit($paymentSessionId, 60, '...') }}</code>
-                                        @else
-                                            <span class="text-danger">Missing</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Amount</td>
-                                    <td><strong>₹{{ number_format($payment->amount, 2) }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Currency</td>
-                                    <td>{{ $payment->currency }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Payment Status</td>
-                                    <td>
-                                        <span class="badge bg-{{ $payment->status === 'pending' ? 'warning text-dark' : 'secondary' }}">
-                                            {{ strtoupper($payment->status) }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Environment</td>
-                                    <td>
-                                        <span class="badge bg-{{ $environment === 'production' ? 'danger' : 'info text-dark' }}">
-                                            {{ strtoupper($environment) }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                @if(!empty($checkoutData['return_url']))
-                                <tr>
-                                    <td class="text-muted">Return URL</td>
-                                    <td><small class="text-muted">{{ $checkoutData['return_url'] }}</small></td>
-                                </tr>
-                                @endif
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <hr style="border-color: var(--ecc-border); margin: 1rem 0 .75rem;">
 
-                {{-- Phase 4 Info --}}
-                <div class="card bg-dark border-secondary mb-4">
-                    <div class="card-body text-center py-4">
-                        <i class="mdi mdi-clock-outline text-warning fs-1 mb-3 d-block"></i>
-                        <h5 class="text-warning">Cashfree Checkout UI — Coming in Phase 4</h5>
-                        <p class="text-muted mb-0">
-                            The Cashfree JS SDK / mobile SDK checkout will be wired in Phase 4 using the
-                            <code>payment_session_id</code> above. Payment will remain in <em>pending</em> state
-                            until the user completes checkout and Phase 4 verification is triggered.
-                        </p>
-                    </div>
+                <div class="d-flex justify-content-between gap-3" style="font-size:.78rem;">
+                    <span style="color: var(--ecc-text-secondary); font-weight:700; letter-spacing:.08em; text-transform:uppercase;">Gateway</span>
+                    <span style="color: var(--ecc-text-primary); font-weight:600;">Cashfree</span>
                 </div>
-
-                {{-- Actions --}}
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="{{ route('shop.orders') }}" class="btn btn-outline-light">
-                        <i class="mdi mdi-arrow-left me-1"></i>Back to Orders
-                    </a>
-                    <a href="{{ route('payments.failed', ['payment_id' => $payment->id]) }}" class="btn btn-outline-danger">
-                        Cancel Payment
-                    </a>
+                <div class="d-flex justify-content-between gap-3 mt-1" style="font-size:.78rem;">
+                    <span style="color: var(--ecc-text-secondary); font-weight:700; letter-spacing:.08em; text-transform:uppercase;">Payment Status</span>
+                    <span style="color: var(--ecc-primary); font-weight:700; letter-spacing:.06em; text-transform:uppercase;">
+                        {{ ucfirst($payment->status) }}
+                    </span>
                 </div>
-
             </div>
         </div>
+
+        {{-- ═══════════════════════════════════════════════
+             LOADING / AUTO-OPEN PANEL
+        ═══════════════════════════════════════════════ --}}
+        <div id="cf-loading-panel" class="text-center p-4" style="background: var(--ecc-bg-input); border: 1px solid var(--ecc-border); border-radius: 1rem;">
+            <div class="spinner-border text-warning mb-3" role="status" id="loading-spinner" style="width:2.5rem;height:2.5rem;">
+                <span class="visually-hidden">Loading…</span>
+            </div>
+            <h4 style="color: var(--ecc-primary); font-weight:900; letter-spacing:-.01em;" class="mb-1">Opening Secure Checkout</h4>
+            <p style="color: var(--ecc-text-secondary); font-size:.85rem;" class="mb-4">
+                Please do not refresh or press back while the payment window is loading.
+            </p>
+            <button id="cf-button" class="btn btn-warning w-100 fw-bold py-3" style="display:none; border-radius:.75rem; letter-spacing:.12em; font-size:.85rem;">
+                <i class="mdi mdi-lock-outline me-2"></i>OPEN PAYMENT CHECKOUT
+            </button>
+        </div>
+
+        {{-- ═══════════════════════════════════════════════
+             DISMISSED / FAILED PANEL
+        ═══════════════════════════════════════════════ --}}
+        <div id="cf-error-panel" style="display:none;">
+            <div class="text-center p-5" style="background: var(--ecc-bg-input); border: 1px solid var(--ecc-border); border-radius: 1rem;">
+                <i class="mdi mdi-alert-circle-outline mb-3" style="font-size:52px; color: var(--ecc-primary); display:block;"></i>
+                <h3 style="color: var(--ecc-primary); font-weight:900;" class="mb-2">Checkout Error</h3>
+                <p id="cf-error-message" style="color: var(--ecc-text-secondary); font-size:.9rem;" class="mb-4">
+                    Could not open secure checkout session.
+                </p>
+                <div class="d-flex flex-column gap-3">
+                    @if($payment && $payment->purpose === \App\Support\Payments\PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT)
+                        <a href="{{ route('home') }}" class="btn btn-outline-light">
+                            <i class="mdi mdi-home-outline me-1"></i>Return to ECC
+                        </a>
+                    @else
+                        <a href="{{ route('shop.orders') }}" class="btn btn-outline-light">
+                            <i class="mdi mdi-arrow-left me-1"></i>Back to Orders
+                        </a>
+                    @endif
+                </div>
+            </div>
+        </div>
+
     </div>
-</x-layouts.web-app>
+
+    @push('scripts')
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var paymentSessionId = "{{ $paymentSessionId }}";
+            var environment = "{{ $environment }}";
+            
+            var loadingPanel = document.getElementById('cf-loading-panel');
+            var errorPanel = document.getElementById('cf-error-panel');
+            var errorMsg = document.getElementById('cf-error-message');
+            var openBtn = document.getElementById('cf-button');
+            var spinner = document.getElementById('loading-spinner');
+
+            if (!paymentSessionId) {
+                loadingPanel.style.display = 'none';
+                errorPanel.style.display = 'block';
+                errorMsg.innerText = 'Payment session ID is missing or invalid.';
+                return;
+            }
+
+            try {
+                // Initialize Cashfree SDK v3
+                const cashfree = Cashfree({
+                    mode: environment === 'production' ? 'production' : 'sandbox'
+                });
+
+                function doCheckout() {
+                    cashfree.checkout({
+                        paymentSessionId: paymentSessionId,
+                        redirectTarget: "_self"
+                    });
+                }
+
+                // Trigger automatically on load
+                doCheckout();
+
+                openBtn.onclick = function (e) {
+                    e.preventDefault();
+                    doCheckout();
+                };
+
+                // Fallback manual open button after 3 seconds in case of popup block
+                setTimeout(function () {
+                    if (loadingPanel.style.display !== 'none') {
+                        spinner.style.display = 'none';
+                        openBtn.style.display = 'block';
+                    }
+                }, 3000);
+
+            } catch (err) {
+                console.error('Cashfree SDK initialization error:', err);
+                loadingPanel.style.display = 'none';
+                errorPanel.style.display = 'block';
+                errorMsg.innerText = 'Failed to load secure payment script: ' + err.message;
+            }
+        });
+    </script>
+    @endpush
+</x-dynamic-component>

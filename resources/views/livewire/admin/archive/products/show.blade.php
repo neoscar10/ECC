@@ -174,7 +174,11 @@
                                 <tr>
                                     <td class="px-0 fw-medium text-muted">Price Range</td>
                                     <td class="px-0 text-end fw-semibold">
+                                    @if(!is_null($product->price_min_amount))
                                         {{ $product->currency }} {{ number_format($product->price_min_amount) }} - {{ number_format($product->price_max_amount) }}
+                                    @else
+                                        <span class="text-muted fst-italic fs-14">Price on Request</span>
+                                    @endif
                                     </td>
                                 </tr>
                                 <tr>

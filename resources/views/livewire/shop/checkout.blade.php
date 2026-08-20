@@ -354,51 +354,46 @@
                         <form wire:submit.prevent="saveAddress">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="ecc-form-label">Full Name</label>
-                                    <input type="text" class="form-control ecc-input" wire:model="addressForm.full_name">
-                                    @error('addressForm.full_name') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    <label class="ecc-form-label">Country / Region</label>
+                                    <select class="form-select ecc-input" wire:model.live="addressForm.delivery_country_id">
+                                        <option value="">Select Country</option>
+                                        @foreach($deliveryCountries as $country)
+                                            <option value="{{ $country->id }}">{{ $country->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('addressForm.delivery_country_id') <span class="text-danger small">{{ $message }}</span> @enderror
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="ecc-form-label">Phone Number</label>
-                                    <input type="text" class="form-control ecc-input" wire:model="addressForm.phone" maxlength="10" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
-                                    @error('addressForm.phone') <span class="text-danger small">{{ $message }}</span> @enderror
-                                </div>
-                                <div class="col-12">
-                                    <label class="ecc-form-label">Address Line 1</label>
-                                    <input type="text" class="form-control ecc-input" wire:model="addressForm.line1">
-                                    @error('addressForm.line1') <span class="text-danger small">{{ $message }}</span> @enderror
-                                </div>
-                                <div class="col-12">
-                                    <label class="ecc-form-label">Address Line 2 (Optional)</label>
-                                    <input type="text" class="form-control ecc-input" wire:model="addressForm.line2">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="ecc-form-label">City</label>
-                                    <input type="text" class="form-control ecc-input" wire:model="addressForm.city">
-                                    @error('addressForm.city') <span class="text-danger small">{{ $message }}</span> @enderror
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="ecc-form-label">State</label>
-                                    <input type="text" class="form-control ecc-input" wire:model="addressForm.state">
-                                    @error('addressForm.state') <span class="text-danger small">{{ $message }}</span> @enderror
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="ecc-form-label">Postal Code</label>
-                                    <input type="text" class="form-control ecc-input" wire:model="addressForm.postal_code">
-                                    @error('addressForm.postal_code') <span class="text-danger small">{{ $message }}</span> @enderror
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-check">
-                                        <input class="form-check-input ecc-radio" type="checkbox" wire:model="addressForm.is_default" id="isDefaultCheck">
-                                        <label class="form-check-label ms-2 small fw-bold" for="isDefaultCheck">
-                                            SET AS DEFAULT ADDRESS
-                                        </label>
+
+                                @if(!empty($addressForm['delivery_country_id']))
+                                    @foreach($addressFieldsConfig as $fieldConfig)
+                                        @php
+                                            $name = $fieldConfig['name'];
+                                            $label = $fieldConfig['label'] ?? ucfirst(str_replace('_', ' ', $name));
+                                            $isRequired = $fieldConfig['is_required'] ?? false;
+                                            
+                                            $colClass = 'col-md-6';
+                                        @endphp
+                                        <div class="{{ $colClass }}">
+                                            <label class="ecc-form-label">{{ $label }} @if(!$isRequired)(Optional)@endif</label>
+                                            <input type="text" class="form-control ecc-input" wire:model="addressForm.{{ $name }}"
+                                                @if($name === 'phone') maxlength="10" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" @endif>
+                                            @error('addressForm.'.$name) <span class="text-danger small">{{ $message }}</span> @enderror
+                                        </div>
+                                    @endforeach
+
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input ecc-radio" type="checkbox" wire:model="addressForm.is_default" id="isDefaultCheck">
+                                            <label class="form-check-label ms-2 small fw-bold" for="isDefaultCheck">
+                                                SET AS DEFAULT ADDRESS
+                                            </label>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-12 mt-4">
-                                    <button type="submit" class="btn ecc-btn-primary px-5 py-2 fw-bold">{{ $editingAddressId ? 'UPDATE ADDRESS' : 'SAVE ADDRESS' }}</button>
-                                    <button type="button" class="btn ecc-text-primary px-4 small" wire:click="$set('showAddressForm', false)">CANCEL</button>
-                                </div>
+                                    <div class="col-12 mt-4">
+                                        <button type="submit" class="btn ecc-btn-primary px-5 py-2 fw-bold">{{ $editingAddressId ? 'UPDATE ADDRESS' : 'SAVE ADDRESS' }}</button>
+                                        <button type="button" class="btn ecc-text-primary px-4 small" wire:click="$set('showAddressForm', false)">CANCEL</button>
+                                    </div>
+                                @endif
                             </div>
                         </form>
                     </div>

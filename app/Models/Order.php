@@ -52,4 +52,9 @@ class Order extends Model
     {
         return $this->morphMany(\App\Models\Payment::class, 'payable');
     }
+
+    public function vaultItem(): \Illuminate\Database\Eloquent\Relations\MorphOne
+    {
+        return $this->morphOne(\App\Models\UserVaultItem::class, 'sale_context');
+    }
 }

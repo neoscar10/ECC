@@ -36,8 +36,11 @@ class CheckoutController extends Controller
 
     public function placeOrder(Request $request)
     {
+        $cartService = app(\App\Services\Shop\CartService::class);
+        $requiresShipping = $cartService->cartRequiresShipping($request->user());
+
         $request->validate([
-            'shipping_address_id' => 'required|exists:user_addresses,id',
+            'shipping_address_id' => $requiresShipping ? 'required|exists:user_addresses,id' : 'nullable',
             'billing_address_id' => 'nullable|exists:user_addresses,id',
             'billing_same_as_shipping' => 'boolean',
             'notes' => 'nullable|string|max:500',
@@ -49,7 +52,9 @@ class CheckoutController extends Controller
 
         try {
             // Additional check: address must belong to user
-            $request->user()->addresses()->findOrFail($request->shipping_address_id);
+            if ($requiresShipping && $request->shipping_address_id) {
+                $request->user()->addresses()->findOrFail($request->shipping_address_id);
+            }
             if ($request->billing_address_id) {
                 $request->user()->addresses()->findOrFail($request->billing_address_id);
             }

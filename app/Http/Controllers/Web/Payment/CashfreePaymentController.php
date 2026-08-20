@@ -31,7 +31,7 @@ class CashfreePaymentController extends Controller
      */
     public function pay(Payment $payment)
     {
-        if ($payment->user_id !== auth()->id()) {
+        if ($payment->purpose !== \App\Support\Payments\PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT && $payment->user_id !== auth()->id()) {
             abort(403, 'Unauthorized access to payment.');
         }
 
@@ -90,7 +90,7 @@ class CashfreePaymentController extends Controller
 
         $payment = Payment::findOrFail($request->input('payment_id'));
 
-        if ($payment->user_id !== auth()->id()) {
+        if ($payment->purpose !== \App\Support\Payments\PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT && $payment->user_id !== auth()->id()) {
             return response()->json(['success' => false, 'message' => 'Unauthorized access to payment.'], 403);
         }
 
@@ -176,7 +176,7 @@ class CashfreePaymentController extends Controller
      */
     public function return(Payment $payment)
     {
-        if ($payment->user_id !== auth()->id()) {
+        if ($payment->purpose !== \App\Support\Payments\PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT && $payment->user_id !== auth()->id()) {
             abort(403, 'Unauthorized access to payment.');
         }
 
@@ -254,6 +254,10 @@ class CashfreePaymentController extends Controller
 
         if ($payment->payable_type === \App\Models\VaultRemovalRequest::class) {
             return route('vault.index');
+        }
+
+        if ($payment->payable_type === \App\Models\Archive\ArchiveProductEnquiry::class) {
+            return route('archive.enquiry.success', ['enquiry' => $payment->payable_id]);
         }
 
         // Fallback

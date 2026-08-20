@@ -71,11 +71,12 @@ class CheckoutService
         }
 
         // --- Shipping Quote ---
+        $cartRequiresShipping = $this->cartService->cartRequiresShipping($user);
         $shippingFee = 0;
         $shippingQuote = null;
         $shippingError = null;
 
-        if ($shippingAddressId) {
+        if ($cartRequiresShipping && $shippingAddressId) {
             $address = UserAddress::find($shippingAddressId);
             if ($address) {
                 $quoteService = app(\App\Services\Shipping\CheckoutShippingQuoteService::class);
@@ -101,12 +102,13 @@ class CheckoutService
             'shipping_fee' => round($shippingFee, 2),
             'shipping_quote' => $shippingQuote,
             'shipping_error' => $shippingError,
+            'requires_shipping' => $cartRequiresShipping,
             'tax_amount' => round($taxAmount, 2),
             'discount_amount' => round($discountAmount, 2),
             'total_amount' => round($totalAmount, 2),
             'items' => $items,
             'can_place_order' => empty(array_filter(array_column($items, 'stock_issues')))
-                && ($shippingError === null || !config('shiprocket.checkout_requires_serviceability', true)),
+                && (!$cartRequiresShipping || $shippingError === null || !config('shiprocket.checkout_requires_serviceability', true)),
         ];
     }
 
@@ -115,16 +117,22 @@ class CheckoutService
      */
     public function placeOrder(User $user, array $data, ?array $paymentDetails = null): ShopOrder
     {
-        $shippingAddress = UserAddress::where('user_id', $user->id)
-            ->where('id', $data['shipping_address_id'])
-            ->firstOrFail();
+        $cartRequiresShipping = $this->cartService->cartRequiresShipping($user);
+        $shippingAddress = null;
+        $billingAddress = null;
 
-        if (!empty($data['billing_address_id'])) {
-            $billingAddress = UserAddress::where('user_id', $user->id)
-                ->where('id', $data['billing_address_id'])
+        if ($cartRequiresShipping) {
+            $shippingAddress = UserAddress::where('user_id', $user->id)
+                ->where('id', $data['shipping_address_id'])
                 ->firstOrFail();
-        } else {
-            $billingAddress = $shippingAddress;
+
+            if (!empty($data['billing_address_id'])) {
+                $billingAddress = UserAddress::where('user_id', $user->id)
+                    ->where('id', $data['billing_address_id'])
+                    ->firstOrFail();
+            } else {
+                $billingAddress = $shippingAddress;
+            }
         }
 
         // --- Final Shipping Validation ---
@@ -132,13 +140,18 @@ class CheckoutService
         $cart = $this->cartService->getCart($user);
         $cart->load(['items.product', 'items.variant']);
 
-        $shippingQuote = $quoteService->quoteForCheckout($user, $cart->items, $shippingAddress);
-        
-        if (!$shippingQuote['success'] && config('shiprocket.checkout_requires_serviceability', true)) {
-            throw new Exception($shippingQuote['message'] ?? "Shipping is not available for this address.");
+        $shippingFee = 0;
+        $shippingQuote = null;
+
+        if ($cartRequiresShipping) {
+            $shippingQuote = $quoteService->quoteForCheckout($user, $cart->items, $shippingAddress);
+            
+            if (!$shippingQuote['success'] && config('shiprocket.checkout_requires_serviceability', true)) {
+                throw new Exception($shippingQuote['message'] ?? "Shipping is not available for this address.");
+            }
+            $shippingFee = $shippingQuote['success'] ? $shippingQuote['shipping_charge'] : 0;
         }
 
-        $shippingFee = $shippingQuote['success'] ? $shippingQuote['shipping_charge'] : 0;
         $isPaid = !empty($paymentDetails);
 
         $order = DB::transaction(function () use ($user, $shippingAddress, $billingAddress, $data, $paymentDetails, $isPaid, $cart, $shippingQuote, $shippingFee) {
@@ -195,6 +208,8 @@ class CheckoutService
                 'status' => $isPaid ? 'paid' : 'draft',
                 'payment_status' => $isPaid ? 'paid' : 'unpaid',
                 'currency' => $currency,
+                'delivery_type' => $shippingQuote['delivery_type'] ?? 'courier',
+                'delivery_payment_status' => 'unpaid', // Paid separately if negotiated, or implicitly with order if courier
                 'subtotal' => $subtotal,
                 'shipping_fee' => $shippingFee, // Legacy field if any
                 'shipping_charge' => $shippingFee,
@@ -210,8 +225,8 @@ class CheckoutService
                 'tax_amount' => 0,
                 'discount_amount' => 0,
                 'total_amount' => $subtotal + $shippingFee,
-                'shipping_address_snapshot' => $shippingAddress->toArray(),
-                'billing_address_snapshot' => $billingAddress->toArray(),
+                'shipping_address_snapshot' => $shippingAddress ? $shippingAddress->toArray() : [],
+                'billing_address_snapshot' => $billingAddress ? $billingAddress->toArray() : [],
                 'notes' => $data['notes'] ?? null,
                 'placed_at' => now(),
                 'paid_at' => $isPaid ? now() : null,

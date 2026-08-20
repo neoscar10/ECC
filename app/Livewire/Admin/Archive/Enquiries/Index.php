@@ -25,6 +25,11 @@ class Index extends Component
     public $selectedEnquiry = null;
     public $selectedEnquiries = [];
     
+    // Payment Link Properties
+    public $paymentEnquiryId = null;
+    public $paymentAmount = '';
+    public $paymentGateway = '';
+    
     #[Url]
     public $viewId = null;
 
@@ -111,6 +116,109 @@ class Index extends Component
                     return $e;
                 });
             }
+        }
+    }
+    
+    public function openPaymentModal($enquiryId)
+    {
+        $enquiry = ArchiveProductEnquiry::find($enquiryId);
+        if ($enquiry) {
+            $this->paymentEnquiryId = $enquiry->id;
+            $this->paymentAmount = $enquiry->payment_amount ?? '';
+            $this->paymentGateway = $enquiry->payment_gateway ?? 'razorpay';
+            $this->dispatch('show-payment-modal');
+        }
+    }
+
+    public function sendDeliveryDetailsRequest($enquiryId)
+    {
+        $enquiry = ArchiveProductEnquiry::find($enquiryId);
+        if (!$enquiry) {
+            session()->flash('error', 'Enquiry not found.');
+            return;
+        }
+
+        if (!$enquiry->contact_email) {
+            session()->flash('error', 'Cannot send request. No email address associated with this enquiry.');
+            return;
+        }
+
+        $enquiry->update([
+            'delivery_details_requested_at' => now(),
+        ]);
+
+        // 1. Log the WhatsApp details request form mock info in the logs
+        \Illuminate\Support\Facades\Log::info('WhatsApp Mock Send: Delivery Details Request Form sent', [
+            'enquiry_id' => $enquiry->id,
+            'whatsapp_number' => $enquiry->contact_phone ?? 'N/A',
+            'template' => 'delivery_details_request_form_v1',
+        ]);
+
+        // 2. Send the customer an email
+        \Illuminate\Support\Facades\Mail::to($enquiry->contact_email)
+            ->send(new \App\Mail\Archive\DeliveryDetailsRequestMail($enquiry));
+
+        session()->flash('success', 'Delivery details form request sent successfully via Email and WhatsApp.');
+
+        // Refresh selected enquiry if open
+        if ($this->selectedEnquiry && $this->selectedEnquiry->id == $enquiryId) {
+            $this->selectedEnquiry = $enquiry->fresh(['product.images', 'user']);
+        }
+        
+        // Refresh in the collection
+        if ($this->selectedEnquiries) {
+            $this->selectedEnquiries = $this->selectedEnquiries->map(function($e) use ($enquiryId, $enquiry) {
+                if ($e->id == $enquiryId) {
+                    return $enquiry->fresh(['product.images', 'user']);
+                }
+                return $e;
+            });
+        }
+    }
+
+    public function sendPaymentLink()
+    {
+        $this->validate([
+            'paymentEnquiryId' => 'required|exists:archive_product_enquiries,id',
+            'paymentAmount' => 'required|numeric|min:1',
+            'paymentGateway' => 'required|in:razorpay,cashfree',
+        ]);
+
+        $enquiry = ArchiveProductEnquiry::find($this->paymentEnquiryId);
+        
+        if (!$enquiry->user_id && !$enquiry->contact_email) {
+            session()->flash('error', 'Cannot send payment link. No email address associated with this enquiry.');
+            return;
+        }
+
+        $enquiry->update([
+            'payment_amount' => $this->paymentAmount,
+            'payment_gateway' => $this->paymentGateway,
+            'payment_link_sent_at' => now(),
+            'status' => 'awaiting payment',
+        ]);
+
+        // Generate the secure signed checkout URL
+        $checkoutUrl = \Illuminate\Support\Facades\URL::signedRoute(
+            'archive.enquiry.checkout', 
+            ['enquiry' => $enquiry->id]
+        );
+
+        // Send Email
+        \Illuminate\Support\Facades\Mail::to($enquiry->contact_email)
+            ->send(new \App\Mail\Archive\EnquiryPaymentLinkMail($enquiry, $checkoutUrl));
+
+        // Send WhatsApp Mock
+        dispatch(new \App\Jobs\Notifications\SendEnquiryPaymentLinkWhatsAppJob($enquiry, $checkoutUrl));
+
+        session()->flash('success', 'Payment link generated and sent successfully via Email and WhatsApp.');
+        
+        $this->dispatch('hide-payment-modal');
+        $this->paymentEnquiryId = null;
+        
+        // Refresh if viewing
+        if ($this->selectedEnquiry && $this->selectedEnquiry->id == $enquiry->id) {
+            $this->selectedEnquiry = $enquiry->fresh(['product.images', 'user']);
         }
     }
     

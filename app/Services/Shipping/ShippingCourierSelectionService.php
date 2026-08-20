@@ -148,19 +148,16 @@ class ShippingCourierSelectionService
         return $availableCouriers[0];
     }
 
-    /**
-     * Build Shiprocket serviceability payload.
-     */
     public function buildServiceabilityPayload(array $data): array
     {
         return [
             'pickup_postcode' => $data['pickup_pincode'] ?? config('shiprocket.pickup_pincode') ?? config('shiprocket.pickup_location'),
             'delivery_postcode' => $data['delivery_pincode'],
             'cod' => ($data['payment_mode'] === 'cod') ? 1 : 0,
-            'weight' => $data['weight_kg'],
-            'length' => $data['length_cm'],
-            'breadth' => $data['breadth_cm'],
-            'height' => $data['height_cm'],
+            'weight' => max(0.05, (float) ($data['weight_kg'] ?? 0)),
+            'length' => max(0.5, (float) ($data['length_cm'] ?? 0)),
+            'breadth' => max(0.5, (float) ($data['breadth_cm'] ?? 0)),
+            'height' => max(0.5, (float) ($data['height_cm'] ?? 0)),
         ];
     }
 

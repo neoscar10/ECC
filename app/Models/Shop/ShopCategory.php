@@ -32,6 +32,11 @@ class ShopCategory extends Model
         return $this->hasMany(ShopCategory::class, 'parent_id')->orderBy('sort_order', 'asc');
     }
 
+    public function sizeGuide(): BelongsTo
+    {
+        return $this->belongsTo(ShopSizeGuide::class, 'size_guide_id');
+    }
+
     // --- Scopes ---
 
     public function scopeActive(Builder $query): Builder

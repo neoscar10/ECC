@@ -134,6 +134,7 @@ class VaultController extends Controller
                     'package_length_cm' => $quoteResult['measurement']['length_cm'] ?? null,
                     'package_breadth_cm' => $quoteResult['measurement']['breadth_cm'] ?? null,
                     'package_height_cm' => $quoteResult['measurement']['height_cm'] ?? null,
+                    'delivery_type' => $quoteResult['delivery_type'] ?? 'courier',
                     'payment_status' => $fee > 0 ? \App\Models\VaultRemovalRequest::PAYMENT_PENDING : \App\Models\VaultRemovalRequest::PAYMENT_NONE,
                 ];
             } else {
@@ -245,6 +246,7 @@ class VaultController extends Controller
                     'package_length_cm' => $quoteResult['measurement']['length_cm'] ?? null,
                     'package_breadth_cm' => $quoteResult['measurement']['breadth_cm'] ?? null,
                     'package_height_cm' => $quoteResult['measurement']['height_cm'] ?? null,
+                    'delivery_type' => $quoteResult['delivery_type'] ?? 'courier',
                     'payment_status' => $fee > 0 ? \App\Models\VaultRemovalRequest::PAYMENT_PENDING : \App\Models\VaultRemovalRequest::PAYMENT_NONE,
                 ];
             } else {

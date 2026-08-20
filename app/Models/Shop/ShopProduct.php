@@ -30,6 +30,8 @@ class ShopProduct extends Model
         'length_cm',
         'breadth_cm',
         'height_cm',
+        'requires_shipping',
+        'size_guide_id',
     ];
 
     protected $casts = [
@@ -43,6 +45,7 @@ class ShopProduct extends Model
         'length_cm' => 'decimal:2',
         'breadth_cm' => 'decimal:2',
         'height_cm' => 'decimal:2',
+        'requires_shipping' => 'boolean',
     ];
 
     // --- Relationships ---
@@ -64,6 +67,16 @@ class ShopProduct extends Model
     public function variationGroups()
     {
         return $this->hasMany(ShopProductVariationGroup::class, 'shop_product_id');
+    }
+
+    public function collection()
+    {
+        return $this->belongsTo(ShopCollection::class, 'collection_id');
+    }
+
+    public function sizeGuide()
+    {
+        return $this->belongsTo(ShopSizeGuide::class, 'size_guide_id');
     }
 
     public function variants()

@@ -1,4 +1,4 @@
-<x-layouts.web-app title="Payment Failed">
+<x-dynamic-component :component="(isset($payment) && $payment->purpose === \App\Support\Payments\PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT) ? 'layouts.guest' : 'layouts.web-app'" title="Payment Failed">
     @php
         $paymentId = request('payment_id');
         $payment = $paymentId ? \App\Models\Payment::find($paymentId) : null;
@@ -43,15 +43,20 @@
                     @endif
 
                     <div class="d-flex justify-content-center gap-3 mt-4">
-                        <a href="{{ route('shop.cart') }}" class="btn btn-outline-light">Return to Cart</a>
-                        @if($canRetry)
+                        @if($payment && $payment->purpose === \App\Support\Payments\PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT)
+                            <a href="{{ route('home') }}" class="btn btn-outline-light">Return to ECC</a>
                             <a href="{{ route('payments.retry', $payment->id) }}" class="btn btn-warning">Retry Payment</a>
                         @else
-                            <a href="{{ route('shop.checkout') }}" class="btn btn-warning">Try Again</a>
+                            <a href="{{ route('shop.cart') }}" class="btn btn-outline-light">Return to Cart</a>
+                            @if($canRetry)
+                                <a href="{{ route('payments.retry', $payment->id) }}" class="btn btn-warning">Retry Payment</a>
+                            @else
+                                <a href="{{ route('shop.checkout') }}" class="btn btn-warning">Try Again</a>
+                            @endif
                         @endif
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</x-layouts.web-app>
+</x-dynamic-component>

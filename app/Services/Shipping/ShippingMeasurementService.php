@@ -251,6 +251,11 @@ class ShippingMeasurementService
         $itemsData = [];
 
         foreach ($items as $item) {
+            // Skip free shipping items
+            if (!$item->product->requires_shipping) {
+                continue;
+            }
+
             $record = $item->variant ?: $item->product;
             $measurement = $this->measurementFromRecord($record);
             

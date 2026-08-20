@@ -41,7 +41,13 @@
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center py-2 border-top ">
                                             <span class="text-muted">Min Price:</span>
-                                            <span class="fw-medium">INR {{ number_format($selectedProduct->price_min_amount) }}</span>
+                                            <span class="fw-medium">
+                                                @if(!is_null($selectedProduct->price_min_amount))
+                                                    INR {{ number_format($selectedProduct->price_min_amount) }}
+                                                @else
+                                                    <span class="fst-italic text-muted">Price on Request</span>
+                                                @endif
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

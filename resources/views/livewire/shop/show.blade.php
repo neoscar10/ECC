@@ -1,1160 +1,1060 @@
-<div class="shop-detail-page">
+<div>
     @push('styles')
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
-        .shop-detail-page {
-            padding-top: .25rem;
-            padding-bottom: 1.5rem;
+        /* ─── Design Tokens ─────────────────────────────── */
+        :root {
+            --hg-primary:          #755a24;
+            --hg-primary-light:    #c5a365;
+            --hg-primary-faint:    rgba(117,90,36,.08);
+            --hg-primary-border:   rgba(117,90,36,.22);
+            --hg-surface:          #fbf9f9;
+            --hg-surface-low:      #f5f3f3;
+            --hg-surface-container:#efeded;
+            --hg-surface-high:     #e9e8e7;
+            --hg-surface-highest:  #e3e2e2;
+            --hg-on-surface:       #1b1c1c;
+            --hg-on-surface-var:   #4d463a;
+            --hg-outline:          #7f7668;
+            --hg-outline-var:      #d1c5b5;
+            --hg-on-primary:       #ffffff;
+            --hg-on-primary-cont:  #503904;
+            --hg-font-body:        'Hanken Grotesk', system-ui, sans-serif;
+            --hg-font-mono:        'JetBrains Mono', monospace;
         }
 
-        .shop-detail-main {
-            margin-bottom: 5rem;
-        }
+        /* ─── Base ─────────────────────────────────────── */
+        .sdp { font-family: var(--hg-font-body); background: var(--hg-surface); color: var(--hg-on-surface); }
 
-        .shop-detail-gallery-stage {
-            position: relative;
-            flex: 1;
-            min-height: 850px;
-            height: clamp(850px, 85vh, 1000px);
-            max-height: 1000px;
-            border-radius: 22px;
-            overflow: hidden;
-            border: 1px solid var(--ecc-primary-border);
-            background: var(--ecc-bg-surface-2);
-            box-shadow: 0 12px 32px rgba(0,0,0,.3);
-            display: flex;
-            align-items: stretch;
-            padding: 1.5rem;
-        }
-
-        .shop-detail-stage-image-wrap {
-            flex-grow: 1;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .shop-detail-stage-thumbs {
-            flex-shrink: 0;
-            width: 110px;
-            height: 100%;
-            padding-left: 1.25rem;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .shop-detail-stage-image-wrap img#shopDetailMainImage {
-            width: 100%;
-            height: 100%;
-            max-width: 98%;
-            max-height: 98%;
-            object-fit: contain;
-            display: block;
-            margin: auto;
-            transition: transform .7s ease;
-        }
-
-        .shop-detail-stage-image-wrap:hover img#shopDetailMainImage {
-            transform: scale(1.04);
-        }
-
-        @media (max-width: 991.98px) {
-            .shop-detail-gallery-stage {
-                min-height: 540px;
-                height: auto;
-                max-height: 640px;
-            }
-
-            .shop-detail-gallery-stage img {
-                width: auto;
-                height: 100%;
-                max-width: 98%;
-                max-height: 100%;
-            }
-        }
-
-        @media (max-width: 767.98px) {
-            .shop-detail-gallery-stage {
-                min-height: 400px;
-                height: auto;
-                max-height: 500px;
-            }
-
-            .shop-detail-gallery-stage img {
-                width: auto;
-                height: 100%;
-                max-width: 100%;
-                max-height: 100%;
-            }
-        }
-
-        .shop-detail-stage-badge {
-            position: absolute;
-            top: 1.25rem;
-            left: 1.25rem;
-            z-index: 3;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 30px;
-            padding: .45rem .9rem;
-            border-radius: 999px;
-            background: var(--ecc-primary);
-            color: var(--ecc-text-primary);
-            font-size: .64rem;
-            font-weight: 900;
-            letter-spacing: .16em;
-            text-transform: uppercase;
-            box-shadow: 0 10px 18px var(--ecc-primary-border);
-        }
-
-        .shop-detail-stage-control {
-            position: absolute;
-            z-index: 4;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: 1px solid var(--ecc-border);
-            background: var(--ecc-overlay-dark);
-            color: var(--ecc-text-primary);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: .2s ease;
-            backdrop-filter: blur(8px);
-        }
-
-        .shop-detail-stage-control:hover {
-            background: var(--ecc-primary);
-            color: var(--ecc-text-primary);
-            border-color: var(--ecc-primary);
-        }
-
-        .shop-detail-stage-control.prev {
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .shop-detail-stage-control.next {
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .shop-detail-stage-control.zoom {
-            right: 1rem;
-            bottom: 1rem;
-        }
-
-        .shop-detail-gallery-container {
-            display: flex;
-            flex-direction: column;
+        /* ─── Gallery Grid ──────────────────────────────── */
+        .sdp-gallery-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 1rem;
         }
-
-        .shop-detail-thumb-rail {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            height: 100%;
-            overflow-y: auto;
-            scrollbar-width: none;
-        }
-
-        .shop-detail-thumb-rail-mobile {
-            display: flex;
-            gap: .85rem;
-            overflow-x: auto;
-            padding: 1rem 0;
-            scrollbar-width: none;
-        }
-
-        .shop-detail-thumb-rail::-webkit-scrollbar {
-            display: none;
-        }
-
-        .shop-detail-thumb {
-            position: relative;
-            border-radius: 14px;
+        .sdp-gallery-cell {
+            border-radius: 0.5rem;
             overflow: hidden;
-            border: 1px solid var(--ecc-primary-border);
-            background: var(--ecc-bg-surface-2);
-            aspect-ratio: 1 / 1;
-            padding: 0;
-            transition: .2s ease;
-            box-shadow: 0 8px 16px rgba(0,0,0,.16);
-            width: 100%;
-            flex: 0 0 auto;
+            background: #fff;
+            cursor: zoom-in;
+            position: relative;
         }
-
-        .shop-detail-thumb img {
+        .sdp-gallery-cell img {
             width: 100%;
-            height: 100%;
+            aspect-ratio: 3/4;
             object-fit: cover;
             display: block;
-            transition: .25s ease;
-            opacity: .74;
+            transition: transform .5s ease;
         }
-
-        .shop-detail-thumb:hover img,
-        .shop-detail-thumb.active img {
-            opacity: 1;
-            transform: scale(1.03);
+        .sdp-gallery-cell:hover img { transform: scale(1.03); }
+        .sdp-gallery-cell.active-thumb { outline: 2px solid var(--hg-primary); }
+        .sdp-badge {
+            position: absolute;
+            top: .85rem; left: .85rem;
+            background: var(--hg-primary);
+            color: var(--hg-on-primary);
+            font-family: var(--hg-font-mono);
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            padding: .3rem .75rem;
+            border-radius: 999px;
+            z-index: 2;
         }
-
-        .shop-detail-thumb.active {
-            border-color: var(--ecc-primary);
-            box-shadow: 0 0 0 2px var(--ecc-primary-soft);
-        }
-
-        .shop-detail-thumb-placeholder {
+        .sdp-show-more {
             display: flex;
-            align-items: center;
             justify-content: center;
-            color: var(--ecc-primary);
-            background: var(--ecc-bg-input);
-            font-size: 1.4rem;
+            margin-top: .5rem;
         }
+        .sdp-show-more-btn {
+            padding: .65rem 2.25rem;
+            border: 1px solid var(--hg-outline-var);
+            border-radius: 999px;
+            background: transparent;
+            color: var(--hg-on-surface);
+            font-family: var(--hg-font-mono);
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background .2s, color .2s;
+        }
+        .sdp-show-more-btn:hover { background: var(--hg-surface-container); }
 
-        .shop-detail-sidebar {
+        /* ─── Sticky Sidebar ────────────────────────────── */
+        .sdp-sidebar {
             position: sticky;
-            top: 100px;
+            top: 90px;
             display: flex;
             flex-direction: column;
-            gap: 1.15rem;
+            gap: 2rem;
         }
+        .sdp-sidebar-inner { display: flex; flex-direction: column; gap: 1.5rem; }
 
-        .shop-detail-side-card,
-        .shop-detail-cert-card {
-            border-radius: 22px;
-            border: 1px solid var(--ecc-primary-border);
-            background: var(--ecc-bg-surface);
-            box-shadow: var(--ecc-shadow-soft);
-            padding: 1.5rem;
-        }
-
-        .shop-detail-side-kicker {
-            color: var(--ecc-text-secondary);
-            font-size: .7rem;
-            font-weight: 900;
-            letter-spacing: .16em;
-            text-transform: uppercase;
-            margin-bottom: .8rem;
-        }
-
-        .shop-detail-cert-card {
+        /* ─── Breadcrumbs ───────────────────────────────── */
+        .sdp-breadcrumb {
             display: flex;
-            flex-direction: column;
+            gap: .4rem;
             align-items: center;
-            text-align: center;
-            gap: .35rem;
+            font-family: var(--hg-font-mono);
+            font-size: .68rem;
+            letter-spacing: .05em;
+            color: var(--hg-on-surface-var);
         }
+        .sdp-breadcrumb a:hover { color: var(--hg-primary); }
+        .sdp-breadcrumb span.sep { opacity: .5; }
 
-        .shop-detail-cert-card i {
-            color: var(--ecc-primary);
-            font-size: 1.4rem;
-        }
-
-        .shop-detail-cert-title {
-            color: var(--ecc-text-primary);
-            font-size: .8rem;
-            font-weight: 900;
-            letter-spacing: .08em;
+        /* ─── Header ────────────────────────────────────── */
+        .sdp-kicker {
+            font-family: var(--hg-font-mono);
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .14em;
             text-transform: uppercase;
+            color: var(--hg-on-surface-var);
         }
-
-        .shop-detail-cert-subtitle {
-            color: var(--ecc-text-secondary);
-            font-size: .7rem;
-            line-height: 1.5;
-        }
-
-        .shop-detail-kicker {
-            display: inline-flex;
-            align-items: center;
-            gap: .45rem;
-            color: var(--ecc-primary);
-            font-size: .72rem;
-            font-weight: 900;
-            letter-spacing: .18em;
+        .sdp-title {
+            font-size: clamp(1.6rem, 3vw, 2rem);
+            line-height: 1.1;
+            font-weight: 700;
+            letter-spacing: -.025em;
             text-transform: uppercase;
-        }
-
-        .shop-detail-title {
-            color: var(--ecc-text-primary);
-            font-size: clamp(2.3rem, 4vw, 4.25rem);
-            line-height: .95;
-            font-weight: 900;
-            letter-spacing: -.06em;
-            text-transform: uppercase;
-            font-style: italic;
+            color: var(--hg-on-surface);
             margin: 0;
         }
-
-        .shop-detail-price-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
+        .sdp-price {
+            font-family: var(--hg-font-body);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--hg-on-surface);
+            line-height: 1.3;
         }
-
-        .shop-detail-price-block {
-            display: flex;
-            align-items: center;
-            gap: .9rem;
-            flex-wrap: wrap;
+        .sdp-price-note {
+            font-family: var(--hg-font-mono);
+            font-size: .62rem;
+            letter-spacing: .03em;
+            color: var(--hg-on-surface-var);
+            margin-top: .15rem;
         }
-
-        .shop-detail-price {
-            color: var(--ecc-primary);
-            font-size: clamp(1.8rem, 3vw, 2.8rem);
-            font-weight: 900;
-            letter-spacing: -.02em;
-            line-height: 1.1;
-        }
-
-        .shop-detail-stock-pill {
+        .sdp-stock-pill {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            min-height: 28px;
-            padding: .35rem .75rem;
+            gap: .35rem;
+            padding: .25rem .7rem;
             border-radius: 999px;
-            background: rgba(16,185,129,.10);
-            color: #34d399;
-            border: 1px solid rgba(16,185,129,.18);
-            font-size: .68rem;
-            font-weight: 900;
+            font-family: var(--hg-font-mono);
+            font-size: .62rem;
+            font-weight: 700;
             letter-spacing: .08em;
             text-transform: uppercase;
         }
+        .sdp-stock-pill.in-stock {
+            background: rgba(16,185,129,.1);
+            color: #059669;
+            border: 1px solid rgba(16,185,129,.2);
+        }
+        .sdp-stock-pill.out-stock {
+            background: rgba(186,26,26,.1);
+            color: #b91c1c;
+            border: 1px solid rgba(186,26,26,.2);
+        }
+        .sdp-stock-pill.select-opts {
+            background: var(--hg-surface-high);
+            color: var(--hg-on-surface-var);
+            border: 1px solid var(--hg-outline-var);
+        }
 
-        .shop-detail-rating {
+        /* ─── Variation Selectors ───────────────────────── */
+        .sdp-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: .6rem;
+        }
+        .sdp-group-label {
+            font-family: var(--hg-font-mono);
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--hg-on-surface);
+        }
+        .sdp-size-guide-link {
+            font-family: var(--hg-font-mono);
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--hg-primary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            padding: 0;
+        }
+        .sdp-size-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: .5rem;
+        }
+        .sdp-size-btn {
+            height: 48px;
+            border-radius: 0.5rem;
+            border: 1px solid var(--hg-outline-var);
+            background: var(--hg-surface);
+            color: var(--hg-on-surface-var);
+            font-family: var(--hg-font-mono);
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            cursor: pointer;
+            transition: border-color .15s, color .15s, background .15s;
+        }
+        .sdp-size-btn:hover:not(:disabled) { border-color: var(--hg-primary); color: var(--hg-primary); }
+        .sdp-size-btn.active { border: 2px solid var(--hg-primary); color: var(--hg-primary); background: var(--hg-primary-faint); font-weight: 900; }
+        .sdp-size-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+        /* Color swatches */
+        .sdp-swatches { display: flex; gap: .6rem; flex-wrap: wrap; }
+        .sdp-swatch {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            padding: 3px;
+            background: transparent;
+            cursor: pointer;
+            transition: border-color .15s;
+        }
+        .sdp-swatch.active, .sdp-swatch:hover:not(:disabled) { border-color: var(--hg-primary); }
+        .sdp-swatch:disabled { opacity: .35; cursor: not-allowed; }
+        .sdp-swatch-core { width: 100%; height: 100%; border-radius: 50%; display: block; box-shadow: inset 0 1px 3px rgba(0,0,0,.25); }
+
+        /* Image swatches */
+        .sdp-swatch-image {
+            width: 48px; height: 60px;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color .15s;
+        }
+        .sdp-swatch-image.active, .sdp-swatch-image:hover:not(:disabled) { border-color: var(--hg-primary); }
+        .sdp-swatch-image img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ─── Quantity ───────────────────────────────────── */
+        .sdp-qty {
             display: inline-flex;
             align-items: center;
             gap: .5rem;
-            color: var(--ecc-text-secondary);
-            font-size: .78rem;
+            padding: .3rem;
+            border-radius: 999px;
+            border: 1px solid var(--hg-outline-var);
+            background: var(--hg-surface-low);
+        }
+        .sdp-qty-btn {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--hg-on-surface);
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background .15s, color .15s;
+        }
+        .sdp-qty-btn:hover { background: var(--hg-surface-container); color: var(--hg-primary); }
+        .sdp-qty-value {
+            min-width: 2rem;
+            text-align: center;
+            font-family: var(--hg-font-mono);
+            font-size: .88rem;
             font-weight: 700;
         }
 
-        .shop-detail-rating-stars {
-            color: var(--ecc-primary);
-            display: inline-flex;
-            align-items: center;
-            gap: .08rem;
-        }
-
-        .shop-detail-divider {
-            height: 1px;
-            background: linear-gradient(90deg, var(--ecc-primary-border), transparent);
-        }
-
-        .shop-detail-field-label {
-            color: var(--ecc-text-secondary);
+        /* ─── Action Buttons ────────────────────────────── */
+        .sdp-action-row { display: flex; gap: .65rem; align-items: stretch; }
+        .sdp-add-btn {
+            flex: 1;
+            min-height: 56px;
+            border-radius: 0.5rem;
+            border: none;
+            background: var(--hg-primary-light);
+            color: var(--hg-on-primary-cont);
+            font-family: var(--hg-font-mono);
             font-size: .72rem;
-            font-weight: 900;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-        }
-
-        .shop-detail-inline-link {
-            color: var(--ecc-primary);
-            font-size: .72rem;
-            font-weight: 900;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-            text-decoration: underline;
-            text-underline-offset: 3px;
-        }
-
-        .shop-detail-size-grid {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: .65rem;
-        }
-
-        .shop-detail-size-btn {
-            min-height: 48px;
-            border-radius: 12px;
-            border: 1px solid var(--ecc-primary-border);
-            background: transparent;
-            color: var(--ecc-text-primary);
-            font-size: .9rem;
-            font-weight: 800;
-            transition: .2s ease;
-        }
-
-        .shop-detail-size-btn:hover {
-            border-color: rgba(199, 167, 90,.4);
-            color: var(--ecc-primary);
-        }
-
-        .shop-detail-size-btn.active {
-            border: 2px solid var(--ecc-primary);
-            background: rgba(199, 167, 90,.06);
-            color: var(--ecc-text-primary);
-        }
-
-        .shop-detail-size-btn.disabled,
-        .shop-detail-size-btn:disabled {
-            opacity: .45;
-            cursor: not-allowed;
-            background: var(--ecc-bg-input);
-        }
-
-        .shop-detail-swatches {
-            display: flex;
-            gap: .7rem;
-            flex-wrap: wrap;
-        }
-
-        .shop-detail-swatch {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            border: 1px solid rgba(199, 167, 90,.16);
-            padding: 3px;
-            background: transparent;
-            transition: .2s ease;
-        }
-
-        .shop-detail-swatch:hover,
-        .shop-detail-swatch.active {
-            border: 2px solid var(--ecc-primary);
-        }
-
-        .shop-detail-swatch-core {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            display: block;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,.25);
-        }
-
-        .shop-detail-purchase-card {
-            border-radius: 18px;
-            border: 1px solid var(--ecc-primary-soft);
-            background: var(--ecc-bg-surface);
-            box-shadow: var(--ecc-shadow-soft);
-            padding: 1.35rem;
-        }
-
-        .shop-detail-purchase-row {
-            display: flex;
-            gap: .85rem;
-            align-items: center;
-        }
-
-        .shop-detail-qty {
-            display: inline-flex;
-            align-items: center;
-            gap: .6rem;
-            padding: .3rem;
-            border-radius: 999px;
-            border: 1px solid var(--ecc-border);
-            background: var(--ecc-bg-input);
-        }
-
-        .shop-detail-qty-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 0;
-            background: transparent;
-            color: var(--ecc-text-primary);
-            transition: .2s ease;
-        }
-
-        .shop-detail-qty-btn:hover {
-            background: var(--ecc-bg-input);
-            color: var(--ecc-primary);
-        }
-
-        .shop-detail-qty-value {
-            min-width: 18px;
-            text-align: center;
-            font-size: .92rem;
-            font-weight: 800;
-        }
-
-        .shop-detail-add-btn {
-            flex: 1 1 auto;
-            min-height: 52px;
-            border-radius: 999px;
-            border: 0;
-            background: var(--ecc-primary);
-            color: var(--ecc-text-primary);
-            font-size: .82rem;
-            font-weight: 900;
+            font-weight: 700;
             letter-spacing: .16em;
             text-transform: uppercase;
-            transition: .2s ease;
-        }
-
-        .shop-detail-add-btn:hover {
-            filter: brightness(1.05);
-            color: var(--ecc-text-primary);
-        }
-
-        .shop-detail-icon-btn {
-            width: 52px;
-            height: 52px;
-            flex: 0 0 auto;
-            border-radius: 50%;
-            border: 1px solid var(--ecc-primary-border);
-            background: transparent;
-            color: var(--ecc-text-primary);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: .2s ease;
-        }
-
-        .shop-detail-icon-btn:hover {
-            border-color: var(--ecc-primary-border);
-            color: var(--ecc-primary);
-        }
-
-        .shop-detail-micro-features {
+            cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 1.25rem;
-            flex-wrap: wrap;
-            color: var(--ecc-text-secondary);
-            font-size: .64rem;
-            font-weight: 900;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-            margin-top: .9rem;
-        }
-
-        .shop-detail-micro-feature {
-            display: inline-flex;
-            align-items: center;
-            gap: .45rem;
-        }
-
-        .shop-detail-story-title {
-            color: var(--ecc-text-primary);
-            font-size: 1.5rem;
-            font-weight: 900;
-            letter-spacing: -.03em;
-            margin: 0 0 1.25rem;
-            display: inline-flex;
-            align-items: center;
-            gap: .85rem;
-            text-transform: uppercase;
-        }
-
-        .shop-detail-story-title::before {
-            content: "";
-            display: inline-block;
-            width: 4px;
-            height: 24px;
-            border-radius: 999px;
-            background: var(--ecc-primary);
-            flex: 0 0 auto;
-        }
-
-        .shop-detail-story,
-        .shop-detail-story p,
-        .shop-detail-story li {
-            color: var(--ecc-text-secondary);
-            font-size: .94rem;
-            line-height: 1.9;
-        }
-
-        .shop-detail-story ul,
-        .shop-detail-story ol {
-            padding-left: 1.1rem;
-            margin-bottom: 0;
-        }
-
-        .shop-detail-story li {
-            margin-bottom: .45rem;
-        }
-
-        .shop-detail-related-section {
-            margin-top: 6rem;
-        }
-
-        .shop-detail-related-head {
-            display: flex;
-            align-items: end;
             justify-content: space-between;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            padding: 0 1.5rem;
+            transition: background .2s, color .2s;
         }
-
-        .shop-detail-related-kicker {
-            color: var(--ecc-primary);
-            font-size: .72rem;
-            font-weight: 900;
-            letter-spacing: .2em;
-            text-transform: uppercase;
-            margin-bottom: .5rem;
+        .sdp-add-btn:hover:not(:disabled) { background: var(--hg-primary); color: var(--hg-on-primary); }
+        .sdp-add-btn:disabled { opacity: .55; cursor: not-allowed; }
+        .sdp-wish-btn {
+            width: 56px;
+            min-height: 56px;
+            border-radius: 0.5rem;
+            border: 1px solid var(--hg-outline-var);
+            background: var(--hg-surface);
+            color: var(--hg-on-surface-var);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color .2s, color .2s;
         }
+        .sdp-wish-btn:hover { border-color: var(--hg-primary); color: var(--hg-primary); }
+        .sdp-wish-btn .material-symbols-outlined { font-size: 22px; font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
 
-        .shop-detail-related-title {
-            color: var(--ecc-text-primary);
-            font-size: 2.5rem;
-            line-height: 1.05;
-            font-weight: 900;
-            letter-spacing: -.04em;
-            text-transform: uppercase;
-            margin: 0;
+        /* ─── Info tip ───────────────────────────────────── */
+        .sdp-info-tip {
+            display: flex;
+            align-items: flex-start;
+            gap: .5rem;
+            padding: .75rem 1rem;
+            border-radius: 0.25rem;
+            background: var(--hg-surface-low);
+            border: 1px solid var(--hg-outline-var);
+            font-family: var(--hg-font-mono);
+            font-size: .68rem;
+            letter-spacing: .03em;
+            color: var(--hg-on-surface-var);
+            line-height: 1.5;
         }
+        .sdp-info-tip .material-symbols-outlined { font-size: 16px; flex-shrink: 0; margin-top: 1px; font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
 
-        .shop-detail-related-link {
-            color: var(--ecc-text-primary);
-            font-size: .78rem;
-            font-weight: 900;
-            letter-spacing: .16em;
-            text-transform: uppercase;
-            text-decoration: none;
-            border-bottom: 2px solid var(--ecc-primary);
-            padding-bottom: .2rem;
-        }
-
-        .shop-detail-bento-card {
-            position: relative;
-            height: 100%;
-            min-height: 320px;
-            border-radius: 18px;
-            overflow: hidden;
-            background: var(--ecc-bg-surface);
-            box-shadow: var(--ecc-shadow-soft);
-        }
-
-        .shop-detail-bento-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            transition: transform .7s ease;
-        }
-
-        .shop-detail-bento-card:hover img {
-            transform: scale(1.05);
-        }
-
-        .shop-detail-bento-overlay {
-            position: absolute;
-            inset: 0;
-            padding: 1.5rem;
+        /* ─── Value Props ────────────────────────────────── */
+        .sdp-value-props {
             display: flex;
             flex-direction: column;
-            justify-content: end;
-            background: linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(11,9,4,.88) 100%);
+            gap: .75rem;
+            padding: 1.25rem 0;
+            border-top: 1px solid var(--hg-outline-var);
+            border-bottom: 1px solid var(--hg-outline-var);
         }
-
-        .shop-detail-bento-kicker {
-            color: var(--ecc-primary);
-            font-size: .62rem;
-            font-weight: 900;
-            letter-spacing: .16em;
-            text-transform: uppercase;
-            margin-bottom: .4rem;
-        }
-
-        .shop-detail-bento-title {
-            color: var(--ecc-text-primary);
-            font-size: 1.35rem;
-            font-weight: 900;
-            line-height: 1.1;
-            letter-spacing: -.03em;
-            text-transform: uppercase;
-            margin-bottom: .6rem;
-        }
-
-        .shop-detail-bento-price {
-            color: var(--ecc-primary);
-            font-size: 1.05rem;
-            font-weight: 900;
-        }
-
-        .shop-detail-bento-btn {
-            width: fit-content;
-            min-height: 34px;
-            padding: .4rem .9rem;
-            border-radius: 999px;
-            border: 1px solid var(--ecc-primary-border);
-            background: transparent;
-            color: var(--ecc-text-primary);
+        .sdp-value-prop {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            font-family: var(--hg-font-mono);
             font-size: .68rem;
-            font-weight: 900;
-            letter-spacing: .14em;
+            letter-spacing: .03em;
+            color: var(--hg-on-surface-var);
+        }
+        .sdp-value-prop .material-symbols-outlined { font-size: 18px; color: var(--hg-primary); flex-shrink: 0; font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+
+        /* ─── Accordions ─────────────────────────────────── */
+        .sdp-accordion { display: flex; flex-direction: column; }
+        .sdp-accordion-item { border-bottom: 1px solid var(--hg-outline-var); }
+        .sdp-accordion-item summary {
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            cursor: pointer;
+            font-family: var(--hg-font-body);
+            font-size: .9rem;
+            font-weight: 700;
+            letter-spacing: .08em;
             text-transform: uppercase;
-            transition: .2s ease;
-            text-decoration: none;
+            color: var(--hg-on-surface);
+            user-select: none;
+        }
+        .sdp-accordion-item summary::-webkit-details-marker { display: none; }
+        .sdp-accordion-item summary .material-symbols-outlined { font-size: 20px; transition: transform .2s; color: var(--hg-on-surface-var); font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+        .sdp-accordion-item[open] summary .material-symbols-outlined { transform: rotate(180deg); }
+        .sdp-accordion-body {
+            padding-bottom: 1rem;
+            color: var(--hg-on-surface-var);
+            font-size: .92rem;
+            line-height: 1.7;
+        }
+        .sdp-accordion-body ul { padding-left: 1.2rem; }
+        .sdp-accordion-body li { margin-bottom: .3rem; }
+        .sdp-care-row { display: flex; align-items: center; gap: .75rem; margin-bottom: .5rem; }
+        .sdp-care-row .material-symbols-outlined { font-size: 18px; font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+
+        /* ─── Related / Complete The Look ───────────────── */
+        .sdp-related-section { border-top: 1px solid var(--hg-outline-var); padding: 3.5rem 0; }
+        .sdp-related-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        @media (min-width: 768px) { .sdp-related-grid { grid-template-columns: repeat(4, 1fr); } }
+        .sdp-related-card { display: flex; flex-direction: column; gap: .65rem; text-decoration: none; color: inherit; }
+        .sdp-related-card:hover .sdp-related-img { transform: scale(1.05); }
+        .sdp-related-img-wrap {
+            background: var(--hg-surface-low);
+            aspect-ratio: 3/4;
+            overflow: hidden;
+            border-radius: 0.25rem;
+            position: relative;
+        }
+        .sdp-related-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+        .sdp-related-title {
+            font-family: var(--hg-font-mono);
+            font-size: .68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--hg-on-surface);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sdp-related-price {
+            font-family: var(--hg-font-mono);
+            font-size: .68rem;
+            color: var(--hg-on-surface-var);
+            margin-top: .1rem;
         }
 
-        .shop-detail-bento-btn:hover {
-            background: var(--ecc-primary);
-            color: var(--ecc-text-primary);
-            border-color: var(--ecc-primary);
+        /* ─── Mobile Adjustments ────────────────────────── */
+        @media (max-width: 767px) {
+            .sdp-gallery-grid { grid-template-columns: 1fr; }
+            .sdp-size-grid { grid-template-columns: repeat(4, 1fr); }
+            .sdp-main-grid { grid-template-columns: 1fr !important; }
         }
-
-        @media (max-width: 1199.98px) {
-            .shop-detail-title {
-                font-size: clamp(2rem, 4vw, 3.3rem);
-            }
-        }
-
-        @media (max-width: 991.98px) {
-            .shop-detail-editorial {
-                position: static;
-            }
-
-            .shop-detail-gallery-stage {
-                min-height: 420px;
-                max-height: 550px;
-            }
-
-            .shop-detail-size-grid {
-                grid-template-columns: repeat(5, minmax(0, 1fr));
-            }
-        }
-
-        @media (max-width: 767.98px) {
-            .shop-detail-gallery-stage {
-                min-height: 340px;
-                max-height: 450px;
-            }
-
-            .shop-detail-thumb-rail {
-                gap: .6rem;
-            }
-
-            .shop-detail-thumb {
-                flex: 0 0 auto;
-                width: 100%;
-            }
-
-            .shop-detail-price-row {
-                align-items: start;
-                flex-direction: column;
-            }
-
-            .shop-detail-purchase-row {
-                flex-wrap: wrap;
-            }
-
-            .shop-detail-add-btn {
-                min-width: 100%;
-            }
-
-            .shop-detail-related-head {
-                flex-direction: column;
-                align-items: start;
-            }
-
-            .shop-detail-related-title {
-                font-size: 2rem;
-            }
-
-            .shop-detail-bento-card {
-                min-height: 260px;
-            }
-        }
-
-            .shop-detail-thumb {
-                flex: 0 0 65px;
-                width: 65px;
-            }
-
-            .shop-detail-gallery-stage {
-                min-height: 320px;
-                max-height: 400px;
-            }
-        }
-
-        @media (min-width: 992px) {
-            .shop-detail-gallery-container {
-                flex-direction: row;
-                align-items: flex-start;
-                gap: .75rem;
-            }
-
-            .shop-detail-thumb-rail {
-                flex-direction: column;
-                flex: 0 0 auto;
-                max-height: 450px;
-                overflow-y: auto;
-                overflow-x: hidden;
-                padding: 0 .4rem 0 0;
-            }
-
-            .shop-detail-thumb {
-                flex: 0 0 auto;
-                width: 100%;
-                aspect-ratio: 1 / 1;
-                margin-bottom: .65rem;
-                border-radius: 12px;
-            }
+        @media (min-width: 768px) {
+            .sdp-gallery-grid { grid-template-columns: 1fr 1fr; }
+            .sdp-main-grid { grid-template-columns: 1fr minmax(0, 390px) !important; gap: 3rem !important; align-items: start !important; }
         }
     </style>
     @endpush
 
     @php
-        $productItem = $product;
-
-        $galleryItems = collect($currentGallery)->values();
-
-        $mainImage = $currentGallery[$selectedMediaIndex]['url'] ?? $currentGallery[0]['url'] ?? null;
-
-        $title = $productItem->title ?? 'Product';
-        $price = ($product->currency ?? 'INR') . ' ' . ($computedPriceDisplay ?? number_format($product->base_price, 2));
-
-        $badge = $productItem->is_featured ? 'Featured Edition' : null;
-
-        $stockLabel = $availabilityLabel ?: ($inStock ? 'In Stock' : 'Out of Stock');
-
-        $ratingValue = 0; // Placeholder
-        $reviewCount = 0; // Placeholder
-
+        $galleryItems    = collect($currentGallery)->values();
+        $title           = $product->title ?? 'Product';
+        $badge           = $product->is_featured ? 'Featured Edition' : null;
+        $priceDisplay    = ($product->currency ?? 'INR') . ' ' . ($computedPriceDisplay ?? number_format($product->base_price, 2));
+        $stockLabel      = $availabilityLabel ?: ($inStock ? 'In Stock' : 'Out of Stock');
+        $stockClass      = $inStock ? 'in-stock' : ($availabilityLabel === 'Select options' ? 'select-opts' : 'out-stock');
         $descriptionHtml = \Illuminate\Support\Str::markdown($product->description ?? '');
+        $collectionUrl   = route('shop.index');
 
-        $features = collect([]);
+        // Breadcrumbs
+        $primaryCategory = $product->categories->first();
+        $parentCategory  = $primaryCategory?->parent;
 
-        $sizeOptions = collect([]);
-        $colorOptions = collect([]);
-        
-        // Map variation groups to specific UI sections
-        foreach(($variationGroups ?? []) as $group) {
-            if (request()->is('*') /* placeholder logic to match groups */) {
-                // We'll use the generic loop instead of splitting for now to remain safe
-            }
-        }
-        
-        $relatedProducts = collect([]);
-        $collectionUrl = route('shop.index');
+        // Show "Show More" if gallery has more than 4 images
+        $initialImages = $galleryItems->take(4);
+        $extraImages   = $galleryItems->slice(4);
+
+        // Variation groups
+        $sizeGroups  = collect($variationGroups)->filter(fn($g) => stripos($g['name'] ?? '', 'size') !== false);
+        $colorGroups = collect($variationGroups)->filter(fn($g) => ($g['presentation_type'] ?? '') === 'color');
+        $imageGroups = collect($variationGroups)->filter(fn($g) => ($g['presentation_type'] ?? '') === 'image');
+        $textGroups  = collect($variationGroups)->filter(fn($g) => ($g['presentation_type'] ?? 'text') === 'text' && stripos($g['name'] ?? '', 'size') === false);
     @endphp
 
-    <div class="shop-detail-main">
-        {{-- MAIN CONTENT GRID (9/3 Split for the entire layout) --}}
-        <div class="row g-4 g-xl-5 mb-5">
-            {{-- LEFT: PRODUCT CONTENT & GALLERY STAGE (9/12) --}}
-            <div class="col-lg-9">
-                
-                {{-- GALLERY STAGE (Includes Main Image & Desktop Thumbnails) --}}
-                <div class="shop-detail-gallery-stage mb-5">
-                    
-                    {{-- MAIN IMAGE WRAPPER --}}
-                    <div class="shop-detail-stage-image-wrap">
-                        @if(!empty($mainImage))
-                            <img
-                                src="{{ $mainImage }}"
-                                alt="{{ $title }}"
-                                id="shopDetailMainImage"
-                            >
-                        @else
-                            <img
-                                src="https://placehold.co/1000x1200/17130b/d4af37?text=Product"
-                                alt="{{ $title }}"
-                                id="shopDetailMainImage"
-                            >
-                        @endif
+    <div class="sdp">
+        {{-- ═══════════════════════════════════════════════════════════
+             MAIN LAYOUT
+             ═══════════════════════════════════════════════════════════ --}}
+        <main style="max-width: 1280px; margin: 0 auto; padding: 1rem 1.5rem 5rem;">
 
-                        @if(!empty($badge))
-                            <div class="shop-detail-stage-badge">{{ $badge }}</div>
-                        @endif
+            {{-- Mobile Breadcrumb --}}
+            <nav class="sdp-breadcrumb d-md-none mb-3">
+                <a href="{{ route('shop.index') }}">Shop</a>
+                @if($parentCategory)
+                    <span class="sep">/</span>
+                    <a href="{{ route('shop.index') }}?cat={{ $parentCategory->id }}">{{ $parentCategory->name }}</a>
+                @endif
+                @if($primaryCategory)
+                    <span class="sep">/</span>
+                    <span style="color: var(--hg-on-surface); font-weight: 700;">{{ $primaryCategory->name }}</span>
+                @endif
+            </nav>
 
-                        @if($galleryItems->count() > 1)
-                            <button type="button" class="shop-detail-stage-control prev" wire:click="selectMedia({{ ($selectedMediaIndex - 1 + $galleryItems->count()) % $galleryItems->count() }})" aria-label="Previous image">
-                                <i class="mdi mdi-chevron-left"></i>
-                            </button>
+            <div style="display: grid; gap: 1.5rem;" class="sdp-main-grid">
 
-                            <button type="button" class="shop-detail-stage-control next" wire:click="selectMedia({{ ($selectedMediaIndex + 1) % $galleryItems->count() }})" aria-label="Next image">
-                                <i class="mdi mdi-chevron-right"></i>
-                            </button>
-                        @endif
-
-                        <button type="button" class="shop-detail-stage-control zoom" id="shopDetailZoomBtn" aria-label="Zoom image">
-                            <i class="mdi mdi-magnify-plus-outline"></i>
-                        </button>
-                    </div>
-
-                    {{-- DESKTOP THUMBNAILS (Inside the Stage card) --}}
-                    <div class="shop-detail-stage-thumbs d-none d-lg-flex">
-                        <div class="shop-detail-thumb-rail scroll-luxury w-100" id="shopDetailThumbGrid">
-                            @if($galleryItems->count())
-                                @foreach($galleryItems as $index => $media)
-                                    @php
-                                        $thumbUrl = $media['thumb_url'] ?? $media['url'] ?? null;
-                                        $fullUrl = $media['url'] ?? null;
-                                    @endphp
-
-                                    <button
-                                        type="button"
-                                        class="shop-detail-thumb {{ (int)$selectedMediaIndex === (int)$index ? 'active' : '' }}"
-                                        wire:click="selectMedia({{ $index }})"
-                                        aria-label="View image {{ $index + 1 }}"
-                                    >
-                                        <img src="{{ $thumbUrl ?: $fullUrl }}" alt="{{ $title }} thumbnail {{ $index + 1 }}">
-                                    </button>
-                                @endforeach
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                {{-- MOBILE THUMBS (Hidden on Desktop) --}}
-                <div class="col-12 d-lg-none mb-5">
-                    <div class="shop-detail-thumb-rail-mobile scroll-luxury">
-                        @foreach($galleryItems as $index => $media)
-                            @php
-                                $thumbUrl = $media['thumb_url'] ?? $media['url'] ?? null;
-                            @endphp
-                            <button
-                                type="button"
-                                class="shop-detail-thumb {{ (int)$selectedMediaIndex === (int)$index ? 'active' : '' }}"
-                                wire:click="selectMedia({{ $index }})"
-                            >
-                                <img src="{{ $thumbUrl }}" alt="thumb">
-                            </button>
+                {{-- ── LEFT: Gallery Column ───────────────────── --}}
+                <div>
+                    {{-- 2×N Gallery Grid --}}
+                    <div class="sdp-gallery-grid" id="sdpGallery" x-data="{ showAll: false }">
+                        @foreach($initialImages as $index => $media)
+                            <div class="sdp-gallery-cell {{ (int)$selectedMediaIndex === (int)$index ? 'active-thumb' : '' }}"
+                                 wire:click="selectMedia({{ $index }})">
+                                @if($index === 0 && $badge)
+                                    <span class="sdp-badge">{{ $badge }}</span>
+                                @endif
+                                <img src="{{ $media['url'] }}" alt="{{ $title }} — View {{ $index + 1 }}" loading="{{ $index < 2 ? 'eager' : 'lazy' }}">
+                            </div>
                         @endforeach
+
+                        @if($extraImages->count())
+                            @foreach($extraImages as $index => $media)
+                                @php $realIndex = $index + 4; @endphp
+                                <div class="sdp-gallery-cell {{ (int)$selectedMediaIndex === (int)$realIndex ? 'active-thumb' : '' }}"
+                                     wire:click="selectMedia({{ $realIndex }})"
+                                     x-show="showAll"
+                                     x-cloak>
+                                    <img src="{{ $media['url'] }}" alt="{{ $title }} — View {{ $realIndex + 1 }}" loading="lazy">
+                                </div>
+                            @endforeach
+
+                            <div class="sdp-show-more" x-show="!showAll" style="grid-column: 1 / -1;">
+                                <button class="sdp-show-more-btn" @click="showAll = true">Show More</button>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
-                {{-- PRODUCT INFO BELOW GALLERY --}}
-                <div class="shop-detail-info-block mt-lg-5 mt-4">
-                    <header class="mb-3">
-                        @if(!empty($badge))
-                            <div class="shop-detail-kicker mb-2">
-                                <i class="mdi mdi-star-four-points-outline"></i>
-                                <span>{{ $badge }}</span>
-                            </div>
-                        @endif
+                {{-- ── RIGHT: Sticky Sidebar ──────────────────── --}}
+                <div class="sdp-sidebar" id="sdpSidebar">
+                    <div class="sdp-sidebar-inner">
 
-                        <h1 class="shop-detail-title">{{ $title }}</h1>
-                    </header>
+                        {{-- Desktop Breadcrumb --}}
+                        <nav class="sdp-breadcrumb d-none d-md-flex">
+                            <a href="{{ route('shop.index') }}">Shop</a>
+                            @if($parentCategory)
+                                <span class="sep">/</span>
+                                <a href="{{ route('shop.index') }}?cat={{ $parentCategory->id }}">{{ $parentCategory->name }}</a>
+                            @endif
+                            @if($primaryCategory)
+                                <span class="sep">/</span>
+                                <span style="color: var(--hg-on-surface); font-weight: 700;">{{ $primaryCategory->name }}</span>
+                            @endif
+                        </nav>
 
-                    <div class="shop-detail-price-row mb-4">
-                        <div class="shop-detail-price-block">
-                            <div class="shop-detail-price">{{ $price }}</div>
-                            <div class="shop-detail-stock-pill {{ $inStock ? '' : 'text-danger border-danger-subtle bg-danger-subtle' }}">
-                                {{ $stockLabel }}
+                        {{-- Header: Kicker, Title, Price --}}
+                        <div>
+                            @if($primaryCategory)
+                                <div class="sdp-kicker mb-1">{{ $primaryCategory->name }}</div>
+                            @endif
+                            <h1 class="sdp-title">{{ $title }}</h1>
+                            <div style="margin-top: .75rem; display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;">
+                                <div class="sdp-price">{{ $priceDisplay }}</div>
+                                <span class="sdp-stock-pill {{ $stockClass }}">
+                                    @if($inStock && !$availabilityLabel)
+                                        <span class="material-symbols-outlined" style="font-size:13px; font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">circle</span>
+                                    @endif
+                                    {{ $stockLabel }}
+                                </span>
                             </div>
+                            <p class="sdp-price-note">Inclusive of all taxes.</p>
                         </div>
 
-                        <div class="shop-detail-rating">
-                            <span class="shop-detail-rating-stars">
-                                @for($i = 1; $i <= 5; $i++)
-                                    <i class="mdi {{ $i <= round((float)$ratingValue) ? 'mdi-star' : 'mdi-star-outline' }}"></i>
-                                @endfor
-                            </span>
-                            <span>({{ $reviewCount }} Reviews)</span>
-                        </div>
-                    </div>
+                        {{-- ── Variation Selectors ───────────────── --}}
+                        @if(count($variationGroups ?? []))
+                            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
 
-                    <div class="shop-detail-divider mb-4" style="background: linear-gradient(90deg, var(--ecc-primary-border), transparent); height: 1px;"></div>
-
-                    {{-- VARIATION GROUPS / SPECIFICATIONS --}}
-                    @if(count($variationGroups ?? []))
-                        <div class="shop-detail-spec-section mb-5">
-                            <div class="shop-detail-story-title mb-4">
-                                <span style="color: var(--ecc-primary); margin-right: .5rem;">|</span>Specifications
-                            </div>
-
-                            <div class="row g-4 leading-relaxed">
+                                {{-- Text/Size groups --}}
                                 @foreach($variationGroups as $group)
                                     @php
-                                        $groupId = $group['id'];
-                                        $groupName = $group['name'] ?? 'Option';
-                                        $presentation = $group['presentation_type'] ?? 'text';
-                                        $values = $group['values'] ?? [];
-                                        $selectedValueId = $selectedVariationValues[$groupId] ?? null;
+                                        $groupId       = $group['id'];
+                                        $groupName     = $group['name'] ?? 'Option';
+                                        $presentation  = $group['presentation_type'] ?? 'text';
+                                        $values        = $group['values'] ?? [];
+                                        $selectedVId   = $selectedVariationValues[$groupId] ?? null;
+                                        $hasSizeName   = stripos($groupName, 'size') !== false;
                                     @endphp
 
-                                    <div class="col-md-6">
-                                        <section>
-                                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                                <div class="shop-detail-field-label ecc-text-primary-50 opacity-75 small uppercase font-bold">{{ $groupName }}</div>
+                                    <div>
+                                        <div class="sdp-group-header">
+                                            <span class="sdp-group-label">{{ $groupName }}</span>
+                                            @if(isset($sizeGuide) && $hasSizeName)
+                                                <button type="button" class="sdp-size-guide-link"
+                                                        data-bs-toggle="offcanvas" data-bs-target="#sizeGuideOffcanvas">
+                                                    Size Guide
+                                                </button>
+                                            @endif
+                                        </div>
 
-                                                @if(strtolower($group['slug'] ?? '') === 'size')
-                                                    <button type="button" class="btn p-0 border-0 bg-transparent shop-detail-inline-link">
-                                                        Size Guide
+                                        @if($presentation === 'color')
+                                            <div class="sdp-swatches">
+                                                @foreach($values as $value)
+                                                    @php
+                                                        $valueId     = $value['id'];
+                                                        $isAvailable = in_array((int)$valueId, $availableOptions[$groupId] ?? []);
+                                                        $isActive    = (string)$selectedVId === (string)$valueId;
+                                                        $colorHex    = $value['color_hex'] ?? '#ccc';
+                                                        $label       = $value['caption'] ?? 'Option';
+                                                    @endphp
+                                                    <button type="button"
+                                                            class="sdp-swatch {{ $isActive ? 'active' : '' }}"
+                                                            title="{{ $label }}{{ !$isAvailable ? ' (Unavailable)' : '' }}"
+                                                            wire:click="selectVariationValue({{ $groupId }}, {{ $valueId }})"
+                                                            @disabled(!$isAvailable)
+                                                            @if(!$isAvailable) style="opacity:.3;cursor:not-allowed;" @endif>
+                                                        <span class="sdp-swatch-core" style="background-color:{{ $colorHex }};"></span>
                                                     </button>
-                                                @endif
+                                                @endforeach
                                             </div>
 
-                                            @if($presentation === 'color')
-                                                <div class="shop-detail-swatches">
-                                                    @foreach($values as $value)
-                                                        @php
-                                                            $valueId = $value['id'];
-                                                            $label = $value['caption'] ?? 'Option';
-                                                            // Combination-aware availability
-                                                            $isAvailable = in_array((int)$valueId, $availableOptions[$groupId] ?? []);
-                                                            $disabled = !$isAvailable;
-                                                            $isActive = (string)$selectedValueId === (string)$valueId;
-                                                            $colorHex = $value['color_hex'] ?? '#ffffff';
-                                                        @endphp
-                                                        <button
-                                                            type="button"
-                                                            class="shop-detail-swatch {{ $isActive ? 'active' : '' }}"
-                                                            style="background-color: transparent; {{ $disabled ? 'opacity: 0.3; cursor: not-allowed;' : '' }}"
-                                                            title="{{ $label }}{{ $disabled ? ' (Unavailable)' : '' }}"
+                                        @elseif($presentation === 'image')
+                                            <div class="sdp-swatches">
+                                                @foreach($values as $value)
+                                                    @php
+                                                        $valueId     = $value['id'];
+                                                        $isAvailable = in_array((int)$valueId, $availableOptions[$groupId] ?? []);
+                                                        $isActive    = (string)$selectedVId === (string)$valueId;
+                                                        $label       = $value['caption'] ?? 'Option';
+                                                        $imgUrl      = $value['presentation_image_path'] ? url('storage/'.$value['presentation_image_path']) : 'https://placehold.co/100x120/eee/999?text=Img';
+                                                    @endphp
+                                                    <button type="button"
+                                                            class="sdp-swatch-image {{ $isActive ? 'active' : '' }}"
+                                                            title="{{ $label }}{{ !$isAvailable ? ' (Unavailable)' : '' }}"
                                                             wire:click="selectVariationValue({{ $groupId }}, {{ $valueId }})"
-                                                            @if($disabled) disabled @endif
-                                                        >
-                                                            <span class="shop-detail-swatch-core" style="background-color: {{ $colorHex }};"></span>
-                                                        </button>
-                                                    @endforeach
-                                                </div>
-                                            @else
-                                                <div class="shop-detail-size-grid">
-                                                    @foreach($values as $value)
-                                                        @php
-                                                            $valueId = $value['id'];
-                                                            $label = $value['caption'] ?? 'Option';
-                                                            // Combination-aware availability
-                                                            $isAvailable = in_array((int)$valueId, $availableOptions[$groupId] ?? []);
-                                                            $disabled = !$isAvailable;
-                                                            $isActive = (string)$selectedValueId === (string)$valueId;
-                                                        @endphp
+                                                            @disabled(!$isAvailable)
+                                                            @if(!$isAvailable) style="opacity:.3;cursor:not-allowed;" @endif>
+                                                        <img src="{{ $imgUrl }}" alt="{{ $label }}">
+                                                    </button>
+                                                @endforeach
+                                            </div>
 
-                                                        <button
-                                                            type="button"
-                                                            class="shop-detail-size-btn {{ $isActive ? 'active' : '' }} {{ $disabled ? 'disabled' : '' }}"
+                                        @else {{-- text / size --}}
+                                            <div class="sdp-size-grid">
+                                                @foreach($values as $value)
+                                                    @php
+                                                        $valueId     = $value['id'];
+                                                        $isAvailable = in_array((int)$valueId, $availableOptions[$groupId] ?? []);
+                                                        $isActive    = (string)$selectedVId === (string)$valueId;
+                                                        $label       = $value['caption'] ?? '?';
+                                                    @endphp
+                                                    <button type="button"
+                                                            class="sdp-size-btn {{ $isActive ? 'active' : '' }}"
                                                             wire:click="selectVariationValue({{ $groupId }}, {{ $valueId }})"
-                                                            @disabled($disabled)
-                                                            title="{{ $disabled ? 'Unavailable for current selection' : '' }}"
-                                                        >
-                                                            {{ $label }}
-                                                        </button>
-                                                    @endforeach
-                                                </div>
-                                            @endif
-                                        </section>
+                                                            @disabled(!$isAvailable)
+                                                            title="{{ !$isAvailable ? 'Unavailable for current selection' : '' }}">
+                                                        {{ $label }}
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
                                 @endforeach
+
+                                {{-- Size Guide link when no size group but guide exists --}}
+                                @if(isset($sizeGuide) && !collect($variationGroups)->contains(fn($g) => stripos($g['name'] ?? '', 'size') !== false))
+                                    <button type="button" class="sdp-size-guide-link" style="text-align:left;"
+                                            data-bs-toggle="offcanvas" data-bs-target="#sizeGuideOffcanvas">
+                                        <span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle; font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;">straighten</span>
+                                        Size Guide
+                                    </button>
+                                @endif
+
                             </div>
+
+                            {{-- Sizing tip --}}
+                            @if(isset($sizeGuide) && count($variationGroups) > 0 && collect($variationGroups)->contains(fn($g) => stripos($g['name'] ?? '', 'size') !== false))
+                                <div class="sdp-info-tip">
+                                    <span class="material-symbols-outlined">info</span>
+                                    <span>True to size. We recommend ordering your usual size.</span>
+                                </div>
+                            @endif
+                        @else
+                            {{-- No variations, show size guide link standalone if available --}}
+                            @if(isset($sizeGuide))
+                                <button type="button" class="sdp-size-guide-link"
+                                        data-bs-toggle="offcanvas" data-bs-target="#sizeGuideOffcanvas">
+                                    <span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle; font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;">straighten</span>
+                                    Size Guide
+                                </button>
+                            @endif
+                        @endif
+
+                        {{-- ── Quantity ──────────────────────────── --}}
+                        <div>
+                            <div class="sdp-group-label" style="margin-bottom:.6rem;">Quantity</div>
+                            <div class="sdp-qty">
+                                <button type="button" class="sdp-qty-btn" wire:click="decrementQuantity" aria-label="Decrease quantity">
+                                    <span class="material-symbols-outlined" style="font-size:18px; font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;">remove</span>
+                                </button>
+                                <span class="sdp-qty-value">{{ $quantity ?? 1 }}</span>
+                                <button type="button" class="sdp-qty-btn" wire:click="incrementQuantity" aria-label="Increase quantity">
+                                    <span class="material-symbols-outlined" style="font-size:18px; font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;">add</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- ── Add to Cart + Wishlist ────────────── --}}
+                        <div class="sdp-action-row">
+                            <button type="button" class="sdp-add-btn"
+                                    wire:click="addToCart"
+                                    wire:loading.attr="disabled"
+                                    @disabled(!$inStock)>
+                                <span wire:loading.remove wire:target="addToCart">
+                                    {{ $inStock ? 'Add to Bag' : ($availabilityLabel ?? 'Out of Stock') }}
+                                </span>
+                                <span wire:loading wire:target="addToCart">Adding…</span>
+                                <span class="material-symbols-outlined" style="font-size:20px; font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;" wire:loading.remove wire:target="addToCart">arrow_forward</span>
+                            </button>
+                            <button type="button" class="sdp-wish-btn" aria-label="Add to wishlist">
+                                <span class="material-symbols-outlined">favorite</span>
+                            </button>
+                        </div>
+
+                        {{-- ── Value Props ───────────────────────── --}}
+                        <div class="sdp-value-props">
+                            <div class="sdp-value-prop">
+                                <span class="material-symbols-outlined">verified</span>
+                                <span>Certified &amp; Authentic. Guaranteed heritage gear from ECC.</span>
+                            </div>
+                            <div class="sdp-value-prop">
+                                <span class="material-symbols-outlined">lock</span>
+                                <span>Secure checkout. Your payment is protected.</span>
+                            </div>
+                        </div>
+
+                        {{-- ── Accordions ────────────────────────── --}}
+                        <div class="sdp-accordion">
+
+                            {{-- Specifications (variation groups listed as bullets) --}}
+                            @if(count($variationGroups ?? []))
+                                <details class="sdp-accordion-item" open>
+                                    <summary>
+                                        <span>Specifications</span>
+                                        <span class="material-symbols-outlined">expand_more</span>
+                                    </summary>
+                                    <div class="sdp-accordion-body">
+                                        <ul>
+                                            @foreach($variationGroups as $group)
+                                                @php
+                                                    $groupId   = $group['id'];
+                                                    $selId     = $selectedVariationValues[$groupId] ?? null;
+                                                    $selValue  = collect($group['values'] ?? [])->firstWhere('id', $selId);
+                                                    $selCaption = $selValue['caption'] ?? null;
+                                                @endphp
+                                                @if($selCaption)
+                                                    <li><strong>{{ $group['name'] }}:</strong> {{ $selCaption }}</li>
+                                                @endif
+                                            @endforeach
+                                            @if($product->sku)
+                                                <li><strong>SKU:</strong> {{ $product->sku }}</li>
+                                            @endif
+                                            @if($product->weight)
+                                                <li><strong>Weight:</strong> {{ $product->weight }} {{ $product->weight_unit ?? 'g' }}</li>
+                                            @endif
+                                        </ul>
+                                    </div>
+                                </details>
+                            @endif
+
+                            {{-- The Craftsmanship (product description) --}}
+                            <details class="sdp-accordion-item" {{ !count($variationGroups ?? []) ? 'open' : '' }}>
+                                <summary>
+                                    <span>The Craftsmanship</span>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </summary>
+                                <div class="sdp-accordion-body">
+                                    {!! $descriptionHtml !!}
+                                </div>
+                            </details>
+
+                            {{-- Tags as extra info --}}
+                            @if($product->tags->count())
+                                <details class="sdp-accordion-item">
+                                    <summary>
+                                        <span>Details & Tags</span>
+                                        <span class="material-symbols-outlined">expand_more</span>
+                                    </summary>
+                                    <div class="sdp-accordion-body">
+                                        <div style="display: flex; flex-wrap: wrap; gap: .4rem;">
+                                            @foreach($product->tags as $tag)
+                                                <span style="display:inline-block; padding:.2rem .7rem; border-radius:999px; border:1px solid var(--hg-outline-var); font-family: var(--hg-font-mono); font-size:.62rem; font-weight:700; letter-spacing:.06em; color: var(--hg-on-surface-var);">
+                                                    {{ $tag->name }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </details>
+                            @endif
+
+                        </div>
+                    </div>
+                </div>
+                {{-- /RIGHT --}}
+
+            </div>
+            {{-- /MAIN GRID --}}
+
+        </main>
+
+        {{-- ═══════════════════════════════════════════════════════════
+             COMPLETE THE LOOK (Related Products)
+             ═══════════════════════════════════════════════════════════ --}}
+        @if(isset($relatedProducts) && $relatedProducts->count())
+            <section class="sdp-related-section" style="max-width:1280px; margin:0 auto; padding-left:1.5rem; padding-right:1.5rem;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 2rem; flex-wrap:wrap; gap:.75rem;">
+                    <h2 style="font-family:var(--hg-font-body); font-size:clamp(1.4rem,3vw,2rem); font-weight:700; text-transform:uppercase; letter-spacing:-.025em; color:var(--hg-on-surface); margin:0;">
+                        Complete The Look
+                    </h2>
+                    <a href="{{ $collectionUrl }}"
+                       style="font-family:var(--hg-font-mono); font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--hg-on-surface); text-decoration:none; border-bottom:2px solid var(--hg-primary); padding-bottom:.15rem;">
+                        View All
+                    </a>
+                </div>
+                <div class="sdp-related-grid">
+                    @foreach($relatedProducts as $related)
+                        @php
+                            $relatedImg   = $related->images->first();
+                            $relatedImgUrl = $relatedImg ? url('storage/'.$relatedImg->image_path) : 'https://placehold.co/400x530/eeebe8/7f7668?text=Product';
+                            $relatedPrice = ($product->currency ?? 'INR') . ' ' . number_format($related->base_price, 2);
+                            $relatedUrl   = route('shop.show', $related->slug);
+                        @endphp
+                        <a href="{{ $relatedUrl }}" class="sdp-related-card">
+                            <div class="sdp-related-img-wrap">
+                                <img src="{{ $relatedImgUrl }}" alt="{{ $related->title }}" class="sdp-related-img" loading="lazy">
+                            </div>
+                            <div>
+                                <div class="sdp-related-title">{{ $related->title }}</div>
+                                <div class="sdp-related-price">{{ $relatedPrice }}</div>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        {{-- ═══════════════════════════════════════════════════════════
+             SIZE GUIDE OFFCANVAS (unchanged — preserved exactly)
+             ═══════════════════════════════════════════════════════════ --}}
+        @if(isset($sizeGuide))
+            <div class="offcanvas offcanvas-end bg-white text-dark" tabindex="-1" id="sizeGuideOffcanvas" aria-labelledby="sizeGuideOffcanvasLabel"
+                 style="width: 500px; max-width: 100vw; border-left: none; box-shadow: -5px 0 25px rgba(0,0,0,0.1);"
+                 x-data="{ unit: 'cm', multiplier: {{ \App\Models\Setting::get('global_cm_to_inch_multiplier', 0.3937) }} }">
+                <div class="offcanvas-header pb-0 border-0">
+                    <h4 class="offcanvas-title fw-bolder text-uppercase" id="sizeGuideOffcanvasLabel" style="letter-spacing: 2px;">
+                        SIZE GUIDE
+                    </h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+
+                <div class="offcanvas-body pt-3">
+                    <h5 class="fw-bolder text-uppercase mb-3" style="letter-spacing: 1px;">
+                        {{ $sizeGuide->name }}
+                    </h5>
+
+                    @if($sizeGuide->description)
+                        <p class="fs-15 mb-4">{{ $sizeGuide->description }}</p>
+                    @endif
+
+                    @php
+                        $tableData = is_array($sizeGuide->table_data) ? $sizeGuide->table_data : [];
+                        $cmTables = [];
+                        $inchTables = [];
+                        
+                        if (isset($tableData[0]['rows'][0]['values'])) {
+                            // Unified format
+                            foreach ($tableData as $table) {
+                                $columns = $table['columns'] ?? [];
+                                $cmRows = [];
+                                $inchRows = [];
+                                
+                                foreach ($table['rows'] ?? [] as $row) {
+                                    $label = $row['label'] ?? '';
+                                    $cmRow = [$label];
+                                    $inchRow = [$label];
+                                    
+                                    foreach ($columns as $cIndex => $colName) {
+                                        if ($cIndex === 0) continue;
+                                        $cmRow[] = $row['values']['cm'][$cIndex] ?? '';
+                                        $inchRow[] = $row['values']['inch'][$cIndex] ?? '';
+                                    }
+                                    $cmRows[] = $cmRow;
+                                    $inchRows[] = $inchRow;
+                                }
+                                
+                                $cmTables[] = [
+                                    'title' => $table['title'] ?? '',
+                                    'columns' => $columns,
+                                    'rows' => $cmRows
+                                ];
+                                $inchTables[] = [
+                                    'title' => $table['title'] ?? '',
+                                    'columns' => $columns,
+                                    'rows' => $inchRows
+                                ];
+                            }
+                        } else if (isset($tableData['cm']) || isset($tableData['inch'])) {
+                            $cmTables = $tableData['cm'] ?? [];
+                            $inchTables = $tableData['inch'] ?? [];
+                        } else {
+                            // Backwards compatibility
+                            if (isset($tableData['columns'])) {
+                                $legacy = [['title' => '', 'columns' => $tableData['columns'], 'rows' => $tableData['rows'] ?? []]];
+                            } else {
+                                $legacy = $tableData;
+                            }
+                            $cmTables = $legacy;
+                            
+                            // generate inch fallback
+                            $multiplier = \App\Models\Setting::get('global_cm_to_inch_multiplier', 0.3937);
+                            $inchTables = [];
+                            foreach ($legacy as $table) {
+                                $newRows = [];
+                                foreach ($table['rows'] ?? [] as $row) {
+                                    $newRow = [];
+                                    foreach ($row as $cIndex => $val) {
+                                        if ($cIndex > 0 && is_numeric(trim($val))) {
+                                            $newRow[] = round((float)trim($val) * $multiplier, 1);
+                                        } else {
+                                            $newRow[] = $val;
+                                        }
+                                    }
+                                    $newRows[] = $newRow;
+                                }
+                                $inchTables[] = [
+                                    'title' => $table['title'] ?? '',
+                                    'columns' => $table['columns'] ?? [],
+                                    'rows' => $newRows
+                                ];
+                            }
+                        }
+
+                        // Check if completely empty helper
+                        $isEmptyTableCollection = function($tablesList) {
+                            if (empty($tablesList)) return true;
+                            foreach ($tablesList as $table) {
+                                if (!empty($table['rows'])) {
+                                    foreach ($table['rows'] as $row) {
+                                        foreach ($row as $cell) {
+                                            if (trim($cell) !== '') {
+                                                return false;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            return true;
+                        };
+
+                        $cmIsEmpty = $isEmptyTableCollection($cmTables);
+                        $inchIsEmpty = $isEmptyTableCollection($inchTables);
+                        
+                        // Determine default unit to show
+                        $defaultUnit = !$cmIsEmpty ? 'cm' : (!$inchIsEmpty ? 'inch' : '');
+                    @endphp
+
+                    @if(!$cmIsEmpty || !$inchIsEmpty)
+                        <div x-data="{ unit: '{{ $defaultUnit }}' }">
+                            @if(!$cmIsEmpty && !$inchIsEmpty)
+                                <div class="d-flex mb-4 border-bottom">
+                                    <button type="button" class="btn btn-link text-decoration-none rounded-0 px-3 py-2 fw-semibold text-dark"
+                                            :class="{ 'border-bottom border-dark border-2': unit === 'inch' }" @click="unit = 'inch'">Inches</button>
+                                    <button type="button" class="btn btn-link text-decoration-none rounded-0 px-3 py-2 fw-semibold text-dark"
+                                            :class="{ 'border-bottom border-dark border-2': unit === 'cm' }" @click="unit = 'cm'">cm</button>
+                                </div>
+                            @endif
+
+                            @if(!$cmIsEmpty)
+                                <div x-show="unit === 'cm'">
+                                    @foreach($cmTables as $table)
+                                        @if(!empty($table['title']))
+                                            <h6 class="fw-bold mb-3">{{ $table['title'] }}</h6>
+                                        @endif
+
+                                        <div class="table-responsive mb-4" style="border: 1px solid #dee2e6;">
+                                            <table class="table table-striped table-hover text-center align-middle mb-0" style="min-width: max-content;">
+                                                <thead class="text-white" style="background-color: #000;">
+                                                    <tr>
+                                                        @foreach($table['columns'] ?? [] as $header)
+                                                            <th class="py-3 px-4 border-0" style="font-weight: 700;">{{ $header }}</th>
+                                                        @endforeach
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($table['rows'] ?? [] as $row)
+                                                        <tr>
+                                                            @foreach($row as $ci => $cell)
+                                                                @if($ci === 0)
+                                                                    <td class="fw-bold text-start py-3 px-4" style="background-color: #fff; border-right: 1px solid #dee2e6;">{{ $cell }}</td>
+                                                                @else
+                                                                    <td class="py-3 px-4">{{ $cell }}</td>
+                                                                @endif
+                                                            @endforeach
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            @if(!$inchIsEmpty)
+                                <div x-show="unit === 'inch'">
+                                    @foreach($inchTables as $table)
+                                        @if(!empty($table['title']))
+                                            <h6 class="fw-bold mb-3">{{ $table['title'] }}</h6>
+                                        @endif
+
+                                        <div class="table-responsive mb-4" style="border: 1px solid #dee2e6;">
+                                            <table class="table table-striped table-hover text-center align-middle mb-0" style="min-width: max-content;">
+                                                <thead class="text-white" style="background-color: #000;">
+                                                    <tr>
+                                                        @foreach($table['columns'] ?? [] as $header)
+                                                            <th class="py-3 px-4 border-0" style="font-weight: 700;">{{ $header }}</th>
+                                                        @endforeach
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($table['rows'] ?? [] as $row)
+                                                        <tr>
+                                                            @foreach($row as $ci => $cell)
+                                                                @if($ci === 0)
+                                                                    <td class="fw-bold text-start py-3 px-4" style="background-color: #fff; border-right: 1px solid #dee2e6;">{{ $cell }}</td>
+                                                                @else
+                                                                    <td class="py-3 px-4">{{ $cell }}</td>
+                                                                @endif
+                                                            @endforeach
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <p class="text-muted small mt-n2 mb-4">
+                                <i class="mdi mdi-ray-start-arrow text-muted me-1"></i> Scroll horizontally to see more.
+                            </p>
                         </div>
                     @endif
 
-                    <div class="shop-detail-divider mb-4" style="background: linear-gradient(90deg, var(--ecc-primary-border), transparent); height: 1px;"></div>
-
-                    <div class="shop-detail-story-title">
-                        <span style="color: var(--ecc-primary); margin-right: .5rem;">|</span>The Craftsmanship
-                    </div>
-                    <div class="shop-detail-story">
-                        {!! $descriptionHtml !!}
-                    </div>
-                </div>
-            </div>
-
-            {{-- RIGHT: SIDEBAR (3/12) --}}
-            <div class="col-lg-3">
-                <div class="shop-detail-sidebar">
-                    {{-- SIDE CARD (Mirroring Archive Side Card) --}}
-                    <div class="shop-detail-side-card">
-                        <div class="shop-detail-side-kicker">ADD TO CART</div>
-                        
-                        {{-- PURCHASE ACTIONS --}}
-                        <div class="shop-detail-purchase-row flex-column gap-3">
-                            <div class="shop-detail-qty w-100 d-flex justify-content-between p-2" style="background: var(--ecc-bg-input); border-radius: 12px; border: 1px solid var(--ecc-border);">
-                                <button type="button" class="shop-detail-qty-btn" wire:click="decrementQuantity">
-                                    <i class="mdi mdi-minus"></i>
-                                </button>
-
-                                <span class="shop-detail-qty-value">{{ $quantity ?? 1 }}</span>
-
-                                <button type="button" class="shop-detail-qty-btn" wire:click="incrementQuantity">
-                                    <i class="mdi mdi-plus"></i>
-                                </button>
+                    @if($sizeGuide->how_to_measure_text)
+                        <div class="mt-5 border-top pt-4">
+                            <h5 class="fw-bold mb-3">How to measure</h5>
+                            <div class="fs-15 summernote-rendered-content" style="line-height: 1.8;">
+                                {!! $sizeGuide->how_to_measure_text !!}
                             </div>
-
-                            <button type="button" class="shop-detail-add-btn w-100 py-3" wire:click="addToCart" wire:loading.attr="disabled" @disabled(!$inStock)>
-                                <span wire:loading.remove wire:target="addToCart">
-                                    {{ $inStock ? 'Add to Cart' : 'Out of Stock' }}
-                                </span>
-                                <span wire:loading wire:target="addToCart">
-                                    Adding...
-                                </span>
-                            </button>
                         </div>
-                    </div>
-
-                    {{-- CERT CARD --}}
-                    <div class="shop-detail-cert-card mt-3">
-                        <i class="mdi mdi-seal-variant"></i>
-                        <div class="shop-detail-cert-title">Certified & Authentic</div>
-                        <div class="shop-detail-cert-subtitle">Guaranteed heritage gear from ECC.</div>
-                    </div>
-
-                    <div class="shop-detail-micro-features mt-3">
-                        <div class="shop-detail-micro-feature">
-                            <i class="mdi mdi-truck-fast-outline"></i>
-                            <span>Free Express Shipping</span>
-                        </div>
-                    </div>
+                    @endif
                 </div>
             </div>
-        </div>
-        </div>
+        @endif
+
     </div>
+    {{-- /sdp --}}
 
-    {{-- RELATED PRODUCTS --}}
-    @if($relatedProducts->count())
-    <section class="shop-detail-related-section">
-        <div class="shop-detail-related-head">
-            <div>
-                <div class="shop-detail-related-kicker">Complete the Kit</div>
-                <h2 class="shop-detail-related-title">Curated Essentials</h2>
-            </div>
-
-            <a href="{{ $collectionUrl }}" class="shop-detail-related-link">View Collection</a>
-        </div>
-
-        <div class="row g-4">
-            @foreach($relatedProducts->take(3) as $index => $related)
-                @php
-                    $relatedTitle = $related->title ?? 'Related Product';
-                    $relatedPrice = ($product->currency ?? 'INR') . ' ' . number_format($related->base_price, 2);
-                    $relatedImage = $related->images->first()->url ?? 'https://placehold.co/800x800/17130b/d4af37?text=Product';
-                    $relatedUrl = route('shop.show', $related->slug);
-                    $relatedBadge = $index === 0 ? 'Legacy Series' : null;
-                @endphp
-
-                @if($index === 0)
-                    <div class="col-md-6">
-                        <article class="shop-detail-bento-card">
-                            <img src="{{ $relatedImage }}" alt="{{ $relatedTitle }}">
-
-                            <div class="shop-detail-bento-overlay">
-                                @if(!empty($relatedBadge))
-                                    <div class="shop-detail-bento-kicker">{{ $relatedBadge }}</div>
-                                @endif
-
-                                <div class="shop-detail-bento-title">{{ $relatedTitle }}</div>
-
-                                <a href="{{ $relatedUrl }}" class="shop-detail-bento-btn">Details</a>
-                            </div>
-                        </article>
-                    </div>
-                @else
-                    <div class="col-md-3">
-                        <article class="shop-detail-bento-card">
-                            <img src="{{ $relatedImage }}" alt="{{ $relatedTitle }}">
-
-                            <div class="shop-detail-bento-overlay">
-                                <div class="shop-detail-bento-title fs-5">{{ $relatedTitle }}</div>
-                                <div class="shop-detail-bento-price">{{ $relatedPrice }}</div>
-                            </div>
-                        </article>
-                    </div>
-                @endif
-            @endforeach
-        </div>
-    </section>
-    @endif
+    @push('scripts')
+    <script>
+        // Apply responsive grid to main layout without requiring Alpine/Tailwind
+        document.addEventListener('DOMContentLoaded', function () {
+            const grid = document.querySelector('.sdp-main-grid');
+            if (!grid) return;
+            function applyGrid() {
+                if (window.innerWidth >= 768) {
+                    grid.style.gridTemplateColumns = '1fr minmax(0, 380px)';
+                    grid.style.gap = '3rem';
+                    grid.style.alignItems = 'start';
+                } else {
+                    grid.style.gridTemplateColumns = '1fr';
+                    grid.style.gap = '1.5rem';
+                }
+            }
+            applyGrid();
+            window.addEventListener('resize', applyGrid);
+        });
+    </script>
+    @endpush
 </div>
-

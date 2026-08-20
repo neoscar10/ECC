@@ -46,7 +46,11 @@
                         @endif
                     </td>
                     <td>
+                    @if(!is_null($product->price_min_amount))
                         {{ $product->currency }} {{ number_format($product->price_min_amount) }} - {{ number_format($product->price_max_amount) }}
+                    @else
+                        <span class="text-muted fst-italic fs-12">Price on Request</span>
+                    @endif
                     </td>
                     <td class="text-center">
                         <span class="badge bg-info-subtle text-info">{{ $product->quantity ?? 1 }}</span>

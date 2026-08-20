@@ -22,6 +22,7 @@ class UserAddress extends Model
         'state',
         'postal_code',
         'country',
+        'delivery_country_id',
         'is_default',
         'type',
     ];
@@ -33,5 +34,10 @@ class UserAddress extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function deliveryCountry(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\DeliveryCountry::class, 'delivery_country_id');
     }
 }

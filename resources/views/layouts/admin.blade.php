@@ -60,6 +60,7 @@
     <!-- apexcharts -->
     <script src="{{ asset('velzon/assets') }}/libs/apexcharts/apexcharts.min.js"></script>
 
+    @stack('styles')
 @livewireStyles
 </head>
 
@@ -316,6 +317,9 @@
                                         <a href="{{ route('admin.archive.products') }}" class="nav-link {{ request()->routeIs('admin.archive.products') ? 'active' : '' }}" data-key="t-products">Products</a>
                                     </li>
                                     <li class="nav-item">
+                                        <a href="{{ route('admin.archive.ownership.index') }}" class="nav-link {{ request()->routeIs('admin.archive.ownership.*') ? 'active' : '' }}" data-key="t-ownership">Ownership Tracking</a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a href="{{ route('admin.archive.enquiries') }}" class="nav-link {{ request()->routeIs('admin.archive.enquiries') ? 'active' : '' }}" data-key="t-enquiries">
                                             <span>Enquiries</span>
                                             @if($newArchiveEnquiriesCount > 0)
@@ -373,6 +377,9 @@
                                         <a href="{{ route('admin.shop.categories') }}" class="nav-link {{ request()->routeIs('admin.shop.categories') ? 'active' : '' }}" data-key="t-shop-categories">Categories</a>
                                     </li>
                                     <li class="nav-item">
+                                        <a href="{{ route('admin.shop.size-guides.index') }}" class="nav-link {{ request()->routeIs('admin.shop.size-guides.*') ? 'active' : '' }}" data-key="t-shop-size-guides">Size Guides</a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a href="{{ route('admin.shop.tags') }}" class="nav-link {{ request()->routeIs('admin.shop.tags') ? 'active' : '' }}" data-key="t-shop-tags">Tags</a>
                                     </li>
                                     <li class="nav-item">
@@ -415,7 +422,8 @@
                                 </ul>
                             </div>
                         </li>
-                        
+
+
                         @php
                             $isVaultActive = request()->routeIs('admin.vault.*') || request()->routeIs('admin.vault-access.*');
                         @endphp
@@ -493,6 +501,24 @@
                                 <i class="ri-pie-chart-line"></i> <span data-key="t-reports">Reports</span>
                             </a>
                         </li>
+                        @php
+                            $isAddressSettingsActive = request()->routeIs('admin.address-settings.*');
+                        @endphp
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ $isAddressSettingsActive ? 'active' : '' }}" href="#sidebarAddressSettings" data-bs-toggle="collapse" role="button" aria-expanded="{{ $isAddressSettingsActive ? 'true' : 'false' }}" aria-controls="sidebarAddressSettings">
+                                <i class="ri-map-pin-2-line"></i> <span data-key="t-address-settings">Address Settings</span>
+                            </a>
+                            <div class="collapse menu-dropdown {{ $isAddressSettingsActive ? 'show' : '' }}" id="sidebarAddressSettings">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.address-settings.groups') }}" class="nav-link {{ request()->routeIs('admin.address-settings.groups') ? 'active' : '' }}" data-key="t-address-groups">Address Groups</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.address-settings.countries') }}" class="nav-link {{ request()->routeIs('admin.address-settings.countries') ? 'active' : '' }}" data-key="t-delivery-countries">Countries</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" href="#sidebarSettings" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('admin.settings.*') ? 'true' : 'false' }}" aria-controls="sidebarSettings">
                                 <i class="ri-settings-3-line"></i> <span data-key="t-settings">Settings</span>
@@ -501,6 +527,9 @@
                                 <ul class="nav nav-sm flex-column">
                                     <li class="nav-item">
                                         <a href="{{ route('admin.settings.navigation') }}" class="nav-link {{ request()->routeIs('admin.settings.navigation') ? 'active' : '' }}" data-key="t-navigation-links">Navigation Links</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.settings.change-password') }}" class="nav-link {{ request()->routeIs('admin.settings.change-password') ? 'active' : '' }}" data-key="t-change-password">Change Password</a>
                                     </li>
                                 </ul>
                             </div>

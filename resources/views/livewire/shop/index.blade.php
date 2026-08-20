@@ -437,6 +437,67 @@
             box-shadow: var(--ecc-shadow-card);
         }
 
+        .shop-card-swatches {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            padding: 0;
+            background: var(--ecc-bg-surface);
+            display: flex;
+            gap: 0;
+            flex-wrap: nowrap;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .shop-card:hover .shop-card-swatches {
+            opacity: 1;
+        }
+
+        .shop-swatch-item {
+            width: 44px;
+            height: 56px;
+            border: none;
+            border-bottom: 2px solid transparent;
+            overflow: hidden;
+            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--ecc-text-primary);
+            font-size: 0.65rem;
+            font-weight: 700;
+            transition: border-color 0.2s ease;
+            flex-shrink: 0;
+            padding: 2px;
+        }
+
+        .shop-swatch-item.swatch-text {
+            width: auto;
+            height: 24px;
+            border-radius: 4px;
+            padding: 0 0.5rem;
+        }
+
+        .shop-swatch-item.swatch-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+
+        .shop-swatch-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .shop-swatch-item:hover, .shop-swatch-item.active {
+            border-color: var(--ecc-text-primary);
+        }
+
         .shop-card-media {
             position: relative;
             aspect-ratio: 4 / 5;
@@ -1457,11 +1518,11 @@
                                 @endphp
 
                                 <div class="col-12 col-sm-6 col-lg-4">
-                                    <article class="shop-card position-relative {{ $isSoldOut ? 'opacity-75' : '' }}">
+                                    <article class="shop-card position-relative {{ $isSoldOut ? 'opacity-75' : '' }}" x-data="{ activeImage: '{{ $productImage }}', activeSwatch: null }">
                                         <a href="{{ $productUrl }}" class="stretched-link"></a>
                                         <div class="shop-card-media">
                                             @if($productImage)
-                                                <img src="{{ $productImage }}" alt="{{ $productTitle }}">
+                                                <img :src="activeImage" alt="{{ $productTitle }}">
                                             @else
                                                 <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
                                                     <i class="mdi mdi-image-outline fs-1"></i>
@@ -1472,6 +1533,43 @@
                                                 <div class="shop-card-badge ecc-bg-surface ecc-text-primary border border-secondary">Sold Out</div>
                                             @elseif(!empty($badgeLabel))
                                                 <div class="shop-card-badge">{{ $badgeLabel }}</div>
+                                            @endif
+
+                                            @if($product->variationGroups->isNotEmpty())
+                                                @php
+                                                    $firstGroup = $product->variationGroups->first();
+                                                @endphp
+                                                @if($firstGroup && $firstGroup->values->isNotEmpty())
+                                                    <div class="shop-card-swatches z-3">
+                                                        @foreach($firstGroup->values->take(4) as $value)
+                                                            @php
+                                                                $swatchUrl = route('shop.show', ['slug' => $product->slug, 'v' => [$firstGroup->id => $value->id]]);
+                                                                $swatchClass = '';
+                                                                if ($firstGroup->presentation_type === 'text') $swatchClass = 'swatch-text';
+                                                                elseif ($firstGroup->presentation_type === 'color') $swatchClass = 'swatch-color';
+                                                                $hoverImageUrl = $value->presentation_image_path ? url('storage/' . $value->presentation_image_path) : $productImage;
+                                                            @endphp
+                                                            <a href="{{ $swatchUrl }}" 
+                                                               class="shop-swatch-item {{ $swatchClass }}" 
+                                                               title="{{ $value->caption }}"
+                                                               @mouseover="activeImage = '{{ $hoverImageUrl }}'; activeSwatch = {{ $value->id }}"
+                                                               :class="{ 'active': activeSwatch === {{ $value->id }} }">
+                                                                @if($firstGroup->presentation_type === 'color' && $value->color_hex)
+                                                                    <span class="w-100 h-100" style="background-color: {{ $value->color_hex }};"></span>
+                                                                @elseif($firstGroup->presentation_type === 'image' && $value->presentation_image_path)
+                                                                    <img src="{{ url('storage/' . $value->presentation_image_path) }}" alt="{{ $value->caption }}">
+                                                                @elseif($firstGroup->presentation_type === 'text')
+                                                                    {{ $value->caption }}
+                                                                @else
+                                                                    <span class="w-100 h-100" style="background-color: #444;"></span>
+                                                                @endif
+                                                            </a>
+                                                        @endforeach
+                                                        @if($firstGroup->values->count() > 4)
+                                                            <div class="ms-1 px-2 text-muted fs-12 fw-medium">+{{ $firstGroup->values->count() - 4 }}</div>
+                                                        @endif
+                                                    </div>
+                                                @endif
                                             @endif
                                         </div>
 

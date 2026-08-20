@@ -18,6 +18,8 @@ class ShopOrder extends Model
         'status',
         'payment_status',
         'currency',
+        'delivery_type',
+        'delivery_payment_status',
         'subtotal',
         'shipping_fee',
         'tax_amount',

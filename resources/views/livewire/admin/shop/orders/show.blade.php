@@ -49,4 +49,5 @@
     {{-- Modals --}}
     @include('livewire.admin.shop.orders.partials._cancel-modal')
     @include('livewire.admin.shop.orders.partials._initiate-shipment-modal')
+    @include('livewire.admin.shop.orders.partials._mark-delivery-paid-modal')
 </div>

@@ -139,6 +139,9 @@ Route::prefix('v1')->group(function () {
         Route::get('categories/{id}', [\App\Http\Controllers\Api\V1\Shop\ShopCategoryController::class, 'show'])->name('categories.show');
         Route::get('categories/{id}/children', [\App\Http\Controllers\Api\V1\Shop\ShopCategoryController::class, 'children'])->name('categories.children');
 
+        // Delivery Countries
+        Route::get('delivery-countries', [\App\Http\Controllers\Api\V1\Shop\DeliveryCountryController::class, 'index'])->name('delivery-countries.index');
+
         // Tags
         Route::get('tags/groups', [\App\Http\Controllers\Api\V1\Shop\ShopTagGroupController::class, 'index'])->name('tags.groups.index');
         Route::get('tags/groups/{id}', [\App\Http\Controllers\Api\V1\Shop\ShopTagGroupController::class, 'show'])->name('tags.groups.show');

@@ -50,6 +50,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Register layouts.web-app view as a Blade component
         \Illuminate\Support\Facades\Blade::component('layouts.web-app', 'layouts.web-app');
+        \Illuminate\Support\Facades\Blade::component('layouts.guest', 'layouts.guest');
     }
 }
 

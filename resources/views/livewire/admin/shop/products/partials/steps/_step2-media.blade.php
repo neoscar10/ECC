@@ -55,13 +55,19 @@
             @foreach($newImages as $index => $img)
                 <div class="col-6 col-sm-4 col-md-3" data-index="{{ $index }}" wire:key="new-img-{{ $index }}">
                     <div class="position-relative border rounded overflow-hidden group-preview">
-                        @try
-                            <img src="{{ $img->temporaryUrl() }}" class="img-fluid w-100 cursor-move" style="height: 150px; object-fit: cover;">
-                        @catch(\Exception $e)
+                        @php
+                            $imgUrl = null;
+                            try {
+                                $imgUrl = $img->temporaryUrl();
+                            } catch (\Exception $e) {}
+                        @endphp
+                        @if($imgUrl)
+                            <img src="{{ $imgUrl }}" class="img-fluid w-100 cursor-move" style="height: 150px; object-fit: cover;">
+                        @else
                             <div class="bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
                                 <i class="ri-image-line fs-24 text-muted"></i>
                             </div>
-                        @endtry
+                        @endif
                         
                         <button type="button" class="btn btn-icon btn-sm btn-danger position-absolute top-0 end-0 m-1 shadow-sm"
                             wire:click="removeNewImage({{ $index }})">

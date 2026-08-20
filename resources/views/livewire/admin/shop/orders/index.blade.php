@@ -69,6 +69,7 @@
                             <th>Date</th>
                             <th>Total</th>
                             <th>Payment</th>
+                            <th>Delivery Payment</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -109,6 +110,21 @@
                                     @endif
                                 </td>
                                 <td>
+                                    @if($order->delivery_type === 'negotiated')
+                                        @if($order->delivery_payment_status === 'paid')
+                                            <span class="badge bg-success">Paid</span>
+                                        @else
+                                            <span class="badge bg-warning text-dark">Needs Negotiation</span>
+                                        @endif
+                                    @else
+                                        @if($order->payment_status === 'paid')
+                                            <span class="badge bg-success">Paid</span>
+                                        @else
+                                            <span class="badge bg-secondary">Unpaid</span>
+                                        @endif
+                                    @endif
+                                </td>
+                                <td>
                                     @php
                                         $statusClass = match($order->status) {
                                             'delivered', 'fulfilled' => 'success',
@@ -135,7 +151,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center">
+                                <td colspan="8" class="text-center">
                                     <div class="noresult py-4">
                                         <div class="text-center">
                                             <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" colors="primary:#121331,secondary:#08a88a" style="width:75px;height:75px"></lord-icon>

@@ -251,6 +251,46 @@
                                             </div>
                                         </div>
                                         
+                                         @if($enq->product && !$enq->archive_order_id)
+                                        <div class="mt-4">
+                                            <h6 class="text-muted text-uppercase fw-semibold mb-3">Payment Flow</h6>
+                                            
+                                            @if(!$enq->delivery_details_requested_at)
+                                                {{-- Step 1: Request Delivery Details --}}
+                                                <div class="alert alert-info py-2 px-3 mb-2 fs-13">
+                                                    <i class="ri-information-line align-bottom me-1"></i> Delivery details must be requested first.
+                                                </div>
+                                                 <button wire:click="sendDeliveryDetailsRequest({{ $enq->id }})" wire:loading.attr="disabled" class="btn btn-warning w-100">
+                                                     <span wire:loading.remove wire:target="sendDeliveryDetailsRequest({{ $enq->id }})">
+                                                         <i class="ri-map-pin-line align-bottom me-1"></i> Request Delivery Details
+                                                     </span>
+                                                     <span wire:loading wire:target="sendDeliveryDetailsRequest({{ $enq->id }})">
+                                                         <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                                         Requesting Details...
+                                                     </span>
+                                                 </button>
+                                            @else
+                                                {{-- Step 2: Payment Link --}}
+                                                <div class="alert alert-info py-2 px-3 mb-3 fs-13">
+                                                    <i class="ri-check-line align-bottom me-1 text-success"></i> Delivery details requested on {{ \Carbon\Carbon::parse($enq->delivery_details_requested_at)->format('d M, Y h:i A') }}
+                                                </div>
+                                                
+                                                @if($enq->payment_link_sent_at)
+                                                    <div class="alert alert-success d-flex justify-content-between align-items-center mb-0">
+                                                        <div class="fs-13">
+                                                            <i class="ri-checkbox-circle-line me-1"></i> Payment link sent on {{ \Carbon\Carbon::parse($enq->payment_link_sent_at)->format('d M, Y h:i A') }} ({{ strtoupper($enq->payment_gateway) }}, ₹{{ number_format($enq->payment_amount, 2) }})
+                                                        </div>
+                                                        <button wire:click="openPaymentModal({{ $enq->id }})" class="btn btn-sm btn-outline-success ms-2">Update / Resend</button>
+                                                    </div>
+                                                @else
+                                                    <button wire:click="openPaymentModal({{ $enq->id }})" class="btn btn-primary w-100">
+                                                        <i class="ri-links-line align-bottom me-1"></i> Generate &amp; Send Payment Link
+                                                    </button>
+                                                @endif
+                                            @endif
+                                        </div>
+                                        @endif
+                                        
                                         <div class="mt-2 text-end text-muted fs-11">
                                             Submitted on {{ $enq->created_at->format('d M, Y h:i A') }}
                                         </div>
@@ -273,13 +313,67 @@
         </div>
     </div>
     
+    {{-- Payment Link Modal --}}
+    <div wire:ignore.self class="modal fade" id="paymentLinkModal" tabindex="-1" aria-labelledby="paymentLinkModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="paymentLinkModalLabel">Generate Payment Link</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="paymentGateway" class="form-label">Payment Gateway</label>
+                        <select wire:model="paymentGateway" class="form-select" id="paymentGateway">
+                            <option value="">Select Gateway</option>
+                            <option value="razorpay">Razorpay</option>
+                            <option value="cashfree">Cashfree</option>
+                        </select>
+                        @error('paymentGateway') <span class="text-danger fs-12">{{ $message }}</span> @enderror
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="paymentAmount" class="form-label">Payment Amount (INR)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input wire:model="paymentAmount" type="number" step="0.01" class="form-control" id="paymentAmount" placeholder="Enter amount">
+                        </div>
+                        @error('paymentAmount') <span class="text-danger fs-12">{{ $message }}</span> @enderror
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="ri-information-line me-2"></i> This will generate a secure checkout link and send it immediately to the customer's email and WhatsApp.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" wire:click="sendPaymentLink" wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="sendPaymentLink"><i class="ri-send-plane-fill align-bottom me-1"></i> Send Payment Link</span>
+                        <span wire:loading wire:target="sendPaymentLink">Sending...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     {{-- Scripts for Modal --}}
     <script>
         document.addEventListener('livewire:initialized', () => {
-            const myModal = new bootstrap.Modal(document.getElementById('viewEnquiryModal'));
+            const viewModal = new bootstrap.Modal(document.getElementById('viewEnquiryModal'));
+            const paymentModal = new bootstrap.Modal(document.getElementById('paymentLinkModal'));
             
             @this.on('show-view-modal', () => {
-                myModal.show();
+                viewModal.show();
+            });
+            
+            @this.on('show-payment-modal', () => {
+                viewModal.hide();
+                paymentModal.show();
+            });
+            
+            @this.on('hide-payment-modal', () => {
+                paymentModal.hide();
+                viewModal.hide();
             });
         });
     </script>

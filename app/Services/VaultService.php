@@ -187,6 +187,7 @@ class VaultService
                 'package_length_cm' => $quoteData['package_length_cm'] ?? null,
                 'package_breadth_cm' => $quoteData['package_breadth_cm'] ?? null,
                 'package_height_cm' => $quoteData['package_height_cm'] ?? null,
+                'delivery_type' => $quoteData['delivery_type'] ?? 'courier',
                 'payment_status' => $quoteData['payment_status'] ?? \App\Models\VaultRemovalRequest::PAYMENT_NONE,
             ];
         }

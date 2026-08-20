@@ -1,4 +1,4 @@
-<x-layouts.web-app title="Secure Payment — ECC">
+<x-dynamic-component :component="(isset($payment) && $payment->purpose === \App\Support\Payments\PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT) ? 'layouts.guest' : 'layouts.web-app'" title="Secure Payment — ECC">
     <div class="container py-5" style="max-width: 680px;">
 
         {{-- ═══════════════════════════════════════════════
@@ -115,9 +115,15 @@
                     <button id="rzp-retry-btn" class="btn btn-warning w-100 fw-bold py-3" style="border-radius:.75rem; letter-spacing:.12em; font-size:.85rem;">
                         <i class="mdi mdi-refresh me-2"></i>RETRY PAYMENT
                     </button>
-                    <a href="{{ route('shop.cart') }}" class="btn py-2" style="border-radius:.75rem; border:1px solid rgba(245,239,225,.15); color:rgba(245,239,225,.55); font-size:.85rem;">
-                        Return to Cart
-                    </a>
+                    @if($payment && $payment->purpose === \App\Support\Payments\PaymentPurpose::ARCHIVE_ENQUIRY_PAYMENT)
+                        <a href="{{ route('home') }}" class="btn py-2" style="border-radius:.75rem; border:1px solid rgba(245,239,225,.15); color:rgba(245,239,225,.55); font-size:.85rem;">
+                            Return to ECC
+                        </a>
+                    @else
+                        <a href="{{ route('shop.cart') }}" class="btn py-2" style="border-radius:.75rem; border:1px solid rgba(245,239,225,.15); color:rgba(245,239,225,.55); font-size:.85rem;">
+                            Return to Cart
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>
@@ -249,4 +255,4 @@
         });
     </script>
     @endpush
-</x-layouts.web-app>
+</x-dynamic-component>

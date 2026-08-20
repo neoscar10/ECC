@@ -213,6 +213,16 @@
                         <input type="text" class="form-control" wire:model="name" placeholder="e.g. Bats">
                         @error('name') <span class="text-danger fs-12">{{ $message }}</span> @enderror
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Size Guide (Optional)</label>
+                        <select class="form-select" wire:model="size_guide_id">
+                            <option value="">None</option>
+                            @foreach($sizeGuides as $guide)
+                                <option value="{{ $guide->id }}">{{ $guide->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">Products in this folder will inherit this size guide.</div>
+                    </div>
                     <div class="form-check form-switch mb-3">
                          <input class="form-check-input" type="checkbox" role="switch" wire:model="is_active" id="createActive">
                          <label class="form-check-label" for="createActive">Active immediately</label>
@@ -239,6 +249,16 @@
                         <label class="form-label">Name</label>
                         <input type="text" class="form-control" wire:model="name">
                         @error('name') <span class="text-danger fs-12">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Size Guide (Optional)</label>
+                        <select class="form-select" wire:model="size_guide_id">
+                            <option value="">None</option>
+                            @foreach($sizeGuides as $guide)
+                                <option value="{{ $guide->id }}">{{ $guide->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">Products in this folder will inherit this size guide.</div>
                     </div>
                 </div>
                 <div class="modal-footer">

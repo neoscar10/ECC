@@ -39,7 +39,7 @@
 
             {{-- Threshold Column (Always visible) --}}
             <div class="col-lg-{{ $has_variants ? '4' : '3' }}">
-                <label class="form-label">Low Stock Alert Threshold</label>
+                <label class="form-label text-nowrap">Low Stock Alert Threshold</label>
                 <div class="input-group">
                     <input type="number" class="form-control" wire:model="low_stock_threshold" placeholder="5">
                     <span class="input-group-text"><i class="ri-alert-line"></i></span>
