@@ -793,6 +793,8 @@ class Index extends Component
             
             // If no conflict, we allow it. (No need to loop disable, as others must be false)
         }
+    }
+
     public function handleVariationShowOnListToggle($enabledIndex)
     {
         if ($this->variationGroups[$enabledIndex]['show_on_list'] ?? false) {
