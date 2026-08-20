@@ -100,6 +100,15 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
         }
+        .ecc-text-primary {
+            color: #755a24 !important;
+        }
+        .ecc-border-primary {
+            border-color: #755a24 !important;
+        }
+        .hover\:ecc-text-primary:hover {
+            color: #755a24 !important;
+        }
         .shop-range-native {
             position: absolute;
             left: 0;
@@ -180,7 +189,7 @@
                 <button
                     type="button"
                     wire:click="$set('activeCategoryId', null)"
-                    class="flex items-center p-2 transition-all rounded-xl w-full text-left {{ empty($activeCategoryId) ? 'text-primary font-bold border-l-4 border-primary bg-surface-container-high' : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-high' }}"
+                    class="flex items-center p-2 transition-all rounded-xl w-full text-left {{ empty($activeCategoryId) ? 'ecc-text-primary font-bold border-l-4 ecc-border-primary bg-surface-container-high' : 'text-on-surface-variant hover:ecc-text-primary hover:bg-surface-container-high' }}"
                 >
                     <span class="text-body-md font-body-md">All Collections</span>
                 </button>
@@ -197,7 +206,7 @@
                         <button
                             type="button"
                             wire:click="$set('activeCategoryId', {{ $categoryActive ? 'null' : "'$categoryId'" }})"
-                            class="flex items-center justify-between p-2 transition-all rounded-xl w-full text-left {{ $categoryActive ? 'text-primary font-bold border-l-4 border-primary bg-surface-container-high' : ($childActive ? 'text-primary font-bold bg-surface-container-high' : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-high') }}"
+                            class="flex items-center justify-between p-2 transition-all rounded-xl w-full text-left {{ $categoryActive ? 'ecc-text-primary font-bold border-l-4 ecc-border-primary bg-surface-container-high' : ($childActive ? 'ecc-text-primary font-bold bg-surface-container-high' : 'text-on-surface-variant hover:ecc-text-primary hover:bg-surface-container-high') }}"
                         >
                             <span class="text-body-md font-body-md">{{ $categoryName }}</span>
                             @if($hasChildren)
@@ -215,7 +224,7 @@
                                     <button
                                         type="button"
                                         wire:click="$set('activeCategoryId', '{{ $childId }}')"
-                                        class="text-left py-1 text-body-md transition-colors rounded-lg px-2 w-full {{ $isChildActive ? 'text-primary font-bold bg-surface-container-high' : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-high' }}"
+                                        class="text-left py-1 text-body-md transition-colors rounded-lg px-2 w-full {{ $isChildActive ? 'ecc-text-primary font-bold bg-surface-container-high' : 'text-on-surface-variant hover:ecc-text-primary hover:bg-surface-container-high' }}"
                                     >
                                         {{ $child->name }}
                                     </button>
