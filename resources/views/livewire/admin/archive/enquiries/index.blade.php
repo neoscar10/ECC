@@ -147,6 +147,9 @@
                                                         </li>
                                                     @endif
                                                     <li><a class="dropdown-item remove-item-btn" href="#" wire:click.prevent="updateStatus({{ $enquiry->id }}, 'closed')"><i class="ri-check-double-fill align-bottom me-2 text-muted"></i> Mark Closed</a></li>
+                                                    @if($enquiry->product)
+                                                        <li><a class="dropdown-item" href="{{ route('admin.archive.ownership.show', ['id' => $enquiry->product->id]) }}"><i class="ri-shield-user-line align-bottom me-2 text-muted"></i> View Ownership</a></li>
+                                                    @endif
                                                 </ul>
                                             </div>
                                         </td>
@@ -227,7 +230,8 @@
                                                         @endif
                                                     </h6>
                                                     <p class="text-muted mb-0">{{ $enq->product->category->title ?? 'Unknown Category' }}</p>
-                                                    <a href="#" class="text-primary fs-12">View Product</a>
+                                                    <a href="{{ route('admin.archive.products.show', ['id' => $enq->product->id]) }}" class="text-primary fs-12" target="_blank">View Product</a>
+                                                    <a href="{{ route('admin.archive.ownership.show', ['id' => $enq->product->id]) }}" class="text-warning fs-12 ms-3" target="_blank"><i class="ri-shield-user-line align-middle"></i> View Ownership</a>
                                                 </div>
                                             </div>
                                         @else
