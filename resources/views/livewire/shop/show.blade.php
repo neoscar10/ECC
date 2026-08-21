@@ -291,7 +291,8 @@
             cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            gap: 0.5rem;
             padding: 0 1.5rem;
             transition: background .2s, color .2s;
         }
