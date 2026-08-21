@@ -675,20 +675,17 @@
                             </div>
                         </div>
 
-                        {{-- ── Add to Cart + Wishlist ────────────── --}}
+                        {{-- ── Add to Cart ────────────── --}}
                         <div class="sdp-action-row">
                             <button type="button" class="sdp-add-btn"
                                     wire:click="addToCart"
                                     wire:loading.attr="disabled"
                                     @disabled(!$inStock)>
                                 <span wire:loading.remove wire:target="addToCart">
-                                    {{ $inStock ? 'Add to Bag' : ($availabilityLabel ?? 'Out of Stock') }}
+                                    {{ $inStock ? 'Add to Cart' : ($availabilityLabel ?? 'Out of Stock') }}
                                 </span>
                                 <span wire:loading wire:target="addToCart">Adding…</span>
                                 <span class="material-symbols-outlined" style="font-size:20px; font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;" wire:loading.remove wire:target="addToCart">arrow_forward</span>
-                            </button>
-                            <button type="button" class="sdp-wish-btn" aria-label="Add to wishlist">
-                                <span class="material-symbols-outlined">favorite</span>
                             </button>
                         </div>
 
