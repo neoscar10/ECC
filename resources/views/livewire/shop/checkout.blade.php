@@ -656,6 +656,13 @@
                             </div>
                         @endif
 
+                        @if(($summary['formatted_shipping'] ?? '') === 'To be discussed')
+                            <div class="alert alert-warning border-0 rounded-3 py-2 px-3 mb-3 d-flex align-items-center" style="background: rgba(199, 167, 90, 0.1); color: var(--ecc-primary); font-size: 0.8rem; line-height: 1.4;">
+                                <i class="mdi mdi-information-outline me-2 fs-5"></i> 
+                                <div>You will be contacted by our team to discuss and arrange the delivery terms and shipping fee separately.</div>
+                            </div>
+                        @endif
+
                         <button type="button"
                                 class="btn ecc-btn-primary w-100 py-3 fw-bold"
                                 wire:click="placeOrder"
@@ -676,11 +683,6 @@
                     </div>
                 </div>
 
-                @if(($summary['formatted_shipping'] ?? '') === 'To be discussed')
-                    <div class="ecc-muted small text-center mt-3" style="font-size: 0.75rem; line-height: 1.5; padding: 0.75rem; border: 1px dashed rgba(199, 167, 90, 0.35); border-radius: 1rem; color: var(--ecc-primary) !important;">
-                        <i class="mdi mdi-information-outline me-1"></i> You will be contacted by our team to discuss and arrange the delivery terms and shipping fee separately.
-                    </div>
-                @endif
 
                 <div class="ecc-trust-row">
                     <div class="ecc-trust-item">
