@@ -27,7 +27,7 @@ class Index extends Component
 
     public function render()
     {
-        $products = ArchiveProduct::withTrashed()
+        $products = ArchiveProduct::query()
             ->with(['images', 'orders' => function($q) {
                 $q->where('status', 'completed');
             }])
