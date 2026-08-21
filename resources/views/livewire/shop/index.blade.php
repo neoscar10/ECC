@@ -411,7 +411,7 @@
                         @endphp
 
                         <article class="bg-surface-container-lowest border border-outline-variant overflow-hidden group hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all duration-300 flex flex-col h-full relative rounded-xl {{ $isSoldOut ? 'opacity-75' : '' }}" x-data="{ activeImage: '{{ $productImage }}', activeSwatch: null }">
-                            <a href="{{ $productUrl }}" class="absolute inset-0 z-0"></a>
+                            <a href="{{ $productUrl }}" class="absolute inset-0 z-10"></a>
                             
                             {{-- Product Media --}}
                             <div class="aspect-[4/5] bg-surface-variant overflow-hidden relative">
@@ -429,7 +429,7 @@
                                     $showcaseGroup = $product->variationGroups->firstWhere('show_on_list', true);
                                 @endphp
                                 @if($showcaseGroup && $showcaseGroup->values->isNotEmpty())
-                                    <div class="px-5 pt-4 flex gap-2 overflow-x-auto pb-2 relative z-10">
+                                    <div class="px-5 pt-4 flex gap-2 overflow-x-auto pb-2 relative z-20">
                                         @foreach($showcaseGroup->values as $value)
                                             @php
                                                 $swatchUrl = route('shop.show', ['slug' => $product->slug, 'v' => [$showcaseGroup->id => $value->id]]);
@@ -462,13 +462,13 @@
                             @endif
 
                             {{-- Product Content & CTA --}}
-                            <div class="p-5 flex flex-col flex-1 border-t border-outline-variant relative z-10 bg-surface-container-lowest">
+                            <div class="p-5 flex flex-col flex-1 border-t border-outline-variant relative z-0 bg-surface-container-lowest">
                                 <h2 class="text-headline-md font-headline-md text-on-surface line-clamp-2 mb-1">{{ $productTitle }}</h2>
                                 <span class="text-label-sm font-label-sm text-secondary uppercase tracking-widest mb-3">{{ $productSubtitle }}</span>
                                 <div class="text-headline-md font-headline-md text-primary mt-auto mb-4">{{ $productPrice }}</div>
 
                                 @if($isSoldOut)
-                                    <button class="w-full bg-surface-container-high text-on-surface-variant py-3 px-4 flex items-center justify-center gap-2 cursor-not-allowed text-label-sm font-label-sm uppercase tracking-widest h-12 border border-outline-variant rounded-xl" disabled="">
+                                    <button class="w-full bg-surface-container-high text-on-surface-variant py-3 px-4 flex items-center justify-center gap-2 cursor-not-allowed text-label-sm font-label-sm uppercase tracking-widest h-12 border border-outline-variant rounded-xl relative z-20" disabled="">
                                         Out of Stock
                                     </button>
                                 @else
@@ -477,7 +477,7 @@
                                         wire:click.stop="addToCart({{ $product->id }})"
                                         wire:loading.attr="disabled"
                                         wire:target="addToCart({{ $product->id }})"
-                                        class="w-full bg-primary-container text-on-primary-container py-3 px-4 flex items-center justify-center gap-2 hover:bg-primary hover:text-on-primary transition-colors text-label-sm font-label-sm uppercase tracking-widest h-12 rounded-xl"
+                                        class="w-full bg-primary-container text-on-primary-container py-3 px-4 flex items-center justify-center gap-2 hover:bg-primary hover:text-on-primary transition-colors text-label-sm font-label-sm uppercase tracking-widest h-12 rounded-xl relative z-20"
                                     >
                                         <span wire:loading.remove wire:target="addToCart({{ $product->id }})" class="flex items-center gap-2">
                                             <span class="material-symbols-outlined text-sm">shopping_cart</span>Add to Cart
