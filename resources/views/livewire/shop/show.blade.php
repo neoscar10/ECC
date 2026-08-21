@@ -686,7 +686,7 @@
                                     {{ $inStock ? 'Add to Cart' : ($availabilityLabel ?? 'Out of Stock') }}
                                 </span>
                                 <span wire:loading wire:target="addToCart">Adding…</span>
-                                <span class="material-symbols-outlined" style="font-size:20px; font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;" wire:loading.remove wire:target="addToCart">arrow_forward</span>
+                                <span class="material-symbols-outlined" style="font-size:20px; font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;" wire:loading.remove wire:target="addToCart">shopping_bag</span>
                             </button>
                         </div>
 
