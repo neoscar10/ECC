@@ -10,20 +10,18 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class SendEnquiryPaymentLinkWhatsAppJob implements ShouldQueue
+class SendEnquiryDeliveryRequestWhatsAppJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $enquiry;
-    public $checkoutUrl;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(ArchiveProductEnquiry $enquiry, string $checkoutUrl)
+    public function __construct(ArchiveProductEnquiry $enquiry)
     {
         $this->enquiry = $enquiry;
-        $this->checkoutUrl = $checkoutUrl;
     }
 
     /**
@@ -31,8 +29,6 @@ class SendEnquiryPaymentLinkWhatsAppJob implements ShouldQueue
      */
     public function handle(WhatsAppNotificationSender $waSender): void
     {
-        // For WhatsApp, we need a phone number. 
-        // If the enquiry has a user with a phone number, or a contact_phone, use it.
         $phoneNumber = null;
         if ($this->enquiry->user && $this->enquiry->user->phone) {
             $phoneNumber = $this->enquiry->user->phone;
@@ -41,19 +37,18 @@ class SendEnquiryPaymentLinkWhatsAppJob implements ShouldQueue
         }
 
         if (empty($phoneNumber)) {
-            \Illuminate\Support\Facades\Log::info("WhatsApp Payment Link Skipped: No phone number available for Enquiry #{$this->enquiry->id}");
+            \Illuminate\Support\Facades\Log::info("WhatsApp Delivery Request Skipped: No phone number for Enquiry #{$this->enquiry->id}");
             return;
         }
 
         $customerName = $this->enquiry->contact_name ?? 'Valued Member';
-        $amountFormatted = '₹' . number_format($this->enquiry->payment_amount, 2);
-        $productTitle = $this->enquiry->product ? $this->enquiry->product->title : 'Item Enquiry';
+        $productTitle = $this->enquiry->product ? $this->enquiry->product->title : 'Item Order';
         $buttonParam = (string) $this->enquiry->id;
 
         $waSender->sendTemplate(
             $phoneNumber,
-            'archive_enquiry_payment_link',
-            [$customerName, $amountFormatted, $productTitle],
+            'archive_enquiry_delivery_request',
+            [$customerName, $productTitle],
             [$buttonParam]
         );
     }

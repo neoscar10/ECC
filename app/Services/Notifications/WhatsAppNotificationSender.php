@@ -86,45 +86,99 @@ class WhatsAppNotificationSender
     }
 
     /**
-     * Core sending logic (Mocked for now).
+     * Send a pre-approved Meta WhatsApp Template message.
+     */
+    public function sendTemplate(string $phoneNumber, string $templateName, array $bodyVariables = [], array $buttonVariables = [], string $language = null): bool
+    {
+        $language = $language ?? config('services.whatsapp.template_language', 'en');
+        if (!$this->enabled) {
+            Log::info("WhatsApp Notification Skipped (Disabled in Config)", ['phone' => $phoneNumber, 'template' => $templateName]);
+            return false;
+        }
+
+        $cleanPhone = preg_replace('/[^0-9]/', '', $phoneNumber);
+        $apiVersion = config('services.whatsapp.api_version', 'v22.0');
+
+        $components = [];
+
+        if (!empty($bodyVariables)) {
+            $bodyParams = [];
+            foreach ($bodyVariables as $var) {
+                $bodyParams[] = ['type' => 'text', 'text' => (string) $var];
+            }
+            $components[] = [
+                'type' => 'body',
+                'parameters' => $bodyParams,
+            ];
+        }
+
+        if (!empty($buttonVariables)) {
+            $btnParams = [];
+            foreach ($buttonVariables as $var) {
+                $btnParams[] = ['type' => 'text', 'text' => (string) $var];
+            }
+            $components[] = [
+                'type' => 'button',
+                'sub_type' => 'url',
+                'index' => '0',
+                'parameters' => $btnParams,
+            ];
+        }
+
+        $payload = [
+            'messaging_product' => 'whatsapp',
+            'recipient_type' => 'individual',
+            'to' => $cleanPhone,
+            'type' => 'template',
+            'template' => [
+                'name' => $templateName,
+                'language' => ['code' => $language],
+            ],
+        ];
+
+        if (!empty($components)) {
+            $payload['template']['components'] = $components;
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withToken($this->accessToken)
+                ->timeout(config('services.whatsapp.timeout', 15))
+                ->post("https://graph.facebook.com/{$apiVersion}/{$this->phoneNumberId}/messages", $payload);
+
+            if ($response->successful()) {
+                Log::info("WhatsApp Template Dispatched Successfully", [
+                    'phone' => $cleanPhone,
+                    'template' => $templateName,
+                    'message_id' => $response->json('messages.0.id'),
+                ]);
+                return true;
+            }
+
+            Log::error("WhatsApp Template API Error Response", [
+                'phone' => $cleanPhone,
+                'template' => $templateName,
+                'status' => $response->status(),
+                'response' => $response->body(),
+            ]);
+            return false;
+        } catch (\Exception $e) {
+            Log::error("WhatsApp Template Exception: " . $e->getMessage(), [
+                'phone' => $cleanPhone,
+                'template' => $templateName,
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Core sending logic.
      */
     public function sendRaw(string $phoneNumber, string $title, string $body, array $data): void
     {
-        // Format the phone number properly (strip +, -, spaces)
-        $cleanPhone = preg_replace('/[^0-9]/', '', $phoneNumber);
+        $templateName = $data['template'] ?? $this->defaultTemplate;
+        $bodyVars = $data['body_vars'] ?? [$title, $body];
+        $buttonVars = $data['button_vars'] ?? [];
 
-        // When templates and credentials are ready, this Log::info will be replaced with an HTTP request to Meta API.
-        Log::info("WhatsApp Mock Send:", [
-            'phone_number' => $cleanPhone,
-            'template'     => $this->defaultTemplate,
-            'title'        => $title,
-            'body'         => $body,
-            'data'         => $data
-        ]);
-        
-        /* 
-        // FUTURE META API IMPLEMENTATION
-        try {
-            $response = \Illuminate\Support\Facades\Http::withToken($this->accessToken)
-                ->post("https://graph.facebook.com/v17.0/{$this->phoneNumberId}/messages", [
-                    'messaging_product' => 'whatsapp',
-                    'to' => $cleanPhone,
-                    'type' => 'template',
-                    'template' => [
-                        'name' => $this->defaultTemplate,
-                        'language' => ['code' => config('services.whatsapp.template_language', 'en_US')],
-                        'components' => [
-                            // Variables will go here when template is defined
-                        ]
-                    ]
-                ]);
-                
-            if (!$response->successful()) {
-                Log::error("WhatsApp API Error: " . $response->body());
-            }
-        } catch (\Exception $e) {
-            Log::error("WhatsApp Exception: " . $e->getMessage());
-        }
-        */
+        $this->sendTemplate($phoneNumber, $templateName, $bodyVars, $buttonVars);
     }
 }

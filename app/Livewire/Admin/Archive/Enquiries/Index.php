@@ -147,12 +147,8 @@ class Index extends Component
             'delivery_details_requested_at' => now(),
         ]);
 
-        // 1. Log the WhatsApp details request form mock info in the logs
-        \Illuminate\Support\Facades\Log::info('WhatsApp Mock Send: Delivery Details Request Form sent', [
-            'enquiry_id' => $enquiry->id,
-            'whatsapp_number' => $enquiry->contact_phone ?? 'N/A',
-            'template' => 'delivery_details_request_form_v1',
-        ]);
+        // 1. Dispatch WhatsApp delivery details request template job
+        dispatch(new \App\Jobs\Notifications\SendEnquiryDeliveryRequestWhatsAppJob($enquiry));
 
         // 2. Send the customer an email
         \Illuminate\Support\Facades\Mail::to($enquiry->contact_email)
