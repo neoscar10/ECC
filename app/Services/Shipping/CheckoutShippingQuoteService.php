@@ -23,18 +23,23 @@ class CheckoutShippingQuoteService
      */
     public function quoteForCheckout(User $user, $cartItems, $address): array
     {
-        $deliveryPincode = $this->extractPincode($address);
-
-        if (!$deliveryPincode) {
-            return [
-                'success' => false,
-                'message' => 'Valid delivery pincode is required.',
-                'reason' => 'missing_pincode',
-            ];
+        // 1. Resolve DeliveryCountry relationship or lookup by country name if missing
+        $deliveryCountry = null;
+        if (is_object($address)) {
+            $deliveryCountry = $address->deliveryCountry;
+            if (!$deliveryCountry && !empty($address->country)) {
+                $deliveryCountry = \App\Models\DeliveryCountry::where('name', $address->country)->first();
+            }
+        } elseif (is_array($address)) {
+            if (!empty($address['delivery_country_id'])) {
+                $deliveryCountry = \App\Models\DeliveryCountry::find($address['delivery_country_id']);
+            } elseif (!empty($address['country'])) {
+                $deliveryCountry = \App\Models\DeliveryCountry::where('name', $address['country'])->first();
+            }
         }
 
-        // Check if the address belongs to a negotiated delivery country
-        if ($address->deliveryCountry && $address->deliveryCountry->delivery_type === 'negotiated') {
+        // 2. Check if the address belongs to a negotiated delivery country FIRST
+        if ($deliveryCountry && $deliveryCountry->delivery_type === 'negotiated') {
             return [
                 'success' => true,
                 'shipping_charge' => 0,
@@ -43,6 +48,30 @@ class CheckoutShippingQuoteService
                 'message' => 'To be discussed',
                 'measurement' => $this->measurementService->measurementFromCartItems($cartItems),
                 'rate_quote_id' => null,
+            ];
+        }
+
+        // 3. Fallback for non-India countries (always negotiated delivery terms as Shiprocket is domestic India courier service)
+        $countryName = is_array($address) ? ($address['country'] ?? null) : ($address->country ?? null);
+        if ($countryName && strtolower(trim($countryName)) !== 'india') {
+            return [
+                'success' => true,
+                'shipping_charge' => 0,
+                'currency' => 'INR',
+                'delivery_type' => 'negotiated',
+                'message' => 'To be discussed',
+                'measurement' => $this->measurementService->measurementFromCartItems($cartItems),
+                'rate_quote_id' => null,
+            ];
+        }
+
+        $deliveryPincode = $this->extractPincode($address);
+
+        if (!$deliveryPincode) {
+            return [
+                'success' => false,
+                'message' => 'Valid delivery pincode is required.',
+                'reason' => 'missing_pincode',
             ];
         }
 

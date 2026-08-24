@@ -31,20 +31,14 @@ class VaultDeliveryQuoteService
         ?User $user = null,
         array $options = []
     ): array {
-        $deliveryPincode = $address->postal_code;
-
-        if (!$deliveryPincode) {
-            return [
-                'success' => false,
-                'message' => 'Delivery is not available for this address.',
-                'reason' => 'missing_pincode',
-                'delivery_fee' => 0.00,
-                'currency' => 'INR',
-            ];
+        $deliveryCountry = $address->deliveryCountry;
+        if (!$deliveryCountry && !empty($address->country)) {
+            $deliveryCountry = \App\Models\DeliveryCountry::where('name', $address->country)->first();
         }
 
-        // Check if the address belongs to a negotiated delivery country
-        if ($address->deliveryCountry && $address->deliveryCountry->delivery_type === 'negotiated') {
+        // Check if the address belongs to a negotiated delivery country or non-India country
+        $countryName = $address->country ?? null;
+        if (($deliveryCountry && $deliveryCountry->delivery_type === 'negotiated') || ($countryName && strtolower(trim($countryName)) !== 'india')) {
             $measurement = $this->measurementService->measurementFromVaultItem($vaultItem);
             return [
                 'success' => true,
@@ -63,6 +57,18 @@ class VaultDeliveryQuoteService
                     'has_fallback' => $measurement['has_fallback'],
                 ],
                 'rate_quote_id' => null,
+            ];
+        }
+
+        $deliveryPincode = $address->postal_code;
+
+        if (!$deliveryPincode) {
+            return [
+                'success' => false,
+                'message' => 'Delivery is not available for this address.',
+                'reason' => 'missing_pincode',
+                'delivery_fee' => 0.00,
+                'currency' => 'INR',
             ];
         }
 
@@ -235,20 +241,14 @@ class VaultDeliveryQuoteService
         ?User $user = null,
         array $options = []
     ): array {
-        $deliveryPincode = $address->postal_code;
-
-        if (!$deliveryPincode) {
-            return [
-                'success' => false,
-                'message' => 'Delivery is not available for this address.',
-                'reason' => 'missing_pincode',
-                'delivery_fee' => 0.00,
-                'currency' => 'INR',
-            ];
+        $deliveryCountry = $address->deliveryCountry;
+        if (!$deliveryCountry && !empty($address->country)) {
+            $deliveryCountry = \App\Models\DeliveryCountry::where('name', $address->country)->first();
         }
 
-        // Check if the address belongs to a negotiated delivery country
-        if ($address->deliveryCountry && $address->deliveryCountry->delivery_type === 'negotiated') {
+        // Check if the address belongs to a negotiated delivery country or non-India country
+        $countryName = $address->country ?? null;
+        if (($deliveryCountry && $deliveryCountry->delivery_type === 'negotiated') || ($countryName && strtolower(trim($countryName)) !== 'india')) {
             $measurement = $this->measurementService->measurementFromVaultItems($vaultItems);
             return [
                 'success' => true,
@@ -267,6 +267,18 @@ class VaultDeliveryQuoteService
                     'has_fallback' => $measurement['has_fallback'],
                 ],
                 'rate_quote_id' => null,
+            ];
+        }
+
+        $deliveryPincode = $address->postal_code;
+
+        if (!$deliveryPincode) {
+            return [
+                'success' => false,
+                'message' => 'Delivery is not available for this address.',
+                'reason' => 'missing_pincode',
+                'delivery_fee' => 0.00,
+                'currency' => 'INR',
             ];
         }
 
