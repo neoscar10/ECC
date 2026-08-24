@@ -14,6 +14,8 @@ class ShopOrderResource extends JsonResource
             'order_number' => $this->order_number,
             'status' => $this->status,
             'payment_status' => $this->payment_status,
+            'delivery_type' => $this->delivery_type ?? 'courier',
+            'delivery_payment_status' => $this->delivery_payment_status ?? 'unpaid',
             'currency' => $this->currency,
             'totals' => [
                 'subtotal' => (float) $this->subtotal,
