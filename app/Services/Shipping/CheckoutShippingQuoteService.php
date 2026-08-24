@@ -23,6 +23,20 @@ class CheckoutShippingQuoteService
      */
     public function quoteForCheckout(User $user, $cartItems, $address): array
     {
+        // 0. Check if ALL items in cart have free shipping (requires_shipping = false)
+        $allFreeShipping = $cartItems->isNotEmpty() && $cartItems->every(fn($item) => isset($item->product) && !$item->product->requires_shipping);
+
+        if ($allFreeShipping) {
+            return [
+                'success' => true,
+                'shipping_charge' => 0,
+                'currency' => 'INR',
+                'delivery_type' => 'free',
+                'message' => 'Free Shipping',
+                'measurement' => $this->measurementService->measurementFromCartItems($cartItems),
+                'rate_quote_id' => null,
+            ];
+        }
         // 1. Resolve DeliveryCountry relationship or lookup by country name if missing
         $deliveryCountry = null;
         if (is_object($address)) {

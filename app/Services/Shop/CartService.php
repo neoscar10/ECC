@@ -208,7 +208,7 @@ class CartService
     public function cartRequiresShipping(User $user): bool
     {
         $cart = $this->getCart($user);
-        return $cart->items->contains(fn($item) => $item->product->requires_shipping);
+        return $cart->items->isNotEmpty();
     }
 
     // --- Helpers ---

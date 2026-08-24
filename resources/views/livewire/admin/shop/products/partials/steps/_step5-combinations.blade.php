@@ -3,8 +3,8 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded mb-3 border">
                 <div>
-                    <h6 class="mb-1"><i class="ri-truck-line align-bottom me-1"></i> Requires Delivery / Shipping</h6>
-                    <p class="text-muted mb-0 fs-13">If disabled, users will not be asked for shipping details and shipping will be free.</p>
+                    <h6 class="mb-1"><i class="ri-truck-line align-bottom me-1"></i> Enable Shipping Charges</h6>
+                    <p class="text-muted mb-0 fs-13">If disabled, shipping fee will be free for this product. Shipping address is still collected from the customer for order fulfillment.</p>
                 </div>
                 <div class="form-check form-switch form-switch-lg form-switch-success">
                     <input class="form-check-input" type="checkbox" role="switch" wire:model.live="requires_shipping">
@@ -70,7 +70,6 @@
                                 </div>
                             </td>
                         </tr>
-                        @if($requires_shipping)
                         <tr class="bg-light-subtle">
                             <td colspan="5" class="py-2 px-4 border-bottom">
                                 <div class="row g-2 align-items-center">
@@ -125,7 +124,6 @@
                                 </div>
                             </td>
                         </tr>
-                        @endif
 
                     @empty
                         <tr>
@@ -142,7 +140,6 @@
             <div class="card-header bg-light-subtle">
                 <h6 class="card-title mb-0"><i class="ri-truck-line align-bottom me-1"></i> Shipping Dimensions</h6>
             </div>
-            @if($requires_shipping)
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-3">
@@ -180,17 +177,10 @@
                             <span><i class="ri-information-line align-bottom"></i> Volumetric Weight: <strong>{{ $volumetric ?: '0.000' }} kg</strong></span>
                             <span><i class="ri-scales-3-line align-bottom"></i> Chargeable Weight: <strong>{{ $chargeable ?: '0.000' }} kg</strong></span>
                         </div>
-                        <p class="text-muted small mt-1 mb-0">Used for courier rate calculation. Volumetric weight is calculated as L × B × H ÷ {{ $divisor }}.</p>
+                        <p class="text-muted small mt-1 mb-0">Used for courier rate calculation and admin shipment fulfillment.</p>
                     </div>
                 </div>
             </div>
-            @else
-            <div class="card-body">
-                <div class="alert alert-success mb-0 border-0">
-                    <i class="ri-checkbox-circle-line me-1 align-middle"></i> Free Shipping enabled. No weight or dimensions required.
-                </div>
-            </div>
-            @endif
         </div>
     @endif
 </div>
