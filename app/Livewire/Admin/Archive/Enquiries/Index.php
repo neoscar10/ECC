@@ -148,7 +148,7 @@ class Index extends Component
         ]);
 
         // 1. Dispatch WhatsApp delivery details request template job
-        dispatch(new \App\Jobs\Notifications\SendEnquiryDeliveryRequestWhatsAppJob($enquiry));
+        dispatch_sync(new \App\Jobs\Notifications\SendEnquiryDeliveryRequestWhatsAppJob($enquiry));
 
         // 2. Send the customer an email
         \Illuminate\Support\Facades\Mail::to($enquiry->contact_email)
@@ -204,8 +204,8 @@ class Index extends Component
         \Illuminate\Support\Facades\Mail::to($enquiry->contact_email)
             ->send(new \App\Mail\Archive\EnquiryPaymentLinkMail($enquiry, $checkoutUrl));
 
-        // Send WhatsApp Mock
-        dispatch(new \App\Jobs\Notifications\SendEnquiryPaymentLinkWhatsAppJob($enquiry, $checkoutUrl));
+        // Send WhatsApp
+        dispatch_sync(new \App\Jobs\Notifications\SendEnquiryPaymentLinkWhatsAppJob($enquiry, $checkoutUrl));
 
         session()->flash('success', 'Payment link generated and sent successfully via Email and WhatsApp.');
         

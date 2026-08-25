@@ -97,6 +97,13 @@ class WhatsAppNotificationSender
         }
 
         $cleanPhone = preg_replace('/[^0-9]/', '', $phoneNumber);
+
+        // Auto-prefix 10-digit numbers with default country prefix (e.g. 91 for India)
+        if (strlen($cleanPhone) === 10) {
+            $defaultPrefix = config('services.whatsapp.default_country_prefix', '91');
+            $cleanPhone = $defaultPrefix . $cleanPhone;
+        }
+
         $apiVersion = config('services.whatsapp.api_version', 'v22.0');
 
         $components = [];
@@ -140,16 +147,27 @@ class WhatsAppNotificationSender
             $payload['template']['components'] = $components;
         }
 
+        Log::info("WhatsApp Template Dispatch Initiated", [
+            'raw_phone' => $phoneNumber,
+            'clean_phone' => $cleanPhone,
+            'template' => $templateName,
+            'phone_number_id' => $this->phoneNumberId,
+            'payload' => $payload,
+        ]);
+
         try {
+            $url = "https://graph.facebook.com/{$apiVersion}/{$this->phoneNumberId}/messages";
             $response = \Illuminate\Support\Facades\Http::withToken($this->accessToken)
                 ->timeout(config('services.whatsapp.timeout', 15))
-                ->post("https://graph.facebook.com/{$apiVersion}/{$this->phoneNumberId}/messages", $payload);
+                ->post($url, $payload);
 
             if ($response->successful()) {
                 Log::info("WhatsApp Template Dispatched Successfully", [
                     'phone' => $cleanPhone,
                     'template' => $templateName,
+                    'status' => $response->status(),
                     'message_id' => $response->json('messages.0.id'),
+                    'response_body' => $response->json(),
                 ]);
                 return true;
             }
@@ -165,6 +183,7 @@ class WhatsAppNotificationSender
             Log::error("WhatsApp Template Exception: " . $e->getMessage(), [
                 'phone' => $cleanPhone,
                 'template' => $templateName,
+                'trace' => $e->getTraceAsString(),
             ]);
             return false;
         }
