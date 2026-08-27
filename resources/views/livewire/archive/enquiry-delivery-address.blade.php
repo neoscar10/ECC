@@ -179,11 +179,8 @@
                                             <span class="input-group-text bg-light text-muted"><i class="ri-earth-line"></i></span>
                                             <select wire:model="delivery_country" class="form-select @error('delivery_country') is-invalid @enderror">
                                                 @foreach($countries as $c)
-                                                    <option value="{{ $c->name }}">{{ $c->name }}</option>
+                                                    <option value="{{ $c }}">{{ $c }}</option>
                                                 @endforeach
-                                                @if(!$countries->pluck('name')->contains('India'))
-                                                    <option value="India">India</option>
-                                                @endif
                                             </select>
                                         </div>
                                         @error('delivery_country') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
