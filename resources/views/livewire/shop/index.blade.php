@@ -621,10 +621,13 @@
                                 </span>
                             </button>
                         </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-           <!-- Mobile Filter Offcanvas Drawer / Bottom Sheet -->
+        @endif
+    </div>
+
+    <!-- Mobile Filter Offcanvas Drawer / Bottom Sheet -->
     @if($mobileFilterOpen)
     <div
         class="fixed inset-0 z-[2000] md:hidden flex flex-col justify-end"
