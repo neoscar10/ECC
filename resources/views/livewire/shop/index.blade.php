@@ -177,7 +177,7 @@
 
     <div class="flex flex-col md:flex-row w-full max-w-container-max mx-auto py-8 gap-gutter relative">
         {{-- SideNavBar / Filters Sidebar --}}
-        <aside class="bg-surface border-r border-outline-variant w-64 hidden md:flex sticky top-24 flex-col p-4 gap-4 self-start rounded-xl">
+        <aside class="bg-surface border-r border-outline-variant w-64 hidden md:flex sticky top-[68px] flex-col p-4 gap-4 self-start rounded-xl">
             <!-- Header -->
             <div class="mb-6">
                 <div class="text-label-sm font-label-sm text-secondary tracking-widest uppercase mb-1">CATEGORIES</div>
@@ -354,7 +354,7 @@
         {{-- Main Product Area --}}
         <main class="flex-1 w-full min-w-0 px-4 md:px-0">
             {{-- Search & Sort Header Panel --}}
-            <div class="flex flex-row items-center justify-between gap-2 bg-surface-container-lowest border border-outline-variant px-2 py-2 md:p-4 mb-4 md:mb-8 shadow-sm rounded-xl sticky top-[60px] md:top-24 z-40">
+            <div class="flex flex-row items-center justify-between gap-2 bg-surface-container-lowest border border-outline-variant px-2 py-2 md:p-4 mb-4 md:mb-8 shadow-sm rounded-xl sticky top-[60px] md:top-[68px] z-40">
                 <div class="hidden md:flex items-center gap-4">
                     <h1 class="text-headline-md font-headline-md text-on-surface whitespace-nowrap">Shop Equipment</h1>
                     <div class="h-6 w-px bg-outline-variant hidden md:block"></div>
