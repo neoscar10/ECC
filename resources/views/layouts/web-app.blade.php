@@ -783,6 +783,39 @@
             color: var(--ecc-primary) !important;
             text-decoration: underline !important;
         }
+
+        /* Mobile Hamburger Drawer Styles */
+        .luxe-mobile-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--ecc-bg-surface, #19140b);
+            border: 1px solid var(--ecc-border, rgba(199, 167, 90, 0.2));
+            border-radius: 16px;
+            margin-top: 0.75rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .luxe-mobile-nav a {
+            color: var(--ecc-text-primary, #ffffff) !important;
+            text-decoration: none !important;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s ease;
+        }
+
+        .luxe-mobile-nav a:hover,
+        .luxe-mobile-nav a.is-active {
+            color: #111111 !important;
+            background: var(--ecc-primary, #c5a365) !important;
+            border-color: var(--ecc-primary, #c5a365) !important;
+        }
     </style>
 
     @livewireStyles

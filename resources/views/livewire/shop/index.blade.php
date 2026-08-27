@@ -175,7 +175,7 @@
     </style>
     @endpush
 
-    <div class="flex flex-col md:flex-row w-full max-w-[1440px] mx-auto py-4 md:py-8 px-3 md:px-6 gap-6 relative" x-data="{ mobileFilterOpen: false }">
+    <div class="flex flex-col md:flex-row w-full max-w-[1440px] mx-auto py-2 md:py-8 px-0 md:px-6 gap-4 md:gap-6 relative" x-data="{ mobileFilterOpen: @entangle('mobileFilterOpen') }">
         {{-- SideNavBar / Filters Sidebar --}}
         <aside class="bg-surface border-r border-outline-variant w-64 hidden md:flex sticky top-[68px] flex-col p-4 gap-4 self-start rounded-xl">
             <!-- Header -->
@@ -352,9 +352,9 @@
         </aside>
 
         {{-- Main Product Area --}}
-        <main class="flex-1 w-full min-w-0 px-4 md:px-0">
-            {{-- Search, Filter Button & Sort Header Panel --}}
-            <div class="flex flex-row items-center justify-between gap-2 bg-surface-container-lowest border border-outline-variant px-2.5 py-2 md:p-4 mb-4 md:mb-8 shadow-sm rounded-xl md:sticky md:top-[68px] z-30">
+        <main class="flex-1 w-full min-w-0 px-0 md:px-0">
+            {{-- Search & Filter Header Panel --}}
+            <div class="flex flex-row items-center justify-between gap-3 bg-surface-container-lowest border-y md:border border-outline-variant px-3 py-2 md:p-4 mb-4 md:mb-8 shadow-sm md:rounded-xl md:sticky md:top-[68px] z-30">
                 <div class="hidden md:flex items-center gap-4">
                     <h1 class="text-headline-md font-headline-md text-on-surface whitespace-nowrap">Shop Equipment</h1>
                     <div class="h-6 w-px bg-outline-variant hidden md:block"></div>
@@ -363,9 +363,9 @@
 
                 {{-- Search Bar --}}
                 <div class="flex-1 min-w-0 relative">
-                    <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-secondary text-xs md:text-sm">search</span>
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-sm">search</span>
                     <input
-                        class="w-full bg-surface-container-low border border-outline-variant text-on-surface pl-8 md:pl-10 pr-2 md:pr-4 py-1.5 md:py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-xs md:text-body-md rounded-lg md:rounded-xl"
+                        class="w-full bg-surface-container-low border border-outline-variant text-on-surface pl-9 md:pl-10 pr-3 md:pr-4 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-xs md:text-body-md rounded-xl"
                         placeholder="Search gear..."
                         type="text"
                         wire:model.live.debounce.400ms="search"
@@ -375,31 +375,31 @@
                 {{-- Mobile Filter Drawer Toggle Button --}}
                 <button
                     type="button"
-                    @click="mobileFilterOpen = true"
-                    class="flex md:hidden items-center gap-1 bg-surface-container-low border border-outline-variant text-on-surface hover:ecc-text-primary py-1.5 px-2.5 rounded-lg text-xs font-semibold shrink-0 transition-colors"
+                    wire:click="toggleMobileFilter"
+                    class="flex md:hidden items-center gap-1.5 bg-primary-container text-on-primary-container font-bold py-2 px-3.5 rounded-xl text-xs shrink-0 shadow-sm transition-all"
                 >
-                    <span class="material-symbols-outlined text-sm ecc-text-primary">tune</span>
+                    <span class="material-symbols-outlined text-base">tune</span>
                     <span>Filter</span>
-                    @if(!empty($activeCategoryId) || !empty($tags) || !empty($minPrice) || !empty($maxPrice))
-                        <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                    @if(!empty($activeCategoryId) || !empty($tags) || !empty($minPrice) || !empty($maxPrice) || $sort !== 'newest')
+                        <span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
                     @endif
                 </button>
 
-                {{-- Sorting Selector --}}
-                <div class="flex items-center gap-1 md:gap-2 shrink-0">
-                    <span class="text-label-sm text-secondary uppercase tracking-widest hidden sm:inline-block">Sort:</span>
+                {{-- Desktop-Only Sorting Selector --}}
+                <div class="hidden md:flex items-center gap-2 shrink-0">
+                    <span class="text-label-sm text-secondary uppercase tracking-widest">Sort:</span>
                     <div class="relative">
                         <select
-                            class="appearance-none bg-surface-container-low border border-outline-variant text-on-surface py-1.5 md:py-2 pl-2 md:pl-3 pr-6 md:pr-8 focus:outline-none focus:border-primary text-[11px] md:text-label-sm font-label-sm cursor-pointer rounded-lg md:rounded-xl max-w-[100px] sm:max-w-none text-ellipsis overflow-hidden"
+                            class="appearance-none bg-surface-container-low border border-outline-variant text-on-surface py-2 pl-3 pr-8 focus:outline-none focus:border-primary text-label-sm font-label-sm cursor-pointer rounded-xl"
                             wire:model.live="sort"
                         >
                             <option value="newest">Newest</option>
-                            <option value="price_asc">Price: Low-High</option>
-                            <option value="price_desc">Price: High-Low</option>
-                            <option value="title_asc">Name: A-Z</option>
-                            <option value="title_desc">Name: Z-A</option>
+                            <option value="price_asc">Price: Low to High</option>
+                            <option value="price_desc">Price: High to Low</option>
+                            <option value="title_asc">Name: A to Z</option>
+                            <option value="title_desc">Name: Z to A</option>
                         </select>
-                        <span class="material-symbols-outlined absolute right-1.5 md:right-2 top-1/2 -translate-y-1/2 text-secondary pointer-events-none text-xs md:text-sm">expand_more</span>
+                        <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-secondary pointer-events-none text-sm">expand_more</span>
                     </div>
                 </div>
             </div>
@@ -676,7 +676,7 @@
                     @endif
                     <button
                         type="button"
-                        @click="mobileFilterOpen = false"
+                        wire:click="closeMobileFilter"
                         class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant hover:bg-outline-variant transition-colors"
                     >
                         <span class="material-symbols-outlined text-lg">close</span>
@@ -686,6 +686,45 @@
 
             <!-- Scrollable Drawer Body -->
             <div class="p-4 overflow-y-auto flex-grow flex flex-col gap-6">
+
+                <!-- 0. Sort By Section -->
+                <div>
+                    <div class="text-label-sm font-label-sm text-secondary tracking-widest uppercase mb-3">Sort By</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button
+                            type="button"
+                            wire:click="$set('sort', 'newest')"
+                            class="py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all text-left flex items-center justify-between {{ $sort === 'newest' ? 'bg-primary text-on-primary border-primary shadow-sm font-bold' : 'bg-surface-container-low text-on-surface-variant border-outline-variant' }}"
+                        >
+                            <span>Newest</span>
+                            @if($sort === 'newest') <span class="material-symbols-outlined text-sm">check</span> @endif
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="$set('sort', 'price_asc')"
+                            class="py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all text-left flex items-center justify-between {{ $sort === 'price_asc' ? 'bg-primary text-on-primary border-primary shadow-sm font-bold' : 'bg-surface-container-low text-on-surface-variant border-outline-variant' }}"
+                        >
+                            <span>Price: Low-High</span>
+                            @if($sort === 'price_asc') <span class="material-symbols-outlined text-sm">check</span> @endif
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="$set('sort', 'price_desc')"
+                            class="py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all text-left flex items-center justify-between {{ $sort === 'price_desc' ? 'bg-primary text-on-primary border-primary shadow-sm font-bold' : 'bg-surface-container-low text-on-surface-variant border-outline-variant' }}"
+                        >
+                            <span>Price: High-Low</span>
+                            @if($sort === 'price_desc') <span class="material-symbols-outlined text-sm">check</span> @endif
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="$set('sort', 'title_asc')"
+                            class="py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all text-left flex items-center justify-between {{ $sort === 'title_asc' ? 'bg-primary text-on-primary border-primary shadow-sm font-bold' : 'bg-surface-container-low text-on-surface-variant border-outline-variant' }}"
+                        >
+                            <span>Name: A-Z</span>
+                            @if($sort === 'title_asc') <span class="material-symbols-outlined text-sm">check</span> @endif
+                        </button>
+                    </div>
+                </div>
 
                 <!-- 1. Categories Filter Section -->
                 <div>
@@ -768,7 +807,7 @@
             <div class="p-4 border-t border-outline-variant bg-surface-container-lowest shrink-0">
                 <button
                     type="button"
-                    @click="mobileFilterOpen = false"
+                    wire:click="closeMobileFilter"
                     class="w-full py-3.5 bg-primary text-on-primary font-bold rounded-xl text-sm shadow-md hover:bg-primary-fixed-dim transition-all flex items-center justify-center gap-2"
                 >
                     <span>Apply Filters</span>

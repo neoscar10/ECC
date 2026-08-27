@@ -36,6 +36,29 @@ class Index extends Component
     public $absoluteMinPrice = 0;
     public $absoluteMaxPrice = 0;
 
+    public bool $mobileFilterOpen = false;
+
+    public function toggleMobileFilter()
+    {
+        $this->mobileFilterOpen = !$this->mobileFilterOpen;
+    }
+
+    public function closeMobileFilter()
+    {
+        $this->mobileFilterOpen = false;
+    }
+
+    public function clearFilters()
+    {
+        $this->search = '';
+        $this->activeCategoryId = null;
+        $this->sort = 'newest';
+        $this->tags = [];
+        $this->minPrice = $this->absoluteMinPrice;
+        $this->maxPrice = $this->absoluteMaxPrice;
+        $this->resetPage();
+    }
+
     // Quick View Modal State
     public $quickViewProduct = null;
     public $quickViewQuantity = 1;
