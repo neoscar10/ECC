@@ -175,7 +175,7 @@
     </style>
     @endpush
 
-    <div class="flex flex-col md:flex-row w-full max-w-[1440px] mx-auto py-2 md:py-8 px-0 md:px-6 gap-4 md:gap-6 relative" x-data="{ mobileFilterOpen: @entangle('mobileFilterOpen') }">
+    <div class="flex flex-col md:flex-row w-full max-w-[1440px] mx-auto py-2 md:py-8 px-0 md:px-6 gap-4 md:gap-6 relative">
         {{-- SideNavBar / Filters Sidebar --}}
         <aside class="bg-surface border-r border-outline-variant w-64 hidden md:flex sticky top-[68px] flex-col p-4 gap-4 self-start rounded-xl">
             <!-- Header -->
@@ -624,38 +624,22 @@
                     </div>
                 </div>
             </div>
-        @endif
-    <!-- Mobile Filter Offcanvas Drawer / Bottom Sheet -->
+           <!-- Mobile Filter Offcanvas Drawer / Bottom Sheet -->
+    @if($mobileFilterOpen)
     <div
-        x-show="mobileFilterOpen"
-        x-cloak
         class="fixed inset-0 z-[2000] md:hidden flex flex-col justify-end"
         role="dialog"
         aria-modal="true"
     >
         <!-- Dark Backdrop Overlay -->
         <div
-            x-show="mobileFilterOpen"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="mobileFilterOpen = false"
+            wire:click="closeMobileFilter"
             class="fixed inset-0 bg-black/60 backdrop-blur-sm"
         ></div>
 
         <!-- Drawer Panel Container -->
         <div
-            x-show="mobileFilterOpen"
-            x-transition:enter="transition ease-out duration-300 transform"
-            x-transition:enter-start="translate-y-full"
-            x-transition:enter-end="translate-y-0"
-            x-transition:leave="transition ease-in duration-200 transform"
-            x-transition:leave-start="translate-y-0"
-            x-transition:leave-end="translate-y-full"
-            class="relative w-full max-h-[85vh] bg-surface-container-lowest rounded-t-3xl shadow-2xl flex flex-col overflow-hidden z-10 border-t border-outline-variant text-on-background"
+            class="relative w-full max-h-[85vh] bg-surface-container-lowest rounded-t-3xl shadow-2xl flex flex-col overflow-hidden z-10 border-t border-outline-variant text-on-background animate-in slide-in-from-bottom duration-300"
         >
             <!-- Top Drag Handle & Header -->
             <div class="p-4 border-b border-outline-variant flex items-center justify-between bg-surface-container-low shrink-0">
@@ -665,7 +649,7 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    @if(!empty($activeCategoryId) || !empty($tags) || !empty($minPrice) || !empty($maxPrice))
+                    @if(!empty($activeCategoryId) || !empty($tags) || !empty($minPrice) || !empty($maxPrice) || $sort !== 'newest')
                         <button
                             type="button"
                             wire:click="clearFilters"
@@ -720,7 +704,7 @@
                             wire:click="$set('sort', 'title_asc')"
                             class="py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all text-left flex items-center justify-between {{ $sort === 'title_asc' ? 'bg-primary text-on-primary border-primary shadow-sm font-bold' : 'bg-surface-container-low text-on-surface-variant border-outline-variant' }}"
                         >
-                            <span>Name: A-Z</span>
+                            <span>Name: A to Z</span>
                             @if($sort === 'title_asc') <span class="material-symbols-outlined text-sm">check</span> @endif
                         </button>
                     </div>
@@ -818,7 +802,7 @@
             </div>
         </div>
     </div>
-</div>
+    @endif
 </div>
 
 @push('scripts')

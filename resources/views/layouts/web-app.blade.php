@@ -816,6 +816,12 @@
             background: var(--ecc-primary, #c5a365) !important;
             border-color: var(--ecc-primary, #c5a365) !important;
         }
+
+        /* Override Tailwind .collapse conflicts on Bootstrap Mobile Nav */
+        #luxeMobileNav.collapse.show {
+            display: block !important;
+            visibility: visible !important;
+        }
     </style>
 
     @livewireStyles
