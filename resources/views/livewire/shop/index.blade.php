@@ -175,7 +175,7 @@
     </style>
     @endpush
 
-    <div class="flex flex-col md:flex-row w-full max-w-container-max mx-auto py-8 gap-gutter relative">
+    <div class="flex flex-col md:flex-row w-full max-w-[1440px] mx-auto py-4 md:py-8 px-3 md:px-6 gap-6 relative" x-data="{ mobileFilterOpen: false }">
         {{-- SideNavBar / Filters Sidebar --}}
         <aside class="bg-surface border-r border-outline-variant w-64 hidden md:flex sticky top-[68px] flex-col p-4 gap-4 self-start rounded-xl">
             <!-- Header -->
@@ -353,8 +353,8 @@
 
         {{-- Main Product Area --}}
         <main class="flex-1 w-full min-w-0 px-4 md:px-0">
-            {{-- Search & Sort Header Panel --}}
-            <div class="flex flex-row items-center justify-between gap-2 bg-surface-container-lowest border border-outline-variant px-2 py-2 md:p-4 mb-4 md:mb-8 shadow-sm rounded-xl sticky top-[60px] md:top-[68px] z-40">
+            {{-- Search, Filter Button & Sort Header Panel --}}
+            <div class="flex flex-row items-center justify-between gap-2 bg-surface-container-lowest border border-outline-variant px-2.5 py-2 md:p-4 mb-4 md:mb-8 shadow-sm rounded-xl md:sticky md:top-[68px] z-30">
                 <div class="hidden md:flex items-center gap-4">
                     <h1 class="text-headline-md font-headline-md text-on-surface whitespace-nowrap">Shop Equipment</h1>
                     <div class="h-6 w-px bg-outline-variant hidden md:block"></div>
@@ -372,12 +372,25 @@
                     />
                 </div>
 
+                {{-- Mobile Filter Drawer Toggle Button --}}
+                <button
+                    type="button"
+                    @click="mobileFilterOpen = true"
+                    class="flex md:hidden items-center gap-1 bg-surface-container-low border border-outline-variant text-on-surface hover:ecc-text-primary py-1.5 px-2.5 rounded-lg text-xs font-semibold shrink-0 transition-colors"
+                >
+                    <span class="material-symbols-outlined text-sm ecc-text-primary">tune</span>
+                    <span>Filter</span>
+                    @if(!empty($activeCategoryId) || !empty($tags) || !empty($minPrice) || !empty($maxPrice))
+                        <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                    @endif
+                </button>
+
                 {{-- Sorting Selector --}}
                 <div class="flex items-center gap-1 md:gap-2 shrink-0">
                     <span class="text-label-sm text-secondary uppercase tracking-widest hidden sm:inline-block">Sort:</span>
                     <div class="relative">
                         <select
-                            class="appearance-none bg-surface-container-low border border-outline-variant text-on-surface py-1.5 md:py-2 pl-2 md:pl-3 pr-6 md:pr-8 focus:outline-none focus:border-primary text-[11px] md:text-label-sm font-label-sm cursor-pointer rounded-lg md:rounded-xl max-w-[115px] sm:max-w-none text-ellipsis overflow-hidden"
+                            class="appearance-none bg-surface-container-low border border-outline-variant text-on-surface py-1.5 md:py-2 pl-2 md:pl-3 pr-6 md:pr-8 focus:outline-none focus:border-primary text-[11px] md:text-label-sm font-label-sm cursor-pointer rounded-lg md:rounded-xl max-w-[100px] sm:max-w-none text-ellipsis overflow-hidden"
                             wire:model.live="sort"
                         >
                             <option value="newest">Newest</option>
@@ -612,7 +625,161 @@
                 </div>
             </div>
         @endif
+    <!-- Mobile Filter Offcanvas Drawer / Bottom Sheet -->
+    <div
+        x-show="mobileFilterOpen"
+        x-cloak
+        class="fixed inset-0 z-[2000] md:hidden flex flex-col justify-end"
+        role="dialog"
+        aria-modal="true"
+    >
+        <!-- Dark Backdrop Overlay -->
+        <div
+            x-show="mobileFilterOpen"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            @click="mobileFilterOpen = false"
+            class="fixed inset-0 bg-black/60 backdrop-blur-sm"
+        ></div>
+
+        <!-- Drawer Panel Container -->
+        <div
+            x-show="mobileFilterOpen"
+            x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="translate-y-full"
+            x-transition:enter-end="translate-y-0"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="translate-y-0"
+            x-transition:leave-end="translate-y-full"
+            class="relative w-full max-h-[85vh] bg-surface-container-lowest rounded-t-3xl shadow-2xl flex flex-col overflow-hidden z-10 border-t border-outline-variant text-on-background"
+        >
+            <!-- Top Drag Handle & Header -->
+            <div class="p-4 border-b border-outline-variant flex items-center justify-between bg-surface-container-low shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined ecc-text-primary text-xl">tune</span>
+                    <h3 class="text-headline-md font-headline-md text-on-surface">Filter Products</h3>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    @if(!empty($activeCategoryId) || !empty($tags) || !empty($minPrice) || !empty($maxPrice))
+                        <button
+                            type="button"
+                            wire:click="clearFilters"
+                            class="text-xs text-error font-bold hover:underline uppercase tracking-wider"
+                        >
+                            Reset All
+                        </button>
+                    @endif
+                    <button
+                        type="button"
+                        @click="mobileFilterOpen = false"
+                        class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant hover:bg-outline-variant transition-colors"
+                    >
+                        <span class="material-symbols-outlined text-lg">close</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scrollable Drawer Body -->
+            <div class="p-4 overflow-y-auto flex-grow flex flex-col gap-6">
+
+                <!-- 1. Categories Filter Section -->
+                <div>
+                    <div class="text-label-sm font-label-sm text-secondary tracking-widest uppercase mb-3">Categories</div>
+                    <div class="flex flex-wrap gap-2">
+                        <button
+                            type="button"
+                            wire:click="$set('activeCategoryId', null)"
+                            class="py-2 px-3.5 rounded-xl text-xs font-semibold border transition-all {{ empty($activeCategoryId) ? 'bg-primary text-on-primary border-primary shadow-sm' : 'bg-surface-container-low text-on-surface-variant border-outline-variant' }}"
+                        >
+                            All Products
+                        </button>
+                        @foreach($categories as $category)
+                            <button
+                                type="button"
+                                wire:click="$set('activeCategoryId', {{ $category->id }})"
+                                class="py-2 px-3.5 rounded-xl text-xs font-semibold border transition-all {{ (string)$activeCategoryId === (string)$category->id ? 'bg-primary text-on-primary border-primary shadow-sm' : 'bg-surface-container-low text-on-surface-variant border-outline-variant' }}"
+                            >
+                                {{ $category->name }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- 2. Price Range Filter Section -->
+                <div class="border-t border-outline-variant pt-5">
+                    <div class="text-label-sm font-label-sm text-secondary tracking-widest uppercase mb-3">Price Range</div>
+                    <div class="px-2">
+                        <div class="flex justify-between text-xs font-bold text-on-surface mb-2">
+                            <span>{{ $currencySymbol ?? '₹' }}{{ number_format($minPrice ?? $absoluteMinPrice) }}</span>
+                            <span>{{ $currencySymbol ?? '₹' }}{{ number_format($maxPrice ?? $absoluteMaxPrice) }}+</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input
+                                type="range"
+                                min="{{ $absoluteMinPrice }}"
+                                max="{{ $absoluteMaxPrice }}"
+                                step="10"
+                                wire:model.live.debounce.300ms="minPrice"
+                                class="w-full accent-primary cursor-pointer"
+                            />
+                            <input
+                                type="range"
+                                min="{{ $absoluteMinPrice }}"
+                                max="{{ $absoluteMaxPrice }}"
+                                step="10"
+                                wire:model.live.debounce.300ms="maxPrice"
+                                class="w-full accent-primary cursor-pointer"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Tags & Brands Filter Section -->
+                @foreach($tagGroups as $group)
+                    @if($group->tags->isNotEmpty())
+                        <div class="border-t border-outline-variant pt-5">
+                            <div class="text-label-sm font-label-sm text-secondary tracking-widest uppercase mb-3">{{ $group->name }}</div>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($group->tags as $tag)
+                                    @php
+                                        $isSelected = in_array($tag->id, $tags);
+                                    @endphp
+                                    <button
+                                        type="button"
+                                        wire:click="toggleTag('{{ $tag->id }}')"
+                                        class="py-2 px-3 rounded-xl text-xs font-semibold border transition-all {{ $isSelected ? 'bg-primary-container text-on-primary-container border-primary font-bold shadow-sm' : 'bg-surface-container-low text-on-surface-variant border-outline-variant' }}"
+                                    >
+                                        {{ $tag->name }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                @endforeach
+
+            </div>
+
+            <!-- Fixed Bottom Action Bar -->
+            <div class="p-4 border-t border-outline-variant bg-surface-container-lowest shrink-0">
+                <button
+                    type="button"
+                    @click="mobileFilterOpen = false"
+                    class="w-full py-3.5 bg-primary text-on-primary font-bold rounded-xl text-sm shadow-md hover:bg-primary-fixed-dim transition-all flex items-center justify-center gap-2"
+                >
+                    <span>Apply Filters</span>
+                    <span class="bg-white/20 px-2 py-0.5 rounded-full text-xs font-semibold">
+                        {{ $products->total() }} Items
+                    </span>
+                </button>
+            </div>
+        </div>
     </div>
+</div>
 </div>
 
 @push('scripts')
