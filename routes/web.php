@@ -72,12 +72,12 @@ Route::get('/archive/enquiry/delivery', function (\Illuminate\Http\Request $requ
         abort(404, 'Archive enquiry not found.');
     }
 
-    if ($enquiry->product_id) {
-        return redirect()->route('archive.products.show', $enquiry->product_id);
-    }
-
-    return redirect()->route('home');
+    return redirect()->signedRoute('archive.enquiry.delivery', ['enquiry' => $enquiry->id]);
 });
+
+Route::get('/archive/enquiry/{enquiry}/delivery', \App\Livewire\Archive\EnquiryDeliveryAddress::class)
+    ->name('archive.enquiry.delivery')
+    ->middleware('signed');
 
 Route::get('/archive/enquiry/{enquiry}/checkout', \App\Livewire\Archive\EnquiryCheckout::class)
     ->name('archive.enquiry.checkout')
