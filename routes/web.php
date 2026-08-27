@@ -50,10 +50,39 @@ Route::get('/privacy', \App\Livewire\Pages\PrivacyPolicyPage::class)->name('priv
 
 // Public Archive Enquiry Payment Routes
 Route::get('/archive/products/{id}', \App\Livewire\Archive\ArchiveProductShow::class)->name('archive.products.show');
+
+// Bridge route for WhatsApp payment link button (?id={enquiry_id})
+Route::get('/archive/enquiry/checkout', function (\Illuminate\Http\Request $request) {
+    $enquiryId = $request->query('id');
+    $enquiry = \App\Models\Archive\ArchiveProductEnquiry::find($enquiryId);
+    
+    if (!$enquiry) {
+        abort(404, 'Archive enquiry not found.');
+    }
+
+    return redirect()->signedRoute('archive.enquiry.checkout', ['enquiry' => $enquiry->id]);
+});
+
+// Bridge route for WhatsApp delivery details button (?id={enquiry_id})
+Route::get('/archive/enquiry/delivery', function (\Illuminate\Http\Request $request) {
+    $enquiryId = $request->query('id');
+    $enquiry = \App\Models\Archive\ArchiveProductEnquiry::find($enquiryId);
+    
+    if (!$enquiry) {
+        abort(404, 'Archive enquiry not found.');
+    }
+
+    if ($enquiry->product_id) {
+        return redirect()->route('archive.products.show', $enquiry->product_id);
+    }
+
+    return redirect()->route('home');
+});
+
 Route::get('/archive/enquiry/{enquiry}/checkout', \App\Livewire\Archive\EnquiryCheckout::class)
     ->name('archive.enquiry.checkout')
     ->middleware('signed');
-    
+
 Route::get('/archive/enquiry/{enquiry}/success', function (\App\Models\Archive\ArchiveProductEnquiry $enquiry) {
     return view('shop.payment.success', [
         'title' => 'Payment Successful',
