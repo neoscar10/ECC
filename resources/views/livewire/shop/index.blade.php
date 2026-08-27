@@ -354,18 +354,18 @@
         {{-- Main Product Area --}}
         <main class="flex-1 w-full min-w-0 px-4 md:px-0">
             {{-- Search & Sort Header Panel --}}
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4 bg-surface-container-lowest border border-outline-variant p-4 mb-8 shadow-sm rounded-xl sticky top-24 z-40">
-                <div class="flex items-center gap-4">
+            <div class="flex flex-row items-center justify-between gap-2 bg-surface-container-lowest border border-outline-variant px-2 py-2 md:p-4 mb-4 md:mb-8 shadow-sm rounded-xl sticky top-[60px] md:top-24 z-40">
+                <div class="hidden md:flex items-center gap-4">
                     <h1 class="text-headline-md font-headline-md text-on-surface whitespace-nowrap">Shop Equipment</h1>
                     <div class="h-6 w-px bg-outline-variant hidden md:block"></div>
                     <p class="text-body-md text-secondary hidden lg:block">Latest additions</p>
                 </div>
 
                 {{-- Search Bar --}}
-                <div class="flex-1 max-w-md relative w-full">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-sm">search</span>
+                <div class="flex-1 min-w-0 relative">
+                    <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-secondary text-xs md:text-sm">search</span>
                     <input
-                        class="w-full bg-surface-container-low border border-outline-variant text-on-surface pl-10 pr-4 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-body-md rounded-xl"
+                        class="w-full bg-surface-container-low border border-outline-variant text-on-surface pl-8 md:pl-10 pr-2 md:pr-4 py-1.5 md:py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-xs md:text-body-md rounded-lg md:rounded-xl"
                         placeholder="Search gear..."
                         type="text"
                         wire:model.live.debounce.400ms="search"
@@ -373,20 +373,20 @@
                 </div>
 
                 {{-- Sorting Selector --}}
-                <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-                    <span class="text-label-sm text-secondary uppercase tracking-widest">Sort:</span>
+                <div class="flex items-center gap-1 md:gap-2 shrink-0">
+                    <span class="text-label-sm text-secondary uppercase tracking-widest hidden sm:inline-block">Sort:</span>
                     <div class="relative">
                         <select
-                            class="appearance-none bg-surface-container-low border border-outline-variant text-on-surface py-2 pl-3 pr-8 focus:outline-none focus:border-primary text-label-sm font-label-sm cursor-pointer rounded-xl"
+                            class="appearance-none bg-surface-container-low border border-outline-variant text-on-surface py-1.5 md:py-2 pl-2 md:pl-3 pr-6 md:pr-8 focus:outline-none focus:border-primary text-[11px] md:text-label-sm font-label-sm cursor-pointer rounded-lg md:rounded-xl max-w-[115px] sm:max-w-none text-ellipsis overflow-hidden"
                             wire:model.live="sort"
                         >
                             <option value="newest">Newest</option>
-                            <option value="price_asc">Price: Low to High</option>
-                            <option value="price_desc">Price: High to Low</option>
-                            <option value="title_asc">Name: A to Z</option>
-                            <option value="title_desc">Name: Z to A</option>
+                            <option value="price_asc">Price: Low-High</option>
+                            <option value="price_desc">Price: High-Low</option>
+                            <option value="title_asc">Name: A-Z</option>
+                            <option value="title_desc">Name: Z-A</option>
                         </select>
-                        <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-secondary pointer-events-none text-sm">expand_more</span>
+                        <span class="material-symbols-outlined absolute right-1.5 md:right-2 top-1/2 -translate-y-1/2 text-secondary pointer-events-none text-xs md:text-sm">expand_more</span>
                     </div>
                 </div>
             </div>
