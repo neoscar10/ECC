@@ -3,7 +3,7 @@
 namespace App\Livewire\Archive;
 
 use App\Models\Archive\ArchiveProductEnquiry;
-use App\Models\Shop\DeliveryCountry;
+use App\Models\DeliveryCountry;
 use Livewire\Component;
 
 class EnquiryDeliveryAddress extends Component
