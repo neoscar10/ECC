@@ -76,7 +76,8 @@ class AuctionBiddingService
                 'placed_at' => now(),
             ]);
 
-            // 5. Update Lot
+            // 5. Capture Previous Winner & Update Lot
+            $previousWinnerUserId = $lot->winner_user_id;
             $lot->current_highest_bid = $amount;
             $lot->winner_user_id = $user->id; // Tentative winner
 
@@ -127,46 +128,62 @@ class AuctionBiddingService
                 }
             });
 
-            // 9. Notifications (FCM)
+            // 9. Notifications (FCM & WhatsApp)
             try {
-                // A) Public Topic: Bid Placed
-                // Logic: Exclude 'actor_user_id' in client
                 $formatter = new \App\Services\Notifications\AuctionNotificationFormatter();
+
+                // A) Outbid Notification to Previous Highest Bidder (FCM + WhatsApp)
+                if ($previousWinnerUserId && $previousWinnerUserId !== $user->id) {
+                    [$outbidTitle, $outbidBody] = $formatter->outbid($lot, $amount);
+                    $outbidExtra = [
+                        'bid_id' => $bid->id,
+                        'bid_amount' => $bid->amount,
+                        'currency' => $lot->currency,
+                        'actor_user_id' => $user->id,
+                    ];
+                    $outbidEventId = "outbid:{$lot->id}:{$bid->id}:{$previousWinnerUserId}";
+                    $outbidPayload = $formatter->buildPayload($lot, 'outbid', $outbidExtra, $outbidEventId);
+
+                    dispatch(new \App\Jobs\Notifications\SendFcmToUserJob(
+                        $previousWinnerUserId,
+                        $outbidTitle,
+                        $outbidBody,
+                        $outbidPayload
+                    ));
+
+                    \Illuminate\Support\Facades\Log::info("AuctionBiddingService: Dispatched Outbid notification", [
+                        'lot_id' => $lot->id,
+                        'outbid_user_id' => $previousWinnerUserId,
+                        'new_highest_bidder_id' => $user->id,
+                        'new_amount' => $amount
+                    ]);
+                }
+
+                // B) Public Topic / Fan-out: Bid Placed to all subscribers excluding current bidder
                 [$title, $body] = $formatter->bidPlaced($lot, $bid, $user, $isAuto);
                 
-                // Do not expose is_autobid to public
                 $extraData = [
                     'bid_id' => $bid->id,
                     'bid_amount' => $bid->amount,
                     'currency' => $lot->currency,
                     'actor_user_id' => $user->id,
-                    // 'new_ends_at' => $lot->ends_at is handled by 'ends_at' in builder if we want standard field.
-                    // But current catalog has 'new_ends_at'. Let's keep 'new_ends_at' for backward compat 
-                    // and 'ends_at' will be added by builder automatically.
                     'new_ends_at' => $lot->ends_at ? $lot->ends_at->toIso8601String() : null,
                 ];
 
                 $eventId = "bid_placed:{$bid->id}";
                 $payload = $formatter->buildPayload($lot, 'bid_placed', $extraData, $eventId);
 
-                // CONDITIONAL DISPATCH REFACTOR:
-                // ALWAYS Fan-out 'bid_placed' to enabled subscribers EXCLUDING the actor (bidder).
-                // This applies to both Manual and Auto bids so the bidder doesn't get a push for their own action.
-                
                 $subscribers = \App\Models\Auctions\AuctionNotificationSubscription::where('auction_lot_id', $lot->id)
                     ->where('is_enabled', true)
                     ->where('user_id', '!=', $user->id) // Exclude current bidder
                     ->pluck('user_id');
 
-                \Illuminate\Support\Facades\Log::info("AuctionBiddingService: Fan-out bid_placed", [
-                    'lot_id' => $lot->id,
-                    'bid_id' => $bid->id,
-                    'is_auto' => $isAuto,
-                    'excluded_user_id' => $user->id,
-                    'recipients_count' => $subscribers->count()
-                ]);
-
                 foreach ($subscribers as $subUserId) {
+                    // Avoid duplicating outbid user if already notified
+                    if ($previousWinnerUserId && $subUserId == $previousWinnerUserId) {
+                        continue;
+                    }
+
                     dispatch(new \App\Jobs\Notifications\SendFcmToUserJob(
                         $subUserId,
                         $title,
@@ -175,10 +192,7 @@ class AuctionBiddingService
                     ));
                 }
 
-                // REMOVED: Topic broadcast for manual bids.
-                // We now strictly use fan-out for all 'bid_placed' events to enforce exclusion.
-
-                // B) Private Auto-Bid Notification (if auto)
+                // C) Private Auto-Bid Notification (if auto)
                 if ($isAuto) {
                     [$autoTitle, $autoBody] = $formatter->autoBidExecuted($lot, $bid, $user);
                     

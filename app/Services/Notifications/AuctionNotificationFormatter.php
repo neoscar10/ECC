@@ -25,6 +25,15 @@ class AuctionNotificationFormatter
         ];
     }
 
+    public function outbid(AuctionLot $lot, float $newAmount): array
+    {
+        $amt = number_format($newAmount, 2);
+        return [
+            "You've Been Outbid!",
+            "Someone placed a higher bid of {$lot->currency} {$amt} on '{$lot->title}' (Lot #{$lot->lot_no}). Bid again now!"
+        ];
+    }
+
     public function autoBidExecuted(AuctionLot $lot, AuctionBid $bid, User $owner): array
     {
         $amt = number_format($bid->amount, 2);

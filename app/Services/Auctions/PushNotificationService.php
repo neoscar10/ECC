@@ -14,21 +14,12 @@ class PushNotificationService
      */
     public function sendToUser(User $user, string $title, string $body, array $data = [])
     {
-        $tokens = $user->deviceTokens()->pluck('token')->toArray();
-        if (empty($tokens)) {
-            return;
-        }
-
-        // Ideally use kreait/laravel-firebase, but here is a raw implementation or placeholder
-        // dispatch job or call API directly.
-        
-        // For this implementation, let's assume we dispatch a job to handle the actual API call
-        // to avoid blocking the request.
-        
-        // \App\Jobs\SendFcmMessage::dispatch($tokens, $title, $body, $data);
-        
-        // Simulating logic for the service file:
-        Log::info("Sending Push to User {$user->id}: {$title} - {$body}");
+        dispatch(new \App\Jobs\Notifications\SendFcmToUserJob(
+            $user->id,
+            $title,
+            $body,
+            $data
+        ));
     }
     
     public function notifyOutbid(User $user, $lotTitle, $lotId)
