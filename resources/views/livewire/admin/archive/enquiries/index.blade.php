@@ -124,6 +124,20 @@
                                             @else
                                                 <span class="badge bg-light text-dark text-uppercase">{{ $enquiry->status }}</span>
                                             @endif
+
+                                            @if($enquiry->delivery_address_submitted_at)
+                                                <div class="mt-1">
+                                                    <span class="badge bg-success-subtle text-success" title="Submitted on {{ \Carbon\Carbon::parse($enquiry->delivery_address_submitted_at)->format('d M, Y h:i A') }}">
+                                                        <i class="ri-map-pin-user-line me-1"></i> Address Received
+                                                    </span>
+                                                </div>
+                                            @elseif($enquiry->delivery_details_requested_at)
+                                                <div class="mt-1">
+                                                    <span class="badge bg-warning-subtle text-warning">
+                                                        <i class="ri-time-line me-1"></i> Address Pending
+                                                    </span>
+                                                </div>
+                                            @endif
                                         </td>
                                         <td>
                                             <div class="dropdown d-inline-block">
@@ -206,6 +220,25 @@
                                         Guest / Deleted
                                     @endif
                                 </p>
+
+                                @if($selectedEnquiry->delivery_address_submitted_at)
+                                    <div class="mt-4 p-3 bg-light border border-success-subtle rounded">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="text-success text-uppercase fw-semibold mb-0 fs-12">
+                                                <i class="ri-map-pin-user-line me-1"></i> Shipping Address
+                                            </h6>
+                                            <span class="badge bg-success-subtle text-success fs-10">
+                                                {{ \Carbon\Carbon::parse($selectedEnquiry->delivery_address_submitted_at)->format('d M, Y') }}
+                                            </span>
+                                        </div>
+                                        <div class="fs-13 text-dark">
+                                            <p class="mb-1"><strong>Recipient:</strong> {{ $selectedEnquiry->delivery_name }}</p>
+                                            <p class="mb-1"><strong>Phone:</strong> {{ $selectedEnquiry->delivery_phone }}</p>
+                                            <p class="mb-1"><strong>Address:</strong> {{ $selectedEnquiry->delivery_line1 }} {{ $selectedEnquiry->delivery_line2 ? '('.$selectedEnquiry->delivery_line2.')' : '' }}</p>
+                                            <p class="mb-0"><strong>City/Country:</strong> {{ $selectedEnquiry->delivery_city }}, {{ $selectedEnquiry->delivery_state }} - {{ $selectedEnquiry->delivery_postal_code }}, {{ $selectedEnquiry->delivery_country }}</p>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                             <div class="col-md-7" style="max-height: 70vh; overflow-y: auto;">
                                 @foreach($selectedEnquiries as $enq)
@@ -257,9 +290,39 @@
                                         
                                          @if($enq->product && !$enq->archive_order_id)
                                         <div class="mt-4">
-                                            <h6 class="text-muted text-uppercase fw-semibold mb-3">Payment Flow</h6>
+                                            <h6 class="text-muted text-uppercase fw-semibold mb-3">Payment &amp; Delivery Flow</h6>
                                             
-                                            @if(!$enq->delivery_details_requested_at)
+                                            @if($enq->delivery_address_submitted_at)
+                                                <div class="p-3 bg-light border border-success-subtle rounded mb-3">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <h6 class="text-success text-uppercase fw-semibold mb-0 fs-12">
+                                                            <i class="ri-checkbox-circle-fill align-middle me-1"></i> Customer Submitted Delivery Address
+                                                        </h6>
+                                                        <span class="badge bg-success-subtle text-success fs-11">
+                                                            {{ \Carbon\Carbon::parse($enq->delivery_address_submitted_at)->format('d M, Y h:i A') }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="fs-13 text-dark">
+                                                        <p class="mb-1"><span class="fw-medium text-muted">Recipient Name:</span> {{ $enq->delivery_name }}</p>
+                                                        <p class="mb-1"><span class="fw-medium text-muted">Phone:</span> {{ $enq->delivery_phone }}</p>
+                                                        <p class="mb-1"><span class="fw-medium text-muted">Address:</span> {{ $enq->delivery_line1 }} @if($enq->delivery_line2) ({{ $enq->delivery_line2 }}) @endif</p>
+                                                        <p class="mb-0"><span class="fw-medium text-muted">Location:</span> {{ $enq->delivery_city }}, {{ $enq->delivery_state }} - {{ $enq->delivery_postal_code }}, {{ $enq->delivery_country }}</p>
+                                                    </div>
+                                                </div>
+
+                                                @if($enq->payment_link_sent_at)
+                                                    <div class="alert alert-success d-flex justify-content-between align-items-center mb-0">
+                                                        <div class="fs-13">
+                                                            <i class="ri-checkbox-circle-line me-1"></i> Payment link sent on {{ \Carbon\Carbon::parse($enq->payment_link_sent_at)->format('d M, Y h:i A') }} ({{ strtoupper($enq->payment_gateway) }}, ₹{{ number_format($enq->payment_amount, 2) }})
+                                                        </div>
+                                                        <button wire:click="openPaymentModal({{ $enq->id }})" class="btn btn-sm btn-outline-success ms-2">Update / Resend</button>
+                                                    </div>
+                                                @else
+                                                    <button wire:click="openPaymentModal({{ $enq->id }})" class="btn btn-primary w-100">
+                                                        <i class="ri-links-line align-bottom me-1"></i> Generate &amp; Send Payment Link
+                                                    </button>
+                                                @endif
+                                            @elseif(!$enq->delivery_details_requested_at)
                                                 {{-- Step 1: Request Delivery Details --}}
                                                 <div class="alert alert-info py-2 px-3 mb-2 fs-13">
                                                     <i class="ri-information-line align-bottom me-1"></i> Delivery details must be requested first.
@@ -274,33 +337,9 @@
                                                      </span>
                                                  </button>
                                             @else
-                                                {{-- Step 2: Payment Link --}}
-                                                <div class="alert alert-info py-2 px-3 mb-3 fs-13">
-                                                    <i class="ri-check-line align-bottom me-1 text-success"></i> Delivery details requested on {{ \Carbon\Carbon::parse($enq->delivery_details_requested_at)->format('d M, Y h:i A') }}
+                                                <div class="alert alert-warning py-2 px-3 mb-3 fs-13">
+                                                    <i class="ri-time-line align-bottom me-1"></i> Delivery details requested on {{ \Carbon\Carbon::parse($enq->delivery_details_requested_at)->format('d M, Y h:i A') }}. Customer has not submitted address yet.
                                                 </div>
-
-                                                @if($enq->delivery_address_submitted_at)
-                                                    <div class="p-3 bg-light border border-success-subtle rounded mb-3">
-                                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                                            <h6 class="text-success text-uppercase fw-semibold mb-0 fs-12">
-                                                                <i class="ri-checkbox-circle-fill align-middle me-1"></i> Customer Submitted Delivery Address
-                                                            </h6>
-                                                            <span class="badge bg-success-subtle text-success fs-11">
-                                                                {{ \Carbon\Carbon::parse($enq->delivery_address_submitted_at)->format('d M, Y h:i A') }}
-                                                            </span>
-                                                        </div>
-                                                        <div class="fs-13 text-dark">
-                                                            <p class="mb-1"><span class="fw-medium text-muted">Recipient Name:</span> {{ $enq->delivery_name }}</p>
-                                                            <p class="mb-1"><span class="fw-medium text-muted">Phone:</span> {{ $enq->delivery_phone }}</p>
-                                                            <p class="mb-1"><span class="fw-medium text-muted">Address:</span> {{ $enq->delivery_line1 }} @if($enq->delivery_line2) ({{ $enq->delivery_line2 }}) @endif</p>
-                                                            <p class="mb-0"><span class="fw-medium text-muted">Location:</span> {{ $enq->delivery_city }}, {{ $enq->delivery_state }} - {{ $enq->delivery_postal_code }}, {{ $enq->delivery_country }}</p>
-                                                        </div>
-                                                    </div>
-                                                @else
-                                                    <div class="alert alert-warning py-2 px-3 fs-13 mb-3">
-                                                        <i class="ri-time-line align-bottom me-1"></i> Customer has not submitted address yet.
-                                                    </div>
-                                                @endif
                                                 
                                                 @if($enq->payment_link_sent_at)
                                                     <div class="alert alert-success d-flex justify-content-between align-items-center mb-0">

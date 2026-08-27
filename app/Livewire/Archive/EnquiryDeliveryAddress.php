@@ -59,8 +59,10 @@ class EnquiryDeliveryAddress extends Component
 
         $this->enquiry->update(array_merge($validated, [
             'delivery_address_submitted_at' => now(),
+            'delivery_details_requested_at' => $this->enquiry->delivery_details_requested_at ?? now(),
         ]));
 
+        $this->enquiry = $this->enquiry->fresh(['product.images', 'user']);
         $this->submittedSuccessfully = true;
         session()->flash('success', 'Delivery address submitted successfully!');
     }
