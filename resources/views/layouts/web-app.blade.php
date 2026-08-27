@@ -811,10 +811,13 @@
         }
 
         .luxe-mobile-nav a:hover,
-        .luxe-mobile-nav a.is-active {
+        .luxe-mobile-nav a.is-active,
+        .luxe-mobile-nav a.is-active *,
+        .luxe-mobile-nav a.is-active span {
             color: #111111 !important;
             background: var(--ecc-primary, #c5a365) !important;
             border-color: var(--ecc-primary, #c5a365) !important;
+            font-weight: 800 !important;
         }
 
         /* Override Tailwind .collapse conflicts on Bootstrap Mobile Nav */
@@ -1003,7 +1006,7 @@
                                     $disabled = $isAwaitingApproval && $it['key'] !== 'explore';
                                 @endphp
                                 <a href="{{ $disabled ? 'javascript:void(0)' : $it['href'] }}"
-                                   class="{{ $isOn($it['key']) ? 'is-active text-warning' : '' }} d-flex align-items-center gap-2"
+                                   class="{{ $isOn($it['key']) ? 'is-active' : '' }} d-flex align-items-center gap-2"
                                    {!! $it['extras'] ?? '' !!}
                                    @if($disabled) style="opacity: 0.45; pointer-events: none; cursor: default;" @endif>
                                     <span class="material-symbols-outlined fs-5">{{ $it['icon'] }}</span>

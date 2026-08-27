@@ -177,7 +177,7 @@
 
     <div class="flex flex-col md:flex-row w-full max-w-[1440px] mx-auto py-2 md:py-8 px-0 md:px-6 gap-4 md:gap-6 relative">
         {{-- SideNavBar / Filters Sidebar --}}
-        <aside class="bg-surface border-r border-outline-variant w-64 hidden md:flex sticky top-[68px] flex-col p-4 gap-4 self-start rounded-xl">
+        <aside class="bg-surface border-r border-outline-variant w-64 hidden md:flex sticky top-[68px] max-h-[calc(100vh-80px)] overflow-y-auto flex-col p-4 gap-4 self-start rounded-xl custom-scrollbar">
             <!-- Header -->
             <div class="mb-6">
                 <div class="text-label-sm font-label-sm text-secondary tracking-widest uppercase mb-1">CATEGORIES</div>
@@ -739,28 +739,60 @@
                 <!-- 2. Price Range Filter Section -->
                 <div class="border-t border-outline-variant pt-5">
                     <div class="text-label-sm font-label-sm text-secondary tracking-widest uppercase mb-3">Price Range</div>
-                    <div class="px-2">
-                        <div class="flex justify-between text-xs font-bold text-on-surface mb-2">
-                            <span>{{ $currencySymbol ?? '₹' }}{{ number_format($minPrice ?? $absoluteMinPrice) }}</span>
-                            <span>{{ $currencySymbol ?? '₹' }}{{ number_format($maxPrice ?? $absoluteMaxPrice) }}+</span>
+                    <div class="shop-range-wrap px-2">
+                        @php
+                            $mSelectedMin = (int) ($minPrice ?? $absoluteMinPrice);
+                            $mSelectedMax = (int) ($maxPrice ?? $absoluteMaxPrice);
+                            $mAbsoluteMin = (int) ($absoluteMinPrice ?? 0);
+                            $mAbsoluteMax = (int) ($absoluteMaxPrice ?? 100);
+                            $mRangeSpan = max(1, $mAbsoluteMax - $mAbsoluteMin);
+
+                            $mLeftPercent = (($mSelectedMin - $mAbsoluteMin) / $mRangeSpan) * 100;
+                            $mRightPercent = (($mSelectedMax - $mAbsoluteMin) / $mRangeSpan) * 100;
+                        @endphp
+
+                        <div class="h-1.5 bg-surface-variant rounded-full relative mt-4 mb-3 cursor-pointer" onclick="handleTrackClick(event, this.closest('.shop-range-wrap'))">
+                            <div
+                                class="absolute h-full bg-primary rounded-full"
+                                style="left: {{ max(0, min(100, $mLeftPercent)) }}%; width: {{ max(0, min(100, $mRightPercent - $mLeftPercent)) }}%;"
+                            ></div>
+
+                            <span
+                                class="absolute -top-2 w-5 h-5 bg-surface border-2 border-primary rounded-full shadow-sm -translate-x-1/2 pointer-events-none z-10"
+                                style="left: {{ max(0, min(100, $mLeftPercent)) }}%;"
+                            ></span>
+
+                            <span
+                                class="absolute -top-2 w-5 h-5 bg-surface border-2 border-primary rounded-full shadow-sm -translate-x-1/2 pointer-events-none z-10"
+                                style="left: {{ max(0, min(100, $mRightPercent)) }}%;"
+                            ></span>
                         </div>
-                        <div class="flex items-center gap-3">
+
+                        <div class="relative h-5 -mt-4">
                             <input
                                 type="range"
                                 min="{{ $absoluteMinPrice }}"
                                 max="{{ $absoluteMaxPrice }}"
-                                step="10"
-                                wire:model.live.debounce.300ms="minPrice"
-                                class="w-full accent-primary cursor-pointer"
-                            />
+                                step="1"
+                                wire:model="minPrice"
+                                class="shop-range-native min-range"
+                                oninput="updateRangeUI(this)"
+                            >
+
                             <input
                                 type="range"
                                 min="{{ $absoluteMinPrice }}"
                                 max="{{ $absoluteMaxPrice }}"
-                                step="10"
-                                wire:model.live.debounce.300ms="maxPrice"
-                                class="w-full accent-primary cursor-pointer"
-                            />
+                                step="1"
+                                wire:model="maxPrice"
+                                class="shop-range-native max-range"
+                                oninput="updateRangeUI(this)"
+                            >
+                        </div>
+
+                        <div class="flex justify-between text-xs font-bold text-on-surface mt-2">
+                            <span class="range-min-label">{{ $currencySymbol ?? '₹' }}{{ number_format($mSelectedMin) }}</span>
+                            <span class="range-max-label">{{ $currencySymbol ?? '₹' }}{{ number_format($mSelectedMax) }}{{ ($mAbsoluteMax === $mSelectedMax) ? '+' : '' }}</span>
                         </div>
                     </div>
                 </div>
