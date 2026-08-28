@@ -33,7 +33,6 @@ class SendFcmToUserJob implements ShouldQueue
         $this->body = $body;
         $this->data = $data;
         $this->options = $options;
-        $this->onQueue('notifications');
     }
 
     /**

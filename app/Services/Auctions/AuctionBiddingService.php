@@ -144,7 +144,7 @@ class AuctionBiddingService
                     $outbidEventId = "outbid:{$lot->id}:{$bid->id}:{$previousWinnerUserId}";
                     $outbidPayload = $formatter->buildPayload($lot, 'outbid', $outbidExtra, $outbidEventId);
 
-                    dispatch(new \App\Jobs\Notifications\SendFcmToUserJob(
+                    dispatch_sync(new \App\Jobs\Notifications\SendFcmToUserJob(
                         $previousWinnerUserId,
                         $outbidTitle,
                         $outbidBody,
