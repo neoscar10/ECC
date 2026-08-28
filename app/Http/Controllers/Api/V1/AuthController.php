@@ -30,10 +30,11 @@ class AuthController extends Controller
      */
     public function register(Request $request): JsonResponse
     {
+        $normalizedPhone = null;
         if ($request->has('phone') && !is_null($request->input('phone'))) {
             try {
-                $normalized = app(\App\Services\Otp\PhoneNormalizer::class)->normalize($request->input('phone'));
-                $request->merge(['phone' => $normalized]);
+                $normalizedPhone = app(\App\Services\Otp\PhoneNormalizer::class)->normalize($request->input('phone'));
+                $request->merge(['phone' => $normalizedPhone]);
             } catch (\Exception $e) {
                 return $this->error('Validation Error', 422, [
                     'phone' => [$e->getMessage() ?: 'The phone number format is invalid.']
@@ -41,6 +42,106 @@ class AuthController extends Controller
             }
         }
 
+        $email = $request->input('email');
+
+        // 1. Check for existing user by Email or Phone
+        $existingUser = User::query()
+            ->when($email, function ($query, $email) {
+                return $query->where('email', $email);
+            })
+            ->when($normalizedPhone, function ($query, $phone) {
+                return $query->orWhere('phone', $phone);
+            })
+            ->first();
+
+        // CASE A: User exists AND is already verified (phone_verified_at is not null)
+        if ($existingUser && !is_null($existingUser->phone_verified_at)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An account with this email or phone number is already registered and verified. Please log in.',
+                'code' => 'ACCOUNT_VERIFIED_PLEASE_LOGIN',
+                'errors' => [
+                    'email' => ['An account with this email or phone number is already registered and verified. Please log in.'],
+                    'phone' => ['An account with this email or phone number is already registered and verified. Please log in.'],
+                ],
+                'data' => [
+                    'should_login' => true,
+                    'email' => $existingUser->email,
+                    'phone' => $existingUser->phone,
+                ]
+            ], 422);
+        }
+
+        // CASE B: User exists BUT is UNVERIFIED (phone_verified_at is null) -> Resume Registration (Option B)
+        if ($existingUser && is_null($existingUser->phone_verified_at)) {
+            $rules = AuthRules::register();
+            $rules['email'] = 'required|email|unique:users,email,' . $existingUser->id;
+            $rules['phone'] = 'required|unique:users,phone,' . $existingUser->id;
+
+            $validator = Validator::make($request->all(), $rules, [
+                'email.unique' => 'This email is already registered to another account.',
+                'phone.unique' => 'This phone number is already registered to another account.',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->error('Validation Error', 422, $validator->errors());
+            }
+
+            try {
+                // Update user details with latest registration inputs
+                $updateData = [
+                    'name' => $request->input('name', $existingUser->name),
+                    'email' => $request->input('email', $existingUser->email),
+                    'phone' => $normalizedPhone ?? $existingUser->phone,
+                ];
+
+                if ($request->filled('password')) {
+                    $updateData['password'] = Hash::make($request->input('password'));
+                }
+
+                $existingUser->update($updateData);
+
+                // Ensure MembershipApplication draft exists
+                if (!$this->authService->getPendingApplication($existingUser)) {
+                    MembershipApplication::create([
+                        'user_id' => $existingUser->id,
+                        'status' => 'draft',
+                        'current_step' => 'personal_details'
+                    ]);
+                }
+
+                // Send a fresh OTP
+                $otpResult = app(\App\Services\Otp\OtpService::class)->requestPhoneOtp($existingUser, $existingUser->phone);
+
+                // Generate JWT token
+                $token = auth('api')->login($existingUser);
+
+                $responseData = [
+                    'is_resumed_registration' => true,
+                    'verified' => false,
+                    'access_token' => $token,
+                    'token_type' => 'bearer',
+                    'expires_in' => JWTAuth::factory()->getTTL() * 60,
+                    'user' => $existingUser,
+                    'application' => $this->authService->getPendingApplication($existingUser),
+                    'active_subscriptions' => $this->getActiveSubscriptions($existingUser),
+                    
+                    'ttl_minutes' => $otpResult['ttl_minutes'] ?? 5,
+                    'otp_method' => $otpResult['otp_method'] ?? config('services.whatsapp.otp_method', 'template'),
+                    'whatsapp_number' => $otpResult['whatsapp_number'] ?? config('services.whatsapp.phone_number', ''),
+                ];
+
+                if (isset($otpResult['dev_otp'])) {
+                    $responseData['dev_otp'] = $otpResult['dev_otp'];
+                }
+
+                return $this->success($responseData, 'Registration resumed. A new verification OTP has been sent via WhatsApp.');
+            } catch (\Exception $e) {
+                return $this->error('Failed to resume registration: ' . $e->getMessage(), 500);
+            }
+        }
+
+        // CASE C: New User -> Standard Registration
         $validator = Validator::make($request->all(), AuthRules::register(), [
             'email.unique' => 'This email is already registered.',
             'phone.unique' => 'This phone number is already registered.',
@@ -51,17 +152,13 @@ class AuthController extends Controller
         }
 
         try {
-            // 1. Create User and MembershipApplication instantly
             $user = $this->authService->register($request->all());
-
-            // 2. Request OTP using the real user
             $otpResult = app(\App\Services\Otp\OtpService::class)->requestPhoneOtp($user, $user->phone);
-
-            // 3. Generate fully-fledged JWT for the user
             $token = auth('api')->login($user);
 
-            // 4. Return standard response exactly as expected by mobile
             $responseData = [
+                'is_resumed_registration' => false,
+                'verified' => false,
                 'access_token' => $token,
                 'token_type' => 'bearer',
                 'expires_in' => JWTAuth::factory()->getTTL() * 60,
@@ -69,7 +166,6 @@ class AuthController extends Controller
                 'application' => $this->authService->getPendingApplication($user),
                 'active_subscriptions' => $this->getActiveSubscriptions($user),
                 
-                // Extra OTP flow data
                 'ttl_minutes' => $otpResult['ttl_minutes'] ?? 5,
                 'otp_method' => $otpResult['otp_method'] ?? config('services.whatsapp.otp_method', 'template'),
                 'whatsapp_number' => $otpResult['whatsapp_number'] ?? config('services.whatsapp.phone_number', ''),
@@ -80,19 +176,6 @@ class AuthController extends Controller
             }
 
             return $this->success($responseData, 'Registration successful. Please verify OTP.');
-
-        } catch (\Illuminate\Database\QueryException $e) {
-            if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'users_phone_unique')) {
-                return $this->error('Validation Error', 422, [
-                    'phone' => ['This phone number is already registered.']
-                ]);
-            }
-            if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'users_email_unique')) {
-                return $this->error('Validation Error', 422, [
-                    'email' => ['This email is already registered.']
-                ]);
-            }
-            return $this->error('Registration failed: A database error occurred.', 500);
         } catch (\Exception $e) {
             return $this->error('Registration failed: ' . $e->getMessage(), 500);
         }

@@ -118,3 +118,124 @@ Address forms during checkout are dynamically built based on the selected countr
 3. Validate required inputs locally on the client using the `is_required` attribute, then post/put:
    - `POST /api/v1/shop/addresses`
    - `PUT /api/v1/shop/addresses/{id}`
+
+---
+
+## 4. User Registration, Recovery (Option B) & Login Prompt Flow
+
+This section details how the mobile app should handle user registration, seamless recovery for unverified accounts, and automatic login prompts for already-verified users.
+
+### API Endpoint
+`POST /api/v1/register`
+
+### Request Payload
+```json
+{
+  "name": "John Doe",
+  "email": "johndoe@example.com",
+  "phone": "+919876543210",
+  "password": "Password123!",
+  "password_confirmation": "Password123!"
+}
+```
+
+---
+
+### Scenario A: Unverified Registration Recovery (Option B)
+If a user previously started registration but closed the app before completing phone/WhatsApp OTP verification (`phone_verified_at` is `null`), re-submitting the registration form **will NOT return a duplicate email/phone error**.
+
+Instead, the backend updates their account details, generates a fresh OTP, and returns an HTTP 200 success response containing `'is_resumed_registration': true`.
+
+#### API Response (HTTP 200 OK)
+```json
+{
+  "success": true,
+  "message": "Registration resumed. A new verification OTP has been sent via WhatsApp.",
+  "data": {
+    "is_resumed_registration": true,
+    "verified": false,
+    "access_token": "eyJhbGciOiJIUzI1Ni...",
+    "token_type": "bearer",
+    "expires_in": 3600,
+    "user": {
+      "id": 42,
+      "name": "John Doe",
+      "email": "johndoe@example.com",
+      "phone": "+919876543210",
+      "phone_verified_at": null
+    },
+    "ttl_minutes": 5,
+    "otp_method": "template",
+    "whatsapp_number": "919876543210"
+  }
+}
+```
+
+#### Mobile Integration Logic for Scenario A:
+1. Save the `access_token` into secure storage.
+2. Check if `verified == false` or `user.phone_verified_at == null`.
+3. Transition immediately to the **OTP Verification Screen** and render the countdown timer (`ttl_minutes`).
+4. Prompt the user: *"We found an incomplete registration for this account. A new OTP has been sent to your WhatsApp number."*
+
+---
+
+### Scenario B: Verified Account Registration Attempt (Prompt User to Login)
+If a user who is **already registered and verified** (`phone_verified_at` is NOT `null`) tries to submit the registration form using their existing email or phone number, the backend returns an HTTP 422 Unprocessable Entity with a structured `ACCOUNT_VERIFIED_PLEASE_LOGIN` code.
+
+#### API Response (HTTP 422 Unprocessable Entity)
+```json
+{
+  "success": false,
+  "message": "An account with this email or phone number is already registered and verified. Please log in.",
+  "code": "ACCOUNT_VERIFIED_PLEASE_LOGIN",
+  "errors": {
+    "email": ["An account with this email or phone number is already registered and verified. Please log in."],
+    "phone": ["An account with this email or phone number is already registered and verified. Please log in."]
+  },
+  "data": {
+    "should_login": true,
+    "email": "johndoe@example.com",
+    "phone": "+919876543210"
+  }
+}
+```
+
+#### Mobile Integration Logic for Scenario B:
+1. Inspect the HTTP 422 response body for `code == "ACCOUNT_VERIFIED_PLEASE_LOGIN"` OR `data.should_login == true`.
+2. Do NOT display a raw field validation error on the form.
+3. Instead, display a modal dialog or alert prompt:
+   > **Account Already Verified**  
+   > An account with **johndoe@example.com** is already registered and verified. Please log in to continue.  
+   > `[ Log In Now ]` `[ Cancel ]`
+4. Clicking **[ Log In Now ]** pre-fills the email/phone field on the **Login Screen** and focuses the Password input field.
+
+---
+
+### Scenario C: Fresh New User Registration
+When a new user registers with unused credentials:
+
+#### API Response (HTTP 200 OK / 201 Created)
+```json
+{
+  "success": true,
+  "message": "Registration successful. Please verify OTP.",
+  "data": {
+    "is_resumed_registration": false,
+    "verified": false,
+    "access_token": "eyJhbGciOiJIUzI1Ni...",
+    "user": {
+      "id": 43,
+      "name": "Jane Smith",
+      "email": "janesmith@example.com",
+      "phone": "+919876543211",
+      "phone_verified_at": null
+    },
+    "ttl_minutes": 5
+  }
+}
+```
+
+#### Mobile Integration Logic for Scenario C:
+1. Save `access_token`.
+2. Direct user to **OTP Verification Screen**.
+
